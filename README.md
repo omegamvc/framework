@@ -6,7 +6,7 @@
 
 <p align="center">
     <a href="https://omegamvc.github.io">Documentation</a> |
-    <a href="https://github.com/omegamvc/framework/blob/main/CHANGELOG.md">Changelog</a> |
+    <a href="https://github.com/omegamvc/omegamvc.github.io/blob/main/README.md#changelog">Changelog</a> |
     <a href="https://github.com/omegamvc/framework/blob/main/CONTRIBUTING.md">Contributing</a> |
     <a href="https://github.com/omegamvc/framework/blob/main/CODE_OF_CONDUCT.md">Code Of Conduct</a> |
     <a href="https://github.com/omegamvc/framework/blob/main/LICENSE">License</a>

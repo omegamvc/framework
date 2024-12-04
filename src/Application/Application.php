@@ -158,7 +158,7 @@ class Application extends Container implements ApplicationInterface
     /**
      * Bootstrap the application.
      *
-     * This method starts and runs the OSPress application. It handles the entire application lifecycle,
+     * This method starts and runs the Omega application. It handles the entire application lifecycle,
      * including session management, configuration setup, routing, and processing HTTP requests.
      *
      * @return Response Return an instance of Response representing the application's response.

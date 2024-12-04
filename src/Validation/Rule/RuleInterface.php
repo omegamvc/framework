@@ -24,7 +24,7 @@ namespace Omega\Validation\Rule;
 /**
  * RuleInterface.
  *
- * The `RuleInterface` defines the contract that validation rules in OSPress must
+ * The `RuleInterface` defines the contract that validation rules in Omega must
  * adhere to.
  *
  * @category    Omega
