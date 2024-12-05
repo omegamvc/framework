@@ -41,7 +41,7 @@ use Omega\Support\Facade\AbstractFacade;
  *
  * @category    Omega
  * @package     Support
- * @subpackage  Facde\Facades
+ * @subpackage  Facade\Facades
  *
  * @see        https://omegamvc.github.io
  *
