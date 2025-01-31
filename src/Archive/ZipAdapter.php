@@ -138,7 +138,10 @@ class ZipAdapter extends AbstractAdapter
 
         $keys = [];
         for ($i = 0; $i < $this->zipArchive->numFiles; ++$i) {
-            $keys[] = $this->zipArchive->getNameIndex($i);
+            $name = $this->zipArchive->getNameIndex($i);
+            if ($name !== false) {
+                $keys[] = $name;
+            }
         }
 
         return $keys;

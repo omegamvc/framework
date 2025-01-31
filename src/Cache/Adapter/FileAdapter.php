@@ -64,7 +64,11 @@ class FileAdapter extends AbstractCacheAdapter
     {
         $data = $this->cached[$key] = $this->read($key);
 
-        return isset($data['expires']) && $data['expires'] > time();
+        if (is_array($data) && isset($data['expires']) && $data['expires'] > time()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -72,7 +76,7 @@ class FileAdapter extends AbstractCacheAdapter
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        if ($this->has($key)) {
+        if (is_array($this->cached[$key]) && isset($this->cached[$key]['value'])) {
             return $this->cached[$key]['value'];
         }
 
@@ -85,7 +89,7 @@ class FileAdapter extends AbstractCacheAdapter
     public function put(string $key, mixed $value, ?int $seconds = null): static
     {
         if (!is_int($seconds)) {
-            $seconds = (int)$this->config['seconds'];
+            $seconds = $this->config['seconds'];
         }
 
         $data = $this->cached[$key] = [
@@ -118,11 +122,13 @@ class FileAdapter extends AbstractCacheAdapter
     public function flush(): static
     {
         $this->cached = [];
-        $files        = glob($this->getBase() . DIRECTORY_SEPARATOR . '*.json');
+        $files = glob($this->getBase() . DIRECTORY_SEPARATOR . '*.json');
 
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file);
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
             }
         }
 
@@ -147,6 +153,7 @@ class FileAdapter extends AbstractCacheAdapter
      */
     private function getBase(): string
     {
+        /** @phpstan-ignore-next-line */
         return $this->config['path'];
     }
 
@@ -164,7 +171,13 @@ class FileAdapter extends AbstractCacheAdapter
             return [];
         }
 
-        return json_decode(file_get_contents($path), true);
+        $content = file_get_contents($path);
+
+        if ($content === false) {
+            return [];
+        }
+
+        return json_decode($content, true) ?: [];
     }
 
     /**

@@ -17,7 +17,6 @@ namespace Omega\Application;
 
 use Closure;
 use Throwable;
-use Omega\Application\Exception\SingletonException;
 use Omega\Container\Container;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
 use Omega\Environment\Dotenv;
@@ -25,9 +24,9 @@ use Omega\Environment\EnvironmentDetector;
 use Omega\Facade\AliasLoader;
 use Omega\Facade\Facades\Router;
 use Omega\Http\Response;
+use Omega\Utils\Path;
 use Omega\Utils\Str;
 
-use function get_called_class;
 use function method_exists;
 
 /**
@@ -47,47 +46,14 @@ use function method_exists;
  */
 class Application extends Container implements ApplicationInterface
 {
-    /**
-     * Singleton instance.
-     *
-     * @var static[] Holds the singleton instances.
-     */
-    private static array $instances;
-
-    /**
-     * The custom application path defined by the developer.
-     *
-     * @var string Holds the custom application path defined by developer.
-     */
-    protected string $appPath = '';
+    use ApplicationInstanceTrait;
 
     /**
      * The base path for the Omega installation.
      *
      * @var string Holds the base path for the Omega installation.
      */
-    protected string $basePath = '';
-
-    /**
-     * The custom application path defined by the developer.
-     *
-     * @var string Holds the custom application path defined by developer.
-     */
-    protected string $bootstrapPath = '';
-
-    /**
-     * The custom configuration path defined by the developer.
-     *
-     * @var string Holds the custom configuration path defined by the developer.
-     */
-    protected string $configPath = '';
-
-    /**
-     * The custom database path defined by the developer.
-     *
-     * @var string Holds the custom database path defined by the developer.
-     */
-    protected string $databasePath = '';
+    protected string $basePath;
 
     /**
      * The environment file to load during bootstrapping.
@@ -104,46 +70,11 @@ class Application extends Container implements ApplicationInterface
     protected string $environmentPath = '';
 
     /**
-     * The custom language path defined by the developer.
-     *
-     * @var string Holds the custom language path defined by the developer.
-     */
-    protected string $langPath = '';
-
-    /**
-     * The custom public path defined by the developer.
-     *
-     * @var string Holds the custom public path defined by the developer.
-     */
-    protected string $publicPath = '';
-
-    /**
-     * The custom storage path defined by the developer.
-     *
-     * @var string Holds the custom storage path defined by the developer.
-     */
-    protected string $storagePath = '';
-
-    /**
      * Application configuration.
      *
      * @var array<string, string> Holds the application configuration.
      */
     private array $app = [];
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function getInstance(?string $basePath = null): static
-    {
-        $getCalledClass = get_called_class();
-
-        if (!isset(self::$instances[$getCalledClass])) {
-            self::$instances[$getCalledClass] = new $getCalledClass($basePath);
-        }
-
-        return self::$instances[$getCalledClass];
-    }
 
     /**
      * Application class constructor.
@@ -153,17 +84,17 @@ class Application extends Container implements ApplicationInterface
      */
     private function __construct(?string $basePath = null)
     {
-        if ($basePath) {
-            $this->setBasePath($basePath);
-        }
+        $this->basePath = rtrim($basePath ?? $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__, 5), '\/');
 
-        $this->alias('paths.base', fn() => $this->getBasePath());
+        Path::init($this->basePath);
 
-        $this->app = require $this->getBasePath() . '/config/app.php';
+        $this->alias('paths.base', fn() => Path::getPath());
+
+        $this->app = require Path::getPath('config', 'app.php');
 
         date_default_timezone_set($this->app['timezone']);
 
-        $this->configure($this->getBasePath());
+        $this->configure(Path::getPath());
         $this->bindProviders();
         $this->registerFacades();
     }
@@ -179,7 +110,7 @@ class Application extends Container implements ApplicationInterface
      */
     public function bootstrap(): Response
     {
-        return $this->dispatch($this->getBasePath());
+        return $this->dispatch(Path::getPath());
     }
 
     /**
@@ -193,7 +124,7 @@ class Application extends Container implements ApplicationInterface
      */
     private function configure(string $basePath): void
     {
-        Dotenv::load($basePath);
+        Dotenv::load(Path::getPath());
     }
 
     /**
@@ -206,7 +137,7 @@ class Application extends Container implements ApplicationInterface
      */
     private function bindProviders(): void
     {
-        $config = require $this->getBasePath() . "/config/app.php";
+        $config = require Path::getPath('config', 'app.php');
         $providers = $config['providers'];
 
         foreach ($providers as $provider) {
@@ -224,7 +155,7 @@ class Application extends Container implements ApplicationInterface
      */
     private function registerFacades(): void
     {
-        $config  = require $this->getBasePath() . '/config/app.php';
+        $config = require Path::getPath('config', 'app.php');
         $aliases = $config['facades'];
 
         AliasLoader::getInstance($aliases)->load();
@@ -242,7 +173,7 @@ class Application extends Container implements ApplicationInterface
      */
     private function dispatch(string $basePath): Response
     {
-        $routes = require $this->getBasePath() . "/routes/web.php";
+        $routes = require Path::getPath('routes', 'web.php');
         $routes(Router::class);
 
         $response = Router::dispatch();
@@ -261,49 +192,6 @@ class Application extends Container implements ApplicationInterface
     public function getVersion(): string
     {
         return static::VERSION;
-    }
-
-    /**
-     * Get the path to the application 'app' directory.
-     *
-     * @param  string $path Holds the application 'app' path.
-     * @return string Return the path for 'app' directory.
-     */
-    public function getAppPath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->appPath ?: $this->getBasePath('app'), $path);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBasePath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->basePath, $path);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBootstrapPath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->bootstrapPath, $path);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigPath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->configPath ?: $this->getBasePath('config'), $path);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDatabasePath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->databasePath ?: $this->getBasePath('database'), $path);
     }
 
     /**
@@ -351,98 +239,6 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param  string $path Holds the custom language path defined by the developer.
-     * @return string Return the path to the language file directory.
-     */
-    public function getLangPath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->langPath, $path);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPublicPath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->publicPath ?: $this->getBasePath('public'), $path);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getResourcePath(string $path = ''): string
-    {
-        return $this->getJoinPaths($this->getBasePath('resources'), $path);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getStoragePath(string $path = ''): string
-    {
-        if (isset($_ENV['OMEGA_STORAGE_PATH'])) {
-            return $this->getJoinPaths($this->storagePath ?: $_ENV['OMEGA_STORAGE_PATH'], $path);
-        }
-
-        return $this->getJoinPaths($this->storagePath ?: $this->getBasePath('storage'), $path);
-    }
-
-    /**
-     * Set the application directory.
-     *
-     * @param  string $path Holds the path to set.
-     * @return $this
-     */
-    public function setAppPath(string $path): self
-    {
-        $this->appPath = $path;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setBasePath(string $basePath): self
-    {
-        $this->basePath = rtrim($basePath, '\/');
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setBootstrapPath(string $path): self
-    {
-        $this->bootstrapPath = $path;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setConfigPath(string $path): self
-    {
-        $this->configPath = $path;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setDatabasePath(string $path): self
-    {
-        $this->databasePath = $path;
-
-        return $this;
-    }
-
-    /**
      * Set the environment file to be loading during bootstrapping.
      *
      * @param  string $file Holds the environment file to be loading during bootstrapping.
@@ -464,36 +260,6 @@ class Application extends Container implements ApplicationInterface
     public function setEnvironmentPath(string $path): self
     {
         $this->environmentPath = $path;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setLangPath(string $path): self
-    {
-        $this->langPath = $path;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setPublicPath(string $path): self
-    {
-        $this->publicPath = $path;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setStoragePath(string $path): self
-    {
-        $this->storagePath = $path;
 
         return $this;
     }
@@ -532,42 +298,6 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * Join the given paths.
-     *
-     * @param  string|null $basePath Holds the base path to join.
-     * @param  string      $path     Holds the path to join.
-     * @return string Return the joined paths.
-     */
-    public function getJoinPaths(?string $basePath, string $path = ''): string
-    {
-        $basePath = $basePath ?? '';
-
-        return $this->joinPaths($basePath, $path);
-    }
-
-    /**
-     * Join the given path.
-     *
-     * Concatenates a base path with additional paths and returns the result.
-     *
-     * @param  string|null $basePath Holds the base path to join.
-     * @param  string      ...$paths Holds the paths to join.
-     * @return string Return the joined paths.
-     */
-    public function joinPaths(?string $basePath, string ...$paths): string
-    {
-        foreach ($paths as $index => $path) {
-            if (empty($path)) {
-                unset($paths[ $index ]);
-            } else {
-                $paths[$index] = DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
-            }
-        }
-
-        return $basePath . implode('', $paths);
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function setCurrentTimeZone(): self
@@ -583,56 +313,5 @@ class Application extends Container implements ApplicationInterface
     public function getCurrentTimeZone(): string
     {
         return date('Y-m-d H:i:s', time());
-    }
-
-    /**
-     * Clone method.
-     *
-     * This method is overridden to prevent cloning of the singleton instance.
-     * Cloning would create a second instance, which violates the Singleton pattern.
-     *
-     * @return void
-     *
-     * @throws SingletonException If an attempt to clone the singleton is made.
-     */
-    public function __clone(): void
-    {
-        throw new SingletonException(
-            'You can not clone a singleton.'
-        );
-    }
-
-    /**
-     * Wakeup method.
-     *
-     * This method is overridden to prevent deserialization of the singleton instance.
-     * Deserialization would create a second instance, which violates the Singleton pattern.
-     *
-     * @return void
-     *
-     * @throws SingletonException If an attempt at deserialization is made.
-     */
-    public function __wakeup(): void
-    {
-        throw new SingletonException(
-            'You can not deserialize a singleton.'
-        );
-    }
-
-    /**
-     * Sleep method.
-     *
-     * This method is overridden to prevent serialization of the singleton instance.
-     * Serialization would create a second instance, which violates the Singleton pattern.
-     *
-     * @return array Return the names of private properties in parent classes.
-     *
-     * @throws SingletonException If an attempt at serialization is made.
-     */
-    public function __sleep(): array
-    {
-        throw new SingletonException(
-            'You can not serialize a singleton.'
-        );
     }
 }

@@ -22,6 +22,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Omega\Database\Adapter\AbstractDatabaseAdapter;
+use Omega\Utils\Path;
 
 use function glob;
 
@@ -92,7 +93,7 @@ class MigrateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $paths = glob(get_database_path('migrations/schemes/*.php'));
+        $paths = glob(Path::getPath('database', 'migrations/schemes/*.php'));
 
         if ($paths === false || count($paths) < 1) {
             $output->writeln('<warning>No migrations found.</warning>');

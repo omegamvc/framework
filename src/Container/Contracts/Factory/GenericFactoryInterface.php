@@ -35,7 +35,7 @@ interface GenericFactoryInterface
     /**
      * Creates and returns an instance of an object based on the provided configuration.
      *
-     * @param array|null $config Holds an optional configuration array that may be used to influence the creation of
+     * @param array<string, mixed>|null $config Holds an optional configuration array that may be used to influence the creation of
      *                           the object. If no configuration is provided, default settings may be applied.
      * @return mixed Return the created object or value. The return type is flexible, allowing or any type to be
      *               returned, depending on the implementation.

@@ -19,6 +19,7 @@ use Memcached;
 use Omega\Cache\Exception\UnsupportedAdapterException;
 
 use function is_int;
+use function is_numeric;
 use function time;
 
 /**
@@ -106,10 +107,12 @@ class MemcacheAdapter extends AbstractCacheAdapter
     public function put(string $key, mixed $value, ?int $seconds = null): static
     {
         if (!is_int($seconds)) {
-            $seconds = (int)$this->config['seconds'];
+            $seconds = isset($this->config['seconds']) && is_numeric($this->config['seconds'])
+                ? $this->config['seconds']
+                : 0;
         }
 
-        $this->memcache->set($key, $value, time() + $seconds);
+        $this->memcache->set($key, $value, time() + (int)$seconds);
 
         return $this;
     }

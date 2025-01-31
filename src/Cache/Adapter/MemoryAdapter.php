@@ -54,7 +54,10 @@ class MemoryAdapter extends AbstractCacheAdapter
      */
     public function has(string $key): bool
     {
-        return isset($this->cached[$key]) && $this->cached[$key]['expires'] > time();
+        return isset($this->cached[$key])
+            && is_array($this->cached[$key])
+            && isset($this->cached[$key]['expires'])
+            && $this->cached[$key]['expires'] > time();
     }
 
     /**
@@ -63,7 +66,10 @@ class MemoryAdapter extends AbstractCacheAdapter
     public function get(string $key, mixed $default = null): mixed
     {
         if ($this->has($key)) {
-            return $this->cached[$key]['value'];
+            $cachedData = $this->cached[$key] ?? null;
+            if (is_array($cachedData) && isset($cachedData['value'])) {
+                return $cachedData['value'];
+            }
         }
 
         return $default;
@@ -74,9 +80,9 @@ class MemoryAdapter extends AbstractCacheAdapter
      */
     public function put(string $key, mixed $value, ?int $seconds = null): static
     {
-        if (!is_int($seconds)) {
-            $seconds = (int)$this->config['seconds'];
-        }
+        $seconds = $seconds ?? (isset($this->config['seconds']) && is_int($this->config['seconds']))
+            ? $seconds = $this->config['seconds']
+            : 0;
 
         $this->cached[$key] = [
             'value'   => $value,

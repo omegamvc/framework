@@ -22,6 +22,8 @@ use Omega\Archive\Exception\PharRenameException;
 use function array_keys;
 use function dirname;
 use function file_exists;
+use function file_get_contents;
+use function iterator_to_array;
 use function strlen;
 
 /**
@@ -43,6 +45,13 @@ use function strlen;
  */
 class PharAdapter extends AbstractAdapter
 {
+    /**
+     * Phar instance.
+     *
+     * @var Phar Holds an instance of Phar class.
+     */
+    protected Phar $phar;
+
     /**
      * PharAdapter constructor.
      *
@@ -96,7 +105,7 @@ class PharAdapter extends AbstractAdapter
         }
 
         try {
-            return $this->phar->getContents($key);
+            return file_get_contents($this->phar[$key]->getPathname());
         } catch (RuntimeException $e) {
             throw new RuntimeException("Failed to read from the key '$key'. " . $e->getMessage(), 0, $e);
         }
@@ -104,7 +113,7 @@ class PharAdapter extends AbstractAdapter
 
     /**
      * {@inheritdoc}
-     * @throws RuntimeExeption if failed to write the key.
+     * @throws RuntimeException if failed to write the key.
      */
     public function write(string $key, string $content): int|bool
     {
@@ -126,12 +135,9 @@ class PharAdapter extends AbstractAdapter
             throw new RuntimeException("The key '$key' does not exist and cannot be deleted.");
         }
 
-        try {
-            unset($this->phar[$key]);
-            return true;
-        } catch (RuntimeException $e) {
-            throw new RuntimeException("Failed to delete the key '$key'. " . $e->getMessage(), 0, $e);
-        }
+        unset($this->phar[$key]);
+
+        return true;
     }
 
     /**
@@ -149,7 +155,7 @@ class PharAdapter extends AbstractAdapter
     public function keys(): array
     {
         try {
-            return array_keys($this->phar->getFiles());
+            return array_keys(iterator_to_array($this->phar));
         } catch (RuntimeException $e) {
             throw new RuntimeException("Failed to retrieve keys from the Phar archive. " . $e->getMessage(), 0, $e);
         }
@@ -202,8 +208,14 @@ class PharAdapter extends AbstractAdapter
         }
 
         try {
-            $this->phar[$targetKey] = $this->phar[$sourceKey];
-            unset($this->phar[$sourceKey]);
+            $content = file_get_contents($this->phar[$sourceKey]->getPathname());
+
+            if ($content === false) {
+                throw new PharRenameException("Failed to read content from '$sourceKey' before renaming.");
+            }
+
+            $this->phar[$targetKey] = $content;
+            //unset($this->phar[$sourceKey]);
         } catch (RuntimeException $e) {
             throw new PharRenameException("Failed to rename '$sourceKey' to '$targetKey'. " . $e->getMessage(), 0, $e);
         }

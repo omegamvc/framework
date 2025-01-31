@@ -23,6 +23,7 @@ use function file_exists;
 use function file_get_contents;
 use function filemtime;
 use function file_put_contents;
+use function is_string;
 use function rename;
 use function strlen;
 
@@ -88,13 +89,15 @@ class Bz2Adapter extends AbstractAdapter
      */
     public function read(string $key): string|bool
     {
-        $content = @bzdecompress(file_get_contents($this->bz2File));
+        $fileContent = file_get_contents($this->bz2File);
 
-        if ($content === false) {
-            throw new RuntimeException("Failed to decompress the file '$this->bz2File'. The file may be corrupted.");
+        if ($fileContent === false) {
+            throw new RuntimeException("Failed to read the file '$this->bz2File'.");
         }
 
-        return $content ?: false;
+        $content = @bzdecompress($fileContent);
+
+        return ($content !== false && is_string($content)) ? $content : false;
     }
 
     /**
@@ -104,6 +107,8 @@ class Bz2Adapter extends AbstractAdapter
     public function write(string $key, string $content): int|bool
     {
         $compressedContent = bzcompress($content);
+
+        /** @phpstan-ignore-next-line */
         if ($compressedContent === false) {
             throw new RuntimeException("Failed to compress content for '$this->bz2File'.");
         }
@@ -112,7 +117,7 @@ class Bz2Adapter extends AbstractAdapter
             throw new RuntimeException("Failed to write to the file '$this->bz2File'.");
         }
 
-        return strlen($compressedContent);
+        return is_string($compressedContent) ? strlen($compressedContent) : false;
     }
 
     /**

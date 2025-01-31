@@ -45,8 +45,10 @@ class CacheServiceProvider implements ServiceProviderInterface
     {
         $application->alias('cache', function () {
             $config  = Config::get('cache');
+            /**@phpstan-ignore-next-line */
             $default = $config['default'];
 
+            /**@phpstan-ignore-next-line */
             return (new CacheFactory())->create($config[$default]);
         });
     }

@@ -49,18 +49,6 @@ if (! function_exists('app')) :
     }
 endif;
 
-if (! function_exists('get_base_path')) :
-    /**
-     * Get the base path of the application.
-     *
-     * @return string|null Returns the base path or null if not set.
-     */
-    function get_base_path(): ?string
-    {
-        return app('paths.base');
-    }
-endif;
-
 if (! function_exists('config')) :
     /**
      * Alias or set a configuration value.
@@ -149,32 +137,6 @@ if (! function_exists('env')) :
     }
 endif;
 
-if (!function_exists('get_database_path')) :
-    /**
-     * Get the path to the appropriate database migrations.
-     *
-     * @param  string|null $path (Optionally) Holds the path to append database path.
-     * @return string Return the path to the database folder.
-     */
-    function get_database_path(?string $path = ''): string
-    {
-        return app()->getDatabasePath($path);
-    }
-endif;
-
-if (! function_exists('get_config_path')) :
-    /**
-     * Get the path to the configuration directory.
-     *
-     * @param string|null $path (Optionally) Holds the path to append config path.
-     * @return string Return the path to the config folder.
-     */
-    function get_config_path(?string $path = ''): string
-    {
-        return app()->getConfigPath($path);
-    }
-endif;
-
 if (! function_exists('get_operating_system')) :
     /**
      * Get the operating system name.
@@ -200,32 +162,6 @@ if (! function_exists('get_operating_system')) :
     }
 endif;
 
-if (! function_exists('get_resource_path')) :
-    /**
-     * Get the path to the resource folder.
-     *
-     * @param string|null $path (Optionally) Holds the path to append resource path.
-     * @return string Return the path to the resource folder.
-     */
-    function get_resource_path(?string $path = ''): string
-    {
-        return app()->getResourcePath($path);
-    }
-endif;
-
-if (! function_exists('get_storage_path')) :
-    /**
-     * Get the path to the storage folder.
-     *
-     * @param string|null $path (Optionally) Holds the path to append storage path.
-     * @return string Return the path to the storage folder.
-     */
-    function get_storage_path(?string $path = ''): string
-    {
-        return app()->getStoragePath($path);
-    }
-endif;
-
 if (! function_exists('head')) :
     /**
      * Get the first element of an array.
@@ -236,55 +172,6 @@ if (! function_exists('head')) :
     function head(array $array): mixed
     {
         return reset($array);
-    }
-endif;
-
-if (! function_exists('join_paths')) :
-    /**
-     * Join the given path.
-     *
-     * Concatenates a base path with additional paths and returns the result.
-     *
-     * @param string|null $basePath Holds the base path to join.
-     * @param string      ...$paths Holds the paths to join.
-     * @return string Return the joined paths.
-     */
-    function join_paths(?string $basePath, string ...$paths): string
-    {
-        foreach ($paths as $index => $path) {
-            if (empty($path)) {
-                unset($paths[$index]);
-            } else {
-                $paths[$index] = DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
-            }
-        }
-
-        return $basePath . implode('', $paths);
-    }
-endif;
-
-if (! function_exists('normalize_path')) :
-    /**
-     * Normalize path based on filesystem type.
-     *
-     * @param string $path Holds the path to normalize.
-     * @return ?string Return the path normalized path based on operating system.
-     */
-    function normalize_path(?string $path): string
-    {
-        if ($path === null) {
-            return '';
-        }
-
-        $separator = DIRECTORY_SEPARATOR;
-        $path      = str_replace([ '/', '\\' ], $separator, $path);
-        $path      = preg_replace('#' . preg_quote($separator) . '{2,}#', $separator, $path);
-
-        if (get_operating_system() === 'windows' && substr($path, -1) !== $separator) {
-            $path .= $separator;
-        }
-
-        return $path;
     }
 endif;
 

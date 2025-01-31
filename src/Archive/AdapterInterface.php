@@ -87,7 +87,7 @@ interface AdapterInterface
     /**
      * Returns an array of all keys present in the archive.
      *
-     * @return array Return an array of all keys in the archive.
+     * @return string[] Return an array of all keys in the archive.
      */
     public function keys(): array;
 

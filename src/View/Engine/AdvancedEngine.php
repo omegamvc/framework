@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Omega\View\Engine;
 
 use Omega\Facade\Facades\View;
+use Omega\Utils\Path;
 
 use function array_merge;
 use function extract;
@@ -55,7 +56,7 @@ class AdvancedEngine extends AbstractEngine
     public function render(\Omega\View\View $view): string
     {
         $hash   = md5($view->path);
-        $folder = get_storage_path('framework/data/views');
+        $folder = Path::getPath('storage', 'framework/data/views');
 
         if (! is_file("{$folder}/{$hash}.php")) {
             touch("{$folder}/{$hash}.php");
