@@ -21,15 +21,15 @@ use function rtrim;
 
 /**
  * Path class.
- * 
+ *
  * This class provides utility methods for managing paths within the Omega MVC framework.
- * It allows the initialization of a base path for the project and provides a method to 
+ * It allows the initialization of a base path for the project and provides a method to
  * generate full paths by joining the base path with other directory or file names.
- * 
- * The base path can be set using the `init()` method and is used globally throughout 
- * the application. The `getPath()` method can then be used to generate paths for various 
+ *
+ * The base path can be set using the `init()` method and is used globally throughout
+ * the application. The `getPath()` method can then be used to generate paths for various
  * resources (e.g., configuration files, database directories) relative to the base path.
- * 
+ *
  * @category  Omega
  * @package   Utils
  * @link      https://omegamvc.github.io
@@ -70,7 +70,7 @@ class Path
     /**
      * Get the full path by joining the base path with optional subdirectories.
      *
-     * This method returns the full path by joining the base path with the specified main directory (`$fullPath`) 
+     * This method returns the full path by joining the base path with the specified main directory (`$fullPath`)
      * and an optional subdirectory (`$subPath`). If no arguments are passed, it simply returns the base path.
      * If only `$fullPath` is passed, it will return the full path to that directory. If both `$fullPath` and `$subPath`
      * are provided, it will return the full path to the subdirectory.
@@ -91,10 +91,10 @@ class Path
      * @param string|null $subPath  An optional subdirectory.
      * @return string The full path.
      */
-    public static function getPath(?string $fullPath = null, ?string $subPath = null): string 
+    public static function getPath(?string $fullPath = null, ?string $subPath = null): string
     {
         $path = self::$basePath;
-        
+
         if ($fullPath) {
             $path = self::joinPaths($path, $fullPath);
         }

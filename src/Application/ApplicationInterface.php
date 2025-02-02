@@ -41,7 +41,7 @@ interface ApplicationInterface
      * @return string Return the version of the application.
      */
     public function getVersion(): string;
-  
+
     /**
      * Get or check the current application environment.
      *

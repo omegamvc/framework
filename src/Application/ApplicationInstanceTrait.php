@@ -21,7 +21,7 @@ use function get_called_class;
 
 /**
  * Application instance trait.
- * 
+ *
  * @category  Omega
  * @package   Application
  * @link      https://omegamvc.github.io

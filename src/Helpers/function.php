@@ -116,7 +116,7 @@ if (! function_exists('dump')) :
      */
     function dump(array $array): void
     {
-        echo '<pre style="background-color:#f4f4f4; padding: 10px; border-radius: 5px; border: 1px solid #ccc; 
+        echo '<pre style="background-color:#f4f4f4; padding: 10px; border-radius: 5px; border: 1px solid #ccc;
                            font-family: Arial, sans-serif; font-size: 14px; color: #333">';
         print_r($array);
         echo '</pre>';
