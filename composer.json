@@ -23,7 +23,7 @@
     "modular-framework"
   ],
   "require": {
-    "php": ">=8.2",
+    "php": ">=8.3",
     "ext-fileinfo": "*",
     "ext-ftp": "*",
     "ext-mbstring": "*",
