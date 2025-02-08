@@ -51,7 +51,7 @@ interface ContainerInterface extends PsrContainerInterface
      * @param callable $factory Holds a closure that defines how to create the class instance.
      * @return $this
      */
-    public function alias(string $is, callable $factory): static;
+    public function alias(string $id, callable $factory): static;
 
     /**
      * Resolve the container.
