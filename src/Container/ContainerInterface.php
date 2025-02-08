@@ -15,10 +15,10 @@ declare(strict_types=1);
 
 namespace Omega\Container;
 
-use InvalidArgumentException;
 use ReflectionException;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Omega\Container\Exception\DependencyResolutionException;
+use Omege\Container\Exception\InvalidCallableException;
 use Omega\Container\Exception\KeyNotFoundException;
 
 /**
@@ -71,7 +71,7 @@ interface ContainerInterface extends PsrContainerInterface
      * @return mixed Return the result of the callable.
      * @throws ReflectionException           if the callable cannot be reflected.
      * @throws DependencyResolutionException if a dependency cannot be resolved.
-     * @throws InvalidArgumentException      if the callable is not invocable.
+     * @throws InvalidCallableException      if the callable is not invocable.
      */
     public function call(callable|array $callable, array $parameters = []): mixed;
 
