@@ -16,10 +16,10 @@ declare(strict_types=1);
 namespace Omega\Container;
 
 use ReflectionException;
-use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Omega\Container\Exception\DependencyResolutionException;
 use Omege\Container\Exception\InvalidCallableException;
 use Omega\Container\Exception\KeyNotFoundException;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
 
 /**
  * Interface for a dependency injection container.
