@@ -16,12 +16,12 @@ declare(strict_types=1);
 namespace Omega\Container;
 
 use Closure;
-use InvalidArgumentException;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
 use Omega\Container\Exception\DependencyResolutionException;
+use Omega\Container\Exception\InvalidCallableException;
 use Omega\Container\Exception\KeyNotFoundException;
 
 use function array_values;
@@ -63,32 +63,32 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function has(string $alias): bool
+    public function has(string $id): bool
     {
-        return isset($this->bindings[$alias]);
+        return isset($this->bindings[$id]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function get(string $alias): mixed
+    public function get(string $id): mixed
     {
-        // Check if the alias is bound to the container
-        if (!isset($this->bindings[$alias])) {
-            throw new KeyNotFoundException("Alias '{$alias}' is not found in the container.");
+        if (!isset($this->bindings[$id])) {
+            throw new KeyNotFoundException(
+                "Alias '{$id}' is not found in the container."
+            );
         }
 
-        // Resolve the instance using the alias
-        return $this->resolve($alias);
+        return $this->resolve($id);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function alias(string $alias, callable $factory): static
+    public function alias(string $id, callable $factory): static
     {
-        $this->bindings[$alias] = $factory;
-        $this->resolved[$alias] = null;
+        $this->bindings[$id] = $factory;
+        $this->resolved[$id] = null;
 
         return $this;
     }
@@ -96,19 +96,20 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(string $alias): mixed
+    public function resolve(string $id): mixed
     {
-        if (!isset($this->bindings[$alias])) {
+        if (!isset($this->bindings[$id])) {
             throw new DependencyResolutionException(
-                $alias . ' is not bound.'
+                $id 
+                . ' is not bound.'
             );
         }
 
-        if (!isset($this->resolved[$alias])) {
-            $this->resolved[$alias] = call_user_func($this->bindings[$alias], $this);
+        if (!isset($this->resolved[$id])) {
+            $this->resolved[$id] = call_user_func($this->bindings[$id], $this);
         }
 
-        return $this->resolved[$alias];
+        return $this->resolved[$id];
     }
 
     /**
@@ -120,12 +121,12 @@ class Container implements ContainerInterface
      * @return mixed Return the result of the callable.
      * @throws ReflectionException           if the callable cannot be reflected.
      * @throws DependencyResolutionException if a dependency cannot be resolved.
-     * @throws InvalidArgumentException      if the callable is not invocable.
+     * @throws InvalidCallableException      if the callable is not invocable.
      */
     public function call(callable|array $callable, array $parameters = []): mixed
     {
         if (!is_callable($callable)) {
-            throw new InvalidArgumentException(
+            throw new InvalidCallableException(
                 'The provided callable is not invocable.'
             );
         }
@@ -156,22 +157,21 @@ class Container implements ContainerInterface
                 continue;
             }
 
-            throw new InvalidArgumentException(
+            throw new InvalidCallableException(
                 $name . 'cannot be resolved.'
             );
         }
 
         return $callable(...array_values($dependencies));
-        //return call_user_func( $callable, ...array_values( $dependencies ) );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function remove(string $alias): bool
+    public function remove(string $id): bool
     {
-        if (isset($this->bindings[$alias])) {
-            unset($this->bindings[$alias], $this->resolved[$alias]);
+        if (isset($this->bindings[$id])) {
+            unset($this->bindings[$id], $this->resolved[$id]);
 
             return true;
         }
@@ -202,7 +202,7 @@ class Container implements ContainerInterface
      * @param callable|array{0: object|string, 1: string} $callable Holds the callable function or method.
      * @return ReflectionMethod|ReflectionFunction Return the reflection object for the callable.
      * @throws ReflectionException      if the callable cannot be reflected.
-     * @throws InvalidArgumentException if an unsupported callable type is provided.
+     * @throws InvalidCallableException if an unsupported callable type is provided.
      */
     private function getReflector(callable|array $callable): ReflectionMethod|ReflectionFunction
     {
@@ -212,7 +212,7 @@ class Container implements ContainerInterface
             return new ReflectionFunction($callable);
         }
 
-        throw new InvalidArgumentException(
+        throw new InvalidCallableException(
             'Unsupported callable type provided.'
         );
     }

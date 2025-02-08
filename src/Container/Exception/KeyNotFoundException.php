@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of Omega - Co2tainer Package.
+ * Part of Omega - Container Package.
  * php version 8.3
  *
  * @link      https://omegamvc.github.io
@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Omega\Container\Exception;
 
 use InvalidArgumentException;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * No entry was found in the container.

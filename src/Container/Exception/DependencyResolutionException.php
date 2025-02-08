@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Omega\Container\Exception;
 
 use InvalidArgumentException;
+use Psr\Container\ContainerExceptionInterface;
 
 /**
  * Exception class for handling errors in resolving a dependency.

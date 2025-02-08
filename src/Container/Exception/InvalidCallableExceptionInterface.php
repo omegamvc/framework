@@ -15,14 +15,15 @@ declare(strict_types=1);
 
 namespace Omega\Container\Exception;
 
-use Throwable;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Base interface representing a generic exception in a container.
+ * Interface for exceptions that are thrown when a callable cannot be resolved or is invalid.
  *
- * The `ContainerExceptionInterface` is a generic interface that represents exceptions
- * thrown by a container when an error occurs.
- *
+ * This interface extends the PSR-11 `NotFoundExceptionInterface` and is intended to be used by exceptions
+ * that indicate an error in resolving a callable within the container. It provides a consistent way to handle
+ * such errors and can be caught by client code to manage situations where a callable is expected but not found.
+ * 
  * @category   Omega
  * @package    Container
  * @subpackage Exception
@@ -32,6 +33,6 @@ use Throwable;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-interface ContainerExceptionInterface extends Throwable
+interface InvalidCallableExceptionInterface extends NotFoundExceptionInterface
 {
 }

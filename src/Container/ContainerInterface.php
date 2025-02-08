@@ -15,10 +15,11 @@ declare(strict_types=1);
 
 namespace Omega\Container;
 
-use Omega\Container\Exception\DependencyResolutionException;
-use Omega\Container\Exception\KeyNotFoundException;
 use InvalidArgumentException;
 use ReflectionException;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Omega\Container\Exception\DependencyResolutionException;
+use Omega\Container\Exception\KeyNotFoundException;
 
 /**
  * Interface for a dependency injection container.
@@ -41,42 +42,25 @@ use ReflectionException;
  * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version   1.0.0
  */
-interface ContainerInterface
+interface ContainerInterface extends PsrContainerInterface
 {
-    /**
-     * Determine if the container has a binding for the given alias.
-     *
-     * @param string $alias The class alias or key to check.
-     * @return bool Returns true if the alias exists in the container bindings, false otherwise.
-     */
-    public function has(string $alias): bool;
-
-    /**
-     * Retrieve an instance from the container by alias.
-     *
-     * @param string $alias The class alias or key.
-     * @return mixed The resolved class instance.
-     * @throws KeyNotFoundException if the alias is not found in the container.
-     */
-    public function get(string $alias): mixed;
-
     /**
      * Bind the class.
      *
-     * @param string   $alias   Holds the class alias or key.
+     * @param string   $id      Holds the class alias or key.
      * @param callable $factory Holds a closure that defines how to create the class instance.
      * @return $this
      */
-    public function alias(string $alias, callable $factory): static;
+    public function alias(string $is, callable $factory): static;
 
     /**
      * Resolve the container.
      *
-     * @param string $alias Holds the class alias or key.
+     * @param string $id Holds the class alias or key.
      * @return mixed Return the resolved class instance.
      * @throws KeyNotFoundException if the key is not bound.
      */
-    public function resolve(string $alias): mixed;
+    public function resolve(string $id): mixed;
 
     /**
      * Call a callable with dependency injection.
@@ -94,10 +78,10 @@ interface ContainerInterface
     /**
      * Remove the binding for the given alias.
      *
-     * @param string $alias The class alias or key to remove.
+     * @param string $id The class alias or key to remove.
      * @return bool Returns true if the alias was found and removed, false otherwise.
      */
-    public function remove(string $alias): bool;
+    public function remove(string $id): bool;
 
     /**
      * Clear all bindings from the container.
