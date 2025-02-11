@@ -19,12 +19,10 @@ use Omega\Facade\AbstractFacade;
 
 /**
  * Class Cache.
- *
  * The `Cache` class serves as a facade for accessing the view component
  * within the application. By extending the `AbstractFacade`, it provides
  * a static interface for interacting with the underlying view functionality
  * registered in the application container.
- *
  * This class implements the `getFacadeAccessor` method, which returns
  * the key used to resolve the underlying view instance. This allows
  * for a clean and straightforward way to access view-related features
@@ -39,11 +37,16 @@ use Omega\Facade\AbstractFacade;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  *
- * @method static static flush()                                              Remove all cache value by its key.
- * @method static static forget(string $key)                                  Remove a single cache value by its key.
- * @method static mixed  get(string $key, mixed $default = null)              Retrieve a cached value by its key.
- * @method static bool   has(string $key)                                     Check if a value exists in the cache.
- * @method static static put(string $key, mixed $value, ?int $seconds = null) Store a value in the cache.
+ * @method static CacheItemInterface getItem(string $key) Returns a Cache Item representing the specified key.
+ * @method static iterable getItems(array $keys = []) Returns a traversable set of cache items.
+ * @method static bool hasItem(string $key) Check if a value exists in the cache.
+ * @method static bool clear() Delete all item in the pool.
+ * @method static bool deleteItem(string $key) Removes the item from the pool.
+ * @method static bool deleteItems(array $keys) Removes multiple items from the pool.
+ * @method static bool save(CacheItemInterface $item) Persists a cache item immediately.
+ * @method static bool saveDeferred(CacheItemInterface $item) Sets a cache item to be persisted later.
+ * @method static bool commit() Persists any deferred cache items.
+ * @method static static set(mixed $value) Sets the value represented by this cache item.
  */
 class Cache extends AbstractFacade
 {

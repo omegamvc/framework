@@ -15,23 +15,48 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Adapter;
 
-use function glob;
-use function json_decode;
-use function json_encode;
-use function file_get_contents;
+use DateMalformedStringException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
+use RuntimeException as PhpRuntimeException;
+use Omega\Cache\AbstractCacheItemPool;
+use Omega\Cache\Exception\InvalidArgumentException;
+use Omega\Cache\Exception\RuntimeException;
+use Omega\Cache\Item\HasExpirationDateInterface;
+use Omega\Cache\Item\Item;
+use Psr\Cache\CacheItemInterface;
+
+use function fclose;
 use function file_put_contents;
-use function is_int;
+use function flock;
+use function fopen;
+use function hash;
+use function is_dir;
 use function is_file;
-use function sha1;
+use function is_writable;
+use function mkdir;
+use function pathinfo;
+use function serialize;
+use function sprintf;
+use function stream_get_contents;
+use function substr;
 use function time;
 use function unlink;
+use function unserialize;
+
+use const LOCK_SH;
+use const LOCK_UN;
 
 /**
- * File adapter class.
+ * File-based cache item pool implementation.
  *
- * The `FileAdapter` class implements a cache adapter that stores cached data in
- * files. It extends the AbstractCacheAdapter class and provides methods to read,
- * write, and manage cache data stored in files.
+ * This class provides a file-based storage mechanism for cache items, ensuring
+ * that cache data is stored persistently in a file system directory.
+ *
+ * Supported options:
+ * - locking (boolean) :
+ * - path              : The path for cache files.
  *
  * @category   Omega
  * @package    Cache
@@ -42,155 +67,253 @@ use function unlink;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-class FileAdapter extends AbstractCacheAdapter
+class FileAdapter extends AbstractCacheItemPool
 {
-    /**
-     * FileAdapter class constructor.
-     *
-     * Initializes the FileAdapter with configuration options.
-     *
-     * @param array<string, mixed> $config Holds an array of configuration options.
+/**
+	 * Constructor.
+	 *
+	 * Initializes the file-based cache system, ensuring that the required options
+	 * are set and validating the cache directory.
+	 *
+	 * @param mixed $options An associative array of configuration options.
      * @return void
-     */
-    public function __construct(array $config)
-    {
-        parent::__construct($config);
-    }
+	 * @throws PhpRuntimeException If an unexpected runtime error occurs.
+     * @throws InvalidArgumentException If the 'path' option is not provided.
+	 */
+	public function __construct(mixed $options = [])
+	{
+		if (!isset($options['locking'])){
+			$options['locking'] = true;
+		}
+
+		if (!isset($options['path'])){
+			throw new InvalidArgumentException(
+                'The path option must be set.'
+            );
+		}
+
+		$this->checkFilePath($options['path']);
+
+		parent::__construct($options);
+	}
 
     /**
      * {@inheritdoc}
      */
-    public function has(string $key): bool
-    {
-        $data = $this->cached[$key] = $this->read($key);
+	public function clear(): bool
+	{
+		$filePath = $this->options['path'];
+		$this->checkFilePath($filePath);
 
-        if (is_array($data) && isset($data['expires']) && $data['expires'] > time()) {
-            return true;
-        }
+		$iterator = new RegexIterator(
+			new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator($filePath)
+			),
+			'/\.data$/i'
+		);
 
-        return false;
-    }
+		/** @var RecursiveDirectoryIterator $file */
+		foreach ($iterator as $file) {
+			if ($file->isFile()) {
+				@unlink($file->getRealPath());
+			}
+		}
+
+		return true;
+	}
+
+    /**
+     * {@inheritdoc}
+     * @throws DateMalformedStringException
+     */
+	public function getItem(string $key): CacheItemInterface
+	{
+		if (!$this->hasItem($key)) {
+			return new Item($key);
+		}
+
+		$resource = @fopen($this->fetchStreamUri($key), 'rb');
+
+	    if (!$resource) {
+			throw new RuntimeException(
+                sprintf(
+                    'Unable to fetch cache entry for %s.  Cannot open the resource.',
+                    $key
+                )
+            );
+		}
+
+		// If locking is enabled get a shared lock for reading on the resource.
+		if ($this->options['locking'] && !flock($resource, LOCK_SH)) {
+			throw new RuntimeException(
+                sprintf(
+                    'Unable to fetch cache entry for %s.  Cannot obtain a lock.',
+                    $key
+                )
+            );
+		}
+
+		$data = stream_get_contents($resource);
+
+		// If locking is enabled release the lock on the resource.
+		if ($this->options['locking'] && !flock($resource, LOCK_UN)) {
+			throw new RuntimeException(
+                sprintf(
+                    'Unable to fetch cache entry for %s.  Cannot release the lock.',
+                    $key
+                )
+            );
+		}
+
+		fclose($resource);
+
+		$item = new Item($key);
+		$information = unserialize($data);
+
+		// If the cached data has expired remove it and return.
+		if ($information[1] !== null && time() > $information[1])
+		{
+			if (!$this->deleteItem($key))
+			{
+				throw new RuntimeException(
+                    sprintf(
+                        'Unable to clean expired cache entry for %s.', 
+                        $key
+                    )//, 
+                    //null
+                );
+			}
+
+			return $item;
+		}
+
+		$item->set($information[0]);
+
+		return $item;
+	}
 
     /**
      * {@inheritdoc}
      */
-    public function get(string $key, mixed $default = null): mixed
-    {
-        if (is_array($this->cached[$key]) && isset($this->cached[$key]['value'])) {
-            return $this->cached[$key]['value'];
-        }
+	public function deleteItem(string $key): bool
+	{
+		if ($this->hasItem($key))
+		{
+			return @unlink($this->fetchStreamUri($key));
+		}
 
-        return $default;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function put(string $key, mixed $value, ?int $seconds = null): static
-    {
-        if (!is_int($seconds)) {
-            $seconds = $this->config['seconds'];
-        }
-
-        $data = $this->cached[$key] = [
-            'value'   => $value,
-            'expires' => time() + $seconds,
-        ];
-
-        return $this->write($key, $data);
-    }
+		// If the item doesn't exist, no error
+		return true;
+	}
 
     /**
      * {@inheritdoc}
      */
-    public function forget(string $key): static
-    {
-        unset($this->cached[$key]);
+	public function save(CacheItemInterface $item): bool
+	{
+		$fileName = $this->fetchStreamUri($item->getKey());
+		$filePath = pathinfo($fileName, PATHINFO_DIRNAME);
 
-        $path = $this->getPath($key);
+		if (!is_dir($filePath)) {
+			mkdir($filePath, 0770, true);
+		}
 
-        if (is_file($path)) {
-            unlink($path);
-        }
+		if ($item instanceof HasExpirationDateInterface) {
+			$contents = serialize([$item->get(), time() + $this->convertItemExpiryToSeconds($item)]);
+		} else {
+			$contents = serialize([$item->get(), null]);
+		}
 
-        return $this;
-    }
+        return (bool) file_put_contents(
+            $fileName,
+            $contents,
+            ($this->options['locking'] ? LOCK_EX : null)
+        );
+	}
 
     /**
      * {@inheritdoc}
      */
-    public function flush(): static
-    {
-        $this->cached = [];
-        $files = glob($this->getBase() . DIRECTORY_SEPARATOR . '*.json');
+	public function hasItem(string $key): bool
+	{
+		return is_file($this->fetchStreamUri($key));
+	}
 
-        if (is_array($files)) {
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    unlink($file);
-                }
-            }
-        }
+	/**
+	 * Determines if the File cache implementation is supported.
+	 *
+	 * This method verifies whether the necessary file system functionality
+	 * is available for the cache system to operate correctly.
+	 *
+	 * @return bool Returns true if the file-based cache system is supported, false otherwise.
+	 */
+	public static function isSupported(): bool
+	{
+		return true;
+	}
 
-        return $this;
-    }
+	/**
+	 * Validates the cache directory.
+	 *
+	 * Ensures that the provided file path exists, is a directory, and is writable.
+	 *
+	 * @param string $filePath The file path to validate.
+	 * @return bool Always returns true if the path is valid.
+	 * @throws RuntimeException If the file path does not exist or is not writable.
+	 */
+	private function checkFilePath(string $filePath): bool
+	{
+		if (!is_dir($filePath)) {
+			throw new RuntimeException(
+                sprintf(
+                    'The base cache path `%s` does not exist.', 
+                    $filePath
+                )
+            );
+		}
 
-    /**
-     * Get the cache path for a specific key.
-     *
-     * @param string $key Holds the cache key.
-     * @return string Return the cache path for the specified key.
-     */
-    private function getPath(string $key): string
-    {
-        return $this->getBase() . DIRECTORY_SEPARATOR . sha1($key) . '.json';
-    }
+		if (!is_writable($filePath)) {
+			throw new RuntimeException(
+                sprintf(
+                    'The base cache path `%s` is not writable.', 
+                    $filePath
+                )
+            );
+		}
 
-    /**
-     * Get the cache base directory.
-     *
-     * @return string Return the base directory for storing cache files.
-     */
-    private function getBase(): string
-    {
-        /** @phpstan-ignore-next-line */
-        return $this->config['path'];
-    }
+		return true;
+	}
 
-    /**
-     * Read the cache data from a file.
-     *
-     * @param string $key Holds the cache key.
-     * @return mixed|array Return the cached data, or an empty array if not found.
-     */
-    private function read(string $key): mixed
-    {
-        $path = $this->getPath($key);
+	/**
+	 * Generates the full stream URI for a cache entry.
+	 *
+	 * Constructs the file path for storing the cache entry based on the provided key.
+	 *
+	 * @param string $key The cache item identifier.
+	 * @return string Returns the full stream URI for the cache entry.
+	 * @throws PhpRuntimeException If the cache path is invalid.
+	 */
+	private function fetchStreamUri(string $key): string
+	{
+		$filePath = $this->options['path'];
+		$this->checkFilePath($filePath);
 
-        if (!is_file($path)) {
-            return [];
-        }
+		return sprintf(
+			'%s/%s.json',
+			rtrim($filePath, '/'), // Rimuove eventuali slash finali per sicurezza
+			hash('md5', $key) // Nome del file basato su hash MD5
+		);
+	}
+	/**private function fetchStreamUri(string $key): string
+	{
+		$filePath = $this->options['path'];
+		$this->checkFilePath($filePath);
 
-        $content = file_get_contents($path);
-
-        if ($content === false) {
-            return [];
-        }
-
-        return json_decode($content, true) ?: [];
-    }
-
-    /**
-     * Write the cache data to a file.
-     *
-     * @param string $key   Holds the cache key.
-     * @param mixed  $value Holds the value to cache.
-     * @return $this Return the cache adapter instance.
-     */
-    private function write(string $key, mixed $value): static
-    {
-        file_put_contents($this->getPath($key), json_encode($value));
-
-        return $this;
-    }
+		return sprintf(
+			'%s/~%s/%s.data',
+			$filePath,
+			substr(hash('md5', $key), 0, 4),
+			hash('sha1', $key)
+		);
+	}*/
 }

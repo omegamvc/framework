@@ -15,6 +15,8 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Factory;
 
+use Omega\Cache\Adapter\MemcachedAdapter;
+use Omega\Cache\Adapter\RedisAdapter;
 use Omega\Container\Contracts\Factory\GenericFactoryInterface;
 
 /**
@@ -42,4 +44,7 @@ use Omega\Container\Contracts\Factory\GenericFactoryInterface;
  */
 interface CacheFactoryInterface extends GenericFactoryInterface
 {
+    public function createMemcachedAdapter(array $config): MemcachedAdapter;
+
+    public function createRedisAdapter(array $config): RedisAdapter;
 }

@@ -15,10 +15,13 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Factory;
 
-use Omega\Cache\Adapter\CacheAdapterInterface;
+use Memcached;
+use Redis;
+use Omega\Cache\CacheItemPoolInterface;
 use Omega\Cache\Adapter\FileAdapter;
-use Omega\Cache\Adapter\MemcacheAdapter;
+use Omega\Cache\Adapter\MemcachedAdapter;
 use Omega\Cache\Adapter\MemoryAdapter;
+use Omega\Cache\Adapter\RedisAdapter;
 use Omega\Cache\Exception\UnsupportedAdapterException;
 
 /**
@@ -37,7 +40,7 @@ use Omega\Cache\Exception\UnsupportedAdapterException;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-class CacheFactory implements CacheFactoryInterface
+/**class CacheFactory implements CacheFactoryInterface
 {
     /**
      * {@inheritdoc}
@@ -48,7 +51,7 @@ class CacheFactory implements CacheFactoryInterface
      * @return CacheAdapterInterface Return the created object or value. The return type is flexible, allowing for any
      *                               type to be returned, depending on the implementation.
      * @throws UnsupportedAdapterException if the adapter is not defined.
-     */
+     * /
     public function create(?array $config = null): CacheAdapterInterface
     {
         if (!isset($config['type'])) {
@@ -58,10 +61,58 @@ class CacheFactory implements CacheFactoryInterface
         }
 
         return match ($config['type']) {
-            'file'     => new FileAdapter($config),
-            'memcache' => new MemcacheAdapter($config),
-            'memory'   => new MemoryAdapter($config),
-            default    => throw new UnsupportedAdapterException('Unrecognized type.')
+            //'file'      => new FileAdapter($config),
+            'memcached' => new MemcachedAdapter($config),
+            //'memory'    => new MemoryAdapter($config),
+            default     => throw new UnsupportedAdapterException('Unrecognized type.')
         };
+    }
+}*/
+
+class CacheFactory implements CacheFactoryInterface
+{
+    public function create(?array $config = null): CacheItemPoolInterface
+    {
+        if (!isset($config['type'])) {
+            throw new UnsupportedAdapterException('Type is not defined.');
+        }
+
+        return match ($config['type']) {
+            'file'      => new FileAdapter($config),
+            'memory'    => new MemoryAdapter($config),
+            'memcached' => $this->createMemcachedAdapter($config),
+            'redis'     => $this->createRedisAdapter($config),
+            default     => throw new UnsupportedAdapterException('Unrecognized type.')
+        };
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createMemcachedAdapter(array $config): MemcachedAdapter
+    {
+        $memcached = new Memcached();
+
+        $host = $config['host'];
+        $port = (int) $config['port'];
+
+        $memcached->addServer($host, $port);
+
+        return new MemcachedAdapter($memcached, $config);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createRedisAdapter(array $config): RedisAdapter
+    {
+        $redis = new Redis();
+
+        $host = $config['host'];
+        $port = (int) $config['port'];
+
+        $redis->connect($host, $port);
+
+        return new RedisAdapter($redis, $config);
     }
 }

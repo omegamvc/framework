@@ -15,16 +15,17 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Adapter;
 
-use function is_int;
-use function time;
+use Omega\Cache\AbstractCacheItemPool;
+use Omega\Cache\Item\HasExpirationDateInterface;
+use Omega\Cache\Item\Item;
+use Psr\Cache\CacheItemInterface;
 
 /**
- * Memory adapter class.
+ * In-memory cache driver.
  *
- * The `MemoryAdapter` class implements a cache adapter that stores cached data in
- * memory. It extends the AbstractCacheAdapter class and provides methods to check,
- * retrieve, store, and manage cached data in memory.
- *
+ * This adapter provides a simple in-memory caching mechanism with expiration.
+ * It stores cache items in a memory array and handles expiration times.
+ * 
  * @category   Omega
  * @package    Cache
  * @subpackage Adapter
@@ -34,81 +35,74 @@ use function time;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-class MemoryAdapter extends AbstractCacheAdapter
+class MemoryAdapter extends AbstractCacheItemPool
 {
-    /**
-     * MemoryAdapter class constructor.
-     *
-     * Initializes the MemoryAdapter with configuration options.
-     *
-     * @param array<string, mixed> $config Holds an array of configuration options.
-     * @return void
-     */
-    public function __construct(array $config)
+    private array $cache = [];
+
+    public function clear(): bool
     {
-        parent::__construct($config);
+        $this->cache = [];
+        return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function has(string $key): bool
+    public function getItem(string $key): CacheItemInterface
     {
-        return isset($this->cached[$key])
-            && is_array($this->cached[$key])
-            && isset($this->cached[$key]['expires'])
-            && $this->cached[$key]['expires'] > time();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function get(string $key, mixed $default = null): mixed
-    {
-        if ($this->has($key)) {
-            $cachedData = $this->cached[$key] ?? null;
-            if (is_array($cachedData) && isset($cachedData['value'])) {
-                return $cachedData['value'];
-            }
+        $item = new Item($key);
+        
+        if ($this->hasItem($key)) {
+            $item->set($this->cache[$key]['value']);
         }
 
-        return $default;
+        return $item;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function put(string $key, mixed $value, ?int $seconds = null): static
+    public function getItems(array $keys = []): array
     {
-        $seconds = $seconds ?? (isset($this->config['seconds']) && is_int($this->config['seconds']))
-            ? $seconds = $this->config['seconds']
+        $items = [];
+
+        foreach ($keys as $key) {
+            $items[$key] = $this->getItem($key);
+        }
+
+        return $items;
+    }
+
+    public function deleteItem(string $key): bool
+    {
+        unset($this->cache[$key]);
+        return true;
+    }
+
+    public function save(CacheItemInterface $item): bool
+    {
+        $expires = $item instanceof HasExpirationDateInterface
+            ? $this->convertItemExpiryToSeconds($item)
             : 0;
 
-        $this->cached[$key] = [
-            'value'   => $value,
-            'expires' => time() + $seconds,
+        $expiresAt = $expires > 0 ? time() + $this->options['seconds'] : time() + $expires;
+    
+        $this->cache[$item->getKey()] = [
+            'value'   => $item->get(),
+            'expires' => $expiresAt,
         ];
-
-        return $this;
+    
+        return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function forget(string $key): static
+    public function hasItem(string $key): bool
     {
-        unset($this->cached[$key]);
-
-        return $this;
+        return isset($this->cache[$key])
+            && ($this->cache[$key]['expires'] === null || $this->cache[$key]['expires'] > time());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function flush(): static
+    /**public function hasItem(string $key): bool
     {
-        $this->cached = [];
+        return isset($this->cache[$key])
+            && ($this->cache[$key]['expires'] === null || $this->cache[$key]['expires'] > time());
+    }*/
 
-        return $this;
+    public static function isSupported(): bool
+    {
+        return true;
     }
 }
