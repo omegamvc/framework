@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace Omega\Cache\Adapter;
 
 use DateMalformedStringException;
-use Memcached;
+use Memcached as M;
 use Omega\Cache\AbstractCacheItemPool;
 use Omega\Cache\Exception\RuntimeException;
 use Omega\Cache\Item\HasExpirationDateInterface;
@@ -45,25 +45,25 @@ use function sprintf;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-class MemcachedAdapter extends AbstractCacheItemPool
+class Memcached extends AbstractCacheItemPool
 {
     /**
      * The Memcached driver instance.
      *
-     * @var Memcached Holds the Memcached driver used for caching operations.
+     * @var M Holds the Memcached driver used for caching operations.
      */
-    protected Memcached $driver;
+    protected M $driver;
 
     /**
      * Constructor.
      *
      * Initializes the Memcached adapter and sets up the caching options.
      *
-     * @param Memcached            $memcached The Memcached driver instance.
+     * @param M                    $memcached The Memcached driver instance.
      * @param array<string, mixed> $options   An associative array of configuration options.
      * @return void
      */
-	public function __construct(Memcached $memcached, array $options = [])
+	public function __construct(M $memcached, array $options = [])
 	{
 		parent::__construct($options);
 
@@ -88,7 +88,7 @@ class MemcachedAdapter extends AbstractCacheItemPool
 		$code  = $this->driver->getResultCode();
 		$item  = new Item($key);
 
-		if ($code === Memcached::RES_SUCCESS) {
+		if ($code === M::RES_SUCCESS) {
 			$item->set($value);
 		}
 
@@ -130,7 +130,7 @@ class MemcachedAdapter extends AbstractCacheItemPool
 			$rc = $this->driver->getResultCode();
 
 			// If the item was not successfully removed nor did not exist then raise an error
-			if (($rc !== Memcached::RES_SUCCESS)) {
+			if (($rc !== M::RES_SUCCESS)) {
 				throw new RuntimeException(
 					sprintf(
 						'Unable to remove cache entry for %s. Error message `%s`.',
@@ -161,7 +161,7 @@ class MemcachedAdapter extends AbstractCacheItemPool
 			 * The return of deleteMulti is not consistent with the documentation for error cases,
 			 * so check for an explicit boolean true for successful deletion
 			 */
-			if ($value !== true && $value !== Memcached::RES_NOTFOUND) {
+			if ($value !== true && $value !== M::RES_NOTFOUND) {
 				return false;
 			}
 		}
@@ -191,7 +191,7 @@ class MemcachedAdapter extends AbstractCacheItemPool
 	{
 		$this->driver->get($key);
 
-		return $this->driver->getResultCode() !== Memcached::RES_NOTFOUND;
+		return $this->driver->getResultCode() !== M::RES_NOTFOUND;
 	}
 
 	/**

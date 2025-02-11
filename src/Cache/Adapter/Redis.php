@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace Omega\Cache\Adapter;
 
 use DateMalformedStringException;
-use Redis;
+use Redis as R;
 use Omega\Cache\AbstractCacheItemPool;
 use Omega\Cache\Item\HasExpirationDateInterface;
 use Omega\Cache\Item\Item;
@@ -39,24 +39,24 @@ use function extension_loaded;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-class RedisAdapter extends AbstractCacheItemPool
+class Redis extends AbstractCacheItemPool
 {
     /**
      * The Redis driver instance.
      *
-     * @var Redis Holds the Redis driver instance.
+     * @var R Holds the Redis driver instance.
      */
-    protected Redis $driver;
+    protected R $driver;
 
     /**
      * Constructor to initialize the Redis adapter with a Redis instance and options.
      *
-     * @param Redis                $redis   The Redis driver instance being used for this cache pool.
+     * @param R                    $redis   The Redis driver instance being used for this cache pool.
      * @param array<string, mixed> $options Options for configuring the cache pool.
      * @return void
      */
 	public function __construct(
-        protected Redis $redis, 
+        protected R $redis, 
         array $options = []
     ) {
 		parent::__construct($options);
