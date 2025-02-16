@@ -15,8 +15,6 @@ declare(strict_types=1);
 
 namespace Omega\Container\Exception;
 
-use Psr\Container\NotFoundExceptionInterface;
-
 /**
  * Interface for exceptions that are thrown when a callable cannot be resolved or is invalid.
  *

@@ -23,7 +23,6 @@ use ReflectionNamedType;
 use Omega\Container\Exception\DependencyResolutionException;
 use Omega\Container\Exception\InvalidCallableException;
 use Omega\Container\Exception\KeyNotFoundException;
-use Psr\Container\ContainerInterface;
 
 use function array_values;
 use function call_user_func;
