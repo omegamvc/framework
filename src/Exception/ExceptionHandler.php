@@ -100,7 +100,7 @@ class ExceptionHandler
      */
     public function showFriendlyThrowable(Throwable $throwable): void
     {
-        $errorHandler= new Run();
+        $errorHandler = new Run();
         $errorHandler->pushHandler(new PrettyPageHandler());
         $errorHandler->register();
 

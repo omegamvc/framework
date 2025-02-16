@@ -31,8 +31,8 @@ use function sprintf;
 /**
  * Represents a cache item.
  *
- * This class provides an implementation of a cache item, including its key, expiration time, value, 
- * and hit status. It supports multiple expiration formats, including integer-based TTL (time-to-live), 
+ * This class provides an implementation of a cache item, including its key, expiration time, value,
+ * and hit status. It supports multiple expiration formats, including integer-based TTL (time-to-live),
  * DateInterval, and DateTimeInterface. The item tracks whether it was successfully retrieved from the cache.
  *
  * @category   Omega
@@ -76,140 +76,140 @@ class Item extends AbstractItem
      *     - A DateInterval object.
      *     - A DateTimeInterface object for a fixed expiration time.
      *     - Null to use the default TTL of 900 seconds.
-	 * @return void
+     * @return void
      * @throws DateMalformedStringException If the provided TTL value is invalid.
      */
-	public function __construct(
+    public function __construct(
         private readonly string $key,
         DateInterval|DateTimeInterface|int|null $ttl = null
     ) {
-		/***if (is_int($ttl) || ($ttl instanceof DateInterval)) {
-			$this->expiresAfter($ttl);
-		} elseif ($ttl instanceof DateTimeInterface) {
-			$this->expiresAt($ttl);
-		} else {
-			$this->expiresAfter(900);
-		}*/
+        /***if (is_int($ttl) || ($ttl instanceof DateInterval)) {
+            $this->expiresAfter($ttl);
+        } elseif ($ttl instanceof DateTimeInterface) {
+            $this->expiresAt($ttl);
+        } else {
+            $this->expiresAfter(900);
+        }*/
         $this->expiration = new DateTime('now + 900 seconds');
-        
+
         $this->expiresAfter($ttl);
-	}
+    }
 
  /**
      * Determines whether the cache item exists.
      *
-     * Note: This method MAY avoid retrieving the actual cached value for performance reasons, 
-     * which could lead to a race condition between `exists()` and `get()`. To avoid this issue, 
+     * Note: This method MAY avoid retrieving the actual cached value for performance reasons,
+     * which could lead to a race condition between `exists()` and `get()`. To avoid this issue,
      * use `isHit()` instead.
      *
      * @return bool True if the cache item exists and is valid, false otherwise.
      */
-	public function exists(): bool
-	{
-		return $this->isHit();
-	}
+    public function exists(): bool
+    {
+        return $this->isHit();
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function getKey(): string
-	{
-		return $this->key;
-	}
+    public function getKey(): string
+    {
+        return $this->key;
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function get(): mixed
-	{
-		return $this->value;
-	}
+    public function get(): mixed
+    {
+        return $this->value;
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function set(mixed $value): static
-	{
-		$this->value = $value;
-		$this->hit = true;
+    public function set(mixed $value): static
+    {
+        $this->value = $value;
+        $this->hit = true;
 
-		return $this;
-	}
-
-    /**
-     * {@inheritdoc}
-     */
-	public function isHit(): bool
-	{
-		return $this->hit;
-	}
+        return $this;
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function expiresAt(?DateTimeInterface $expiration): static
-	{
+    public function isHit(): bool
+    {
+        return $this->hit;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function expiresAt(?DateTimeInterface $expiration): static
+    {
         // @phpstan-ignore-next-line
-		if ($expiration !== null && !($expiration instanceof DateTimeInterface)) {
-			throw new InvalidArgumentException(
-				sprintf(
-					'Argument 1 passed to %s::expiresAt() must be an instance of DateTimeInterface; %s given',
-					get_class($this),
-					is_object($expiration) 
+        if ($expiration !== null && !($expiration instanceof DateTimeInterface)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Argument 1 passed to %s::expiresAt() must be an instance of DateTimeInterface; %s given',
+                    get_class($this),
+                    is_object($expiration)
                         ? get_class($expiration)
                         // @phpstan-ignore-next-line
                         : gettype($expiration)
-				)
-			);
-		}
+                )
+            );
+        }
 
         // @phpstan-ignore-next-line
-		$this->expiration = $expiration;
+        $this->expiration = $expiration;
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * {@inheritdoc}
      * @throws DateMalformedStringException
      */
 
-     public function expiresAfter(int|DateInterval|null $time): static
-     {
-         if (is_int($time)) {
-             $this->expiration = (new DateTime())->modify("+$time seconds");
-         } elseif ($time instanceof DateInterval) {
-             $this->expiration = (new DateTime())->add($time);
-         } else {
-             return $this->expiresAfter(900);
-         }
- 
-         return $this;
-     }
+    public function expiresAfter(int|DateInterval|null $time): static
+    {
+        if (is_int($time)) {
+            $this->expiration = (new DateTime())->modify("+$time seconds");
+        } elseif ($time instanceof DateInterval) {
+            $this->expiration = (new DateTime())->add($time);
+        } else {
+            return $this->expiresAfter(900);
+        }
+
+        return $this;
+    }
     /**public function expiresAfter(int|DateInterval|null $time): static
-	{
-		if (is_integer($time)) {
-			$this->expiration = new DateTime('now +' . $time . ' seconds');
-		} elseif ($time instanceof DateInterval) {
-			$this->expiration = new DateTime('now');
-			$this->expiration->add($time);
-		} else {
-			$this->expiration = new DateTime('now + 900 seconds');
-		}
+    {
+        if (is_integer($time)) {
+            $this->expiration = new DateTime('now +' . $time . ' seconds');
+        } elseif ($time instanceof DateInterval) {
+            $this->expiration = new DateTime('now');
+            $this->expiration->add($time);
+        } else {
+            $this->expiration = new DateTime('now + 900 seconds');
+        }
 
-		return $this;
-	}*/
+        return $this;
+    }*/
 
-	/**
+    /**
      * Retrieves the expiration time of the cache item.
      *
-     * If the item is a cache miss, this method MAY return either the time at which it expired 
+     * If the item is a cache miss, this method MAY return either the time at which it expired
      * or the current time if the expiration time is unavailable.
      *
      * @return DateTimeInterface The timestamp indicating when this cache item will expire.
      */
-	public function getExpiration(): DateTimeInterface
-	{
-		return $this->expiration;
-	}
+    public function getExpiration(): DateTimeInterface
+    {
+        return $this->expiration;
+    }
 }

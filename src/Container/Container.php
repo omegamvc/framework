@@ -101,7 +101,7 @@ class Container implements ContainerInterface
     {
         if (!isset($this->bindings[$id])) {
             throw new DependencyResolutionException(
-                $id 
+                $id
                 . ' is not bound.'
             );
         }

@@ -3,17 +3,19 @@
 namespace Omega\Exception\Handler;
 
 use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
+use Omega\Logging\LoggerInterface;
 use Omega\Exception\Frame\Frame;
 
 /**
-* Handler outputing plaintext error messages. Can be used
-* directly, or will be instantiated automagically by Run
-* if passed to Run::pushHandler
-*/
+ * Handler outputing plaintext error messages. Can be used
+ * directly, or will be instantiated automagically by Run
+ * if passed to Run::pushHandler
+ *
+ * @property-read string VAR_DUMPER_PREFIX
+ */
 class PlainTextHandler extends Handler
 {
-    const VAR_DUMP_PREFIX = '   | ';
+    public const string VAR_DUMP_PREFIX = '   | ';
 
     /**
      * @var \Psr\Log\LoggerInterface
@@ -67,8 +69,10 @@ class PlainTextHandler extends Handler
      */
     public function setLogger($logger = null)
     {
-        if (! (is_null($logger)
-            || $logger instanceof LoggerInterface)) {
+        if (
+            ! (is_null($logger)
+            || $logger instanceof LoggerInterface)
+        ) {
             throw new InvalidArgumentException(
                 'Argument to ' . __METHOD__ .
                 " must be a valid Logger Interface (aka. Monolog), " .
@@ -158,7 +162,7 @@ class PlainTextHandler extends Handler
      */
     public function setTraceFunctionArgsOutputLimit($traceFunctionArgsOutputLimit)
     {
-        $this->traceFunctionArgsOutputLimit = (integer) $traceFunctionArgsOutputLimit;
+        $this->traceFunctionArgsOutputLimit = (int) $traceFunctionArgsOutputLimit;
         return $this;
     }
 
@@ -226,8 +230,10 @@ class PlainTextHandler extends Handler
      */
     private function getFrameArgsOutput(Frame $frame, $line)
     {
-        if ($this->addTraceFunctionArgsToOutput() === false
-            || $this->addTraceFunctionArgsToOutput() < $line) {
+        if (
+            $this->addTraceFunctionArgsToOutput() === false
+            || $this->addTraceFunctionArgsToOutput() < $line
+        ) {
             return '';
         }
 

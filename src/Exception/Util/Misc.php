@@ -53,7 +53,7 @@ class Misc
         }
         return "E_UNKNOWN";
     }
-    
+
     /**
      * Determine if an error level is fatal (halts execution)
      *

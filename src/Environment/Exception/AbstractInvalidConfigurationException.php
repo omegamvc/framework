@@ -18,7 +18,7 @@ namespace Omega\Environment\Exception;
 use RuntimeException as PhpRuntimeException;
 use Throwable;
 
-abstract class AbstractInvalidConfigurationException extends PhpRuntimeException implements 
+abstract class AbstractInvalidConfigurationException extends PhpRuntimeException implements
     InvalidConfigurationExceptionInterface
 {
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null)

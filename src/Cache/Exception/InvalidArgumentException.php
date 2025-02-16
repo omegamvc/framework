@@ -22,7 +22,7 @@ use InvalidArgumentException as PhpInvalidArgumentException;
  *
  * This exception is used within the Omega caching system to signal invalid arguments passed to methods.
  * It extends PHP's native InvalidArgumentException and implements the required PSR and custom exception interfaces.
- * 
+ *
  * @category   Omega
  * @package    Cache
  * @subpackage Exception

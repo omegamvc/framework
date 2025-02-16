@@ -200,9 +200,9 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, C
         $diff = $this->frames;
 
         $parentFrames = $parentFrames->getArray();
-        $p = count($parentFrames)-1;
+        $p = count($parentFrames) - 1;
 
-        for ($i = count($diff)-1; $i >= 0 && $p >= 0; $i--) {
+        for ($i = count($diff) - 1; $i >= 0 && $p >= 0; $i--) {
             /** @var Frame $tailFrame */
             $tailFrame = $diff[$i];
             if ($tailFrame->equals($parentFrames[$p])) {

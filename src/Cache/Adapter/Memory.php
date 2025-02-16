@@ -25,7 +25,7 @@ use Omega\Cache\Item\CacheItemInterface;
  *
  * This adapter provides a simple in-memory caching mechanism with expiration.
  * It stores cache items in a memory array and handles expiration times.
- * 
+ *
  * @category   Omega
  * @package    Cache
  * @subpackage Adapter
@@ -48,7 +48,7 @@ class Memory extends AbstractCacheItemPool
     public function getItem(string $key): CacheItemInterface
     {
         $item = new Item($key);
-        
+
         if ($this->hasItem($key)) {
             $item->set($this->cache[$key]['value']);
         }
@@ -80,12 +80,12 @@ class Memory extends AbstractCacheItemPool
             : 0;
 
         $expiresAt = $expires > 0 ? time() + $this->options['seconds'] : time() + $expires;
-    
+
         $this->cache[$item->getKey()] = [
             'value'   => $item->get(),
             'expires' => $expiresAt,
         ];
-    
+
         return true;
     }
 

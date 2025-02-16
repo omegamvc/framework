@@ -20,10 +20,10 @@ use RuntimeException as PhpRuntimeException;
 /**
  * Exception thrown when an error occurs during cache operations.
  *
- * This exception is used within the Omega caching system to signal runtime errors that prevent 
- * proper cache functionality. It extends PHP's native RuntimeException and implements the 
+ * This exception is used within the Omega caching system to signal runtime errors that prevent
+ * proper cache functionality. It extends PHP's native RuntimeException and implements the
  * CacheException interface for compatibility with the caching system.
- * 
+ *
  * @category   Omega
  * @package    Cache
  * @subpackage Exception

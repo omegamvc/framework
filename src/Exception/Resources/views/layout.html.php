@@ -1,7 +1,9 @@
 <?php
+
 /**
-* Main layout template file.
-*/
+ * Main layout template file.
+ */
+
 ?>
 <!DOCTYPE html><?php echo $preface; ?>
 <html>

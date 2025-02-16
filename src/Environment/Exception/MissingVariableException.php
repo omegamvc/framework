@@ -14,6 +14,7 @@
 declare(strict_types=1);
 
 namespace Omega\Environment\Exception;
+
 class MissingVariableException extends AbstractInvalidConfigurationException implements InvalidContentExceptionInterface
 {
     public function __construct(string $variable)

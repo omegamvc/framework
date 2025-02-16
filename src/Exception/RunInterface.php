@@ -6,11 +6,16 @@ use InvalidArgumentException;
 use Omega\Exception\Exception\ErrorException;
 use Omega\Exception\Handler\HandlerInterface;
 
+/**
+ * @property-read string EXCEPTION_HANDLER
+ * @property-read string ERROR_HANDLER
+ * @property-read string SHUTDOWN_HANDLER
+ */
 interface RunInterface
 {
-    const EXCEPTION_HANDLER = "handleException";
-    const ERROR_HANDLER     = "handleError";
-    const SHUTDOWN_HANDLER  = "handleShutdown";
+    public const string EXCEPTION_HANDLER = "handleException";
+    public const string ERROR_HANDLER     = "handleError";
+    public const string SHUTDOWN_HANDLER  = "handleShutdown";
 
     /**
      * Pushes a handler to the end of the stack

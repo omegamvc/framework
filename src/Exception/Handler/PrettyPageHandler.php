@@ -8,23 +8,38 @@ use Symfony\Component\VarDumper\Cloner\AbstractCloner;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use UnexpectedValueException;
 use Omega\Exception\Inspector\Formatter;
+use Omega\Exception\Inspector\InspectorInterface;
 use Omega\Exception\Util\Misc;
 use Omega\Exception\Util\TemplateHelper;
 
+/**
+ * @property-read string EDITOR_SUBLIME
+ * @property-read string EDITOR_TEXTMATE
+ * @property-read string EDITOR_EMACS
+ * @property-read string EDITOR_MACVIM
+ * @property-read string EDITOR_PHPSTORM
+ * @property-read string EDITOR_IDEA
+ * @property-read string VEDITOR_VSCODE
+ * @property-read string EDITOR_ATOM
+ * @property-read string EDITOR_ESPRESSO
+ * @property-read string EDITOR_XDEBUG
+ * @property-read string EDITOR_NETBEANS
+ * @property-read string EDITOR_CURSOR
+ */
 class PrettyPageHandler extends Handler
 {
-    const EDITOR_SUBLIME = "sublime";
-    const EDITOR_TEXTMATE = "textmate";
-    const EDITOR_EMACS = "emacs";
-    const EDITOR_MACVIM = "macvim";
-    const EDITOR_PHPSTORM = "phpstorm";
-    const EDITOR_IDEA = "idea";
-    const EDITOR_VSCODE = "vscode";
-    const EDITOR_ATOM = "atom";
-    const EDITOR_ESPRESSO = "espresso";
-    const EDITOR_XDEBUG = "xdebug";
-    const EDITOR_NETBEANS = "netbeans";
-    const EDITOR_CURSOR = "cursor";
+    public const string  EDITOR_SUBLIME = "sublime";
+    public const string  EDITOR_TEXTMATE = "textmate";
+    public const string  EDITOR_EMACS = "emacs";
+    public const string  EDITOR_MACVIM = "macvim";
+    public const string  EDITOR_PHPSTORM = "phpstorm";
+    public const string  EDITOR_IDEA = "idea";
+    public const string  EDITOR_VSCODE = "vscode";
+    public const string  EDITOR_ATOM = "atom";
+    public const string  EDITOR_ESPRESSO = "espresso";
+    public const string  EDITOR_XDEBUG = "xdebug";
+    public const string  EDITOR_NETBEANS = "netbeans";
+    public const string  EDITOR_CURSOR = "cursor";
 
     /**
      * Search paths to be scanned for resources.
@@ -137,7 +152,8 @@ class PrettyPageHandler extends Handler
         if (ini_get('xdebug.file_link_format') || get_cfg_var('xdebug.file_link_format')) {
             // Register editor using xdebug's file_link_format option.
             $this->editors['xdebug'] = function ($file, $line) {
-                return str_replace(['%f', '%l'], [$file, $line], ini_get('xdebug.file_link_format') ?: get_cfg_var('xdebug.file_link_format'));
+                return str_replace(['%f', '%l'], [$file, $line], ini_get('xdebug.file_link_format')
+                ?: get_cfg_var('xdebug.file_link_format'));
             };
 
             // If xdebug is available, use it as default editor.
@@ -187,7 +203,7 @@ class PrettyPageHandler extends Handler
                 if (isset($_ENV['omega-test'])) {
                     throw new \Exception(
                         'Use handleUnconditionally instead of omega-test'
-                        .' environment variable'
+                        . ' environment variable'
                     );
                 }
 
@@ -286,7 +302,9 @@ class PrettyPageHandler extends Handler
         $plainTextHandler->setRun($this->getRun());
         $plainTextHandler->setException($this->getException());
         $plainTextHandler->setInspector($this->getInspector());
-        $vars["preface"] = "<!--\n\n\n" .  $this->templateHelper->escape($plainTextHandler->generateResponse()) . "\n\n\n\n\n\n\n\n\n\n\n-->";
+        $vars["preface"] = "<!--\n\n\n"
+            .  $this->templateHelper->escape($plainTextHandler->generateResponse())
+            . "\n\n\n\n\n\n\n\n\n\n\n-->";
 
         $this->templateHelper->setVariables($vars);
         $this->templateHelper->render($templateFile);
@@ -379,7 +397,7 @@ class PrettyPageHandler extends Handler
             throw new InvalidArgumentException('Expecting callback argument to be callable');
         }
 
-        $this->extraTables[$label] = function (?\Omega\Exception\Inspector\InspectorInterface $inspector = null) use ($callback) {
+        $this->extraTables[$label] = function (?InspectorInterface $inspector = null) use ($callback) {
             try {
                 $result = call_user_func($callback, $inspector);
 
@@ -560,14 +578,22 @@ class PrettyPageHandler extends Handler
             return [];
         }
 
-        if (is_string($this->editor) && isset($this->editors[$this->editor]) && !is_callable($this->editors[$this->editor])) {
+        if (
+            is_string($this->editor)
+            && isset($this->editors[$this->editor])
+            && !is_callable($this->editors[$this->editor])
+        ) {
             return [
                 'ajax' => false,
                 'url' => $this->editors[$this->editor],
             ];
         }
 
-        if (is_callable($this->editor) || (isset($this->editors[$this->editor]) && is_callable($this->editors[$this->editor]))) {
+        if (
+            is_callable($this->editor)
+            || (isset($this->editors[$this->editor])
+            && is_callable($this->editors[$this->editor]))
+        ) {
             if (is_callable($this->editor)) {
                 $callback = call_user_func($this->editor, $filePath, $line);
             } else {
@@ -708,7 +734,7 @@ class PrettyPageHandler extends Handler
         // If we got this far, nothing was found.
         throw new RuntimeException(
             "Could not find resource '$resource' in any resource paths."
-            . "(searched: " . join(", ", $this->searchPaths). ")"
+            . "(searched: " . join(", ", $this->searchPaths) . ")"
         );
     }
 

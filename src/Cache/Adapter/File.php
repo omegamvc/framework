@@ -63,223 +63,212 @@ use function unlink;
  */
 class File extends AbstractCacheItemPool
 {
-	/**
-	 * Constructor.
-	 *
-	 * Initializes the file-based cache system, ensuring that the required options
-	 * are set and validating the cache directory.
-	 *
-	 * @param mixed $options An associative array of configuration options.
+    /**
+     * Constructor.
+     *
+     * Initializes the file-based cache system, ensuring that the required options
+     * are set and validating the cache directory.
+     *
+     * @param mixed $options An associative array of configuration options.
      * @return void
-	 * @throws PhpRuntimeException If an unexpected runtime error occurs.
+     * @throws PhpRuntimeException If an unexpected runtime error occurs.
      * @throws InvalidArgumentException If the 'path' option is not provided.
-	 */
-	public function __construct(mixed $options = [])
-	{
-		if (!isset($options['path'])){
-			throw new InvalidArgumentException(
+     */
+    public function __construct(mixed $options = [])
+    {
+        if (!isset($options['path'])) {
+            throw new InvalidArgumentException(
                 'The path option must be set.'
             );
-		}
+        }
 
-		$this->checkFilePath($options['path']);
+        $this->checkFilePath($options['path']);
 
-		parent::__construct($options);
-	}
+        parent::__construct($options);
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function clear(): bool
-	{
-		$filePath = $this->options['path'];
-		$this->checkFilePath($filePath);
+    public function clear(): bool
+    {
+        $filePath = $this->options['path'];
+        $this->checkFilePath($filePath);
 
-		$iterator = new RegexIterator(
-			new RecursiveIteratorIterator(
-				new RecursiveDirectoryIterator($filePath)
-			),
-			'/\.data$/i'
-		);
+        $iterator = new RegexIterator(
+            new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($filePath)
+            ),
+            '/\.data$/i'
+        );
 
-		/** @var RecursiveDirectoryIterator $file */
-		foreach ($iterator as $file) {
-			if ($file->isFile()) {
-				@unlink($file->getRealPath());
-			}
-		}
+        /** @var RecursiveDirectoryIterator $file */
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                @unlink($file->getRealPath());
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /**
      * {@inheritdoc}
      * @throws DateMalformedStringException
      */
-	public function getItem(string $key): CacheItemInterface
-	{
-		if (!$this->hasItem($key)) {
-			return new Item($key);
-		}
+    public function getItem(string $key): CacheItemInterface
+    {
+        if (!$this->hasItem($key)) {
+            return new Item($key);
+        }
 
-		$resource = @fopen($this->fetchStreamUri($key), 'rb');
+        $resource = @fopen($this->fetchStreamUri($key), 'rb');
 
-		if (!$resource) {
-			throw new RuntimeException(
-				sprintf(
-					'Unable to fetch cache entry for %s. Cannot open the resource.',
-					$key
-				)
-			);
-		}
-
-		$data = stream_get_contents($resource);
-		fclose($resource);
-
-		$item = new Item($key);
-		$dataArray = json_decode($data, true);  // Use json_decode() instead of unserialize()
-
-		// Check expiration date
-		if ($dataArray['expires'] !== null && time() > $dataArray['expires']) {
-			if (!$this->deleteItem($key)) {
-				throw new RuntimeException(
-					sprintf(
-						'Unable to clean expired cache entry for %s.', 
-						$key
-					)
-				);
-			}
-
-			return $item;
-		}
-
-		$item->set($dataArray['value']);
-
-		return $item;
-	}
-
-
-    /**
-     * {@inheritdoc}
-     */
-	public function deleteItem(string $key): bool
-	{
-		if ($this->hasItem($key))
-		{
-			return @unlink($this->fetchStreamUri($key));
-		}
-
-		// If the item doesn't exist, no error
-		return true;
-	}
-
-    /**
-     * {@inheritdoc}
-     */
-	public function save(CacheItemInterface $item): bool
-	{
-		$fileName = $this->fetchStreamUri($item->getKey());
-		$filePath = pathinfo($fileName, PATHINFO_DIRNAME);
-	
-		if (!is_dir($filePath)) {
-			mkdir($filePath, 0770, true);
-		}
-	
-		// Saving in JSON format instead of serialization
-		$data = [
-			'value'   => $item->get(),
-			'expires' => $item instanceof HasExpirationDateInterface ? time() + $this->convertItemExpiryToSeconds($item) : null
-		];
-	
-		return (bool) file_put_contents(
-			$fileName,
-			json_encode($data)  // Use json_encode() instead of serialize()
-		);
-	}	
-
-    /**
-     * {@inheritdoc}
-     */
-	public function hasItem(string $key): bool
-	{
-		return is_file($this->fetchStreamUri($key));
-	}
-
-	/**
-	 * Determines if the File cache implementation is supported.
-	 *
-	 * This method verifies whether the necessary file system functionality
-	 * is available for the cache system to operate correctly.
-	 *
-	 * @return bool Returns true if the file-based cache system is supported, false otherwise.
-	 */
-	public static function isSupported(): bool
-	{
-		return true;
-	}
-
-	/**
-	 * Validates the cache directory.
-	 *
-	 * Ensures that the provided file path exists, is a directory, and is writable.
-	 *
-	 * @param string $filePath The file path to validate.
-	 * @return bool Always returns true if the path is valid.
-	 * @throws RuntimeException If the file path does not exist or is not writable.
-	 */
-	private function checkFilePath(string $filePath): bool
-	{
-		if (!is_dir($filePath)) {
-			throw new RuntimeException(
+        if (!$resource) {
+            throw new RuntimeException(
                 sprintf(
-                    'The base cache path `%s` does not exist.', 
+                    'Unable to fetch cache entry for %s. Cannot open the resource.',
+                    $key
+                )
+            );
+        }
+
+        $data = stream_get_contents($resource);
+        fclose($resource);
+
+        $item = new Item($key);
+        $dataArray = json_decode($data, true);  // Use json_decode() instead of unserialize()
+
+        // Check expiration date
+        if ($dataArray['expires'] !== null && time() > $dataArray['expires']) {
+            if (!$this->deleteItem($key)) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Unable to clean expired cache entry for %s.',
+                        $key
+                    )
+                );
+            }
+
+            return $item;
+        }
+
+        $item->set($dataArray['value']);
+
+        return $item;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function deleteItem(string $key): bool
+    {
+        if ($this->hasItem($key)) {
+            return @unlink($this->fetchStreamUri($key));
+        }
+
+        // If the item doesn't exist, no error
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function save(CacheItemInterface $item): bool
+    {
+        $fileName = $this->fetchStreamUri($item->getKey());
+        $filePath = pathinfo($fileName, PATHINFO_DIRNAME);
+
+        if (!is_dir($filePath)) {
+            mkdir($filePath, 0770, true);
+        }
+
+        // Saving in JSON format instead of serialization
+        $data = [
+            'value'   => $item->get(),
+            'expires' => $item instanceof HasExpirationDateInterface
+                ? time() + $this->convertItemExpiryToSeconds($item)
+                : null
+        ];
+
+        return (bool) file_put_contents(
+            $fileName,
+            json_encode($data)  // Use json_encode() instead of serialize()
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasItem(string $key): bool
+    {
+        return is_file($this->fetchStreamUri($key));
+    }
+
+    /**
+     * Determines if the File cache implementation is supported.
+     *
+     * This method verifies whether the necessary file system functionality
+     * is available for the cache system to operate correctly.
+     *
+     * @return bool Returns true if the file-based cache system is supported, false otherwise.
+     */
+    public static function isSupported(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Validates the cache directory.
+     *
+     * Ensures that the provided file path exists, is a directory, and is writable.
+     *
+     * @param string $filePath The file path to validate.
+     * @return bool Always returns true if the path is valid.
+     * @throws RuntimeException If the file path does not exist or is not writable.
+     */
+    private function checkFilePath(string $filePath): bool
+    {
+        if (!is_dir($filePath)) {
+            throw new RuntimeException(
+                sprintf(
+                    'The base cache path `%s` does not exist.',
                     $filePath
                 )
             );
-		}
+        }
 
-		if (!is_writable($filePath)) {
-			throw new RuntimeException(
+        if (!is_writable($filePath)) {
+            throw new RuntimeException(
                 sprintf(
-                    'The base cache path `%s` is not writable.', 
+                    'The base cache path `%s` is not writable.',
                     $filePath
                 )
             );
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Generates the full stream URI for a cache entry.
-	 *
-	 * Constructs the file path for storing the cache entry based on the provided key.
-	 *
-	 * @param string $key The cache item identifier.
-	 * @return string Returns the full stream URI for the cache entry.
-	 * @throws PhpRuntimeException If the cache path is invalid.
-	 */
-	private function fetchStreamUri(string $key): string
-	{
-		$filePath = $this->options['path'];
-		$this->checkFilePath($filePath);
+    /**
+     * Generates the full stream URI for a cache entry.
+     *
+     * Constructs the file path for storing the cache entry based on the provided key.
+     *
+     * @param string $key The cache item identifier.
+     * @return string Returns the full stream URI for the cache entry.
+     * @throws PhpRuntimeException If the cache path is invalid.
+     */
+    private function fetchStreamUri(string $key): string
+    {
+        $filePath = $this->options['path'];
+        $this->checkFilePath($filePath);
 
-		return sprintf(
-			'%s/%s.json',
-			rtrim($filePath, '/'), // Rimuove eventuali slash finali per sicurezza
-			hash('md5', $key) // Nome del file basato su hash MD5
-		);
-	}
-	/**private function fetchStreamUri(string $key): string
-	{
-		$filePath = $this->options['path'];
-		$this->checkFilePath($filePath);
-
-		return sprintf(
-			'%s/~%s/%s.data',
-			$filePath,
-			substr(hash('md5', $key), 0, 4),
-			hash('sha1', $key)
-		);
-	}*/
+        return sprintf(
+            '%s/%s.json',
+            rtrim($filePath, '/'), // Rimuove eventuali slash finali per sicurezza
+            hash('md5', $key) // Nome del file basato su hash MD5
+        );
+    }
 }

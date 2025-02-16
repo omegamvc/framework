@@ -173,9 +173,9 @@ class Inspector implements InspectorInterface
     /**
      * Returns an iterator for the inspected exception's
      * frames.
-     * 
+     *
      * @param array<callable> $frameFilters
-     * 
+     *
      * @return FrameCollection
      */
     public function getFrames(array $frameFilters = [])

@@ -18,7 +18,7 @@ namespace Omega\Cache\Item;
 /**
  * Abstract representation of a cache item.
  *
- * This class provides a base implementation for cache items within the Joomla Framework. 
+ * This class provides a base implementation for cache items within the Joomla Framework.
  * It defines the necessary structure and contracts for handling expiration dates and cache storage.
  * Concrete implementations must define specific behaviors for managing cached data.
  *

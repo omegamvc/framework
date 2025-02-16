@@ -7,6 +7,10 @@ use Omega\Exception\RunInterface;
 
 /**
  * Abstract implementation of a Handler.
+ *
+ * @property-read int DONE
+ * @property-read int LAST_HANDLER
+ * @property-read int QUIT
  */
 abstract class Handler implements HandlerInterface
 {
@@ -14,17 +18,16 @@ abstract class Handler implements HandlerInterface
      Return constants that can be returned from Handler::handle
      to message the handler walker.
      */
-    const DONE         = 0x10; // returning this is optional, only exists for
-                               // semantic purposes
+    public const int DONE = 0x10;
     /**
      * The Handler has handled the Throwable in some way, and wishes to skip any other Handler.
      * Execution will continue.
      */
-    const LAST_HANDLER = 0x20;
+    public const int LAST_HANDLER = 0x20;
     /**
      * The Handler has handled the Throwable in some way, and wishes to quit/stop execution
      */
-    const QUIT         = 0x30;
+    public const int QUIT = 0x30;
 
     /**
      * @var RunInterface

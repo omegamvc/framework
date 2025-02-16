@@ -29,7 +29,7 @@ use function extension_loaded;
  * Redis cache driver.
  * This adapter provides caching using Redis, a powerful in-memory data store.
  * It implements CacheItemPoolInterface for managing cache items with Redis as the backend.
- * 
+ *
  * @category   Omega
  * @package    Cache
  * @subpackage Adapter
@@ -55,83 +55,83 @@ class Redis extends AbstractCacheItemPool
      * @param array<string, mixed> $options Options for configuring the cache pool.
      * @return void
      */
-	public function __construct(
-        protected R $redis, 
+    public function __construct(
+        protected R $redis,
         array $options = []
     ) {
-		parent::__construct($options);
+        parent::__construct($options);
 
-		$this->driver = $redis;
-	}
+        $this->driver = $redis;
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function clear(): bool
-	{
-		return $this->driver->flushDB();
-	}
+    public function clear(): bool
+    {
+        return $this->driver->flushDB();
+    }
 
     /**
      * {@inheritdoc}
      * @throws DateMalformedStringException
      */
-	public function getItem(string $key): CacheItemInterface
-	{
-		$value = $this->driver->get($key);
-		$item = new Item($key);
+    public function getItem(string $key): CacheItemInterface
+    {
+        $value = $this->driver->get($key);
+        $item = new Item($key);
 
-		if ($value !== false) {
-			$item->set($value);
-		}
+        if ($value !== false) {
+            $item->set($value);
+        }
 
-		return $item;
-	}
-
-    /**
-     * {@inheritdoc}
-     */
-	public function deleteItem(string $key): bool
-	{
-		if ($this->hasItem($key)) {
-			return (bool) $this->driver->del($key);
-		}
-
-		// If the item doesn't exist, no error
-		return true;
-	}
+        return $item;
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function save(CacheItemInterface $item): bool
-	{
-		if ($item instanceof HasExpirationDateInterface) {
-			$ttl = $this->convertItemExpiryToSeconds($item);
+    public function deleteItem(string $key): bool
+    {
+        if ($this->hasItem($key)) {
+            return (bool) $this->driver->del($key);
+        }
 
-			if ($ttl > 0) {
-				return $this->driver->setex($item->getKey(), $ttl, $item->get());
-			}
-		}
-
-		return $this->driver->set($item->getKey(), $item->get());
-	}
+        // If the item doesn't exist, no error
+        return true;
+    }
 
     /**
      * {@inheritdoc}
      */
-	public function hasItem(string $key): bool
-	{
-		return $this->driver->exists($key);
-	}
+    public function save(CacheItemInterface $item): bool
+    {
+        if ($item instanceof HasExpirationDateInterface) {
+            $ttl = $this->convertItemExpiryToSeconds($item);
 
-	/**
+            if ($ttl > 0) {
+                return $this->driver->setex($item->getKey(), $ttl, $item->get());
+            }
+        }
+
+        return $this->driver->set($item->getKey(), $item->get());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasItem(string $key): bool
+    {
+        return $this->driver->exists($key);
+    }
+
+    /**
      * Checks if the Redis extension and class are available for use.
      *
      * @return bool Returns true if Redis is available, false otherwise.
      */
-	public static function isSupported(): bool
-	{
-		return extension_loaded('redis') && class_exists('Redis');
-	}
+    public static function isSupported(): bool
+    {
+        return extension_loaded('redis') && class_exists('Redis');
+    }
 }

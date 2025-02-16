@@ -79,7 +79,7 @@ final class Run implements RunInterface
 
     public function __construct(?SystemFacade $system = null)
     {
-        $this->system = $system ?: new SystemFacade;
+        $this->system = $system ?: new SystemFacade();
         $this->inspectorFactory = new InspectorFactory();
     }
 
@@ -523,7 +523,7 @@ final class Run implements RunInterface
     {
         if (!is_callable($filterCallback)) {
             throw new \InvalidArgumentException(sprintf(
-                "A frame filter must be of type callable, %s type given.", 
+                "A frame filter must be of type callable, %s type given.",
                 gettype($filterCallback)
             ));
         }

@@ -29,7 +29,8 @@ use Attribute;
  * @version   1.0.0
  */
 #[Attribute(Attribute::TARGET_FUNCTION | Attribute::TARGET_METHOD)]
-class NoReturn {
+class NoReturn
+{
     /**
      * Use this constant to skip function argument on the specified position
      */

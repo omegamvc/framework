@@ -15,11 +15,12 @@ declare(strict_types=1);
 
 namespace Omega\Environment;
 
-use Exception;
-use InvalidArgumentException;
+use Omega\Environment\Exception\BadValueFormatException;
+use Omega\Environment\Exception\InvalidLineException;
 use Omega\Environment\Exception\InvalidKeyException;
 use Omega\Environment\Exception\MissingEnvFileException;
 use Omega\Environment\Exception\MissingVariableException;
+use Omega\Environment\Exception\UnexpectedDirectoryException;
 use Omega\Utils\Path;
 
 use function array_key_exists;
@@ -106,23 +107,23 @@ class Dotenv
         }
 
         if (!file_exists($envFile)) {
-            throw new EnvFileNotFounfException(
-                "File not found: " . 
+            throw new MissingEnvFileException(
+                "File not found: " .
                 $envFile
             );
         }
 
         if (is_dir($envFile)) {
             throw new UnexpectedDirectoryException(
-                "Expected file, found directory: " 
+                "Expected file, found directory: "
                 . $envFile
             );
         }
 
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($lines === false) {
-            throw new EnvFileNotFoundException(
-                "Unable to read the .env file: " . 
+            throw new MissingEnvFileException(
+                "Unable to read the .env file: " .
                 $envFile
             );
         }
@@ -136,7 +137,7 @@ class Dotenv
             $parts = explode('=', $trimmedLine, 2);
             if (count($parts) !== 2) {
                 throw new InvalidLineException(
-                    "Invalid line in .env file: " 
+                    "Invalid line in .env file: "
                     . $line
                 );
             }
@@ -147,7 +148,7 @@ class Dotenv
 
             if ($key === '' || preg_match('/\s/', $key)) {
                 throw new InvalidKeyException(
-                    "Invalid key in .env file: " 
+                    "Invalid key in .env file: "
                     . $key
                 );
             }
@@ -233,20 +234,20 @@ class Dotenv
      *
      * @return void
      *
-     * @throws InvalidArgumentException if any value is not a string.
+     * @throws BadValueFormatException if any value is not a string.
      */
     public static function set(string|array $keys, mixed $value = null): void
     {
         if (is_array($keys)) {
             foreach ($keys as $k => $v) {
                 if (!is_string($v)) {
-                    throw new InvalidArgumentException('All values must be a string.');
+                    throw new BadValueFormatException('All values must be a string.');
                 }
                 self::$variables[$k] = $v;
             }
         } else {
             if (!is_string($value)) {
-                throw new InvalidArgumentException('Value must be a string.');
+                throw new BadValueFormatException('Value must be a string.');
             }
             self::$variables[$keys] = $value;
         }
@@ -282,7 +283,6 @@ class Dotenv
         foreach (array_keys($_SERVER) as $key) {
             unset($_SERVER[$key]);
         }
-        // putenv() non offre un meccanismo diretto per rimuovere tutte le variabili, pertanto qui non facciamo nulla in più.
     }
 
     /**

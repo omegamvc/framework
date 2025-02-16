@@ -17,16 +17,16 @@ namespace Omega\Container\Exception;
 
 /**
  * ContainerExceptionInterface
- * 
- * The `ContainerExceptionInterface` serves as a marker interface within the Omega framework's 
- * container package. It is used to group all exceptions related to the container subsystem. 
- * Implementing this interface allows for consistent handling and categorization of container-specific 
- * exceptions, providing a clear separation between general exceptions and those specifically tied 
+ *
+ * The `ContainerExceptionInterface` serves as a marker interface within the Omega framework's
+ * container package. It is used to group all exceptions related to the container subsystem.
+ * Implementing this interface allows for consistent handling and categorization of container-specific
+ * exceptions, providing a clear separation between general exceptions and those specifically tied
  * to the container's functionality.
- * 
- * This interface does not define any methods, but is intended to be extended by other exception 
+ *
+ * This interface does not define any methods, but is intended to be extended by other exception
  * classes that are specific to errors encountered when interacting with the Omega container.
- * 
+ *
  * @category   Omega
  * @package    Container
  * @subpackage Exception

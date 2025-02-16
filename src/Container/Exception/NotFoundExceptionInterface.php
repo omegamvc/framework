@@ -17,17 +17,17 @@ namespace Omega\Container\Exception;
 
 /**
  * NotFoundExceptionInterface
- * 
+ *
  * The NotFoundExceptionInterface extends the ContainerExceptionInterface and is used to represent
  * exceptions related to the inability to find a specific service or component within the Omega
  * container. Implementing this interface allows for better categorization of container exceptions
  * that specifically deal with missing or unresolved services, ensuring that such errors are properly
  * handled and distinguished from other types of container-related exceptions.
- * 
+ *
  * This interface does not define any methods, but it marks exceptions that indicate a "not found"
  * condition in the container, such as when a service or dependency is not registered or available
  * for resolution.
- * 
+ *
  * @category   Omega
  * @package    Container
  * @subpackage Exception

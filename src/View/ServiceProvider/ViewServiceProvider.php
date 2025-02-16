@@ -27,6 +27,8 @@ use Omega\View\Engine\PhpEngine;
 
 use function htmlspecialchars;
 
+use const ENT_QUOTES;
+
 /**
  * View service provider class.
  *
@@ -89,7 +91,10 @@ class ViewServiceProvider implements ServiceProviderInterface
      */
     private function bindMacros(Application $application, ViewManager $viewManager): void
     {
-        $viewManager->addMacro('escape', fn($value) => @htmlspecialchars($value instanceof Item ? $value->get() : $value, ENT_QUOTES));
+        $viewManager->addMacro('escape', fn($value) => @htmlspecialchars(
+            $value instanceof Item ? $value->get() : $value,
+            ENT_QUOTES
+        ));
         $viewManager->addMacro('includes', fn(...$params) => print View::render(...$params));
     }
 

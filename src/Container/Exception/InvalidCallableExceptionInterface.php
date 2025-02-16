@@ -23,7 +23,7 @@ use Psr\Container\NotFoundExceptionInterface;
  * This interface extends the PSR-11 `NotFoundExceptionInterface` and is intended to be used by exceptions
  * that indicate an error in resolving a callable within the container. It provides a consistent way to handle
  * such errors and can be caught by client code to manage situations where a callable is expected but not found.
- * 
+ *
  * @category   Omega
  * @package    Container
  * @subpackage Exception

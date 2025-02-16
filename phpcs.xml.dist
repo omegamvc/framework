@@ -13,4 +13,7 @@
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
         <exclude name="PSR12.Files.FileHeader.IncorrectGrouping" />
     </rule>
+
+    <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/css/*</exclude-pattern>
+    <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/js/*</exclude-pattern>
 </ruleset>

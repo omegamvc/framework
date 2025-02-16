@@ -20,8 +20,8 @@ use DateTimeInterface;
 /**
  * Interface for cache items with expiration dates.
  *
- * This interface defines a contract for cache items that have an associated expiration time. 
- * Implementing classes must provide a method to retrieve the expiration timestamp of a stored item, 
+ * This interface defines a contract for cache items that have an associated expiration time.
+ * Implementing classes must provide a method to retrieve the expiration timestamp of a stored item,
  * allowing cache pools to determine its validity.
  *
  * @category   Omega
@@ -38,7 +38,7 @@ interface HasExpirationDateInterface
     /**
      * Retrieves the expiration time of a valid cache item.
      *
-     * If the cache item is a Cache Miss, this method MAY return either the time at which the item expired 
+     * If the cache item is a Cache Miss, this method MAY return either the time at which the item expired
      * or the current time if the expiration time is unavailable.
      *
      * @return DateTimeInterface The timestamp indicating when this cache item will expire.

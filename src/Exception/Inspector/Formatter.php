@@ -12,8 +12,11 @@ class Formatter
      * @param  array<callable>    $frameFilters
      * @return array
      */
-    public static function formatExceptionAsDataArray(InspectorInterface $inspector, $shouldAddTrace, array $frameFilters = [])
-    {
+    public static function formatExceptionAsDataArray(
+        InspectorInterface $inspector,
+        bool $shouldAddTrace,
+        array $frameFilters = []
+    ) {
         $exception = $inspector->getException();
         $response = [
             'type'    => get_class($exception),
@@ -52,18 +55,18 @@ class Formatter
         $plain = $inspector->getExceptionName();
         $plain .= ' thrown with message "';
         $plain .= $message;
-        $plain .= '"'."\n\n";
+        $plain .= '"' . "\n\n";
 
         $plain .= "Stacktrace:\n";
         foreach ($frames as $i => $frame) {
-            $plain .= "#". (count($frames) - $i - 1). " ";
+            $plain .= "#" . (count($frames) - $i - 1) . " ";
             $plain .= $frame->getClass() ?: '';
             $plain .= $frame->getClass() && $frame->getFunction() ? ":" : "";
             $plain .= $frame->getFunction() ?: '';
             $plain .= ' in ';
             $plain .= ($frame->getFile() ?: '<#unknown>');
             $plain .= ':';
-            $plain .= (int) $frame->getLine(). "\n";
+            $plain .= (int) $frame->getLine() . "\n";
         }
 
         return $plain;
