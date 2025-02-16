@@ -16,10 +16,11 @@ declare(strict_types=1);
 namespace Omega\Container;
 
 use ReflectionException;
+use Omega\Container\Exception\ContainerExceptionInterface;
 use Omega\Container\Exception\DependencyResolutionException;
 use Omege\Container\Exception\InvalidCallableException;
 use Omega\Container\Exception\KeyNotFoundException;
-use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Omega\Container\Exception\NotFoundExceptionInterface;
 
 /**
  * Interface for a dependency injection container.
@@ -42,8 +43,30 @@ use Psr\Container\ContainerInterface as PsrContainerInterface;
  * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version   1.0.0
  */
-interface ContainerInterface extends PsrContainerInterface
+interface ContainerInterface
 {
+    /**
+     * Returns true if the container can return an entry for the given identifier.
+     * Returns false otherwise.
+     *
+     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+     *
+     * @param string $id Identifier of the entry to look for.
+     * @return bool
+     */
+    public function has(string $id): bool;
+
+    /**
+     * Finds an entry of the container by its identifier and returns it.
+     *
+     * @param string $id Identifier of the entry to look for.
+     * @return mixed
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     */
+    public function get(string $id): mixed;
+
     /**
      * Bind the class.
      *

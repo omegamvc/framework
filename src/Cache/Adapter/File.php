@@ -25,27 +25,23 @@ use Omega\Cache\Exception\InvalidArgumentException;
 use Omega\Cache\Exception\RuntimeException;
 use Omega\Cache\Item\HasExpirationDateInterface;
 use Omega\Cache\Item\Item;
-use Psr\Cache\CacheItemInterface;
+use Omega\Cache\Item\CacheItemInterface;
 
 use function fclose;
 use function file_put_contents;
-use function flock;
 use function fopen;
 use function hash;
 use function is_dir;
 use function is_file;
 use function is_writable;
+use function json_decode;
+use function json_encode;
 use function mkdir;
 use function pathinfo;
-use function serialize;
 use function sprintf;
 use function stream_get_contents;
 use function time;
 use function unlink;
-use function unserialize;
-
-use const LOCK_SH;
-use const LOCK_UN;
 
 /**
  * File-based cache item pool implementation.
@@ -54,7 +50,6 @@ use const LOCK_UN;
  * that cache data is stored persistently in a file system directory.
  *
  * Supported options:
- * - locking (boolean) :
  * - path              : The path for cache files.
  *
  * @category   Omega
@@ -81,10 +76,6 @@ class File extends AbstractCacheItemPool
 	 */
 	public function __construct(mixed $options = [])
 	{
-		if (!isset($options['locking'])){
-			$options['locking'] = true;
-		}
-
 		if (!isset($options['path'])){
 			throw new InvalidArgumentException(
                 'The path option must be set.'
@@ -133,63 +124,40 @@ class File extends AbstractCacheItemPool
 
 		$resource = @fopen($this->fetchStreamUri($key), 'rb');
 
-	    if (!$resource) {
+		if (!$resource) {
 			throw new RuntimeException(
-                sprintf(
-                    'Unable to fetch cache entry for %s.  Cannot open the resource.',
-                    $key
-                )
-            );
-		}
-
-		// If locking is enabled get a shared lock for reading on the resource.
-		if ($this->options['locking'] && !flock($resource, LOCK_SH)) {
-			throw new RuntimeException(
-                sprintf(
-                    'Unable to fetch cache entry for %s.  Cannot obtain a lock.',
-                    $key
-                )
-            );
+				sprintf(
+					'Unable to fetch cache entry for %s. Cannot open the resource.',
+					$key
+				)
+			);
 		}
 
 		$data = stream_get_contents($resource);
-
-		// If locking is enabled release the lock on the resource.
-		if ($this->options['locking'] && !flock($resource, LOCK_UN)) {
-			throw new RuntimeException(
-                sprintf(
-                    'Unable to fetch cache entry for %s.  Cannot release the lock.',
-                    $key
-                )
-            );
-		}
-
 		fclose($resource);
 
 		$item = new Item($key);
-		$information = unserialize($data);
+		$dataArray = json_decode($data, true);  // Use json_decode() instead of unserialize()
 
-		// If the cached data has expired remove it and return.
-		if ($information[1] !== null && time() > $information[1])
-		{
-			if (!$this->deleteItem($key))
-			{
+		// Check expiration date
+		if ($dataArray['expires'] !== null && time() > $dataArray['expires']) {
+			if (!$this->deleteItem($key)) {
 				throw new RuntimeException(
-                    sprintf(
-                        'Unable to clean expired cache entry for %s.', 
-                        $key
-                    )//, 
-                    //null
-                );
+					sprintf(
+						'Unable to clean expired cache entry for %s.', 
+						$key
+					)
+				);
 			}
 
 			return $item;
 		}
 
-		$item->set($information[0]);
+		$item->set($dataArray['value']);
 
 		return $item;
 	}
+
 
     /**
      * {@inheritdoc}
@@ -212,23 +180,22 @@ class File extends AbstractCacheItemPool
 	{
 		$fileName = $this->fetchStreamUri($item->getKey());
 		$filePath = pathinfo($fileName, PATHINFO_DIRNAME);
-
+	
 		if (!is_dir($filePath)) {
 			mkdir($filePath, 0770, true);
 		}
-
-		if ($item instanceof HasExpirationDateInterface) {
-			$contents = serialize([$item->get(), time() + $this->convertItemExpiryToSeconds($item)]);
-		} else {
-			$contents = serialize([$item->get(), null]);
-		}
-
-        return (bool) file_put_contents(
-            $fileName,
-            $contents,
-            ($this->options['locking'] ? LOCK_EX : null)
-        );
-	}
+	
+		// Saving in JSON format instead of serialization
+		$data = [
+			'value'   => $item->get(),
+			'expires' => $item instanceof HasExpirationDateInterface ? time() + $this->convertItemExpiryToSeconds($item) : null
+		];
+	
+		return (bool) file_put_contents(
+			$fileName,
+			json_encode($data)  // Use json_encode() instead of serialize()
+		);
+	}	
 
     /**
      * {@inheritdoc}

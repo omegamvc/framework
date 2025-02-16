@@ -21,7 +21,7 @@ use Omega\Cache\AbstractCacheItemPool;
 use Omega\Cache\Exception\RuntimeException;
 use Omega\Cache\Item\HasExpirationDateInterface;
 use Omega\Cache\Item\Item;
-use Psr\Cache\CacheItemInterface;
+use Omega\Cache\Item\CacheItemInterface;
 
 use function array_key_exists;
 use function class_exists;

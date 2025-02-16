@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Attrbutes;
+namespace Omega\Attributes;
 
 use Attribute;
 

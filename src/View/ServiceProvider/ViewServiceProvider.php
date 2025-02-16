@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Omega\View\ServiceProvider;
 
 use Omega\Application\Application;
+use OMega\Cache\Item\Item;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
 use Omega\Facade\Facades\View;
 use Omega\View\ViewManager;
@@ -88,7 +89,7 @@ class ViewServiceProvider implements ServiceProviderInterface
      */
     private function bindMacros(Application $application, ViewManager $viewManager): void
     {
-        $viewManager->addMacro('escape', fn($value) => @htmlspecialchars($value, ENT_QUOTES));
+        $viewManager->addMacro('escape', fn($value) => @htmlspecialchars($value instanceof Item ? $value->get() : $value, ENT_QUOTES));
         $viewManager->addMacro('includes', fn(...$params) => print View::render(...$params));
     }
 

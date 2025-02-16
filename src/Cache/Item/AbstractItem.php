@@ -15,8 +15,6 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Item;
 
-use Psr\Cache\CacheItemInterface;
-
 /**
  * Abstract representation of a cache item.
  *

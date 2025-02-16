@@ -19,11 +19,8 @@ use DateInterval;
 use Generator;
 use Traversable;
 use Omega\Cache\Exception\InvalidArgumentException;
+use Omega\Cache\Item\CacheItemInterface;
 use Omega\Cache\Item\HasExpirationDateInterface;
-use Omega\Cache\Item\Item;
-use Psr\Cache\CacheItemInterface;
-use Psr\Cache\InvalidArgumentException as PsrInvalidArgumentException;
-use Psr\SimpleCache\CacheInterface;
 
 use function get_class;
 use function iterator_to_array;
@@ -158,7 +155,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
 
     /**
      * {@inheritdoc}
-     * @throws PsrInvalidArgumentException
+     * @throws InvalidArgumentException
      */
 	public function get(string $key, mixed $default = null): mixed
 	{
@@ -173,7 +170,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
 
     /**
      * {@inheritdoc}
-     * @throws PsrInvalidArgumentException
+     * @throws InvalidArgumentException
      */
 	public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
 	{
@@ -186,7 +183,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
 
     /**
      * {@inheritdoc}
-     * @throws PsrInvalidArgumentException
+     * @throws InvalidArgumentException
      */
 	public function delete(string $key): bool
 	{
@@ -199,7 +196,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
      * @param iterable<string> $keys    Holds a list of cache keys to retrieve.
      * @param mixed            $default Holds the default value to return for keys that do not exist or have expired.
      * @return iterable<string, mixed> A list of key-value pairs, where non-existing keys are mapped to the default value.
-     * @throws PsrInvalidArgumentException If the provided keys are not a valid iterable.
+     * @throws InvalidArgumentException If the provided keys are not a valid iterable.
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
 	{
@@ -221,7 +218,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
     /**
      * {@inheritdoc}
 	 * @param iterable<string, mixed> $values Values to be set in cache.
-     * @throws PsrInvalidArgumentException
+     * @throws InvalidArgumentException
      */
 	public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
 	{
@@ -261,7 +258,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
 
     /**
      * {@iheritdoc}
-     * @throws PsrInvalidArgumentException
+     * @throws InvalidArgumentException
      */
 	public function deleteMultiple(iterable $keys): bool
 	{
@@ -280,7 +277,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
 
     /**
      * {@inheritdoc}
-     * @throws PsrInvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function has(string $key): bool
 	{

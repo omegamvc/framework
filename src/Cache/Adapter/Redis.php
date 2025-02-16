@@ -20,7 +20,7 @@ use Redis as R;
 use Omega\Cache\AbstractCacheItemPool;
 use Omega\Cache\Item\HasExpirationDateInterface;
 use Omega\Cache\Item\Item;
-use Psr\Cache\CacheItemInterface;
+use Omega\Cache\Item\CacheItemInterface;
 
 use function class_exists;
 use function extension_loaded;
