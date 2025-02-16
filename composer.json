@@ -30,6 +30,7 @@
     "ext-memcached": "*",
     "ext-pdo": "*",
     "ext-zip": "*",
+
     "symfony/console": "^7.1",
     "psr/container": "^2.0"
   },

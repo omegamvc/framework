@@ -14,10 +14,12 @@
 declare(strict_types=1);
 
 namespace Omega\Environment\Exception;
-class MissingVariableException extends AbstractInvalidConfigurationException implements InvalidContentExceptionInterface
+
+class MissingEnvFileException extends AbstractInvalidConfigurationException implements
+    InvalidSourceDataExceptionInterface
 {
-    public function __construct(string $variable)
+    public function __construct(string $filePath)
     {
-        parent::__construct("Missing required environment variable: {$variable}");
+        parent::__construct("Environment file not found: {$filePath}");
     }
 }

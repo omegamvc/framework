@@ -95,12 +95,6 @@ class Memory extends AbstractCacheItemPool
             && ($this->cache[$key]['expires'] === null || $this->cache[$key]['expires'] > time());
     }
 
-    /**public function hasItem(string $key): bool
-    {
-        return isset($this->cache[$key])
-            && ($this->cache[$key]['expires'] === null || $this->cache[$key]['expires'] > time());
-    }*/
-
     public static function isSupported(): bool
     {
         return true;

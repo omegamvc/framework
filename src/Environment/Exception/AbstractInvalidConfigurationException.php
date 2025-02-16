@@ -14,10 +14,15 @@
 declare(strict_types=1);
 
 namespace Omega\Environment\Exception;
-class MissingVariableException extends AbstractInvalidConfigurationException implements InvalidContentExceptionInterface
+
+use RuntimeException as PhpRuntimeException;
+use Throwable;
+
+abstract class AbstractInvalidConfigurationException extends PhpRuntimeException implements 
+    InvalidConfigurationExceptionInterface
 {
-    public function __construct(string $variable)
+    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null)
     {
-        parent::__construct("Missing required environment variable: {$variable}");
+        parent::__construct($message, $code, $previous);
     }
 }

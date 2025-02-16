@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of Omega - Exceptions Package.
+ * Part of Omega - Exception Package.
  * php version 8.3
  *
  * @link      https://omegamvc.github.io
@@ -13,11 +13,10 @@
 
 declare(strict_types=1);
 
-namespace Omega\Exceptions;
+namespace Omega\Exception;
 
 use Throwable;
-use Whoops\Handler\PrettyPageHandler;
-use Whoops\Run;
+use Omega\Exception\Handler\PrettyPageHandler;
 use Omega\Session\Storage\NativeStorage;
 use Omega\Validation\Exception\ValidationException;
 
@@ -28,7 +27,7 @@ use Omega\Validation\Exception\ValidationException;
  * in Omega applications.
  *
  * @category  Omega
- * @package   Exceptions
+ * @package   Exception
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
  * @copyright Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
@@ -42,7 +41,7 @@ class ExceptionHandler
      *
      * This method handles and displays exceptions or errors based on the environment.
      * In a development environment ('APP_ENV' === 'dev'), it displays detailed error
-     * information using the Whoops error handler. In other environments, it may perform
+     * information using the error handler. In other environments, it may perform
      * different actions depending on the type of exception.
      *
      * @param Throwable $throwable Holds an instance of Throwable (Exception or Error).
@@ -80,7 +79,7 @@ class ExceptionHandler
         $session = session();
 
         if ($session = session()) {
-            /* @var NativeStorage */
+            /* @var NativeStorage $session */
             $session->put($exception->getSessionName(), $exception->getErrors());
         }
 
@@ -88,9 +87,9 @@ class ExceptionHandler
     }
 
     /**
-     * Initialize Whoops.
+     * Initialize ErrorHandler
      *
-     * This method initializes the Whoops error handler for displaying user-friendly
+     * This method initializes the error handler for displaying user-friendly
      * error pages in a development environment ('APP_ENV' === 'dev').
      *
      * @param Throwable $throwable Holds an instance of Throwable (Exception or Error).
@@ -101,9 +100,9 @@ class ExceptionHandler
      */
     public function showFriendlyThrowable(Throwable $throwable): void
     {
-        $whoops = new Run();
-        $whoops->pushHandler(new PrettyPageHandler());
-        $whoops->register();
+        $errorHandler= new Run();
+        $errorHandler->pushHandler(new PrettyPageHandler());
+        $errorHandler->register();
 
         throw $throwable;
     }

@@ -17,6 +17,7 @@ namespace Omega\Queue\Adapter;
 
 use Closure;
 use Exception;
+use Omega\Facade\Facades\Config;
 use Omega\SerializableClosure\SerializableClosure;
 use Omega\Queue\Job;
 
@@ -72,7 +73,7 @@ class DatabaseQueueAdapter extends AbstractQueueAdapter
      */
     public function shift(): ?Job
     {
-        $attempts = config('queue.database.attempts');
+        $attempts = Config::get('queue.database.attempts');
 
         return Job::where('attempts', '<', $attempts)
             ->where('is_complete', false)

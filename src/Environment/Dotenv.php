@@ -17,7 +17,10 @@ namespace Omega\Environment;
 
 use Exception;
 use InvalidArgumentException;
+use Omega\Environment\Exception\InvalidKeyException;
+use Omega\Environment\Exception\MissingEnvFileException;
 use Omega\Environment\Exception\MissingVariableException;
+use Omega\Utils\Path;
 
 use function array_key_exists;
 use function explode;
@@ -30,6 +33,10 @@ use function putenv;
 use function rtrim;
 use function strpos;
 use function trim;
+
+use const DIRECTORY_SEPARATOR;
+use const FILE_IGNORE_NEW_LINES;
+use const FILE_SKIP_EMPTY_LINES;
 
 /**
  * Dotenv class.
@@ -74,71 +81,80 @@ class Dotenv
     /**
      * Load and parse .env file from a given directory.
      *
-     * @param string      $directoryPath Holds the path to the directory containing the .env file.
-     * @param string|null $fileName      Holds the filename to load. (Optional)
+     * @param string|null $directoryPath Holds the path to the directory containing the .env file, or null.
+     * @param string|null $fileName      Holds the filename to load, or null.
      * @return void
-     *
-     * @throws Exception
+     * @throws InvalidKeyException
+     * @throws InvalidLineException
+     * @throws MssingEnvFileException
+     * @throws UnexpectedDirectoryException
      */
-    public static function load(string $directoryPath, string $fileName = null): void
+    public static function load(?string $directoryPath = null, ?string $fileName = null): void
     {
-        $testPath = __DIR__ . '/fixtures';
-
-        if (is_file($directoryPath)) {
-            $envFile = $directoryPath;
+        if ($directoryPath === null && $fileName === null) {
+            $envFile = Path::getPath('.env');
         } else {
-            if ($testPath === $directoryPath && empty($fileName)) {
-                $envFile = rtrim($directoryPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.env';
-            } elseif ($testPath === $directoryPath && !empty($fileName)) {
-                $envFile = rtrim($directoryPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
-            } elseif ($testPath !== $directoryPath && empty($fileName)) {
-                $envFile = rtrim($directoryPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.env';
-            } elseif ($testPath !== $directoryPath && !empty($fileName)) {
-                $envFile = rtrim($directoryPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
+            if ($directoryPath === null) {
+                $directoryPath = Path::getPath();
+            }
+
+            if (is_file($directoryPath)) {
+                $envFile = $directoryPath;
             } else {
-                throw new \Exception('An error occurred during initialization.');
+                $envFile = rtrim($directoryPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ($fileName ?? '.env');
             }
         }
 
         if (!file_exists($envFile)) {
-            throw new \Exception("File not found: $envFile");
+            throw new EnvFileNotFounfException(
+                "File not found: " . 
+                $envFile
+            );
         }
 
         if (is_dir($envFile)) {
-            throw new \Exception("Expected file, found directory: $envFile");
+            throw new UnexpectedDirectoryException(
+                "Expected file, found directory: " 
+                . $envFile
+            );
         }
 
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines !== false) {
-            foreach ($lines as $line) {
-                if (strpos(trim($line), '#') === 0) {
-                    continue;
-                }
-
-                $parts = explode('=', $line, 2);
-                if (count($parts) !== 2) {
-                    throw new Exception(
-                        "Invalid line in .env file: $line"
-                    );
-                }
-
-                list( $key, $value ) = $parts;
-                $key                 = trim($key);
-                $value               = trim($value);
-
-                if (preg_match('/\s/', $key) || $key == '') {
-                    throw new Exception(
-                        "Invalid key in .env file: $key"
-                    );
-                }
-
-                $value                 = trim($value, "\"'");
-                self::$variables[$key] = $value;
-            }
-        } else {
-            throw new Exception(
-                "Unable to read the .env file: $envFile"
+        if ($lines === false) {
+            throw new EnvFileNotFoundException(
+                "Unable to read the .env file: " . 
+                $envFile
             );
+        }
+
+        foreach ($lines as $line) {
+            $trimmedLine = trim($line);
+            if ($trimmedLine === '' || strpos($trimmedLine, '#') === 0) {
+                continue;
+            }
+
+            $parts = explode('=', $trimmedLine, 2);
+            if (count($parts) !== 2) {
+                throw new InvalidLineException(
+                    "Invalid line in .env file: " 
+                    . $line
+                );
+            }
+
+            [$key, $value] = $parts;
+            $key = trim($key);
+            $value = trim($value);
+
+            if ($key === '' || preg_match('/\s/', $key)) {
+                throw new InvalidKeyException(
+                    "Invalid key in .env file: " 
+                    . $key
+                );
+            }
+
+            // Rimuove eventuali doppi o singoli apici iniziali e finali
+            $value = trim($value, "\"'");
+            self::$variables[$key] = $value;
         }
 
         self::$isLoaded = true;
@@ -186,7 +202,7 @@ class Dotenv
     /**
      * Get env variables.
      *
-     * @return array<string, string> Return an array with all environment variables.
+     * @return array<string, string>
      */
     public static function all(): array
     {
@@ -206,36 +222,32 @@ class Dotenv
         if (array_key_exists($key, self::$variables) && self::$variables[$key] !== '') {
             return self::$variables[$key];
         }
-
         return $default;
     }
 
     /**
      * Set an environment variable.
      *
-     * @param string|array<string, string> $keys  Holds a single variable key or an array of variable keys.
-     * @param mixed                        $value Holds the value for the key, or null if an array of keys is provided.
+     * @param string|array<string, string> $keys  Holds a single variable key or an array of key-value pairs.
+     * @param mixed                        $value Holds the value for the key, or null if an array is provided.
      *
      * @return void
      *
-     * @throws InvalidArgumentException if the values not are a string.
+     * @throws InvalidArgumentException if any value is not a string.
      */
     public static function set(string|array $keys, mixed $value = null): void
     {
         if (is_array($keys)) {
             foreach ($keys as $k => $v) {
-                if (! is_string($v)) {
-                    throw new InvalidArgumentException(
-                        'All values must be a string.'
-                    );
+                if (!is_string($v)) {
+                    throw new InvalidArgumentException('All values must be a string.');
                 }
                 self::$variables[$k] = $v;
             }
-        } elseif (! is_string($value)) {
-            throw new InvalidArgumentException(
-                'Value must be a string.'
-            );
         } else {
+            if (!is_string($value)) {
+                throw new InvalidArgumentException('Value must be a string.');
+            }
             self::$variables[$keys] = $value;
         }
     }
@@ -243,54 +255,48 @@ class Dotenv
     /**
      * Set required variables.
      *
-     * @param array<int, string> $variables Holds an array of variables.
+     * @param array<int, string> $variables Holds an array of required variable keys.
      *
      * @return void
      */
     public static function setRequired(array $variables): void
     {
         self::$required = $variables;
-
         if (self::$isLoaded) {
             self::checkRequiredVariables();
         }
     }
 
     /**
-     * Delete all variables.
+     * Delete all environment variables.
      *
      * @return void
      */
     public static function flush(): void
     {
         self::$variables = [];
-        self::$isLoaded  = false;
-
+        self::$isLoaded = false;
         foreach (array_keys($_ENV) as $key) {
             unset($_ENV[$key]);
         }
         foreach (array_keys($_SERVER) as $key) {
             unset($_SERVER[$key]);
         }
-        foreach (array_keys(getenv()) as $key) {
-            putenv($key);
-        }
+        // putenv() non offre un meccanismo diretto per rimuovere tutte le variabili, pertanto qui non facciamo nulla in più.
     }
 
     /**
-     * Throw exception if any of required variables was not loaded.
+     * Check that all required variables are present.
      *
      * @return void
      *
-     * @throws MissingVariableException if the .env variable is missing.
+     * @throws MissingVariableException if a required variable is missing.
      */
     protected static function checkRequiredVariables(): void
     {
         foreach (self::$required as $key) {
-            if (! isset(self::$variables[$key])) {
-                throw new MissingVariableException(
-                    ".env variable '{$key}' is missing"
-                );
+            if (!isset(self::$variables[$key])) {
+                throw new MissingVariableException(".env variable '{$key}' is missing");
             }
         }
     }

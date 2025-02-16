@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Omega\Queue;
 
 use Omega\Database\AbstractModel;
+use Omega\Facade\Facades\Config;
 
 use function unserialize;
 
@@ -43,7 +44,7 @@ class Job extends AbstractModel
      */
     public function getTable(): string
     {
-        return config('queue.database.table');
+        return Config::get('queue.database.table');
     }
 
     /**

@@ -40,7 +40,6 @@ use function pathinfo;
 use function serialize;
 use function sprintf;
 use function stream_get_contents;
-use function substr;
 use function time;
 use function unlink;
 use function unserialize;
@@ -69,7 +68,7 @@ use const LOCK_UN;
  */
 class File extends AbstractCacheItemPool
 {
-/**
+	/**
 	 * Constructor.
 	 *
 	 * Initializes the file-based cache system, ensuring that the required options

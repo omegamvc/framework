@@ -14,10 +14,11 @@
 declare(strict_types=1);
 
 namespace Omega\Environment\Exception;
-class MissingVariableException extends AbstractInvalidConfigurationException implements InvalidContentExceptionInterface
+
+class InvalidKeyException extends AbstractInvalidConfigurationException implements InvalidContentExceptionInterface
 {
-    public function __construct(string $variable)
+    public function __construct(string $key)
     {
-        parent::__construct("Missing required environment variable: {$variable}");
+        parent::__construct("Invalid key in .env file: {$key}");
     }
 }
