@@ -1,6 +1,22 @@
 <?php
 
+/**
+ * Part of Omega - Cache Package.
+ * php version 8.3
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   1.0.0
+ */
+
+declare(strict_types=1);
+
 namespace Omega\Cache\Item;
+
+use DateInterval;
+use DateTimeInterface;
 
 /**
  * CacheItemInterface defines an interface for interacting with objects inside a cache.
@@ -20,6 +36,15 @@ namespace Omega\Cache\Item;
  * be requested from a Pool object via the getItem() method.  Calling Libraries
  * SHOULD NOT assume that an Item created by one Implementing Library is
  * compatible with a Pool from another Implementing Library.
+ *
+ * @category   Omega
+ * @package    Cache
+ * @subpackage Item
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    1.0.0
  */
 interface CacheItemInterface
 {
@@ -29,8 +54,7 @@ interface CacheItemInterface
      * The key is loaded by the Implementing Library, but should be available to
      * the higher level callers when needed.
      *
-     * @return string
-     *   The key string for this cache item.
+     * @return string Return the key string for this cache item.
      */
     public function getKey(): string;
 
@@ -43,8 +67,7 @@ interface CacheItemInterface
      * is a legitimate cached value, so the isHit() method SHOULD be used to
      * differentiate between "null value was found" and "no value was found."
      *
-     * @return mixed
-     *   The value corresponding to this cache item's key, or null if not found.
+     * @return mixed Return the value corresponding to this cache item's key, or null if not found.
      */
     public function get(): mixed;
 
@@ -54,8 +77,7 @@ interface CacheItemInterface
      * Note: This method MUST NOT have a race condition between calling isHit()
      * and calling get().
      *
-     * @return bool
-     *   True if the request resulted in a cache hit. False otherwise.
+     * @return bool Return true if the request resulted in a cache hit. False otherwise.
      */
     public function isHit(): bool;
 
@@ -66,40 +88,36 @@ interface CacheItemInterface
      * although the method of serialization is left up to the Implementing
      * Library.
      *
-     * @param mixed $value
-     *   The serializable value to be stored.
+     * @param mixed $value Return tThe serializable value to be stored.
      *
-     * @return static
-     *   The invoked object.
+     * @return static Return the invoked object.
      */
     public function set(mixed $value): static;
 
     /**
      * Sets the expiration time for this cache item.
      *
-     * @param ?\DateTimeInterface $expiration
+     * @param ?DateTimeInterface $expiration
      *   The point in time after which the item MUST be considered expired.
      *   If null is passed explicitly, a default value MAY be used. If none is set,
      *   the value should be stored permanently or for as long as the
      *   implementation allows.
      *
-     * @return static
-     *   The called object.
+     * @return static Return the called object.
      */
-    public function expiresAt(?\DateTimeInterface $expiration): static;
+    public function expiresAt(?DateTimeInterface $expiration): static;
 
     /**
      * Sets the expiration time for this cache item.
      *
-     * @param int|\DateInterval|null $time
+     * @param int|DateInterval|null $time
      *   The period of time from the present after which the item MUST be considered
      *   expired. An integer parameter is understood to be the time in seconds until
      *   expiration. If null is passed explicitly, a default value MAY be used.
      *   If none is set, the value should be stored permanently or for as long as the
      *   implementation allows.
      *
-     * @return static
-     *   The called object.
+     * @return static Return the called object.
      */
-    public function expiresAfter(int|\DateInterval|null $time): static;
+    public function expiresAfter(int|DateInterval|null $time): static;
 }
