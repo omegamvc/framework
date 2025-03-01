@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Facade\Facades;
 
+use Omega\Cache\Item\CacheItemInterface;
 use Omega\Facade\AbstractFacade;
 
 /**

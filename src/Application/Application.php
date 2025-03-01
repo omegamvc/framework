@@ -27,8 +27,6 @@ use Omega\Http\Response;
 use Omega\Utils\Path;
 use Omega\Utils\Str;
 
-use function method_exists;
-
 /**
  * Base application class.
  *
@@ -74,7 +72,7 @@ class Application extends Container implements ApplicationInterface
      *
      * @var array<string, string> Holds the application configuration.
      */
-    private array $app = [];
+    private array $app;
 
     /**
      * Application class constructor.
@@ -94,7 +92,7 @@ class Application extends Container implements ApplicationInterface
 
         date_default_timezone_set($this->app['timezone']);
 
-        $this->configure(Path::getPath());
+        $this->configure();
         $this->bindProviders();
         $this->registerFacades();
     }
@@ -110,7 +108,7 @@ class Application extends Container implements ApplicationInterface
      */
     public function bootstrap(): Response
     {
-        return $this->dispatch(Path::getPath());
+        return $this->dispatch();
     }
 
     /**
@@ -119,10 +117,9 @@ class Application extends Container implements ApplicationInterface
      * This method sets up the application's configuration by loading environment
      * variables from Dotenv.
      *
-     * @param  string $basePath Holds the base path of the application.
      * @return void
      */
-    private function configure(string $basePath): void
+    private function configure(): void
     {
         Dotenv::load(Path::getPath());
     }
@@ -167,11 +164,10 @@ class Application extends Container implements ApplicationInterface
      * This method dispatches the application, including routing setup and
      * handling of HTTP requests.
      *
-     * @param  string $basePath The base path of the application.
      * @return Response An instance of Response representing the application's response.
      * @throws Throwable If an error occurs during dispatching.
      */
-    private function dispatch(string $basePath): Response
+    private function dispatch(): Response
     {
         $routes = require Path::getPath('routes', 'web.php');
         $routes(Router::class);

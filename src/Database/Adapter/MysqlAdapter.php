@@ -88,7 +88,7 @@ class MysqlAdapter extends AbstractDatabaseAdapter
 
         $this->database = $database;
 
-        $this->checkIfDatabaseExists($host, (string)$port, $username, $password);
+        $this->checkIfDatabaseExists($host, $port, $username, $password);
         $dsn = "mysql:host={$host};port={$port};dbname={$database}";
 
         parent::__construct($dsn, $username, $password);

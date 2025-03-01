@@ -60,12 +60,7 @@ abstract class AbstractCacheItemPool implements CacheItemPoolInterface, CacheInt
     public function __construct(protected array $options = [])
     {
         if (!is_array($options)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    '%s requires an options array',
-                    get_class($this)
-                )
-            );
+            throw new InvalidArgumentException(sprintf('%s requires an options array', get_class($this)));
         }
     }
 

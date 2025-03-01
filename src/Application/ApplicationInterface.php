@@ -33,7 +33,7 @@ interface ApplicationInterface
      *
      * @var string Holds the Omega framework version.
      */
-    public const VERSION = '1.0.0';
+    public const string VERSION = '1.0.0';
 
     /**
      * Get the version of the application.

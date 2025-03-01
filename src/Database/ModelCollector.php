@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Database;
 
+use Omega\Database\Exception\QueryException;
 use Omega\Database\QueryBuilder\AbstractQueryBuilder;
 
 use function is_null;
@@ -22,7 +23,7 @@ use function is_null;
 /**
  * Model collector class.
  *
- * The `ModelCollector` class is responsible for collecting query and trasforming them into
+ * The `ModelCollector` class is responsible for collecting query and transforming them into
  * model instance,  This class acts as a bridge between the query builder and model instances,
  * facilitating the transformation of raw database results into instances of the specified model
  * class.
@@ -46,7 +47,7 @@ class ModelCollector
      */
     public function __construct(
         private AbstractQueryBuilder $builder,
-        private string $class
+        private readonly string $class
     ) {
     }
 
@@ -75,10 +76,10 @@ class ModelCollector
 
     /**
      * Retrieve the first result from the query and transform it into an instance of the model.
-     *
      * This method executes the query and returns the first result as an instance of the specified model class.
      *
-     * @return mixed|null Return an instance of the model, or null if no results are found.
+     * @return mixed[] Return an instance of the model, or null if no results are found.
+     * @throws QueryException
      */
     public function first(): mixed
     {
@@ -94,12 +95,12 @@ class ModelCollector
 
     /**
      * Retrieve all results from the query and transform each into an instance of the model.
-     *
      * This method executes the query and returns an array of instances of the specified model class.
      *
-     * @return mixed[] Return an array of model instances, or an empty array if no results are found.
+     * @return array Return an array of model instances, or an empty array if no results are found.
+     * @throws QueryException
      */
-    public function all(): mixed
+    public function all(): array
     {
         $class = $this->class;
         $rows  = $this->builder->all();

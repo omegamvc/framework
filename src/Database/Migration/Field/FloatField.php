@@ -2,7 +2,7 @@
 
 /**
  * Part of Omega - Database Package.
- * php vsrsion 8.3
+ * php version 8.3
  *
  * @link       https://omegamvc.github.io
  * @author     Adriano Giovannini <agisoftt@gmail.com>

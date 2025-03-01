@@ -19,7 +19,7 @@ use DateInterval;
 use Omega\Cache\Exception\InvalidArgumentException;
 
 /**
- * CacheIntreface class.
+ * CacheInterface class.
  *
  * The `CacheInterface` defines a standard contract for caching operations within the Omega
  * framework. It provides methods for storing, retrieving, deleting, and checking the existence
@@ -94,7 +94,7 @@ interface CacheInterface
     /**
      * Persists a set of key => value pairs in the cache, with an optional TTL.
      *
-     * @param iterable              $values Holds a list of key => value pairs for a multiple-set operation.
+     * @param iterable<string, mixed>       $values Holds a list of key => value pairs for a multiple-set operation.
      * @param null|int|DateInterval $ttl    Optional. Return the TTL value of this item. If no value is sent and
      *                                      the driver supports TTL then the library may set a default value
      *                                      for it or let the driver take care of that.

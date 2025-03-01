@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
 
 /**
  * Part of Omega -  Database Package.

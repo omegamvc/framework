@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Csrf;
 
+use RuntimeException;
 use Omega\Application\Application;
 use Omega\Session\Storage\NativeStorage;
 
@@ -44,10 +45,17 @@ abstract class AbstractCsrf implements CsrfInterface
      * The session storage is used to store and retrieve CSRF tokens.
      *
      * @return NativeStorage The session storage instance.
+     * @throws RuntimeException if storage is not instance of NativeStorage.
      */
     protected function getSession(): NativeStorage
     {
-        return Application::getInstance()->get('session');
+        $session = Application::getInstance()->get('session');
+        
+        if (!$session instanceof NativeStorage) {
+            throw new RuntimeException('Session storage is not an instance of NativeStorage.');
+        }
+
+        return $session;
     }
 
     /**
@@ -58,5 +66,5 @@ abstract class AbstractCsrf implements CsrfInterface
     /**
      * {@inheritdoc}
      */
-    abstract public function validateToken(string $token): bool;
+    abstract public function validateToken(?string $token): bool;
 }

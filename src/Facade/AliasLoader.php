@@ -35,13 +35,13 @@ namespace Omega\Facade;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-class AliasLoader
+final class AliasLoader
 {
     /**
      * Create a new AliasLoader instance.
      *
-     * @param array $aliases Holds an associative array where the keys are the alias names
-     *                       and the values are the fully qualified class names.
+     * @param array<string, string> $aliases Holds an associative array where the keys are the alias names
+     *                                       and the values are the fully qualified class names.
      *
      * @return void
      */
@@ -73,13 +73,12 @@ class AliasLoader
      * creation of an `AliasLoader` instance without the need to instantiate it
      * directly.
      *
-     * @param array $aliases Holds a associative array where the keys are the alias names
-     *                       and the values are the fully qualified class names.
-     *
+     * @param array<string, string> $aliases Holds a associative array where the keys are the alias names
+     *                                       and the values are the fully qualified class names.
      * @return AliasLoader Returns a new instance of AliasLoader.
      */
     public static function getInstance(array $aliases): AliasLoader
     {
-        return new static($aliases);
+        return new AliasLoader($aliases);
     }
 }

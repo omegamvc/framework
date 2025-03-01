@@ -125,7 +125,7 @@ class SqliteMigration extends AbstractMigration
         }
 
         if ($field->alter) {
-            throw new MigrationException('SQLite doesn\'t support altering columns');
+            throw new MigrationException('SQLite does\'t support altering columns');
         }
 
         if ($field instanceof BoolField) {
@@ -215,7 +215,7 @@ class SqliteMigration extends AbstractMigration
     public function dropColumn(string $name): static
     {
         throw new MigrationException(
-            'SQLite doesn\'t support dropping columns'
+            'SQLite does\'t support dropping columns'
         );
     }
 }

@@ -63,26 +63,34 @@ use function unlink;
  */
 class File extends AbstractCacheItemPool
 {
+    private string $path;
+
     /**
      * Constructor.
      *
      * Initializes the file-based cache system, ensuring that the required options
      * are set and validating the cache directory.
      *
-     * @param mixed $options An associative array of configuration options.
+     * @param array<string, mixed> $options An associative array of configuration options.
      * @return void
      * @throws PhpRuntimeException If an unexpected runtime error occurs.
      * @throws InvalidArgumentException If the 'path' option is not provided.
      */
-    public function __construct(mixed $options = [])
+    public function __construct(array $options)
     {
-        if (!isset($options['path'])) {
-            throw new InvalidArgumentException(
-                'The path option must be set.'
-            );
+        if (!array_key_exists('path', $options) || !is_string($options['path']) || $options['path'] === '') {
+            throw new InvalidArgumentException('The path option must be set and be a non-empty string.');
         }
 
-        $this->checkFilePath($options['path']);
+        $this->path = $options['path'];
+
+        if (!is_dir($this->path)) {
+            throw new PhpRuntimeException("The file path is not a directory.");
+        }
+
+        if (!is_writable($this->path)) {
+            throw new PhpRuntimeException("The file path is not writable.");
+        }
 
         parent::__construct($options);
     }
@@ -92,12 +100,9 @@ class File extends AbstractCacheItemPool
      */
     public function clear(): bool
     {
-        $filePath = $this->options['path'];
-        $this->checkFilePath($filePath);
-
         $iterator = new RegexIterator(
             new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($filePath)
+                new RecursiveDirectoryIterator($this->path)
             ),
             '/\.data$/i'
         );
@@ -125,39 +130,50 @@ class File extends AbstractCacheItemPool
         $resource = @fopen($this->fetchStreamUri($key), 'rb');
 
         if (!$resource) {
-            throw new RuntimeException(
-                sprintf(
-                    'Unable to fetch cache entry for %s. Cannot open the resource.',
-                    $key
-                )
-            );
+            throw new RuntimeException(sprintf('Unable to fetch cache entry for %s. Cannot open the resource.', $key));
         }
 
         $data = stream_get_contents($resource);
         fclose($resource);
 
-        $item = new Item($key);
-        $dataArray = json_decode($data, true);  // Use json_decode() instead of unserialize()
-
-        // Check expiration date
-        if ($dataArray['expires'] !== null && time() > $dataArray['expires']) {
-            if (!$this->deleteItem($key)) {
-                throw new RuntimeException(
-                    sprintf(
-                        'Unable to clean expired cache entry for %s.',
-                        $key
-                    )
-                );
-            }
-
-            return $item;
+        if ($data === false) {
+            throw new RuntimeException(
+                sprintf(
+                    'Unable to read cache entry for %s. The file might be corrupted or unreadable.',
+                    $key
+                )
+            );
         }
 
-        $item->set($dataArray['value']);
+        $item = new Item($key);
+        $dataArray = json_decode($data, true);
+
+        if ($dataArray === null) {
+            throw new RuntimeException(
+                sprintf(
+                    'Unable to decode cache entry for %s. The file might be corrupted.',
+                    $key
+                )
+            );
+        }
+
+        if (is_array($dataArray) && isset($dataArray['expires'])) {
+            // Check expiration date
+            if (time() > $dataArray['expires']) {
+                if (!$this->deleteItem($key)) {
+                    throw new RuntimeException(sprintf('Unable to clean expired cache entry for %s.', $key));
+                }
+
+                return $item;
+            }
+        }
+
+        if (is_array($dataArray) && isset($dataArray['value'])) {
+            $item->set($dataArray['value']);
+        }
 
         return $item;
     }
-
 
     /**
      * {@inheritdoc}
@@ -220,38 +236,6 @@ class File extends AbstractCacheItemPool
     }
 
     /**
-     * Validates the cache directory.
-     *
-     * Ensures that the provided file path exists, is a directory, and is writable.
-     *
-     * @param string $filePath The file path to validate.
-     * @return bool Always returns true if the path is valid.
-     * @throws RuntimeException If the file path does not exist or is not writable.
-     */
-    private function checkFilePath(string $filePath): bool
-    {
-        if (!is_dir($filePath)) {
-            throw new RuntimeException(
-                sprintf(
-                    'The base cache path `%s` does not exist.',
-                    $filePath
-                )
-            );
-        }
-
-        if (!is_writable($filePath)) {
-            throw new RuntimeException(
-                sprintf(
-                    'The base cache path `%s` is not writable.',
-                    $filePath
-                )
-            );
-        }
-
-        return true;
-    }
-
-    /**
      * Generates the full stream URI for a cache entry.
      *
      * Constructs the file path for storing the cache entry based on the provided key.
@@ -262,13 +246,13 @@ class File extends AbstractCacheItemPool
      */
     private function fetchStreamUri(string $key): string
     {
-        $filePath = $this->options['path'];
-        $this->checkFilePath($filePath);
+        //$filePath = $this->options['path'];
+        //$this->checkFilePath($filePath);
 
         return sprintf(
             '%s/%s.json',
-            rtrim($filePath, '/'), // Rimuove eventuali slash finali per sicurezza
-            hash('md5', $key) // Nome del file basato su hash MD5
+            rtrim($this->path, '/'),
+            hash('md5', $key)
         );
     }
 }

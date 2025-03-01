@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Adapter;
 
+use DateMalformedStringException;
 use Omega\Cache\AbstractCacheItemPool;
 use Omega\Cache\Item\HasExpirationDateInterface;
 use Omega\Cache\Item\Item;
@@ -81,6 +82,7 @@ class Apcu extends AbstractCacheItemPool
 
     /**
      * {@inheritdoc}
+     * @throws DateMalformedStringException
      */
     public function getItem(string $key): CacheItemInterface
     {
@@ -97,6 +99,7 @@ class Apcu extends AbstractCacheItemPool
 
     /**
      * {@inheritdoc}
+     * @throws DateMalformedStringException
      */
     public function getItems(array $keys = []): array
     {
@@ -135,8 +138,9 @@ class Apcu extends AbstractCacheItemPool
      */
     public function save(CacheItemInterface $item): bool
     {
-        // If we are able to find out when the item expires - find out. Else bail.
-        if ($item instanceof HasExpirationDateInterface) {
+        $isExpirable = $item instanceof HasExpirationDateInterface;
+
+        if ($isExpirable) {
             $ttl = $this->convertItemExpiryToSeconds($item);
         } else {
             $ttl = 0;

@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace Omega\Database\QueryBuilder;
 
 use Omega\Database\Adapter\DatabaseAdapterInterface;
-use Omega\Database\Adapter\MysqlAdapter;
 
 /**
  * Mysql query builder class.

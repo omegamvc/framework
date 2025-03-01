@@ -15,11 +15,11 @@ declare(strict_types=1);
 
 namespace Omega\Csrf;
 
+use Random\RandomException;
 use Omega\Csrf\Exception\CsrfInvalidTokenException;
 use Omega\Csrf\Exception\CsrfMalformedTokenException;
 
 use function bin2hex;
-use function xtype_xdigit;
 use function hash_equals;
 use function random_bytes;
 use function strlen;
@@ -41,6 +41,7 @@ class Csrf extends AbstractCsrf
 {
     /**
      * {@inheritdoc}
+     * @throws RandomException
      */
     public function generateToken(): string
     {
@@ -80,8 +81,13 @@ class Csrf extends AbstractCsrf
      */
     private function verifyToken(string $token): bool
     {
-        $session = $this->getSession();
-
-        return hash_equals($session->get('csrf_token', ''), $token);
-    }
+        $session     = $this->getSession();
+        $storedToken = $session->get('csrf_token', '');
+    
+        if (!is_string($storedToken)) {
+            return false;
+        }
+    
+        return hash_equals($storedToken, $token);
+    }    
 }

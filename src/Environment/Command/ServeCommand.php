@@ -2,7 +2,7 @@
 
 /**
  * Part of Omega - Environment Package.
- * php veersion 8.2
+ * php version 8.3
  *
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
@@ -46,7 +46,7 @@ class ServeCommand extends Command
      *
      * @var string Holds the default command name.
      */
-    protected static $defaultName = 'serve';
+    protected static string $defaultName = 'serve';
 
     /**
      * Command constructor.
@@ -264,7 +264,7 @@ class ServeCommand extends Command
                 $stdout = fgets($pipes[2]);
 
                 if ($stdout !== false) {
-                    $output->write("<info>STDOOT: {$stdout}</info>");
+                    $output->write("<info>STDOUT: {$stdout}</info>");
                 }
 
                 if ($stderr !== false) {

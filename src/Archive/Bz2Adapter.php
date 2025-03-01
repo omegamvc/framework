@@ -25,6 +25,7 @@ use function filemtime;
 use function file_put_contents;
 use function is_string;
 use function rename;
+use function sprintf;
 use function strlen;
 
 /**
@@ -66,11 +67,11 @@ class Bz2Adapter extends AbstractAdapter
     public function open(string $file): void
     {
         if (!file_exists($file)) {
-            throw new RuntimeException("The file '$file' does not exist.");
+            throw new RuntimeException(sprintf("The file %s does not exist.", $file));
         }
 
         if (!is_readable($file)) {
-            throw new RuntimeException("The file '$file' is not readable.");
+            throw new RuntimeException(sprintf("The file %s is not readable.", $file));
         }
 
         $this->bz2File = $file;
@@ -92,7 +93,7 @@ class Bz2Adapter extends AbstractAdapter
         $fileContent = file_get_contents($this->bz2File);
 
         if ($fileContent === false) {
-            throw new RuntimeException("Failed to read the file '$this->bz2File'.");
+            throw new RuntimeException(sprintf("Failed to read the file %s.", $this->bz2File));
         }
 
         $content = @bzdecompress($fileContent);
@@ -108,16 +109,15 @@ class Bz2Adapter extends AbstractAdapter
     {
         $compressedContent = bzcompress($content);
 
-        /** @phpstan-ignore-next-line */
-        if ($compressedContent === false) {
-            throw new RuntimeException("Failed to compress content for '$this->bz2File'.");
+        if (!is_string($compressedContent) || $compressedContent === '') {
+            throw new RuntimeException(sprintf("Failed to compress content for %s.", $this->bz2File));
         }
 
         if (file_put_contents($this->bz2File, $compressedContent) === false) {
-            throw new RuntimeException("Failed to write to the file '$this->bz2File'.");
+            throw new RuntimeException(sprintf("Failed to write to the file %s.", $this->bz2File));
         }
 
-        return is_string($compressedContent) ? strlen($compressedContent) : false;
+        return strlen($compressedContent);
     }
 
     /**
@@ -154,14 +154,14 @@ class Bz2Adapter extends AbstractAdapter
 
     /**
      * {@inheritdoc}
-     * @throws RuntimeException if faied to retrieve the modification time.
+     * @throws RuntimeException if failed to retrieve the modification time.
      */
     public function mtime(string $key): int|bool
     {
         $mtime = filemtime($this->bz2File);
 
         if ($mtime === false) {
-            throw new RuntimeException("Failed to retrieve the modification time for '$this->bz2File'.");
+            throw new RuntimeException(sprintf("Failed to retrieve the modification time for %s.", $this->bz2File));
         }
 
         return $mtime;
@@ -179,23 +179,24 @@ class Bz2Adapter extends AbstractAdapter
     public function rename(string $sourceKey, string $targetKey): bool
     {
         if (!file_exists($sourceKey)) {
-            throw new RuntimeException("Source file '{$sourceKey}' does not exist.");
+            throw new RuntimeException(sprintf("Source file %s does not exist.", $sourceKey));
         }
 
         if (file_exists($targetKey)) {
-            throw new RuntimeException("Target file '{$targetKey}' already exists.");
+            throw new RuntimeException(sprintf("Target file %s already exists.", $targetKey));
         }
 
         if (!is_readable($sourceKey)) {
-            throw new RuntimeException("Source file '{$sourceKey}' is not readable.");
+            throw new RuntimeException(sprintf("Source file %s is not readable.", $sourceKey));
         }
 
-        if (!is_writable(dirname($targetKey))) {
-            throw new RuntimeException("Cannot write to the directory of the target file '{$targetKey}'.");
+        $targetDir = dirname($targetKey);
+        if ($targetDir === '' || !is_writable($targetDir)) {
+            throw new RuntimeException(sprintf("Cannot write to the directory of the target file %s.", $targetKey));
         }
 
         if (!rename($sourceKey, $targetKey)) {
-            throw new RuntimeException("Failed to rename '{$sourceKey}' to '{$targetKey}'.");
+            throw new RuntimeException(sprintf("Failed to rename %s to %s.", $sourceKey, $targetKey));
         }
 
         return true;

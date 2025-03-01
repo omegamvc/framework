@@ -53,7 +53,7 @@ interface CsrfInterface
      * @param string|null $token The token received from the request.
      * @return bool Returns true if the token is valid.
      * @throws CsrfInvalidTokenException If the token is invalid.
-     * @throws CsrfMalformedTekenException if token is malformed.
+     * @throws CsrfMalformedTokenException if token is malformed.
      */
-    public function validateToken(string $token): bool;
+    public function validateToken(?string $token): bool;
 }

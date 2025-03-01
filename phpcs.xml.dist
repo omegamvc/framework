@@ -13,6 +13,13 @@
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
         <exclude name="PSR12.Files.FileHeader.IncorrectGrouping" />
     </rule>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+            <property name="ignoreComments" value="false"/>
+        </properties>
+    </rule>
 
     <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/css/*</exclude-pattern>
     <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/js/*</exclude-pattern>

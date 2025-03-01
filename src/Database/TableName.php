@@ -18,7 +18,7 @@ namespace Omega\Database;
 /**
  * TableName class.
  *
- * This `TableName` class represents a table name in the Omgea CMS package.
+ * This `TableName` class represents a table name in the Omega CMS package.
  * This class encapsulates the name of a database table.
  *
  * @category   Omega

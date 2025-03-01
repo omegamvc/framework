@@ -15,9 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Container;
 
-use Closure;
 use ReflectionException;
-use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
 use Omega\Container\Exception\DependencyResolutionException;
@@ -28,8 +26,7 @@ use function array_values;
 use function call_user_func;
 use function is_array;
 use function is_callable;
-use function is_string;
-
+use function sprintf;
 /**
  * Container class.
  *
@@ -74,9 +71,7 @@ class Container implements ContainerInterface
     public function get(string $id): mixed
     {
         if (!isset($this->bindings[$id])) {
-            throw new KeyNotFoundException(
-                "Alias '{$id}' is not found in the container."
-            );
+            throw new KeyNotFoundException(sprintf('Alias %s is not found in the container.', $id));
         }
 
         return $this->resolve($id);
@@ -99,10 +94,7 @@ class Container implements ContainerInterface
     public function resolve(string $id): mixed
     {
         if (!isset($this->bindings[$id])) {
-            throw new DependencyResolutionException(
-                $id
-                . ' is not bound.'
-            );
+            throw new KeyNotFoundException(sprintf('%d is not bound.', $id));
         }
 
         if (!isset($this->resolved[$id])) {
@@ -132,33 +124,43 @@ class Container implements ContainerInterface
         }
 
         $reflector = $this->getReflector($callable);
-
         $dependencies = [];
 
         foreach ($reflector->getParameters() as $parameter) {
             $name = $parameter->getName();
             $type = $parameter->getType();
 
-            if (isset($parameters[$name])) {
+            // Se il parametro è già fornito manualmente, lo usiamo
+            if (array_key_exists($name, $parameters)) {
                 $dependencies[$name] = $parameters[$name];
-
                 continue;
             }
 
+            // Se il parametro ha un valore di default, lo usiamo
             if ($parameter->isDefaultValueAvailable()) {
                 $dependencies[$name] = $parameter->getDefaultValue();
-
                 continue;
             }
 
-            if ($type instanceof ReflectionNamedType) {
-                $dependencies[$name] = $this->resolve((string)$type);
-
-                continue;
+            // Se ha un type hint, proviamo a risolverlo
+            if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+                try {
+                    $dependencies[$name] = $this->resolve($type->getName());
+                    continue;
+                } catch (DependencyResolutionException $e) {
+                    throw new DependencyResolutionException(
+                        "Cannot resolve dependency '{$name}' of type '{$type->getName()}'.",
+                        previous: $e
+                    );
+                }
             }
 
-            throw new InvalidCallableException(
-                $name . 'cannot be resolved.'
+            // Se arriviamo qui, il parametro non può essere risolto
+            throw new DependencyResolutionException(
+                sprintf(
+                    "Cannot resolve dependency %d, no default value available and no matching binding.", 
+                    $name
+                )
             );
         }
 
@@ -200,16 +202,14 @@ class Container implements ContainerInterface
      * Get reflector for the given callable.
      *
      * @param callable|array{0: object|string, 1: string} $callable Holds the callable function or method.
-     * @return ReflectionMethod|ReflectionFunction Return the reflection object for the callable.
+     * @return ReflectionMethod Return the reflection object for the callable.
      * @throws ReflectionException      if the callable cannot be reflected.
      * @throws InvalidCallableException if an unsupported callable type is provided.
      */
-    private function getReflector(callable|array $callable): ReflectionMethod|ReflectionFunction
+    private function getReflector(callable|array $callable): ReflectionMethod
     {
         if (is_array($callable)) {
-            return new ReflectionMethod($callable[0], $callable[1]);
-        } elseif ($callable instanceof Closure || is_string($callable)) {
-            return new ReflectionFunction($callable);
+            return new ReflectionMethod(is_object($callable[0]) ? get_class($callable[0]) : $callable[0], $callable[1]);
         }
 
         throw new InvalidCallableException(

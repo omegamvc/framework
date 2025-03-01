@@ -81,7 +81,6 @@ abstract class AbstractMigration implements MigrationInterface
      */
     public function __construct(protected DatabaseAdapterInterface $connection, string $table, string $type)
     {
-        $this->connection = $connection;
         $this->table      = $table;
         $this->type       = $type;
     }

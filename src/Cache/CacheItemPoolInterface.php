@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Cache;
 
+use Omega\Cache\Exception\InvalidArgumentException;
 use Omega\Cache\Item\CacheItemInterface;
 
 /**
@@ -61,7 +62,7 @@ interface CacheItemPoolInterface
      *   If any of the keys in $keys are not a legal value a \Psr\Cache\InvalidArgumentException
      *   MUST be thrown.
      *
-     * @return iterable
+     * @return iterable<string, CacheItemInterface>
      *   An iterable collection of Cache Items keyed by the cache keys of
      *   each item. A Cache item will be returned for each key, even if that
      *   key is not found. However, if no keys are specified then an empty

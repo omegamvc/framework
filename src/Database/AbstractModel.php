@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
 
 /**
  * Part of Omega -  Model Package.
@@ -174,7 +174,7 @@ abstract class AbstractModel
      * @param string       $method     Holds the method name.
      * @param array<mixed> $parameters Holds the method parameters.
      * @return $this|mixed Return $this if the method is fluent, otherwise, returns the method result.
-     * @throws Exception if the tabl is not set or getTable is not defined.
+     * @throws Exception if the table is not set or getTable is not defined.
      */
     public static function __callStatic(string $method, array $parameters = []): mixed
     {
@@ -221,11 +221,11 @@ abstract class AbstractModel
      * @param mixed  $value    Holds the property value.
      * @return void
      */
-    public function __set(string $property, $value)
+    public function __set(string $property, mixed $value): void
     {
         $setter = 'set' . ucfirst($property) . 'Attribute';
 
-        array_push($this->dirty, $property);
+        $this->dirty[] = $property;
 
         if (method_exists($this, $setter)) {
             $this->attributes[$property] = $this->$setter($value);
@@ -240,6 +240,7 @@ abstract class AbstractModel
      * Save the model's changes to the database.
      *
      * @return static
+     * @throws Exception
      * @throws UndefinedTableNameException if the table is not set or getTable is not defined.
      */
     public function save(): static
@@ -273,6 +274,7 @@ abstract class AbstractModel
      * Delete the model from the database.
      *
      * @return static
+     * @throws Exception
      * @throws UndefinedTableNameException if the table is not set or getTable is not defined.
      */
     public function delete(): static

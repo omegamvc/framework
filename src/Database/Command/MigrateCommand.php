@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Omega\Database\Command;
 
 use Exception;
+use Omega\Database\Exception\QueryException;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -49,7 +50,7 @@ class MigrateCommand extends Command
      *
      * @var string Holds the default command name.
      */
-    protected static $defaultName = 'migrate';
+    protected static string $defaultName = 'migrate';
 
     /**
      * Command constructor.
@@ -86,9 +87,8 @@ class MigrateCommand extends Command
      *
      * @param InputInterface  $input  Holds an instance of InputInterface.
      * @param OutputInterface $output Holds an instance of OutputInterface.
-     *
      * @return int Return 0 if everything went fine, or an exit code.
-     *
+     * @throws Exception
      * @throws RuntimeException if database connection is invalid.
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -130,8 +130,8 @@ class MigrateCommand extends Command
      * @param array                   $paths      Holds the migration files paths.
      * @param AbstractDatabaseAdapter $connection Holds the database connection.
      * @param OutputInterface         $output     Holds the command output interface.
-     *
      * @return void
+     * @throws Exception
      */
     private function runAllMigrations(array $paths, AbstractDatabaseAdapter $connection, OutputInterface $output): void
     {
@@ -146,8 +146,9 @@ class MigrateCommand extends Command
      * @param array                   $paths      Holds the migration files paths.
      * @param AbstractDatabaseAdapter $connection Holds the database connection.
      * @param OutputInterface         $output     Holds the command output interface.
-     *
      * @return void
+     * @throws Exception
+     * @throws QueryException
      */
     private function runNewMigrations(array $paths, AbstractDatabaseAdapter $connection, OutputInterface $output): void
     {
@@ -178,8 +179,8 @@ class MigrateCommand extends Command
      * @param string                  $path       Holds the migration file path.
      * @param AbstractDatabaseAdapter $connection Holds the database connection.
      * @param OutputInterface         $output     Holds the command output interface.
-     *
      * @return void
+     * @throws Exception
      */
     private function runMigration(string $path, AbstractDatabaseAdapter $connection, OutputInterface $output): void
     {
@@ -220,8 +221,6 @@ class MigrateCommand extends Command
             }
         } else {
             $output->writeln("<error>Class {$class} does not have an up method.</error>");
-
-            return;
         }
     }
 

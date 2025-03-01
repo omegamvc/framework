@@ -24,12 +24,17 @@
   ],
   "require": {
     "php": ">=8.3",
+    "ext-apcu": "*",
     "ext-fileinfo": "*",
     "ext-ftp": "*",
     "ext-mbstring": "*",
     "ext-memcached": "*",
     "ext-pdo": "*",
     "ext-zip": "*",
+    "ext-bz2": "*",
+    "ext-pcntl": "*",
+    "ext-simplexml": "*",
+    "ext-redis": "*",
     "symfony/console": "^7.1"
   },
   "require-dev": {

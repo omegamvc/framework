@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
 
 /**
  * Part of Omega -  Database Package.
@@ -21,7 +21,6 @@ use Omega\Database\Adapter\DatabaseAdapterInterface;
 use Omega\Database\Exception\QueryException;
 
 use function array_map;
-use function array_push;
 use function count;
 use function join;
 use function is_array;
@@ -89,14 +88,14 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     protected array $values;
 
     /**
-     * {@inheritdoc}
+     * Array of wheres clause.
      *
      * @var array<array{string, string, mixed}> Holds an array of wheres clause.
      */
     protected array $wheres = [];
 
     /**
-     * AbstractQueryBuilder class contructor.
+     * AbstractQueryBuilder class contractor.
      *
      * @param DatabaseAdapterInterface $connection Holds an instance of Mysql.
      * @return void
@@ -108,6 +107,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
 
     /**
      * {@inheritdoc}
+     * @throws QueryException
      */
     public function all(): array
     {
@@ -272,6 +272,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
 
     /**
      * {@inheritdoc}
+     * @throws QueryException
      */
     public function first(): ?array
     {
@@ -314,6 +315,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
 
     /**
      * {@inheritdoc}
+     * @throws QueryException
      */
     public function select(mixed $columns = '*'): static
     {
@@ -341,6 +343,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
 
     /**
      * {@inheritdoc}
+     * @throws QueryException
      */
     public function insert(array $columns, array $values): int|bool
     {
@@ -359,9 +362,9 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
     public function where(string $column, mixed $comparator, mixed $value = null): static
     {
         if (is_null($value) && ! is_null($comparator)) {
-            array_push($this->wheres, [ $column, '=', $comparator ]);
+            $this->wheres[] = [$column, '=', $comparator];
         } else {
-            array_push($this->wheres, [ $column, $comparator, $value ]);
+            $this->wheres[] = [$column, $comparator, $value];
         }
 
         return $this;
@@ -369,6 +372,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
 
     /**
      * {@inheritdoc}
+     * @throws QueryException
      */
     public function update(array $columns, array $values): int|bool
     {
@@ -391,6 +395,7 @@ abstract class AbstractQueryBuilder implements QueryBuilderInterface
 
     /**
      * {@inheritdoc}
+     * @throws QueryException
      */
     public function delete(): int|bool
     {

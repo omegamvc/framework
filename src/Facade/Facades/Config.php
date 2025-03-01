@@ -18,7 +18,7 @@ namespace Omega\Facade\Facades;
 use Omega\Facade\AbstractFacade;
 
 /**
- * Class Config.
+ * Class Configuration facade.
  *
  * The `Config` class serves as a facade for accessing the view component
  * within the application. By extending the `AbstractFacade`, it provides

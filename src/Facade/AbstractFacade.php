@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
 
 /**
  * Part of Omega - Support Package.
@@ -60,11 +60,9 @@ abstract class AbstractFacade implements FacadeInterface
      * the call to the underlying instance retrieved from the application container.
      * If the instance is not set, it throws a RuntimeException.
      *
-     * @param string $method    Holds the name of the method being called.
-     * @param array  $arguments Holds the arguments passed to the method.
-     *
+     * @param string       $method    Holds the name of the method being called.
+     * @param array<mixed> $arguments Holds the arguments passed to the method.
      * @return mixed Return the result of the method call on the underlying instance.
-     *
      * @throws FacadeObjectNotSetException If a facade root has not been set.
      */
     public static function __callStatic(string $method, array $arguments): mixed

@@ -37,6 +37,7 @@ class IdField extends AbstractField
      *
      * @param int $value Holds the default value for the id field.
      * @return $this Returns the current instance for method chaining.
+     * @noinspection PhpUnusedParameterInspection
      */
     public function default(int $value): mixed
     {

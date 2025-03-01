@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Adapter;
 
+use DateMalformedStringException;
 use Omega\Cache\AbstractCacheItemPool;
 use Omega\Cache\Item\HasExpirationDateInterface;
 use Omega\Cache\Item\Item;
@@ -37,14 +38,29 @@ use Omega\Cache\Item\CacheItemInterface;
  */
 class Memory extends AbstractCacheItemPool
 {
+    /**
+     * In-memory cache storage.
+     *
+     * This property holds the cache items in an associative array.
+     * Each cache item is an array containing the value of the cache entry and its expiration time.
+     *
+     * @var array<string, array{value: mixed, expires: float|int|null}> $cache
+     */
     private array $cache = [];
 
+    /**
+     * {@iheritdoc}
+     */
     public function clear(): bool
     {
         $this->cache = [];
         return true;
     }
 
+    /**
+     * {@iheritdoc}
+     * @throws DateMalformedStringException
+     */
     public function getItem(string $key): CacheItemInterface
     {
         $item = new Item($key);
@@ -56,6 +72,10 @@ class Memory extends AbstractCacheItemPool
         return $item;
     }
 
+    /**
+     * {@iheritdoc}
+     * @throws DateMalformedStringException
+     */
     public function getItems(array $keys = []): array
     {
         $items = [];
@@ -67,12 +87,18 @@ class Memory extends AbstractCacheItemPool
         return $items;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function deleteItem(string $key): bool
     {
         unset($this->cache[$key]);
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(CacheItemInterface $item): bool
     {
         $expires = $item instanceof HasExpirationDateInterface
@@ -89,12 +115,18 @@ class Memory extends AbstractCacheItemPool
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasItem(string $key): bool
     {
         return isset($this->cache[$key])
             && ($this->cache[$key]['expires'] === null || $this->cache[$key]['expires'] > time());
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public static function isSupported(): bool
     {
         return true;

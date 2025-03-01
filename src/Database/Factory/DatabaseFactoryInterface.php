@@ -21,7 +21,7 @@ use Omega\Container\Contracts\Factory\GenericFactoryInterface;
  * Session factory interface.
  *
  * The `DatabaseFactoryInterface` is an extension of the GenericFactoryInterface, specifically
- * for creating databse-related instances. It follows the structure defined in the
+ * for creating database-related instances. It follows the structure defined in the
  * `GenericFactoryInterface` and is used to standardize the creation of database components in
  * the Omega system.
  *

@@ -176,7 +176,7 @@ class PharAdapter extends AbstractAdapter
 
     /**
      * {@inheritdoc}
-     * @throws RuntimeException if the key not exists or failed to retrieves the modification time for the key.
+     * @throws RuntimeException if the key not exists or failed to retrieve the modification time for the key.
      */
     public function mtime(string $key): int|bool
     {

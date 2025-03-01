@@ -21,6 +21,8 @@ use Omega\View\View;
 use function debug_backtrace;
 use function realpath;
 
+use const DEBUG_BACKTRACE_IGNORE_ARGS;
+
 /**
  * Abstract engine class.
  *
@@ -40,7 +42,7 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * Layout array.
      *
-     * @var array Holds an array of layouts.
+     * @var array<int|string, string> Holds an array of layouts.
      */
     protected array $layouts = [];
 
@@ -54,8 +56,9 @@ abstract class AbstractEngine implements EngineInterface
      */
     protected function extends(string $template): static
     {
-        $backtrace                                      = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-        $this->layouts[realpath($backtrace[0]['file'])] = $template;
+        $backtrace            = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+        $file                 = isset($backtrace[0]['file']) ? realpath($backtrace[0]['file']) : null;
+        $this->layouts[$file] = $template;
 
         return $this;
     }
@@ -66,11 +69,11 @@ abstract class AbstractEngine implements EngineInterface
      * This method handles dynamic method calls, typically for macros.
      *
      * @param string $name      Holds the method name.
-     * @param mixed  ...$values Holds the method params/values.
+     * @param array  $values Holds the method params/values.
      * @return mixed
      * @throws Exception
      */
-    public function __call(string $name, mixed $values): mixed
+    public function __call(string $name, array $values): mixed
     {
         return $this->viewManager->useMacro($name, ...$values);
     }

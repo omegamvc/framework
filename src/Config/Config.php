@@ -73,16 +73,15 @@ class Config
 
     /**
      * Retrieve config key with dots notations.
-     *
      * Helper method to access nested configuration values using dot notation.
      *
      * @param array<string, mixed> $array    Holds an array of key.
      * @param array<int, string>   $segments Holds an array of arguments.
-     * @return mixed
+     * @return array<string, mixed>|null Return an array of key and values or null.
      */
-    private function withDots(array $array, array $segments): mixed
+    private function withDots(array $array, array $segments): ?array
     {
-        /** @var array<string, mixed> */
+        /** @var array<string, mixed> $current */
         $current = $array;
 
         foreach ($segments as $segment) {

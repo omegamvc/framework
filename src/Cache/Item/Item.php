@@ -19,14 +19,8 @@ use DateInterval;
 use DateMalformedStringException;
 use DateTime;
 use DateTimeInterface;
-use Omega\Cache\Exception\InvalidArgumentException;
 
-use function get_class;
-use function gettype;
 use function is_int;
-use function is_integer;
-use function is_object;
-use function sprintf;
 
 /**
  * Represents a cache item.
@@ -83,13 +77,6 @@ class Item extends AbstractItem
         private readonly string $key,
         DateInterval|DateTimeInterface|int|null $ttl = null
     ) {
-        /***if (is_int($ttl) || ($ttl instanceof DateInterval)) {
-            $this->expiresAfter($ttl);
-        } elseif ($ttl instanceof DateTimeInterface) {
-            $this->expiresAt($ttl);
-        } else {
-            $this->expiresAfter(900);
-        }*/
         $this->expiration = new DateTime('now + 900 seconds');
 
         $this->expiresAfter($ttl);
@@ -150,20 +137,6 @@ class Item extends AbstractItem
     public function expiresAt(?DateTimeInterface $expiration): static
     {
         // @phpstan-ignore-next-line
-        if ($expiration !== null && !($expiration instanceof DateTimeInterface)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Argument 1 passed to %s::expiresAt() must be an instance of DateTimeInterface; %s given',
-                    get_class($this),
-                    is_object($expiration)
-                        ? get_class($expiration)
-                        // @phpstan-ignore-next-line
-                        : gettype($expiration)
-                )
-            );
-        }
-
-        // @phpstan-ignore-next-line
         $this->expiration = $expiration;
 
         return $this;
@@ -174,7 +147,7 @@ class Item extends AbstractItem
      * @throws DateMalformedStringException
      */
 
-    public function expiresAfter(int|DateInterval|null $time): static
+    public function expiresAfter(int|DateInterval|DateTimeInterface|null $time): static
     {
         if (is_int($time)) {
             $this->expiration = (new DateTime())->modify("+$time seconds");
@@ -186,19 +159,6 @@ class Item extends AbstractItem
 
         return $this;
     }
-    /**public function expiresAfter(int|DateInterval|null $time): static
-    {
-        if (is_integer($time)) {
-            $this->expiration = new DateTime('now +' . $time . ' seconds');
-        } elseif ($time instanceof DateInterval) {
-            $this->expiration = new DateTime('now');
-            $this->expiration->add($time);
-        } else {
-            $this->expiration = new DateTime('now + 900 seconds');
-        }
-
-        return $this;
-    }*/
 
     /**
      * Retrieves the expiration time of the cache item.

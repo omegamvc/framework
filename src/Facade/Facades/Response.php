@@ -39,7 +39,7 @@ use Omega\Facade\AbstractFacade;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  *
- * @method static Omega\Http\Response redirect(string $redirect = null): static|string|null Redirect to given url.
+ * @method static \Omega\Http\Response redirect(string $redirect = null): static|string|null Redirect to given url.
  */
 class Response extends AbstractFacade
 {

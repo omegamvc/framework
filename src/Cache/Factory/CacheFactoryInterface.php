@@ -44,7 +44,23 @@ use Omega\Container\Contracts\Factory\GenericFactoryInterface;
  */
 interface CacheFactoryInterface extends GenericFactoryInterface
 {
+    /**
+     * Creates a Memcached cache instance.
+     *
+     * @param array<string, mixed> $config The configuration array for the Memcached cache.
+     *                                    It should include necessary settings like server list, options, etc.
+     *
+     * @return Memcached The created Memcached instance.
+     */
     public function createMemcached(array $config): Memcached;
 
+    /**
+     * Creates a Redis cache instance.
+     *
+     * @param array<string, mixed> $config The configuration array for the Redis cache.
+     *                                    It should include necessary settings like server list, options, etc.
+     *
+     * @return Redis The created Redis instance.
+     */
     public function createRedis(array $config): Redis;
 }

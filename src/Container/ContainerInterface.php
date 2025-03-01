@@ -18,7 +18,7 @@ namespace Omega\Container;
 use ReflectionException;
 use Omega\Container\Exception\ContainerExceptionInterface;
 use Omega\Container\Exception\DependencyResolutionException;
-use Omege\Container\Exception\InvalidCallableException;
+use Omega\Container\Exception\InvalidCallableException;
 use Omega\Container\Exception\KeyNotFoundException;
 use Omega\Container\Exception\NotFoundExceptionInterface;
 

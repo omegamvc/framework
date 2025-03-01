@@ -91,10 +91,17 @@ class ViewServiceProvider implements ServiceProviderInterface
      */
     private function bindMacros(Application $application, ViewManager $viewManager): void
     {
-        $viewManager->addMacro('escape', fn($value) => @htmlspecialchars(
+        /**$viewManager->addMacro('escape', fn($value) => @htmlspecialchars(
             $value instanceof Item ? $value->get() : $value,
             ENT_QUOTES
-        ));
+        ));*/
+        $viewManager->addMacro('escape', function ($value) {
+            error_log('Value in escape macro: ' . var_export($value, true));
+            return $value !== null ? @htmlspecialchars(
+                $value instanceof Item ? $value->get() : $value,
+                ENT_QUOTES
+            ) : '';
+        });
         $viewManager->addMacro('includes', fn(...$params) => print View::render(...$params));
     }
 

@@ -32,7 +32,7 @@ use function is_array;
 use function preg_match;
 use function putenv;
 use function rtrim;
-use function strpos;
+use function str_starts_with;
 use function trim;
 
 use const DIRECTORY_SEPARATOR;
@@ -63,21 +63,21 @@ class Dotenv
      *
      * @var array<string, string> Holds an array of the key-value storage.
      */
-    protected static $variables = [];
+    protected static array $variables = [];
 
     /**
      * Required variables.
      *
      * @var array<int, string> Holds an array of required variables.
      */
-    protected static $required = [];
+    protected static array $required = [];
 
     /**
      * Were variables loaded?
      *
      * @var bool Determine which variables is loaded.
      */
-    protected static $isLoaded = false;
+    protected static bool $isLoaded = false;
 
     /**
      * Load and parse .env file from a given directory.
@@ -87,7 +87,7 @@ class Dotenv
      * @return void
      * @throws InvalidKeyException
      * @throws InvalidLineException
-     * @throws MssingEnvFileException
+     * @throws MissingEnvFileException
      * @throws UnexpectedDirectoryException
      */
     public static function load(?string $directoryPath = null, ?string $fileName = null): void
@@ -130,7 +130,7 @@ class Dotenv
 
         foreach ($lines as $line) {
             $trimmedLine = trim($line);
-            if ($trimmedLine === '' || strpos($trimmedLine, '#') === 0) {
+            if ($trimmedLine === '' || str_starts_with($trimmedLine, '#')) {
                 continue;
             }
 
@@ -153,7 +153,6 @@ class Dotenv
                 );
             }
 
-            // Rimuove eventuali doppi o singoli apici iniziali e finali
             $value = trim($value, "\"'");
             self::$variables[$key] = $value;
         }

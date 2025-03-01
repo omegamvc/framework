@@ -174,12 +174,11 @@ class Memcached extends AbstractCacheItemPool
      */
     public function save(CacheItemInterface $item): bool
     {
-        // Calcola il TTL come numero di secondi
         $ttl = $item instanceof HasExpirationDateInterface
             ? $this->convertItemExpiryToSeconds($item)
             : 0;
 
-        $ttl = $ttl > 0 ? (int)$this->options['seconds'] : $ttl;
+        $ttl = $ttl > 0 ? (is_int($this->options['seconds']) ? $this->options['seconds'] : 0) : $ttl;
 
         return $this->driver->set($item->getKey(), $item->get(), $ttl);
     }
