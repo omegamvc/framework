@@ -32,7 +32,7 @@ use Omega\Environment\Dotenv;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    1.0.0
  */
-if (! function_exists('app')) :
+if (! function_exists('app')) {
     /**
      * Get an instance of the Omega Application.
      *
@@ -47,9 +47,9 @@ if (! function_exists('app')) :
 
         return Application::getInstance()->resolve($alias);
     }
-endif;
+}
 
-if (! function_exists('config')) :
+if (! function_exists('config')) {
     /**
      * Alias or set a configuration value.
      *
@@ -65,9 +65,9 @@ if (! function_exists('config')) :
 
         return app('config')->get($key, $default);
     }
-endif;
+}
 
-if (! function_exists('csrf')) :
+if (! function_exists('csrf')) {
     /**
      * Set the CSRF token.
      *
@@ -90,9 +90,9 @@ if (! function_exists('csrf')) :
 
         return $token;
     }
-endif;
+}
 
-if (! function_exists('dd')) :
+if (! function_exists('dd')) {
     /**
      * Dump variables and end script execution.
      *
@@ -105,9 +105,9 @@ if (! function_exists('dd')) :
 
         die;
     }
-endif;
+}
 
-if (! function_exists('dump')) :
+if (! function_exists('dump')) {
     /**
      * Display a variable dump in a formatted manner.
      *
@@ -121,9 +121,9 @@ if (! function_exists('dump')) :
         print_r($array);
         echo '</pre>';
     }
-endif;
+}
 
-if (! function_exists('env')) :
+if (! function_exists('env')) {
     /**
      * Get the value of an environment variable.
      *
@@ -135,9 +135,9 @@ if (! function_exists('env')) :
     {
         return Dotenv::get($key, $default);
     }
-endif;
+}
 
-if (! function_exists('get_operating_system')) :
+if (! function_exists('get_operating_system')) {
     /**
      * Get the operating system name.
      *
@@ -160,9 +160,9 @@ if (! function_exists('get_operating_system')) :
                 return 'unknown';
         }
     }
-endif;
+}
 
-if (! function_exists('head')) :
+if (! function_exists('head')) {
     /**
      * Get the first element of an array.
      *
@@ -173,9 +173,9 @@ if (! function_exists('head')) :
     {
         return reset($array);
     }
-endif;
+}
 
-if (! function_exists('now')) :
+if (! function_exists('now')) {
     /**
      * Returns the current date and time in the configured timezone.
      *
@@ -185,9 +185,9 @@ if (! function_exists('now')) :
     {
         return app()->setCurrentTimeZone()->getCurrentTimeZone();
     }
-endif;
+}
 
-if (! function_exists('redirect')) :
+if (! function_exists('redirect')) {
     /**
      * Redirect to a specific URL.
      *
@@ -201,9 +201,9 @@ if (! function_exists('redirect')) :
     {
         return response()->redirect($url);
     }
-endif;
+}
 
-if (! function_exists('response')) :
+if (! function_exists('response')) {
     /**
      * Get the response instance.
      *
@@ -213,9 +213,9 @@ if (! function_exists('response')) :
     {
         return app('response');
     }
-endif;
+}
 
-if (! function_exists('secure')) :
+if (! function_exists('secure')) {
     /**
      * Secure the CSRF token.
      *
@@ -244,9 +244,9 @@ if (! function_exists('secure')) :
             );
         }
     }
-endif;
+}
 
-if (! function_exists('session')) :
+if (! function_exists('session')) {
     /**
      * Get or set a session value.
      *
@@ -262,9 +262,9 @@ if (! function_exists('session')) :
 
         return app('session')->get($key, $default);
     }
-endif;
+}
 
-if (! function_exists('validate')) :
+if (! function_exists('validate')) {
     /**
      * Validate input.
      *
@@ -279,9 +279,9 @@ if (! function_exists('validate')) :
     {
         return app('validator')->validate($data, $rules, $sessionName);
     }
-endif;
+}
 
-if (! function_exists('value')) :
+if (! function_exists('value')) {
     /**
      * The default value of the given value.
      *
@@ -293,4 +293,4 @@ if (! function_exists('value')) :
     {
         return $value instanceof Closure ? $value(...$args) : $value;
     }
-endif;
+}

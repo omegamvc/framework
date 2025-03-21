@@ -50,7 +50,7 @@ abstract class AbstractCsrf implements CsrfInterface
     protected function getSession(): NativeStorage
     {
         $session = Application::getInstance()->get('session');
-        
+
         if (!$session instanceof NativeStorage) {
             throw new RuntimeException('Session storage is not an instance of NativeStorage.');
         }

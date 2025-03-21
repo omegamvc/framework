@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
+<?php
+
+/** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
 
 /**
  * Part of Omega -  Model Package.

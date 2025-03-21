@@ -83,11 +83,11 @@ class Csrf extends AbstractCsrf
     {
         $session     = $this->getSession();
         $storedToken = $session->get('csrf_token', '');
-    
+
         if (!is_string($storedToken)) {
             return false;
         }
-    
+
         return hash_equals($storedToken, $token);
-    }    
+    }
 }

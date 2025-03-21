@@ -27,6 +27,7 @@ use function call_user_func;
 use function is_array;
 use function is_callable;
 use function sprintf;
+
 /**
  * Container class.
  *
@@ -158,7 +159,7 @@ class Container implements ContainerInterface
             // Se arriviamo qui, il parametro non può essere risolto
             throw new DependencyResolutionException(
                 sprintf(
-                    "Cannot resolve dependency %d, no default value available and no matching binding.", 
+                    "Cannot resolve dependency %d, no default value available and no matching binding.",
                     $name
                 )
             );

@@ -44,10 +44,10 @@
   },
   "autoload": {
     "psr-4": {
-      "Omega\\": "src/"
+      "Omega\\": "src/Omega/"
     },
     "files": [
-      "src/Helpers/function.php"
+      "src/Omega/Helpers/function.php"
     ]
   },
   "autoload-dev": {
