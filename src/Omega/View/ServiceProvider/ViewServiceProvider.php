@@ -96,7 +96,7 @@ class ViewServiceProvider implements ServiceProviderInterface
             ENT_QUOTES
         ));*/
         $viewManager->addMacro('escape', function ($value) {
-            error_log('Value in escape macro: ' . var_export($value, true));
+            //error_log('Value in escape macro: ' . var_export($value, true));
             return $value !== null ? @htmlspecialchars(
                 $value instanceof Item ? $value->get() : $value,
                 ENT_QUOTES

@@ -44,7 +44,7 @@ class SessionFactory implements SessionFactoryInterface
      */
     public function create(?array $config = null): StorageInterface
     {
-        if (! isset($config['type'])) {
+        if (!isset($config['type'])) {
             throw new StorageException(
                 'Type is not defined.'
             );

@@ -18,6 +18,10 @@ namespace Omega\Config\ServiceProvider;
 use Omega\Application\Application;
 use Omega\Config\Config;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
+use Omega\Utils\Path;
+
+use function basename;
+use function glob;
 
 /**
  * Config service provider class.
@@ -43,7 +47,14 @@ class ConfigServiceProvider implements ServiceProviderInterface
     public function bind(Application $application): void
     {
         $application->alias('config', function () {
-            return new Config();
+            $config = [];
+
+            foreach (glob(Path::getPath('config', '/*.php')) as $file) {
+                $configName = basename($file, '.php');
+                $config[$configName] = require $file;
+            }
+
+            return new Config($config);
         });
     }
 }

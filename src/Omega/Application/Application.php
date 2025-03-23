@@ -44,7 +44,7 @@ use Omega\Utils\Str;
  */
 class Application extends Container implements ApplicationInterface
 {
-    use ApplicationInstanceTrait;
+    use ApplicationSingletonTrait;
 
     /**
      * The base path for the Omega installation.

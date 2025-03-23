@@ -8,29 +8,34 @@
  * @author    Adriano Giovannini <agisoftt@gmail.com>
  * @copyright Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
  * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version   1.0.0
+ * @version   2.0.0
  */
 
- declare(strict_types=1);
+declare(strict_types=1);
 
 namespace Omega\Application;
 
-use Omega\Application\Exception\SingletonException;
+use Omega\Application\Exceptions\ImmutableStateException;
+use Omega\Application\Exceptions\UndefinedSingletonClassException;
 
-use function get_called_class;
+use function class_exists;
+use function debug_backtrace;
+use function is_string;
+
+use const DEBUG_BACKTRACE_IGNORE_ARGS;
 
 /**
- * Application instance trait.
+ * Application singleton trait.
  *
- * @category  Omega
+ * @category  System
  * @package   Application
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
  * @copyright Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
  * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version   1.0.
+ * @version   2.0.0
  */
-trait ApplicationInstanceTrait
+trait ApplicationSingletonTrait
 {
     /**
      * Singleton instance.
@@ -51,13 +56,37 @@ trait ApplicationInstanceTrait
      */
     public static function getInstance(?string $basePath = null): static
     {
-        $getCalledClass = get_called_class();
+        $getCalledClass = static::getSingletonClass();
 
-        if (!isset(self::$instances[$getCalledClass])) {
-            self::$instances[$getCalledClass] = new $getCalledClass($basePath);
+        if (!isset(static::$instances[$getCalledClass])) {
+            static::$instances[$getCalledClass] = new $getCalledClass($basePath);
         }
 
-        return self::$instances[$getCalledClass];
+        return static::$instances[$getCalledClass];
+    }
+
+    /**
+     * Determines the singleton class name.
+     *
+     * This method inspects the call stack to identify the class that invoked
+     * the singleton. It ensures that the retrieved class name is valid and exists.
+     *
+     * @return string Return the fully qualified name of the singleton class.
+     * @throws UndefinedSingletonClassException If a valid singleton class cannot be determined.
+     */
+    private static function getSingletonClass(): string
+    {
+        $backtrace  = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+
+        foreach ($backtrace as $frame) {
+            if (isset($frame['class']) && is_string($frame['class']) && class_exists($frame['class'])) {
+                return $frame['class'];
+            }
+        }
+
+        throw new UndefinedSingletonClassException(
+            'Failed to determine a valid singleton class in getInstance().'
+        );
     }
 
     /**
@@ -67,12 +96,11 @@ trait ApplicationInstanceTrait
      * Cloning would create a second instance, which violates the Singleton pattern.
      *
      * @return void
-     *
-     * @throws SingletonException If an attempt to clone the singleton is made.
+     * @throws ImmutableStateException If an attempt to clone the singleton is made.
      */
     public function __clone(): void
     {
-        throw new SingletonException(
+        throw new ImmutableStateException(
             'You can not clone a singleton.'
         );
     }
@@ -84,12 +112,11 @@ trait ApplicationInstanceTrait
      * Deserialization would create a second instance, which violates the Singleton pattern.
      *
      * @return void
-     *
-     * @throws SingletonException If an attempt at deserialization is made.
+     * @throws ImmutableStateException If an attempt at deserialization is made.
      */
     public function __wakeup(): void
     {
-        throw new SingletonException(
+        throw new ImmutableStateException(
             'You can not deserialize a singleton.'
         );
     }
@@ -101,12 +128,11 @@ trait ApplicationInstanceTrait
      * Serialization would create a second instance, which violates the Singleton pattern.
      *
      * @return array Return the names of private properties in parent classes.
-     *
-     * @throws SingletonException If an attempt at serialization is made.
+     * @throws ImmutableStateException If an attempt at serialization is made.
      */
     public function __sleep(): array
     {
-        throw new SingletonException(
+        throw new ImmutableStateException(
             'You can not serialize a singleton.'
         );
     }

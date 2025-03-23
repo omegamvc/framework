@@ -69,10 +69,10 @@ interface ApplicationInterface
      */
     public function setCurrentTimeZone(): self;
 
-      /**
-       * Gets the current date and time formatted according to the application timezone.
-       *
-       * @return string The formatted current date and time.
-       */
+    /**
+     * Gets the current date and time formatted according to the application timezone.
+     *
+     * @return string The formatted current date and time.
+     */
     public function getCurrentTimeZone(): string;
 }
