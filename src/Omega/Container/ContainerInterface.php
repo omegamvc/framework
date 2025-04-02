@@ -46,35 +46,126 @@ use Omega\Container\Exception\NotFoundExceptionInterface;
 interface ContainerInterface
 {
     /**
-     * Returns true if the container can return an entry for the given identifier.
-     * Returns false otherwise.
+     * Check if a service or value is registered in the container.
      *
-     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
-     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+     * This method checks whether a given service ID exists in the container
+     * and whether it has been registered with a factory.
      *
-     * @param string $id Identifier of the entry to look for.
-     * @return bool
+     * @param string $id The alias for the service to check.
+     * @return bool True if the service exists, false otherwise.
+     *
+     * ```php
+     * $container->has('database.connection');  // Returns true if the 'database.connection' is bound.
+     * ```
      */
     public function has(string $id): bool;
 
     /**
-     * Finds an entry of the container by its identifier and returns it.
+     * Retrieve a service or value from the container.
      *
-     * @param string $id Identifier of the entry to look for.
-     * @return mixed
-     * @throws ContainerExceptionInterface Error while retrieving the entry.
-     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     * This method fetches the service associated with the given ID, resolving it
+     * if necessary. If the service does not exist, a KeyNotFoundException is thrown.
+     *
+     * @param string $id The alias for the service to retrieve.
+     * @return mixed The resolved service or value.
+     * @throws KeyNotFoundException If the service is not found.
+     *
+     * ```php
+     * $database = $container->get('database.connection');  // Retrieves the 'database.connection' service.
+     * ```
      */
     public function get(string $id): mixed;
 
     /**
-     * Bind the class.
+     * Bind a value to the container.
      *
-     * @param string   $id      Holds the class alias or key.
-     * @param callable $factory Holds a closure that defines how to create the class instance.
-     * @return $this
+     * This method directly binds a value (not a factory) to the container
+     * under the specified alias. The value is immediately available for retrieval.
+     *
+     * @param string $id    The alias for the service.
+     * @param mixed  $value The value or service to store.
+     * @return void
+     *
+     * ```php
+     * $container->set('app.name', 'OmegaApp');  // Binds the value 'OmegaApp' to the 'app.name' alias.
+     * ```
+     */
+    public function set(string $id, mixed $value): void;
+
+    /**
+     * Unset a service or value from the container.
+     *
+     * This method removes a service or value from the container, so it will no longer
+     * be available for retrieval.
+     *
+     * @param string $id The alias of the service to unset.
+     * @return void
+     *
+     * ```php
+     * $container->unset('app.name');  // Removes the 'app.name' service from the container.
+     * ```
+     */
+    public function unset(string $id): void;
+
+    /**
+     * Bind a factory (callable) to the container.
+     *
+     * This method binds a callable (factory) that can be invoked to generate an instance
+     * when the service is retrieved. The factory is invoked when the service is first accessed.
+     *
+     * @param string   $id     The alias for the service.
+     * @param callable $factory A callable that returns the service instance.
+     * @return static The current instance for method chaining.
+     *
+     * ```php
+     * $container->alias('database.connection', function() {
+     *     return new DatabaseConnection('localhost', 'root', 'password');
+     * });
+     * // The 'database.connection' alias will return an instance of DatabaseConnection when accessed.
+     * ```
      */
     public function alias(string $id, callable $factory): static;
+
+    /**
+     * Bind an instance to the container if not already bound.
+     *
+     * This method binds a value or object to the container only if the service is not
+     * already registered. It ensures that the value is only set once.
+     *
+     * @param string $id    The alias for the service.
+     * @param mixed  $value The value or instance to store.
+     * @return void
+     *
+     * ```php
+     * $container->instance('path.base', '/var/www');
+     * // Binds the value '/var/www' to 'path.base' only if it's not already set.
+     * ```
+     */
+    public function instance(string $id, mixed $value): void;
+
+    /**
+     * Define multiple services using a callable setter.
+     *
+     * This method registers multiple services in the container by invoking a callable setter,
+     * which is executed immediately to resolve the services and bind them to the container.
+     * The setter should return an array where keys are the service aliases and values are
+     * the corresponding values or services to bind.
+     *
+     * @param callable $setter A callable that returns an associative array of services.
+     * @return void
+     *
+     * ```php
+     * $container->definition(function() {
+     *     return [
+     *         'path.base' => '/var/www',
+     *         'path.lang' => '/var/www/lang',
+     *     ];
+     * });
+     * $basePath = $container->get('path.base');
+     * $langPath = $container->get('path.lang');
+     * ```
+     */
+    public function definition(callable $setter): void;
 
     /**
      * Resolve the container.

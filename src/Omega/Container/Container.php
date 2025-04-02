@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Container;
 
+use ArrayAccess;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -42,7 +43,7 @@ use function sprintf;
  * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version   1.0.0
  */
-class Container implements ContainerInterface
+class Container implements ArrayAccess, ContainerInterface
 {
     /**
      * Binding class.
@@ -72,10 +73,43 @@ class Container implements ContainerInterface
     public function get(string $id): mixed
     {
         if (!isset($this->bindings[$id])) {
-            throw new KeyNotFoundException(sprintf('Alias %s is not found in the container.', $id));
+            throw new KeyNotFoundException(
+                sprintf(
+                    "The service '%s' is not registered in the container. Please check if it is correctly bound.",
+                    $id
+                )
+            );
         }
 
-        return $this->resolve($id);
+        if (!isset($this->resolved[$id])) {
+            $this->resolved[$id] = $this->bindings[$id]();
+        }
+
+        return $this->resolved[$id];
+    }
+
+    /**
+     * Set a service or value in the container.
+     *
+     * @param string $id    The alias for the service.
+     * @param mixed  $value The value or service to store.
+     * @return void
+     */
+    public function set(string $id, mixed $value): void
+    {
+        $this->bindings[$id] = fn() => $value;
+        $this->resolved[$id] = null;
+    }
+
+    /**
+     * Unset a service from the container.
+     *
+     * @param string $id The alias of the service to unset.
+     * @return void
+     */
+    public function unset(string $id): void
+    {
+        unset($this->bindings[$id], $this->resolved[$id]);
     }
 
     /**
@@ -92,10 +126,39 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
+    public function instance(string $id, mixed $value): void
+    {
+        if (!$this->has($id)) {
+            $this->set($id, $value);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function definition(callable $setter): void
+    {
+        $services = $setter();
+
+        if (is_array($services)) {
+            foreach ($services as $id => $value) {
+                $this->instance($id, $value);
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function resolve(string $id): mixed
     {
         if (!isset($this->bindings[$id])) {
-            throw new KeyNotFoundException(sprintf('%d is not bound.', $id));
+            throw new KeyNotFoundException(
+                sprintf(
+                    '%s is not bound to the container. Ensure that it has been registered before resolution.',
+                    $id
+                )
+            );
         }
 
         if (!isset($this->resolved[$id])) {
@@ -120,7 +183,8 @@ class Container implements ContainerInterface
     {
         if (!is_callable($callable)) {
             throw new InvalidCallableException(
-                'The provided callable is not invocable.'
+                'The provided callable is not invocable. 
+                Please ensure that the callback is correctly defined and accessible.'
             );
         }
 
@@ -131,35 +195,32 @@ class Container implements ContainerInterface
             $name = $parameter->getName();
             $type = $parameter->getType();
 
-            // Se il parametro è già fornito manualmente, lo usiamo
             if (array_key_exists($name, $parameters)) {
                 $dependencies[$name] = $parameters[$name];
                 continue;
             }
 
-            // Se il parametro ha un valore di default, lo usiamo
             if ($parameter->isDefaultValueAvailable()) {
                 $dependencies[$name] = $parameter->getDefaultValue();
                 continue;
             }
 
-            // Se ha un type hint, proviamo a risolverlo
             if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
                 try {
                     $dependencies[$name] = $this->resolve($type->getName());
                     continue;
                 } catch (DependencyResolutionException $e) {
                     throw new DependencyResolutionException(
-                        "Cannot resolve dependency '{$name}' of type '{$type->getName()}'.",
+                        sprintf("Unable to resolve the dependency '%s' of type '%s'.", $name, $type->getName()),
                         previous: $e
                     );
                 }
             }
 
-            // Se arriviamo qui, il parametro non può essere risolto
             throw new DependencyResolutionException(
                 sprintf(
-                    "Cannot resolve dependency %d, no default value available and no matching binding.",
+                    "Cannot resolve dependency '%s'. 
+                    No default value is available, and no matching binding found in the container.",
                     $name
                 )
             );
@@ -214,7 +275,39 @@ class Container implements ContainerInterface
         }
 
         throw new InvalidCallableException(
-            'Unsupported callable type provided.'
+            'Unsupported callable type provided. Only array and closure callables are supported.'
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetExists(mixed $offset): bool
+    {
+        return $this->has($offset);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->get($offset);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $this->set($offset, $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetUnset(mixed $offset): void
+    {
+        $this->unset($offset);
     }
 }

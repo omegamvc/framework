@@ -21,7 +21,7 @@ use Omega\Environment\Exception\InvalidKeyException;
 use Omega\Environment\Exception\MissingEnvFileException;
 use Omega\Environment\Exception\MissingVariableException;
 use Omega\Environment\Exception\UnexpectedDirectoryException;
-use Omega\Utils\Path;
+use Omega\Support\Path;
 
 use function array_key_exists;
 use function explode;

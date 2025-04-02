@@ -18,7 +18,7 @@ namespace Omega\Config\ServiceProvider;
 use Omega\Application\Application;
 use Omega\Config\Config;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
-use Omega\Utils\Path;
+use Omega\Support\Path;
 
 use function basename;
 use function glob;

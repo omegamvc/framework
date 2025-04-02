@@ -13,7 +13,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Utils\Enum\Exceptions;
+namespace Omega\Support\Enum\Exceptions;
 
 /**
  * This interface serves as a marker for all exceptions related to enumeration operations.

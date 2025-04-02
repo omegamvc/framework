@@ -48,5 +48,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
 
             return (new DatabaseFactory())->create($config[$default]);
         });
+
+        //$application->dumpBindings();
     }
 }

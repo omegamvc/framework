@@ -24,8 +24,8 @@ use Omega\Environment\EnvironmentDetector;
 use Omega\Facade\AliasLoader;
 use Omega\Facade\Facades\Router;
 use Omega\Http\Response;
-use Omega\Utils\Path;
-use Omega\Utils\Str;
+use Omega\Support\Path;
+use Omega\Support\Str;
 
 /**
  * Base application class.
@@ -80,7 +80,7 @@ class Application extends Container implements ApplicationInterface
      * @param  string|null $basePath Holds the Omega application base path or null.
      * @return void
      */
-    private function __construct(?string $basePath = null)
+    private function __construct(?string $basePath =  null)
     {
         $this->basePath = rtrim($basePath ?? $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__, 5), '\/');
 

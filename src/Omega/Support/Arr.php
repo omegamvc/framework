@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of Omega MVC - Utils Package
+ * Part of Omega MVC - Support Package
  * php version 8.3
  *
  * @link      https://omegamvc.github.io
@@ -13,7 +13,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Utils;
+namespace Omega\Support;
 
 use function is_array;
 use function is_null;
@@ -31,7 +31,7 @@ use function is_null;
  * and overall code organization.
  *
  * @category  Omega
- * @package   Utils
+ * @package   Support
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
  * @copyright Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)

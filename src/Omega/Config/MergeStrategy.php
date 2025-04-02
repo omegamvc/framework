@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Config;
 
-use Omega\Utils\Enum\AbstractEnum;
+use Omega\Support\Enum\AbstractEnum;
 
 /**
  * Defines merge strategies for configuration data.

@@ -23,7 +23,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Omega\Database\Adapter\AbstractDatabaseAdapter;
-use Omega\Utils\Path;
+use Omega\Support\Path;
 
 use function glob;
 

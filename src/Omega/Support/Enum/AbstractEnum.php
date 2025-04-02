@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of Omega MVC - Utils Package
+ * Part of Omega MVC - Support Package
  * php version 8.3
  *
  * @link      https://omegamvc.github.io
@@ -13,10 +13,10 @@
 
 declare(strict_types=1);
 
-namespace Omega\Utils\Enum;
+namespace Omega\Support\Enum;
 
-use Omega\Utils\Enum\Exceptions\BadInstantiationException;
-use Omega\Utils\Enum\Exceptions\InvalidValueException;
+use Omega\Support\Enum\Exceptions\BadInstantiationException;
+use Omega\Support\Enum\Exceptions\InvalidValueException;
 use ReflectionClass;
 
 use function array_flip;
@@ -33,7 +33,7 @@ use function in_array;
  * invalid values and allows conversion between string representations and constants.
  *
  * @category   Omega
- * @package    Utils
+ * @package    Support
  * @link       https://omegamvc.github.io
  */
 abstract class AbstractEnum

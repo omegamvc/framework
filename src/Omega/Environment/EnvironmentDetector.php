@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace Omega\Environment;
 
 use Closure;
-use Omega\Utils\Str;
+use Omega\Support\Str;
 
 use function explode;
 

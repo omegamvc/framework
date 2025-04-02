@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace Omega\View\Engine;
 
 use Omega\Facade\Facades\View;
-use Omega\Utils\Path;
+use Omega\Support\Path;
 
 use function array_merge;
 use function extract;

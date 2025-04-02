@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace Omega\Validation\Rule;
 
-use Omega\Utils\Str;
+use Omega\Support\Str;
 
 /**
  * Email rule class.
