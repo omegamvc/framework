@@ -47,7 +47,7 @@
       "Omega\\": "src/Omega/"
     },
     "files": [
-      "src/Omega/Helpers/function.php"
+      "src/Omega/Support/helpers.php"
     ]
   },
   "autoload-dev": {

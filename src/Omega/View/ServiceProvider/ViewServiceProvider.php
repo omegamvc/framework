@@ -18,7 +18,7 @@ namespace Omega\View\ServiceProvider;
 use Omega\Application\Application;
 use OMega\Cache\Item\Item;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
-use Omega\Facade\Facades\View;
+use Omega\Support\Facade\Facades\View;
 use Omega\View\ViewManager;
 use Omega\View\Engine\AdvancedEngine;
 use Omega\View\Engine\BasicEngine;

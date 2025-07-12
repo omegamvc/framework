@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use System\Collection\Collection;
+use Omega\Collection\Collection;
 
 if (!function_exists('collection')) {
     /**

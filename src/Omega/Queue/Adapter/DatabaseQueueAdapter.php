@@ -17,7 +17,7 @@ namespace Omega\Queue\Adapter;
 
 use Closure;
 use Exception;
-use Omega\Facade\Facades\Config;
+use Omega\Support\Facade\Facades\Config;
 use Omega\SerializableClosure\SerializableClosure;
 use Omega\Queue\Job;
 

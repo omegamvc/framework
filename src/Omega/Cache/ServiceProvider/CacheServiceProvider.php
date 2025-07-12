@@ -18,7 +18,7 @@ namespace Omega\Cache\ServiceProvider;
 use Omega\Application\Application;
 use Omega\Cache\Factory\CacheFactory;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
-use Omega\Facade\Facades\Config;
+use Omega\Support\Facade\Facades\Config;
 
 /**
  * Cache service provider class.

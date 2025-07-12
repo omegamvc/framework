@@ -18,7 +18,7 @@ namespace Omega\Filesystem\ServiceProvider;
 use Omega\Application\Application;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
 use Omega\Filesystem\Factory\FilesystemFactory;
-use Omega\Facade\Facades\Config;
+use Omega\Support\Facade\Facades\Config;
 
 /**
  * Filesystem service provider class.

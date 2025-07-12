@@ -18,7 +18,7 @@ namespace Omega\Database\ServiceProvider;
 use Omega\Application\Application;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
 use Omega\Database\Factory\DatabaseFactory;
-use Omega\Facade\Facades\Config;
+use Omega\Support\Facade\Facades\Config;
 
 /**
  * Database service provider class.

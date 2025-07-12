@@ -16,13 +16,14 @@ declare(strict_types=1);
 namespace Omega\Application;
 
 use Closure;
+use Omega\Support\Singleton\SingletonTrait;
 use Throwable;
 use Omega\Container\Container;
 use Omega\Container\Contracts\ServiceProvider\ServiceProviderInterface;
 use Omega\Environment\Dotenv;
 use Omega\Environment\EnvironmentDetector;
-use Omega\Facade\AliasLoader;
-use Omega\Facade\Facades\Router;
+use Omega\Support\Facade\AliasLoader;
+use Omega\Support\Facade\Facades\Router;
 use Omega\Http\Response;
 use Omega\Support\Path;
 use Omega\Support\Str;
@@ -44,7 +45,7 @@ use Omega\Support\Str;
  */
 class Application extends Container implements ApplicationInterface
 {
-    use ApplicationSingletonTrait;
+    use SingletonTrait;
 
     /**
      * The base path for the Omega installation.
