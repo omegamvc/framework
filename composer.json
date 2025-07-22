@@ -1,0 +1,64 @@
+{
+    "name": "omegamvc/framework",
+    "description": "library to build php mvc",
+    "keywords": [
+        "framework",
+        "php-mvc",
+        "php-library"
+    ],
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Adriano Giovannini",
+            "email": "agisoftt@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "ext-http": "*",
+        "ext-intl": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-pcntl": "*",
+        "ext-posix": "*",
+        "ext-readline": "*",
+        "php-di/php-di": "^7.0.0",
+        "wixel/gump": "^v2.2.0"
+    },
+    "require-dev": {
+        "filp/whoops": "^2.18"
+    },
+    "autoload": {
+        "psr-4": {
+            "Omega\\": "src/Omega/"
+        },
+        "files": [
+            "src/Omega/Collection/helper.php",
+            "src/Omega/Console/helper.php",
+            "src/Omega/Support/helper.php",
+            "src/Omega/Text/helper.php",
+            "src/Omega/Time/helper.php",
+            "src/Omega/Validator/helper.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/Tests/"
+        }
+    },
+    "scripts": {
+        "phpunit": "vendor/bin/phpunit",
+        "phpcs": "vendor/bin/phpcs",
+        "phpcbf": "vendor/bin/phpcbf --standard=PSR12"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
