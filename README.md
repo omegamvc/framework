@@ -52,7 +52,7 @@ Focused on simplicity, performance, and scalability, Omega Framework equips deve
     <tr>
         <td><code>Collection</code></td>
         <td>Offers a fluent, convenient wrapper for working with arrays of data.</td>
-        <td><a href="https://github.com/omegamvc/php-library/blob/main/docs/Collection.md" target="_blank">📖</a></td>
+        <td><a href="https://github.com/omegamvc/framework/blob/main/docs/Collection.md" target="_blank">📖</a></td>
      </tr>
     <tr>
         <td><code>Container</code></td>
@@ -67,12 +67,12 @@ Focused on simplicity, performance, and scalability, Omega Framework equips deve
     <tr>
         <td><code>Console</code></td>
         <td>Provides tools to define and run CLI commands within the application.</td>
-        <td><a href="https://github.com/omegamvc/php-library/blob/main/docs/Console.md" target="_blank">📖</a></td>
+        <td><a href="https://github.com/omegamvc/framework/blob/main/docs/Console.md" target="_blank">📖</a></td>
      </tr>
      <tr>
         <td><code>Database</code></td>
         <td>Provides a database abstraction, CRUD operations, and a QueryBuilder.</td>
-        <td><a href="https://github.com/omegamvc/php-library/blob/main/docs/Database.md" target="_blank">📖</a></td>
+        <td><a href="https://github.com/omegamvc/framework/blob/main/docs/Database.md" target="_blank">📖</a></td>
     </tr>
     <tr>
         <td><code>File</code></td>
@@ -105,7 +105,7 @@ Focused on simplicity, performance, and scalability, Omega Framework equips deve
       <td>N/A</td>
     </tr>
     <tr>
-        <td><code>Support</code></ts>
+        <td><code>Support</code></td>
         <td>Contains helper classes and general-purpose utility functions.</td>
         <td>N/A</td>
     </tr>
@@ -117,7 +117,7 @@ Focused on simplicity, performance, and scalability, Omega Framework equips deve
     <tr>
       <td><code>Text</code></td>
       <td>Provides methods to manipulate strings.</td>
-      <td><a href="https://github.com/omegamvc/php-library/blob/main/docs/Str.md" target="_blank">📖</a></td>
+      <td><a href="https://github.com/omegamvc/framework/blob/main/docs/Str.md" target="_blank">📖</a></td>
     </tr>
     <tr>
         <td><code>Time</code></td>
@@ -127,7 +127,7 @@ Focused on simplicity, performance, and scalability, Omega Framework equips deve
     <tr>
       <td><code>Validator</code></td>
       <td>Provides a flexible and extensible validation system for input data.</td>
-      <td><a href="https://github.com/omegamvc/php-library/blob/main/docs/Validator.md" target="_blank">📖</a></td>
+      <td><a href="https://github.com/omegamvc/framework/blob/main/docs/Validator.md" target="_blank">📖</a></td>
     </tr>
     <tr>
         <td><code>View</code></td>
