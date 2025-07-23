@@ -64,7 +64,7 @@ class ConfigProviders
         $config     = $app->defaultConfigs();
         $hasCache   = false;
 
-        if (file_exists($file = $app->getApplicationCachePath() . '.php')) {
+        if (file_exists($file = $app->getApplicationCachePath() . 'config.php')) {
             $config    = array_merge($config, require $file);
             $hasCache = true;
         }
@@ -80,6 +80,6 @@ class ConfigProviders
 
         $app->loadConfig(new ConfigRepository($config));
 
-        date_default_timezone_set($config['time_zone'] ?? 'UTC');
+        date_default_timezone_set($config['timezone'] ?? 'UTC');
     }
 }

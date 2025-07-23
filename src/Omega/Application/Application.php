@@ -99,7 +99,7 @@ class Application extends Container implements ApplicationInterface
         // set base path
         $this->setBasePath($basePath);
         $this->setConfigPath(
-            $_ENV['CONFIG_PATH'] ?? DIRECTORY_SEPARATOR
+            env('CONFIG_PATH') ?? DIRECTORY_SEPARATOR
             . 'app'
             . DIRECTORY_SEPARATOR
             . 'config'

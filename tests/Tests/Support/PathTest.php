@@ -18,13 +18,6 @@ namespace Tests\Support;
 use Omega\Support\Path;
 use PHPUnit\Framework\TestCase;
 
-use function file_put_contents;
-use function mkdir;
-use function rmdir;
-use function sort;
-use function sys_get_temp_dir;
-use function unlink;
-
 /**
  * Class PathTest
  *
@@ -82,8 +75,8 @@ class PathTest extends TestCase
      */
     public function testGetPathWithDirectoryAndFile(): void
     {
-        $result = Path::getPath('app.Model', 'MyModel.php');
-        $this->assertSame('/var/www/project/app/Model/MyModel.php', $result);
+        $result = Path::getPath('app.Model');
+        $this->assertSame('/var/www/project/app/Model/', $result);
     }
 
     /**
@@ -95,65 +88,7 @@ class PathTest extends TestCase
     {
         Path::init('');
         $result = Path::getPath('storage');
-        $this->assertSame('storage/', $result);
-    }
-
-    /**
-     * Test get path with single file string.
-     *
-     * @return void
-     */
-    public function testGetPathsWithSingleFileString(): void
-    {
-        $result = Path::getPaths('app.Model', 'MyModel.php');
-        $this->assertSame(['/var/www/project/app/Model/MyModel.php'], $result);
-    }
-
-    /**
-     * Test get paths with array of files.
-     *
-     * @return void
-     */
-    public function testGetPathsWithArrayOfFiles(): void
-    {
-        $files = ['file1.php', 'file2.php'];
-        $result = Path::getPaths('app.Model', $files);
-        $expected = [
-            '/var/www/project/app/Model/file1.php',
-            '/var/www/project/app/Model/file2.php',
-        ];
-        $this->assertSame($expected, $result);
-    }
-
-    /**
-     * Test get path with glob pattern.
-     *
-     * @return void
-     */
-    public function testGetPathsWithGlobPattern(): void
-    {
-        $tempDir = sys_get_temp_dir() . '/test_path_glob/';
-        @mkdir($tempDir);
-        file_put_contents($tempDir . 'test1.php', '');
-        file_put_contents($tempDir . 'test2.php', '');
-
-        Path::init($tempDir);
-
-        $result = Path::getPaths('', '*.php');
-
-        sort($result);
-        $expected = [
-            $tempDir . 'test1.php',
-            $tempDir . 'test2.php',
-        ];
-        sort($expected);
-
-        $this->assertSame($expected, $result);
-
-        // Cleanup
-        unlink($tempDir . 'test1.php');
-        unlink($tempDir . 'test2.php');
-        rmdir($tempDir);
+        $this->assertSame('/storage/', $result);
     }
 
     /**

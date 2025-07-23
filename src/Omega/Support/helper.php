@@ -16,6 +16,7 @@ declare(strict_types=1);
 use DI\DependencyException;
 use DI\NotFoundException;
 use Omega\Collection\CollectionImmutable;
+use Omega\Environment\Dotenv;
 use Omega\Http\RedirectResponse;
 use Omega\Http\Response;
 use Omega\Application\Application;
@@ -504,5 +505,19 @@ if (!function_exists('abort')) {
     function abort(int $code, string $message = '', array $headers = []): void
     {
         app()->abort($code, $message, $headers);
+    }
+}
+
+if (! function_exists('env')) {
+    /**
+     * Get the value of an environment variable.
+     *
+     * @param string $key     Holds the key of the environment variable.
+     * @param mixed  $default Holds the default value if the key is not set.
+     * @return mixed Returns the value of the environment variable or the default value if the key is not set.
+     */
+    function env(string $key, mixed $default = null): mixed
+    {
+        return Dotenv::get($key, $default);
     }
 }
