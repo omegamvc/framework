@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+use Omega\Console\Command;
+use Omega\Console\Prompt;
+
+require_once dirname(__DIR__, 5) . '/vendor/autoload.php';
+
+$command = new class($argv) extends Command {
+  public function main(): void
+  {    
+    $prompt = new Prompt('test', [
+      'test_1' => function () {
+        echo "ok";
+      },
+      '' => function () {
+        echo "default";
+      }
+    ]);      
+    $prompt->option();
+  }
+};
+
+$command->main();

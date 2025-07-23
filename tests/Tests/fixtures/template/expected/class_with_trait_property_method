@@ -1,0 +1,17 @@
+<?php
+
+use Omega\Template\Generate;
+
+class NewClass extends PHPUnit\Framework\TestCase implements testInterface
+{
+	use Tests\Template\PhpParser\Builder\TraitUseAdaptation, Tests\Template\PhpParser\Builder\TraitUse;
+
+	const TEST = null;
+
+	private $test;
+
+	function test()
+	{
+
+	}
+}
