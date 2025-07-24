@@ -124,7 +124,7 @@ class SeedCommandsWithDatabaseTest extends AbstractDatabase
      */
     public function testItCanRunSeederRunnerWithRealInsertData(): void
     {
-        $this->createUserschema();
+        //$this->createUserschema();
         $seeder = new SeedCommand(['omega', 'db:seed', '--class', 'UserSeeder']);
         ob_start();
         $seeder->main();

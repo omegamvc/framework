@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace Tests\Console\Commands;
 
-use Omega\Config\ConfigRepository;
+use Omega\Config\Config;
 use Omega\Console\Command;
 use Omega\Console\Commands\HelpCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -43,7 +43,7 @@ use function ob_start;
  * @version    2.0.0
  */
 #[CoversClass(Command::class)]
-#[CoversClass(ConfigRepository::class)]
+#[CoversClass(Config::class)]
 #[CoversClass(HelpCommand::class)]
 class HelpCommandsTest extends CommandTestHelper
 {
@@ -61,7 +61,7 @@ class HelpCommandsTest extends CommandTestHelper
     protected function setUp(): void
     {
         parent::setUp();
-        $this->app->set('config', fn () => new ConfigRepository([
+        $this->app->set('config', fn () => new Config([
             'commands' => [$this->command],
         ]));
     }

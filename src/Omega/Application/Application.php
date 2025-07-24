@@ -15,14 +15,21 @@ declare(strict_types=1);
 
 namespace Omega\Application;
 
+use App\Providers\AppServiceProvider;
+use App\Providers\CacheServiceProvider;
+use App\Providers\DatabaseServiceProvider;
+use App\Providers\RouteServiceProvider;
+use App\Providers\ViewServiceProvider;
 use DI\DependencyException;
 use DI\NotFoundException;
-use Omega\Config\ConfigRepository;
+use Omega\Config\Config;
 use Omega\Container\Container;
 use Omega\Container\Provider\AbstractServiceProvider;
+use Omega\Environment\Dotenv;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Request;
 use Omega\Support\PackageManifest;
+use Omega\Support\Path;
 use Omega\Support\RequestMacroServiceProvider;
 use Omega\Support\Vite;
 use Omega\View\Templator;
@@ -96,7 +103,8 @@ class Application extends Container implements ApplicationInterface
     {
         parent::__construct();
 
-        // set base path
+        Path::init($basePath);
+
         $this->setBasePath($basePath);
         $this->setConfigPath(
             env('CONFIG_PATH') ?? DIRECTORY_SEPARATOR
@@ -150,26 +158,6 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * Defines legacy constants from the given configuration array.
-     *
-     * Useful for backward compatibility with global-based APIs (e.g., Redis, Memcached).
-     *
-     * @param array<string, string> $configs Associative array of constant names and values.
-     * @return void
-     */
-    private function defined(array $configs): void
-    {
-        // redis
-        defined('REDIS_HOST') || define('REDIS_HOST', $configs['REDIS_HOST']);
-        defined('REDIS_PASS') || define('REDIS_PASS', $configs['REDIS_PASS']);
-        defined('REDIS_PORT') || define('REDIS_PORT', $configs['REDIS_PORT']);
-        // Memcached
-        defined('MEMCACHED_HOST') || define('MEMCACHED_HOST', $configs['MEMCACHED_HOST']);
-        defined('MEMCACHED_PASS') || define('MEMCACHED_PASS', $configs['MEMCACHED_PASS']);
-        defined('MEMCACHED_PORT') || define('MEMCACHED_PORT', $configs['MEMCACHED_PORT']);
-    }
-
-    /**
      * Registers aliases for container services.
      *
      * Maps common string-based identifiers to their corresponding classes
@@ -184,7 +172,7 @@ class Application extends Container implements ApplicationInterface
                 'request'       => [Request::class],
                 'view.instance' => [Templator::class],
                 'vite.gets'     => [Vite::class],
-                'config'        => [ConfigRepository::class],
+                'config'        => [Config::class],
             ] as $abstract => $aliases
         ) {
             foreach ($aliases as $alias) {
@@ -208,10 +196,10 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function loadConfig(ConfigRepository $configs): void
+    public function loadConfig(Config $configs): void
     {
         // give access to get config directly
-        $this->set('config', fn (): ConfigRepository => $configs);
+        $this->set('config', fn (): Config => $configs);
 
         // base env
         $this->set('environment', $configs['APP_ENV'] ?? $configs['ENVIRONMENT']);
@@ -241,7 +229,6 @@ class Application extends Container implements ApplicationInterface
         $this->set('config.view.extensions', $configs['VIEW_EXTENSIONS']);
         // load provider
         $this->providers = $configs['PROVIDERS'];
-        $this->defined($configs->toArray());
     }
 
     /**
@@ -252,7 +239,7 @@ class Application extends Container implements ApplicationInterface
         return [
             // app config
             'BASEURL'               => '/',
-            'time_zone'             => 'UTC',
+            'TIME_ZONE'             => 'UTC',
             'APP_KEY'               => '',
             'ENVIRONMENT'           => 'dev',
             'APP_DEBUG'             => 'false',

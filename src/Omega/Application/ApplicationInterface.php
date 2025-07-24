@@ -17,7 +17,7 @@ namespace Omega\Application;
 
 use DI\DependencyException;
 use DI\NotFoundException;
-use Omega\Config\ConfigRepository;
+use Omega\Config\Config;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Http\Exceptions\HttpException;
 
@@ -43,12 +43,12 @@ interface ApplicationInterface
     /**
      * Loads and applies configuration to the application.
      *
-     * @param ConfigRepository $configs The configuration repository instance.
+     * @param Config $configs The configuration repository instance.
      * @return void
      * @throws DependencyException If a dependency cannot be resolved.
      * @throws NotFoundException If a service or value is not found in the container.
      */
-    public function loadConfig(ConfigRepository $configs): void;
+    public function loadConfig(Config $configs): void;
 
     /**
      * Returns the default configuration array for fallback purposes.

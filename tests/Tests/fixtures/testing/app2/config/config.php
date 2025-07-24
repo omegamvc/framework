@@ -3,9 +3,9 @@
 return [
     // app config
     'BASEURL'               => '/',
-    'time_zone'             => 'UTC',
+    'TIME_ZONE'             => 'UTC',
     'APP_KEY'               => '',
-    'ENVIRONMENT'           => 'test',
+    'ENVIRONMENT'           => 'prod',
 
     'COMMAND_PATH'          => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Commands' . DIRECTORY_SEPARATOR,
     'CONTROLLER_PATH'       => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR,

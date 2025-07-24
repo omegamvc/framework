@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace Tests\Console\Commands;
 
-use Omega\Config\ConfigRepository;
+use Omega\Config\Config;
 use Omega\Console\Commands\ViewCommand;
 use Omega\Application\Application;
 use Omega\View\Templator;
@@ -45,7 +45,7 @@ use function ob_start;
  * @version    2.0.0
  */
 #[CoversClass(Application::class)]
-#[CoversClass(ConfigRepository::class)]
+#[CoversClass(Config::class)]
 #[CoversClass(Templator::class)]
 #[CoversClass(TemplatorFinder::class)]
 #[CoversClass(ViewCommand::class)]

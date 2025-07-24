@@ -18,7 +18,7 @@ namespace Omega\Console\Commands;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Omega\Application\Application;
-use Omega\Config\ConfigRepository;
+use Omega\Config\Config;
 use Omega\Console\Command;
 use Omega\Support\Bootstrap\ConfigProviders;
 
@@ -101,7 +101,7 @@ class ConfigCommand extends Command
         (new ConfigProviders())->bootstrap($app);
 
         $this->clear();
-        $config        = $app->get(ConfigRepository::class)->toArray();
+        $config        = $app->get(Config::class)->getAll();
         $cached_config = '<?php return ' . var_export($config, true) . ';' . PHP_EOL;
         if (file_put_contents($app->getApplicationCachePath() . 'config.php', $cached_config)) {
             ok('Config file has successfully created.')->out();

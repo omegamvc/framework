@@ -18,7 +18,7 @@ namespace Omega\Support\Bootstrap;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Omega\Application\Application;
-use Omega\Config\ConfigRepository;
+use Omega\Config\Config;
 
 use function array_merge;
 use function date_default_timezone_set;
@@ -78,8 +78,32 @@ class ConfigProviders
             }
         }
 
-        $app->loadConfig(new ConfigRepository($config));
+        $app->loadConfig(new Config($config));
 
-        date_default_timezone_set($config['timezone'] ?? 'UTC');
+        date_default_timezone_set($this->normalizeTimeZone($config));
+    }
+
+    /**
+     * Determines the appropriate timezone setting for the application.
+     *
+     * Priority is given to the environment variable 'TIME_ZONE'. If not set,
+     * it falls back to the 'timezone' key in the configuration array, and
+     * optionally uses the 'timezone' environment variable as an override.
+     * If neither is found, defaults to 'UTC'.
+     *
+     * @param array $config The application's configuration array.
+     * @return string The resolved timezone identifier.
+     */
+    private function normalizeTimeZone(array $config): string
+    {
+        if ($tz = env('TIME_ZONE')) {
+            return $tz;
+        }
+
+        if (isset($config['timezone'])) {
+            return env('timezone', $config['timezone']);
+        }
+
+        return 'UTC';
     }
 }

@@ -3,7 +3,7 @@
 return [
     // app config
     'BASEURL'               => '/',
-    'time_zone'             => 'UTC',
+    'TIME_ZONE'             => 'UTC',
     'APP_KEY'               => '',
     'ENVIRONMENT'           => 'test',
 

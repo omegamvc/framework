@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace Omega\Console;
 
 use Omega\Application\Application;
-use Omega\Config\ConfigRepository;
+use Omega\Config\Config;
 
 /**
  * Class Util
@@ -47,7 +47,7 @@ final class Util
     public static function loadCommandFromConfig(Application $app): array
     {
         $commandMap = [];
-        foreach ($app[ConfigRepository::class]->get('commands', []) as $commands) {
+        foreach ($app[Config::class]->get('commands', []) as $commands) {
             foreach ($commands as $command) {
                 $commandMap[] = new CommandMap($command);
             }
