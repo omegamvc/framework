@@ -110,6 +110,7 @@ class MakeCommandsWithDatabaseTest extends AbstractDatabase
      */
     public function testItCanCallMakeCommandModelWithSuccess(): void
     {
+        $this->createUserSchema();
         $make_model = new MakeCommand(['omega', 'make:model', 'Client', '--table-name', 'users']);
         ob_start();
         $exit = $make_model->makeModel();

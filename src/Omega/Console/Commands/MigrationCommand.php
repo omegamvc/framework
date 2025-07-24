@@ -238,6 +238,8 @@ class MigrationCommand extends Command
      *
      * @param false|int $batch Batch number passed by reference. If false, the next available batch is used.
      * @return Collection<string, array<string, string>> A collection of migrations with file path and batch number.
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function baseMigrate(false|int &$batch = false): Collection
     {
@@ -479,6 +481,8 @@ class MigrationCommand extends Command
      * Requires the 'batch' option to be specified.
      *
      * @return int Exit status code.
+     * @throws DependencyException If a service could not be resolved.
+     * @throws NotFoundException If a class or value was not found in the container.
      */
     public function rollback(): int
     {
@@ -501,9 +505,11 @@ class MigrationCommand extends Command
     /**
      * Executes the rollback process for a given batch and number of steps.
      *
-     * @param int|false $batch The target batch number or false to rollback all.
+     * @param int|false $batch The target batch number or false to roll back all.
      * @param int $take Number of migrations to rollback. 0 rolls back all from the batch.
      * @return int Exit status code.
+     * @throws DependencyException If a service could not be resolved.
+     * @throws NotFoundException If a class or value was not found in the container.
      */
     public function rollbacks(int|false $batch, int $take): int
     {
@@ -533,6 +539,9 @@ class MigrationCommand extends Command
 
             try {
                 $success = $down->every(fn ($item) => $item->execute());
+                if ($success) {
+                    $success = $this->deleteMigrationTable((int) $val['batch']);
+                }
             } catch (Throwable $th) {
                 $success = false;
                 fail($th->getMessage())->out(false);
@@ -556,9 +565,9 @@ class MigrationCommand extends Command
      *
      * @param bool $silent If true, suppresses confirmation prompts.
      * @return int Exit status code.
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws Exception
+     * @throws DependencyException If a service could not be resolved.
+     * @throws NotFoundException If a class or value was not found in the container.
+     * @throws Exception If an error occurs during user prompt.
      */
     public function databaseCreate(bool $silent = false): int
     {
@@ -842,8 +851,21 @@ class MigrationCommand extends Command
         return DB::table('migration')
             ->insert()
             ->values($migration)
-            ->execute()
-        ;
+            ->execute();
+    }
+
+    /**
+     * Save insert migration file with batch to migration table.
+     *
+     * @param int $batchNumber The batch number of migration.
+     * @return bool
+     */
+    private function deleteMigrationTable(int $batchNumber): bool
+    {
+        return DB::table('migration')
+            ->delete()
+            ->equal('batch', $batchNumber)
+            ->execute();
     }
 
     /**
