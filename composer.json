@@ -30,8 +30,10 @@
         "ext-mbstring": "*",
         "ext-openssl": "*",
         "ext-pcntl": "*",
+        "ext-pdo": "*",
         "ext-posix": "*",
         "ext-readline": "*",
+        "ext-simplexml": "*",
         "php-di/php-di": "^7.0.0",
         "wixel/gump": "^v2.2.0"
     },
