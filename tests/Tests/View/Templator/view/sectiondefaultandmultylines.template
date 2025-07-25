@@ -1,7 +1,0 @@
-<li>
-{% yield('list', 'default') %}
-<ul>one</ul>
-<ul>two</ul>
-<ul>three</ul>
-{% endyield %}
-</li>

@@ -1,8 +1,0 @@
-<?php
-
-use Omega\Template\Generate;
-
-class NewClass extends PHPUnit\Framework\TestCase implements testInterface
-{
-
-}
