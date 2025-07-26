@@ -61,11 +61,11 @@ class ConfigProviders
     public function bootstrap(Application $app): void
     {
         $configPath = $app->getConfigPath();
-        $config     = $app->defaultConfigs();
+        $config     = [];
         $hasCache   = false;
 
         if (file_exists($file = $app->getApplicationCachePath() . 'config.php')) {
-            $config    = array_merge($config, require $file);
+            $config    = require $file;
             $hasCache = true;
         }
 
@@ -80,30 +80,6 @@ class ConfigProviders
 
         $app->loadConfig(new Config($config));
 
-        date_default_timezone_set($this->normalizeTimeZone($config));
-    }
-
-    /**
-     * Determines the appropriate timezone setting for the application.
-     *
-     * Priority is given to the environment variable 'TIME_ZONE'. If not set,
-     * it falls back to the 'timezone' key in the configuration array, and
-     * optionally uses the 'timezone' environment variable as an override.
-     * If neither is found, defaults to 'UTC'.
-     *
-     * @param array $config The application's configuration array.
-     * @return string The resolved timezone identifier.
-     */
-    private function normalizeTimeZone(array $config): string
-    {
-        if ($tz = env('TIME_ZONE')) {
-            return $tz;
-        }
-
-        if (isset($config['timezone'])) {
-            return env('timezone', $config['timezone']);
-        }
-
-        return 'UTC';
+        date_default_timezone_set(env('TIME_ZONE'));
     }
 }

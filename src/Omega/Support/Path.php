@@ -15,9 +15,7 @@ declare(strict_types=1);
 namespace Omega\Support;
 
 use function implode;
-use function ltrim;
 use function rtrim;
-use function str_ends_with;
 use function str_replace;
 
 /**
@@ -69,30 +67,27 @@ class Path
     }
 
     /**
-     * Get the full path by joining the base path with optional subdirectories.
+     * Get the full path by joining the base path with a directory and an optional file.
      *
-     * This method returns the full path by joining the base path with the specified main directory (`$fullPath`)
-     * and an optional subdirectory (`$subPath`). If no arguments are passed, it simply returns the base path.
-     * If only `$fullPath` is passed, it will return the full path to that directory. If both `$fullPath` and `$subPath`
-     * are provided, it will return the full path to the subdirectory.
+     * This method returns the full path by combining the base path with the specified logical
+     * directory (`$fullPath`) and an optional file name (`$subPath`). The first argument is always
+     * treated as a directory path (converted from dot notation to directory separators) and will
+     * end with a trailing slash. The second argument, if present, is treated as a file name and
+     * appended directly to the resulting path.
      *
-     * Example usage:
-     * ```php
-     * // Assuming base path is initialized as '/var/www/project'
+     * Example:
+     * ```
      * Path::init('/var/www/project');
      *
-     * // Get the path to the 'database' directory
-     * echo Path::getPath('database'); // Output: '/var/www/project/database'
-     *
-     * // Get the path to the 'database/migrations' subdirectory
-     * echo Path::getPath('database', 'migrations'); // Output: '/var/www/project/database/migrations'
+     * Path::getPath('storage.logs');             // returns '/var/www/project/storage/logs/'
+     * Path::getPath('storage.logs', 'app.log');  // returns '/var/www/project/storage/logs/app.log'
      * ```
      *
-     * @param string|null $fullPath The main directory name (e.g., 'database', 'config', etc.).
-     * @param string|null $subPath  An optional subdirectory.
-     * @return string The full path.
+     * @param string|null $fullPath The directory path in dot notation (e.g., 'storage.logs').
+     * @param string|null $file     The file name to append to the directory path.
+     * @return string The full absolute path.
      */
-    public static function getPath(?string $fullPath = null, ?string $subPath = null): string
+    public static function getPath(?string $fullPath = null, ?string $file = null): string
     {
         $path = self::$basePath;
 
@@ -101,39 +96,45 @@ class Path
             $path = self::joinPaths($path, $fullPath);
         }
 
-        if ($subPath) {
-            $subPath = str_replace('.', DIRECTORY_SEPARATOR, $subPath);
-            $path = self::joinPaths($path, $subPath);
-        }
-
-        if (!str_ends_with($path, DIRECTORY_SEPARATOR)) {
-            $path .= DIRECTORY_SEPARATOR;
+        if ($file) {
+            $path = self::joinPaths($path, $file);
+        } else {
+            // solo se è una cartella, aggiungo lo slash finale
+            $path = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         }
 
         return $path;
     }
 
     /**
-     * Join the given paths.
+     * Join multiple path segments into a normalized path string.
      *
-     * This method takes a base path and additional paths as arguments, then joins them together, ensuring
-     * proper directory separators between each path component. It trims any extra separators from the start
-     * and end of each path before joining them.
+     * This method takes any number of path segments and joins them using the system's
+     * directory separator. It ensures that there are no duplicate slashes between segments.
+     * Leading and trailing slashes are trimmed from all segments except the first,
+     * which may retain its leading slash for absolute paths.
      *
-     * @param string      $basePath The base path.
-     * @param string|null ...$paths Additional paths.
-     * @return string The joined path.
+     * Examples:
+     * ```php
+     * joinPaths('/var/www', 'project')        => '/var/www/project'
+     * joinPaths('/base/', '/to/', '/file')    => '/base/to/file'
+     * joinPaths('path', 'to', 'file.txt')     => 'path/to/file.txt'
+     * ```
+     *
+     * @param string ...$segments One or more path segments to join.
+     * @return string The normalized joined path.
      */
-    private static function joinPaths(string $basePath, ?string ...$paths): string
+    private static function joinPaths(string ...$segments): string
     {
-        foreach ($paths as $index => $path) {
-            if (empty($path)) {
-                unset($paths[$index]);
-            } else {
-                $paths[$index] = DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
-            }
-        }
+        // Rimuove slash iniziali/finali da ogni segmento tranne il primo
+        $segments = array_map(
+            static fn($i, $part) => $i === 0
+                ? rtrim($part, DIRECTORY_SEPARATOR)
+                : trim($part, DIRECTORY_SEPARATOR),
+            array_keys($segments),
+            $segments
+        );
 
-        return rtrim($basePath, DIRECTORY_SEPARATOR) . implode('', $paths);
+        return implode(DIRECTORY_SEPARATOR, $segments);
     }
 }

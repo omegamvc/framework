@@ -57,6 +57,20 @@ class Container extends DIContainer implements ArrayAccess, ContainerInterface
     protected array $aliases = [];
 
     /**
+     * Register a pre-built instance in the container.
+     *
+     * This binds the given ID to a closure that always returns the same value.
+     * Useful for binding singleton-like instances or values directly.
+     *
+     * @param string $id    The identifier to bind in the container.
+     * @param mixed  $value The instance or value to associate with the identifier.
+     */
+    public function instance(string $id, mixed $value): void
+    {
+        $this->set($id, fn () => $value);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function get(string $id): mixed

@@ -215,7 +215,6 @@ if (!function_exists('cache_path')) {
      * @return string The full path to the cache directory with optional suffix
      * @throws DependencyException If a dependency cannot be resolved.
      * @throws NotFoundException If the requested entry is not found in the container.
-     * @deprecated Since version 0.32, use compiled_view_path() instead.
      */
     function cache_path(string $suffix_path = ''): string
     {

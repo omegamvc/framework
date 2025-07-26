@@ -25,7 +25,6 @@ use DI\NotFoundException;
 use Omega\Config\Config;
 use Omega\Container\Container;
 use Omega\Container\Provider\AbstractServiceProvider;
-use Omega\Environment\Dotenv;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Request;
 use Omega\Support\PackageManifest;
@@ -35,12 +34,8 @@ use Omega\Support\Vite;
 use Omega\View\Templator;
 
 use function array_map;
-use function defined;
 use function file_exists;
 use function in_array;
-use function rtrim;
-
-use const DIRECTORY_SEPARATOR;
 
 /**
  * The core Application class.
@@ -69,7 +64,13 @@ class Application extends Container implements ApplicationInterface
     private string $basePath;
 
     /** @var AbstractServiceProvider[] List of all registered service providers. */
-    private array $providers = [];
+    private array $providers = [
+        AppServiceProvider::class,
+        RouteServiceProvider::class,
+        DatabaseServiceProvider::class,
+        ViewServiceProvider::class,
+        CacheServiceProvider::class,
+    ];
 
     /** @var AbstractServiceProvider[] List of service providers that have been booted. */
     private array $bootedProviders = [];
@@ -103,16 +104,12 @@ class Application extends Container implements ApplicationInterface
     {
         parent::__construct();
 
-        Path::init($basePath);
+        $this->basePath = $basePath;
 
-        $this->setBasePath($basePath);
-        $this->setConfigPath(
-            env('CONFIG_PATH') ?? DIRECTORY_SEPARATOR
-            . 'app'
-            . DIRECTORY_SEPARATOR
-            . 'config'
-            . DIRECTORY_SEPARATOR
-        );
+        Path::init($this->basePath);
+
+        $this->setBasePath($this->basePath);
+        $this->setConfigPath(env('CONFIG_PATH'));
 
         // base binding
         $this->setBaseBinding();
@@ -132,6 +129,14 @@ class Application extends Container implements ApplicationInterface
     public static function getInstance(): ?Application
     {
         return Application::$app;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getVersion(): string
+    {
+        return static::VERSION;
     }
 
     /**
@@ -198,114 +203,20 @@ class Application extends Container implements ApplicationInterface
      */
     public function loadConfig(Config $configs): void
     {
-        // give access to get config directly
         $this->set('config', fn (): Config => $configs);
 
-        // base env
-        $this->set('environment', $configs['APP_ENV'] ?? $configs['ENVIRONMENT']);
-        $this->set('app.debug', $configs['APP_DEBUG'] === 'true');
-        // application path
-        $this->setAppPath($this->getBasePath());
-        $this->setModelPath($configs['MODEL_PATH']);
-        $this->setViewPath($configs['VIEW_PATH']);
-        $this->setViewPaths($configs['VIEW_PATHS']);
-        $this->setControllerPath($configs['CONTROLLER_PATH']);
-        $this->setServicesPath($configs['SERVICES_PATH']);
-        $this->setComponentPath($configs['COMPONENT_PATH']);
-        $this->setCommandPath($configs['COMMAND_PATH']);
-        $this->setCachePath($configs['CACHE_PATH']);
-        $this->setCompiledViewPath($configs['COMPILED_VIEW_PATH']);
-        $this->setMiddlewarePath($configs['MIDDLEWARE']);
-        $this->setProviderPath($configs['SERVICE_PROVIDER']);
-        $this->setMigrationPath($configs['MIGRATION_PATH']);
-        $this->setPublicPath($configs['PUBLIC_PATH']);
-        $this->setSeederPath($configs['SEEDER_PATH']);
-        $this->setStoragePath($configs['STORAGE_PATH']);
-        // other config
-        $this->set('config.pusher_id', $configs['PUSHER_APP_ID']);
-        $this->set('config.pusher_key', $configs['PUSHER_APP_KEY']);
-        $this->set('config.pusher_secret', $configs['PUSHER_APP_SECRET']);
-        $this->set('config.pusher_cluster', $configs['PUSHER_APP_CLUSTER']);
+        $this->set('environment', env('APP_ENV'));
+        $this->set('app.debug', env('APP_DEBUG'));
+
         $this->set('config.view.extensions', $configs['VIEW_EXTENSIONS']);
-        // load provider
-        $this->providers = $configs['PROVIDERS'];
     }
 
+    #region Setter Region
     /**
      * {@inheritdoc}
      */
-    public function defaultConfigs(): array
+    public function setBasePath(string $path): static
     {
-        return [
-            // app config
-            'BASEURL'               => '/',
-            'TIME_ZONE'             => 'UTC',
-            'APP_KEY'               => '',
-            'ENVIRONMENT'           => 'dev',
-            'APP_DEBUG'             => 'false',
-            'BCRYPT_ROUNDS'         => 12,
-            'CACHE_STORE'           => 'file',
-
-            'COMMAND_PATH'          => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Commands' . DIRECTORY_SEPARATOR,
-            'CONTROLLER_PATH'       => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR,
-            'MODEL_PATH'            => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR,
-            'MIDDLEWARE'            => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Middlewares' . DIRECTORY_SEPARATOR,
-            'SERVICE_PROVIDER'      => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR,
-            'CONFIG'                => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR,
-            'SERVICES_PATH'         => DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Services' . DIRECTORY_SEPARATOR,
-            'VIEW_PATH'             => DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR,
-            'COMPONENT_PATH'        => DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR,
-            'STORAGE_PATH'          => DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR,
-            'CACHE_PATH'            => DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR,
-            'CACHE_VIEW_PATH'       => DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR,
-            'PUBLIC_PATH'           => DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR,
-            'MIGRATION_PATH'        => DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . 'migration' . DIRECTORY_SEPARATOR,
-            'SEEDER_PATH'           => DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . 'seeders' . DIRECTORY_SEPARATOR,
-
-            'PROVIDERS'             => [
-                // provider class name
-            ],
-
-            // db config
-            'DB_HOST'               => 'localhost',
-            'DB_USER'               => 'root',
-            'DB_PASS'               => 'vb65ty4',
-            'DB_NAME'               => 'phpmvc',
-
-            // pusher
-            'PUSHER_APP_ID'         => '',
-            'PUSHER_APP_KEY'        => '',
-            'PUSHER_APP_SECRET'     => '',
-            'PUSHER_APP_CLUSTER'    => '',
-
-            // redis driver
-            'REDIS_HOST'            => '127.0.0.1',
-            'REDIS_PASS'            => '',
-            'REDIS_PORT'            => 6379,
-
-            // Memcached
-            'MEMCACHED_HOST'        => '127.0.0.1',
-            'MEMCACHED_PASS'        => '',
-            'MEMCACHED_PORT'        => 6379,
-
-            // view config
-            'VIEW_PATHS' => [
-                DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR,
-            ],
-            'VIEW_EXTENSIONS' => [
-                '.template.php',
-                '.php',
-            ],
-            'COMPILED_VIEW_PATH' => DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR,
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setBasePath(string $path): self
-    {
-        $this->basePath = $path;
         $this->set('path.base', $path);
 
         return $this;
@@ -314,10 +225,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setAppPath(string $path): self
+    public function setAppPath(string $path): static
     {
-        $appPath = $path . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR;
-        $this->set('path.app', $appPath);
+        $this->set('path.app', $path);
 
         return $this;
     }
@@ -325,10 +235,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setModelPath(string $path): self
+    public function setModelPath(string $path): static
     {
-        $modelPath = $this->basePath . $path;
-        $this->set('path.model', $modelPath);
+        $this->set('path.model', $path);
 
         return $this;
     }
@@ -336,10 +245,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setViewPath(string $path): self
+    public function setViewPath(string $path): static
     {
-        $viewPath = $this->basePath . $path;
-        $this->set('path.view', $viewPath);
+        $this->set('path.view', $path);
 
         return $this;
     }
@@ -347,10 +255,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setViewPaths(array $paths): self
+    public function setViewPaths(array $paths): static
     {
-        $viewPaths = array_map(fn ($path) => $this->basePath . $path, $paths);
-        $this->set('paths.view', $viewPaths);
+        $this->set('paths.view', array_map(fn ($path) => $path, $paths));
 
         return $this;
     }
@@ -358,10 +265,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setControllerPath(string $path): self
+    public function setControllerPath(string $path): static
     {
-        $controllerPath = $this->basePath . $path;
-        $this->set('path.controller', $controllerPath);
+        $this->set('path.controller', $path);
 
         return $this;
     }
@@ -369,10 +275,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setServicesPath(string $path): self
+    public function setServicesPath(string $path): static
     {
-        $servicesPath = $this->basePath . $path;
-        $this->set('path.services', $servicesPath);
+        $this->set('path.services', $path);
 
         return $this;
     }
@@ -380,10 +285,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setComponentPath(string $path): self
+    public function setComponentPath(string $path): static
     {
-        $componentPath = $this->basePath . $path;
-        $this->set('path.component', $componentPath);
+        $this->set('path.component', $path);
 
         return $this;
     }
@@ -391,10 +295,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setCommandPath(string $path): self
+    public function setCommandPath(string $path): static
     {
-        $commandPath = $this->basePath . $path;
-        $this->set('path.command', $commandPath);
+        $this->set('path.command', $path);
 
         return $this;
     }
@@ -402,10 +305,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setStoragePath(string $path): self
+    public function setStoragePath(string $path): static
     {
-        $storagePath = $this->basePath . $path;
-        $this->set('path.storage', $storagePath);
+        $this->set('path.storage', $path);
 
         return $this;
     }
@@ -413,10 +315,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setCachePath(string $path): self
+    public function setCachePath(string $path): static
     {
-        $cachePath = $this->basePath . $path;
-        $this->set('path.cache', $cachePath);
+        $this->set('path.cache', $path);
 
         return $this;
     }
@@ -424,10 +325,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setCompiledViewPath(string $path): self
+    public function setCompiledViewPath(string $path): static
     {
-        $compiledViewPath = $this->basePath . $path;
-        $this->set('path.compiled_view_path', $compiledViewPath);
+        $this->set('path.compiled_view_path', $path);
 
         return $this;
     }
@@ -435,10 +335,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setConfigPath(string $path): self
+    public function setConfigPath(string $path): static
     {
-        $configPath = $this->basePath . $path;
-        $this->set('path.config', $configPath);
+        $this->set('path.config', Path::getPath($path));
 
         return $this;
     }
@@ -446,10 +345,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setMiddlewarePath(string $path): self
+    public function setMiddlewarePath(string $path): static
     {
-        $middlewarePath = $this->basePath . $path;
-        $this->set('path.middleware', $middlewarePath);
+        $this->set('path.middleware', $path);
 
         return $this;
     }
@@ -457,10 +355,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setProviderPath(string $path): self
+    public function setProviderPath(string $path): static
     {
-        $serviceProviderPath = $this->basePath . $path;
-        $this->set('path.provider', $serviceProviderPath);
+        $this->set('path.provider', $path);
 
         return $this;
     }
@@ -468,10 +365,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setMigrationPath(string $path): self
+    public function setMigrationPath(string $path): static
     {
-        $migrationPath = $this->basePath . $path;
-        $this->set('path.migration', $migrationPath);
+        $this->set('path.migration', $path);
 
         return $this;
     }
@@ -479,10 +375,9 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setSeederPath(string $path): self
+    public function setSeederPath(string $path): static
     {
-        $seederPath = $this->basePath . $path;
-        $this->set('path.seeder', $seederPath);
+        $this->set('path.seeder', $path);
 
         return $this;
     }
@@ -490,16 +385,20 @@ class Application extends Container implements ApplicationInterface
     /**
      * {@inheritdoc}
      */
-    public function setPublicPath(string $path): self
+    public function setPublicPath(string $path): static
     {
-        $publicPath = $this->basePath . $path;
-        $this->set('path.public', $publicPath);
+        $this->set('path.public', $path);
 
         return $this;
     }
+    #endregion
 
+    #region Getter Region
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
     public function getBasePath(): string
     {
@@ -508,9 +407,16 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getAppPath(): string
+    public function getAppPath(?string $path = null): string
     {
+        if (! $this->has('path.app')) {
+            $this->setAppPath(Path::getPath($path ?? 'app'));
+        }
+
         return $this->get('path.app');
     }
 
@@ -519,94 +425,165 @@ class Application extends Container implements ApplicationInterface
      */
     public function getApplicationCachePath(): string
     {
-        return rtrim(
-            $this->getBasePath(),
-            DIRECTORY_SEPARATOR
-        ) . DIRECTORY_SEPARATOR . 'bootstrap' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
+        return Path::getPath('bootstrap.cache');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getModelPath(): string
+    public function getModelPath(?string $path = null): string
     {
+        if (! $this->has('path.model')) {
+            $this->setModelPath(Path::getPath($path ?? 'app.Models'));
+        }
+
         return $this->get('path.model');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getViewPath(): string
+    public function getViewPath(?string $path = null): string
     {
+        if (! $this->has('path.view')) {
+            $this->setViewPath(Path::getPath($path ?? 'resources.views'));
+        }
+
         return $this->get('path.view');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getViewPaths(): array
+    public function getViewPaths(?array $paths = null): array
     {
+        if (! $this->has('paths.view')) {
+            $defaultPaths = $paths ?? [Path::getPath('resources.views')];
+            $this->setViewPaths($defaultPaths);
+        }
+
         return $this->get('paths.view');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getControllerPath(): string
+    public function getControllerPath(?string $path = null): string
     {
+        if (! $this->has('path.controller')) {
+            $this->setControllerPath(Path::getPath($path ?? 'app.Controllers'));
+        }
+
         return $this->get('path.controller');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getServicesPath(): string
+    public function getServicesPath(?string $path = null): string
     {
+        if (! $this->has('path.services')) {
+            $this->setServicesPath(Path::getPath($path ?? 'app.services'));
+        }
+
         return $this->get('path.services');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getComponentPath(): string
+    public function getComponentPath(?string $path = null): string
     {
+        if (! $this->has('path.component')) {
+            $this->setComponentPath(Path::getPath($path ?? 'resources.components'));
+        }
+
         return $this->get('path.component');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getCommandPath(): string
+    public function getCommandPath(?string $path = null): string
     {
+        if (! $this->has('path.command')) {
+            $this->setCommandPath(Path::getPath($path ?? 'app.Commands'));
+        }
+
         return $this->get('path.command');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getStoragePath(): string
+    public function getStoragePath(?string $path = null): string
     {
+        if (! $this->has('path.storage')) {
+            $this->setStoragePath(Path::getPath($path ?? 'storage'));
+        }
+
         return $this->get('path.storage');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getCachePath(): string
+    public function getCachePath(?string $path = null): string
     {
+        if (! $this->has('path.cache')) {
+            $this->setCachePath(Path::getPath($path ?? 'storage.app.cache'));
+        }
+
         return $this->get('path.cache');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getCompiledViewPath(): string
+    public function getCompiledViewPath(?string $path = null): string
     {
+        if (! $this->has('path.compiled_view_path')) {
+            $this->setCompiledViewPath(Path::getPath($path ?? 'storage.app.view'));
+        }
+
         return $this->get('path.compiled_view_path');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
     public function getConfigPath(): string
     {
@@ -615,43 +592,79 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getMiddlewarePath(): string
+    public function getMiddlewarePath(?string $path = null): string
     {
+        if (! $this->has('path.middleware')) {
+            $this->setMiddlewarePath(Path::getPath($path ?? 'app.Middlewares'));
+        }
+
         return $this->get('path.middleware');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getProviderPath(): string
+    public function getProviderPath(?string $path = null): string
     {
+        if (! $this->has('path.provider')) {
+            $this->setProviderPath(Path::getPath($path ?? 'app.Providers'));
+        }
+
         return $this->get('path.provider');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getMigrationPath(): string
+    public function getMigrationPath(?string $path = null): string
     {
+        if (! $this->has('path.migration')) {
+            $this->setMigrationPath(Path::getPath($path ?? 'database.migration'));
+        }
+
         return $this->get('path.migration');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getSeederPath(): string
+    public function getSeederPath(?string $path = null): string
     {
+        if (! $this->has('path.seeder')) {
+            $this->setSeederPath(Path::getPath($path ?? 'database.seeders'));
+        }
+
         return $this->get('path.seeder');
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DependencyException if a dependency cannot be resolved.
+     * @throws NotFoundException if a requested entry is not found in the container.
      */
-    public function getPublicPath(): string
+    public function getPublicPath(?string $path = null): string
     {
+        if (! $this->has('path.public')) {
+            $this->setPublicPath(Path::getPath($path ?? 'public'));
+        }
+
         return $this->get('path.public');
     }
+    #endregion
 
     /**
      * {@inheritdoc}
@@ -855,7 +868,7 @@ class Application extends Container implements ApplicationInterface
      */
     public function isDownMaintenanceMode(): bool
     {
-        return file_exists($this->getStoragePath() . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php');
+        return file_exists($this->getStoragePath() . Path::getPath('app', 'maintenance.php'));
     }
 
     /**
@@ -870,7 +883,9 @@ class Application extends Container implements ApplicationInterface
             'template' => null,
         ];
 
-        if (false === file_exists($down = $this->getStoragePath() . 'app' . DIRECTORY_SEPARATOR . 'down')) {
+        $down = $this->getStoragePath() . Path::getPath('app', 'down');
+
+        if (!file_exists($down)) {
             return $default;
         }
 

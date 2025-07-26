@@ -40,6 +40,16 @@ use Omega\Http\Exceptions\HttpException;
  */
 interface ApplicationInterface
 {
+    /** @var string The Omega Framework version number. */
+    public const string VERSION = "3.0.0";
+
+    /**
+     * Retrieve the Omega Framework version number.
+     *
+     * @return string Return the Omega Framework version number.
+     */
+    public function getVersion(): string;
+
     /**
      * Loads and applies configuration to the application.
      *
@@ -51,22 +61,15 @@ interface ApplicationInterface
     public function loadConfig(Config $configs): void;
 
     /**
-     * Returns the default configuration array for fallback purposes.
-     *
-     * @return array<string, mixed> The array of default configuration values.
-     */
-    public function defaultConfigs(): array;
-
-    /**
      * Sets the base path.
      *
      * This method assigns the given path to the base directory (e.g., "base", "config", "modules"),
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the base directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setBasePath(string $path): self;
+    public function setBasePath(string $path): static;
 
     /**
      * Sets the app path.
@@ -75,9 +78,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the app directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setAppPath(string $path): self;
+    public function setAppPath(string $path): static;
 
     /**
      * Sets the model path.
@@ -86,9 +89,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the model directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setModelPath(string $path): self;
+    public function setModelPath(string $path): static;
 
     /**
      * Sets the view path.
@@ -97,9 +100,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the view directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setViewPath(string $path): self;
+    public function setViewPath(string $path): static;
 
     /**
      * Sets the view paths.
@@ -108,9 +111,9 @@ interface ApplicationInterface
      * and stores them into the container for later resolution and usage by the application.
      *
      * @param string[] $paths A list of absolute paths to the view directories.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setViewPaths(array $paths): self;
+    public function setViewPaths(array $paths): static;
 
     /**
      * Sets the controller path.
@@ -119,9 +122,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the controller directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setControllerPath(string $path): self;
+    public function setControllerPath(string $path): static;
 
     /**
      * Sets the services path.
@@ -130,9 +133,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the services' directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setServicesPath(string $path): self;
+    public function setServicesPath(string $path): static;
 
     /**
      * Sets the component path.
@@ -141,9 +144,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the component directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setComponentPath(string $path): self;
+    public function setComponentPath(string $path): static;
 
     /**
      * Sets the command path.
@@ -152,9 +155,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the command directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setCommandPath(string $path): self;
+    public function setCommandPath(string $path): static;
 
     /**
      * Sets the storage path.
@@ -163,9 +166,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the storage directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setStoragePath(string $path): self;
+    public function setStoragePath(string $path): static;
 
     /**
      * Sets the cache path.
@@ -174,11 +177,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the cache directory.
-     * @return self Returns the current instance for method chaining.
-     *
-     * @deprecated version 0.32 use compiled_view_path sited.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setCachePath(string $path): self;
+    public function setCachePath(string $path): static;
 
     /**
      * Sets the compiled path.
@@ -187,9 +188,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the compiled directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setCompiledViewPath(string $path): self;
+    public function setCompiledViewPath(string $path): static;
 
     /**
      * Sets the config path.
@@ -198,9 +199,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the config directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setConfigPath(string $path): self;
+    public function setConfigPath(string $path): static;
 
     /**
      * Sets the middleware path.
@@ -209,9 +210,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the middleware directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setMiddlewarePath(string $path): self;
+    public function setMiddlewarePath(string $path): static;
 
     /**
      * Sets the provider path.
@@ -220,9 +221,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the provider directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setProviderPath(string $path): self;
+    public function setProviderPath(string $path): static;
 
     /**
      * Sets the migration path.
@@ -231,9 +232,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the migration directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setMigrationPath(string $path): self;
+    public function setMigrationPath(string $path): static;
 
     /**
      * Sets the seeder path.
@@ -242,9 +243,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the seeder directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setSeederPath(string $path): self;
+    public function setSeederPath(string $path): static;
 
     /**
      * Sets the public path.
@@ -253,9 +254,9 @@ interface ApplicationInterface
      * and stores it into the container under a corresponding key for later retrieval.
      *
      * @param string $path The absolute path to the public directory.
-     * @return self Returns the current instance for method chaining.
+     * @return static Returns the current instance for method chaining.
      */
-    public function setPublicPath(string $path): self;
+    public function setPublicPath(string $path): static;
 
     /**
      * Returns the base path.

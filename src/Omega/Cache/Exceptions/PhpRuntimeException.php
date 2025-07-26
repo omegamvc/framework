@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Part of Omega - Cache Package
- * php version 8.3
+ * Part of Omega - Cache Package.
  *
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
@@ -15,10 +14,14 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Exceptions;
 
-use UnexpectedValueException;
+use RuntimeException;
 
 /**
- * Thrown when a cache value cannot be incremented, typically because it's not an integer.
+ * Exception thrown when an error occurs during cache operations.
+ *
+ * This exception is used within the Omega caching system to signal runtime errors that prevent
+ * proper cache functionality. It extends PHP's native RuntimeException and implements the
+ * CacheException interface for compatibility with the caching system.
  *
  * @category   Omega
  * @package    Cache
@@ -29,6 +32,6 @@ use UnexpectedValueException;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    2.0.0
  */
-class ValueNotIncrementableException extends UnexpectedValueException implements CacheExceptionInterface
+class PhpRuntimeException extends RuntimeException implements CacheExceptionInterface
 {
 }

@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Part of Omega - Cache Package
- * php version 8.3
+ * Part of Omega - Cache Package.
  *
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
@@ -18,11 +17,17 @@ namespace Omega\Cache\Exceptions;
 use Throwable;
 
 /**
- * Marker interface for all cache-related exceptions.
+ * CacheExceptionInterface class.
  *
- * This interface allows consumers to catch all exceptions originating
- * from the caching subsystem using a single type hint, regardless of the
- * specific implementation.
+ * The CacheExceptionInterface is part of the Omega framework's Cache package. It serves as a marker
+ * interface for all exceptions related to caching operations within the framework. By extending PHP's
+ * built-in Throwable, it ensures that all cache-related exceptions can be caught and handled consistently.
+ *
+ * This interface is primarily intended to provide a common type for exceptions thrown by caching components,
+ * making it easier to catch and process errors in a structured way.
+ *
+ * Since it does not declare any methods, its purpose is purely semantic, allowing developers to identify
+ * and differentiate cache-related exceptions from other types of errors in the system.
  *
  * @category   Omega
  * @package    Cache

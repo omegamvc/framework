@@ -2,7 +2,6 @@
 
 /**
  * Part of Omega - Cache Package
- * php version 8.3
  *
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
@@ -15,14 +14,13 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Exceptions;
 
-use RuntimeException;
+use InvalidArgumentException as PhpInvalidArgumentException;
 
 /**
- * Thrown when a cache driver cannot be properly resolved.
+ * Exception thrown when an invalid argument is provided.
  *
- * This exception is typically thrown when a registered driver is expected
- * to return a valid CacheInterface instance, but returns null or fails
- * during instantiation.
+ * This exception is used within the Omega caching system to signal invalid arguments passed to methods.
+ * It extends PHP's native InvalidArgumentException and implements the required PSR and custom exception interfaces.
  *
  * @category   Omega
  * @package    Cache
@@ -33,6 +31,6 @@ use RuntimeException;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    2.0.0
  */
-class DriverResolutionException extends RuntimeException implements CacheExceptionInterface
+class InvalidArgumentException extends PhpInvalidArgumentException implements InvalidArgumentExceptionInterface
 {
 }

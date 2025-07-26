@@ -25,14 +25,17 @@
     ],
     "require": {
         "php": "^8.3",
+        "ext-apcu": "*",
         "ext-http": "*",
         "ext-intl": "*",
         "ext-mbstring": "*",
+        "ext-memcached": "*",
         "ext-openssl": "*",
         "ext-pcntl": "*",
         "ext-pdo": "*",
         "ext-posix": "*",
         "ext-readline": "*",
+        "ext-redis": "*",
         "ext-simplexml": "*",
         "php-di/php-di": "^7.0.0"
     },
@@ -54,13 +57,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/Tests/"
         }
     },
     "scripts": {
-        "phpunit": "vendor/bin/phpunit",
-        "phpcs": "vendor/bin/phpcs",
-        "phpcbf": "vendor/bin/phpcbf --standard=PSR12"
     },
     "config": {
         "optimize-autoloader": true,

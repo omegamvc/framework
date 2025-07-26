@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Part of Omega - Cache Package
- * php version 8.3
+ * Part of Omega - Cache Package.
  *
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
@@ -15,122 +14,116 @@ declare(strict_types=1);
 
 namespace Omega\Cache;
 
-use Closure;
 use DateInterval;
+use Omega\Cache\Exceptions\InvalidArgumentException;
 
 /**
- * Interface CacheInterface
+ * CacheInterface class.
  *
- * Defines a standard contract for interacting with a caching system.
+ * The `CacheInterface` defines a standard contract for caching operations within the Omega
+ * framework. It provides methods for storing, retrieving, deleting, and checking the existence
+ * of cache items, supporting single and multiple key operations.
  *
- * Implementations of this interface provide methods to retrieve, store,
- * delete, and manage cached items either individually or in batches.
- * It also includes support for TTL (Time-To-Live), atomic increment/decrement,
- * and lazy-loading via the `remember()` helper.
+ * This interface ensures consistency across different cache implementations while allowing
+ * flexibility in choosing storage mechanisms. It follows best practices for handling cached
+ * data, including support for expiration (TTL) and race condition considerations when checking
+ * key existence.
  *
- * @category  Omega
- * @package   Cache
- * @link      https://omegamvc.github.io
- * @author    Adriano Giovannini <agisoftt@gmail.com>
- * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
- * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version   2.0.0
+ * @category   Omega
+ * @package    Cache
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  */
 interface CacheInterface
 {
     /**
      * Fetches a value from the cache.
      *
-     * @param string $key     The unique key identifying the cached item.
-     * @param mixed  $default The default value to return if the item is not found.
-     * @return mixed The cached value or $default if the key does not exist.
+     * @param string $key     Holds the unique key of this item in the cache.
+     * @param mixed  $default Holds the default value to return if the key does not exist.
+     * @return mixed Return the value of the item from the cache, or $default in case of cache miss.
+     * @throws InvalidArgumentException if the $key string is not a legal value.
      */
     public function get(string $key, mixed $default = null): mixed;
 
     /**
-     * Stores a value in the cache under a unique key, optionally with an expiration TTL.
+     * Persists data in the cache, uniquely referenced by a key with an optional expiration TTL time.
      *
-     * @param string                    $key   The key under which to store the value.
-     * @param mixed                     $value The value to store.
-     * @param int|DateInterval|null     $ttl   Optional. Time-to-live in seconds or as a DateInterval.
-     * @return bool True on success, false on failure.
+     * @param string                $key   Holds the key of the item to store.
+     * @param mixed                 $value Holds the value of the item to store, must be serializable.
+     * @param null|int|DateInterval $ttl   Optional. Holds the TTL value of this item. If no value is sent and
+     *                                     the driver supports TTL then the library may set a default value
+     *                                     for it or let the driver take care of that.
+     * @return bool Return true on success and false on failure.
+     * @throws InvalidArgumentException if the $key string is not a legal value.
      */
-    public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool;
+    public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool;
 
     /**
-     * Deletes a value from the cache.
+     * Delete an item from the cache by its unique key.
      *
-     * @param string $key The key of the item to remove.
-     * @return bool True if the item was successfully removed, false otherwise.
+     * @param string $key Holds the unique cache key of the item to delete.
+     * @return bool Return true if the item was successfully removed. False if there was an error.
+     * @throws InvalidArgumentException if the $key string is not a legal value.
      */
     public function delete(string $key): bool;
 
     /**
-     * Clears all entries from the cache.
+     * Wipes clean the entire cache's keys.
      *
-     * @return bool True on success, false on failure.
+     * @return bool Return true on success and false on failure.
      */
     public function clear(): bool;
 
     /**
-     * Retrieves multiple values from the cache using a list of keys.
+     * Obtains multiple cache items by their unique keys.
      *
-     * @param iterable<string> $keys    The list of keys to retrieve.
-     * @param mixed            $default The default value for keys that are not found.
-     * @return iterable<string, mixed> An iterable of key-value pairs.
+     * @param iterable<string> $keys    Holds a list of keys that can be obtained in a single operation.
+     * @param mixed            $default Holds the default value to return for keys that do not exist.
+     * @return iterable<string, mixed> Return a list of key => value pairs. Cache keys that do not exist or
+     *                                 are stale will have $default as value.
+     * @throws InvalidArgumentException if $keys is neither an array nor a Traversable,
+     *                                  or if any of the $keys are not a legal value.
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable;
 
     /**
-     * Stores multiple key-value pairs in the cache, optionally with a TTL.
+     * Persists a set of key => value pairs in the cache, with an optional TTL.
      *
-     * @param iterable<string, mixed>  $values A list of key-value pairs to store.
-     * @param int|DateInterval|null    $ttl    Optional TTL to apply to all items.
-     * @return bool True on success, false on failure.
+     * @param iterable<string, mixed>       $values Holds a list of key => value pairs for a multiple-set operation.
+     * @param null|int|DateInterval $ttl    Optional. Return the TTL value of this item. If no value is sent and
+     *                                      the driver supports TTL then the library may set a default value
+     *                                      for it or let the driver take care of that.
+     * @return bool Return true on success and false on failure.
+     * @throws InvalidArgumentException if $values is neither an array nor a Traversable,
+     *                                  or if any of the $values are not a legal value.
      */
-    public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool;
+    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool;
 
     /**
-     * Deletes multiple items from the cache.
+     * Deletes multiple cache items in a single operation.
      *
-     * @param iterable<string> $keys The list of keys to delete.
-     * @return bool True on success, false on failure.
+     * @param iterable<string> $keys Holds a list of string-based keys to be deleted.
+     * @return bool Return true if the items were successfully removed. False if there was an error.
+     * @throws InvalidArgumentException if $keys is neither an array nor a Traversable,
+     *                                  or if any of the $keys are not a legal value.
      */
     public function deleteMultiple(iterable $keys): bool;
 
     /**
-     * Checks whether a given key exists in the cache.
+     * Determines whether an item is present in the cache.
      *
-     * @param string $key The cache key to check.
-     * @return bool True if the item exists, false otherwise.
+     * NOTE: It is recommended that has() is only to be used for cache warming type purposes
+     * and not to be used within your live applications operations for get/set, as this method
+     * is subject to a race condition where your has() will return true and immediately after,
+     * another script can remove it making the state of your app out of date.
+     *
+     * @param string $key The cache item key.
+     * @return bool Return true if the cache contains an item with the given key, false if not.
+     * @throws InvalidArgumentException if the $key string is not a legal value.
      */
     public function has(string $key): bool;
-
-    /**
-     * Atomically increases a numeric value in the cache.
-     *
-     * @param string $key   The cache key.
-     * @param int    $value The amount to increment by.
-     * @return int The new value after incrementing.
-     */
-    public function increment(string $key, int $value): int;
-
-    /**
-     * Atomically decreases a numeric value in the cache.
-     *
-     * @param string $key   The cache key.
-     * @param int    $value The amount to decrement by.
-     * @return int The new value after decrementing.
-     */
-    public function decrement(string $key, int $value): int;
-
-    /**
-     * Retrieves an item from the cache or stores the result of the callback if it does not exist.
-     *
-     * @param string                    $key      The cache key.
-     * @param Closure                   $callback The callback that generates the value if not cached.
-     * @param int|DateInterval|null     $ttl      Optional TTL for the cached value.
-     * @return mixed The cached value, or the result of the callback if not found.
-     */
-    public function remember(string $key, Closure $callback, int|DateInterval|null $ttl = null): mixed;
 }
