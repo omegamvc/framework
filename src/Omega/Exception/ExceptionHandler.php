@@ -16,9 +16,10 @@ declare(strict_types=1);
 namespace Omega\Exception;
 
 use Throwable;
-use Omega\Exception\Handler\PrettyPageHandler;
 use Omega\Session\Storage\NativeStorage;
 use Omega\Validation\Exception\ValidationException;
+use Whoops\Handler\PrettyPageHandler;
+use Whoops\Run;
 
 /**
  * ExceptionHandler class.
@@ -76,8 +77,6 @@ class ExceptionHandler
      */
     public function showValidationException(ValidationException $exception): mixed
     {
-        $session = session();
-
         if ($session = session()) {
             /* @var NativeStorage $session */
             $session->put($exception->getSessionName(), $exception->getErrors());
@@ -93,17 +92,21 @@ class ExceptionHandler
      * error pages in a development environment ('APP_ENV' === 'dev').
      *
      * @param Throwable $throwable Holds an instance of Throwable (Exception or Error).
-     *
      * @return void
-     *
      * @throws Throwable
      */
     public function showFriendlyThrowable(Throwable $throwable): void
     {
-        $errorHandler = new Run();
-        $errorHandler->pushHandler(new PrettyPageHandler());
-        $errorHandler->register();
+        if (ob_get_level()) {
+            ob_end_clean(); // Pulisce l'output buffer se presente
+        }
 
-        throw $throwable;
+        $whoops = new Run();
+        $whoops->pushHandler(new PrettyPageHandler());
+        $whoops->allowQuit(false); // Evita che Whoops faccia exit() di sua iniziativa
+        $whoops->writeToOutput(true); // Forza la scrittura a video
+        $whoops->handleException($throwable); // Esegue Whoops
+
+        exit; // Ferma l'applicazione, altrimenti continua dopo Whoops
     }
 }

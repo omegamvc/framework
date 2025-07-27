@@ -133,7 +133,26 @@ if (! function_exists('env')) {
      */
     function env(string $key, mixed $default = null): mixed
     {
-        return Dotenv::get($key, $default);
+        $value = Dotenv::get($key);
+
+        if ($value === null) {
+            return value($default);
+        }
+
+        $lower = strtolower($value);
+
+        return match ($lower) {
+            'true', '(true)'     => true,
+            'false', '(false)'   => false,
+            'empty', '(empty)'   => '',
+            'null', '(null)'     => null,
+            default              => $value,
+        };
+    }
+
+    function value(mixed $value): mixed
+    {
+        return $value instanceof Closure ? $value() : $value;
     }
 }
 

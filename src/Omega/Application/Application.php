@@ -83,19 +83,26 @@ class Application extends Container implements ApplicationInterface
      */
     private function __construct(?string $basePath = null)
     {
-        $this->basePath = rtrim($basePath ?? $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__, 5), '\/');
+        //$this->basePath = rtrim($basePath ?? $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__, 5), '\/');
 
+        $this->basePath = $this->basePath($basePath);
         Path::init($this->basePath);
 
         $this->alias('paths.base', fn() => Path::getPath());
 
-        $this->app = require Path::getPath('config', 'app.php');
-
-        date_default_timezone_set($this->app['timezone']);
+        //$this->app = require Path::getPath('config', 'app.php');
 
         $this->configure();
+        echo env('timezone');
+        date_default_timezone_set(env('TIMEZONE'));
+
         $this->bindProviders();
         $this->registerFacades();
+    }
+
+    public function basePath(?string $basePath = null): string
+    {
+        return rtrim($basePath, '/\\');
     }
 
     /**
@@ -261,24 +268,14 @@ class Application extends Container implements ApplicationInterface
         return $this;
     }
 
-    /**
-     * Determine if the application is in rhe local environment.
-     *
-     * @return bool Return true if the application is in local environment.
-     */
-    public function isLocal(): bool
+    public function getEnvironment(): string
     {
-        return $this->app['env'] === 'local';
+        return env('APP_ENV');
     }
 
-    /**
-     * Determine if the application is in the production environment.
-     *
-     * @return bool Return true if the application is in the production environment.
-     */
-    public function isProduction(): bool
+    public function isDebug(): bool
     {
-        return $this->app['env'] === 'production';
+        return env('APP_DEBUG');
     }
 
     /**
@@ -299,7 +296,7 @@ class Application extends Container implements ApplicationInterface
      */
     public function setCurrentTimeZone(): self
     {
-        date_default_timezone_set($this->app['timezone']);
+        date_default_timezone_set(env('TIMEZONE'));
 
         return $this;
     }
