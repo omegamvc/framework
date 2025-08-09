@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * Part of Omega - Config Package.
+ * php version 8.3
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   1.0.0
+ */
+
+declare(strict_types=1);
+
+namespace Omega\Config\Source;
+
+use JsonException;
+use Omega\Config\Exceptions\MalformedJsonException;
+
+use function json_decode;
+
+use const JSON_THROW_ON_ERROR;
+
+/**
+ * Configuration source that loads data from a JSON file.
+ *
+ * This implementation reads a JSON configuration file, decodes its content, and
+ * returns it as an associative array. It ensures the file is readable and properly
+ * formatted.
+ *
+ * @category   Omega
+ * @package    Config
+ * @subpackage Source
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    1.0.0
+ */
+class JsonConfig extends AbstractFile
+{
+    /**
+     * {@inhertdoc}
+     *
+     * @throws MalformedJsonException If unable to produce the content.
+     */
+    public function fetch(): array
+    {
+        try {
+            return (array)json_decode($this->fetchContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $_) {
+            throw new MalformedJsonException('Invalid JSON format in configuration file.');
+        }
+    }
+}

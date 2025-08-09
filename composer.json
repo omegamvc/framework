@@ -1,0 +1,60 @@
+{
+  "name": "omegamvc/framework",
+  "version": "1.0.0",
+  "type": "library",
+  "description": "OmegaFramework is a lightweight and modular PHP framework designed for building modern web applications following the MVC architecture. It is optimized for PHP 8+ and provides a simple, extensible foundation for rapid application development.",
+  "homepage": "https://omegamvc.github.io",
+  "license": "GPL-3.0",
+  "authors": [
+    {
+      "name": "Adriano Giovannini",
+      "email": "agisoftt@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "keywords": [
+    "omegamvc",
+    "framework",
+    "php-framework",
+    "mvc",
+    "web-application",
+    "lightweight",
+    "php8.2",
+    "open-source",
+    "modular-framework"
+  ],
+  "require": {
+    "php": ">=8.3",
+    "ext-apcu": "*",
+    "ext-fileinfo": "*",
+    "ext-ftp": "*",
+    "ext-mbstring": "*",
+    "ext-memcached": "*",
+    "ext-pdo": "*",
+    "ext-zip": "*",
+    "ext-bz2": "*",
+    "ext-pcntl": "*",
+    "ext-simplexml": "*",
+    "ext-redis": "*",
+    "symfony/console": "^7.1"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.11"
+  },
+  "autoload": {
+    "psr-4": {
+      "Omega\\": "src/Omega/"
+    },
+    "files": [
+      "src/Omega/Support/helpers.php"
+    ]
+  },
+  "suggest": {
+
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
