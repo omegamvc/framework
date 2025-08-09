@@ -24,14 +24,14 @@
     },
     "autoload": {
         "psr-4": {
-            "System\\": "src/System/"
+            "Omega\\": "src/Omega/"
         },
         "files": [
-            "src/System/Collection/helper.php",
-            "src/System/Console/helper.php",
-            "src/System/Text/helper.php",
-            "src/System/Time/helper.php",
-            "src/System/Support/helper.php"
+            "src/Omega/Collection/helper.php",
+            "src/Omega/Console/helper.php",
+            "src/Omega/Text/helper.php",
+            "src/Omega/Time/helper.php",
+            "src/Omega/Support/helper.php"
         ]
     },
     "extra": {
