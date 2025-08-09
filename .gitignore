@@ -1,8 +1,4 @@
 vendor/
 composer.lock
-package-lock.json
-phpunit.xml
-phpcs.xml
-phpdoc.xml
-phpstan.neon
-phpstan-ignore.md
+.phpunit.result.cache
+.php-cs-fixer.cache

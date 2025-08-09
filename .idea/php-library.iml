@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Cache/" isTestSource="false" packagePrefix="System\Cache\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Collection/" isTestSource="false" packagePrefix="System\Collection\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Console/" isTestSource="false" packagePrefix="System\Console\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Container/" isTestSource="false" packagePrefix="System\Container\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Cron/" isTestSource="false" packagePrefix="System\Cron\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Database/" isTestSource="false" packagePrefix="System\Database\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/File/" isTestSource="false" packagePrefix="System\File\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Http/" isTestSource="false" packagePrefix="System\Http\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Macroable" isTestSource="false" packagePrefix="System\Support\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Macroable/" isTestSource="false" packagePrefix="System\Support\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Router/" isTestSource="false" packagePrefix="System\Router\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Security/" isTestSource="false" packagePrefix="System\Security\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Support/" isTestSource="false" packagePrefix="System\Support\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Template/" isTestSource="false" packagePrefix="System\Template\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Text/" isTestSource="false" packagePrefix="System\Text\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/Time/" isTestSource="false" packagePrefix="System\Time\" />
+      <sourceFolder url="file://$MODULE_DIR$/src/System/View/" isTestSource="false" packagePrefix="System\View\" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/DataBase" isTestSource="true" packagePrefix="System\Test\Database\" />
+      <sourceFolder url="file://$MODULE_DIR$/validator/Validator" isTestSource="false" packagePrefix="Validator\" />
+      <sourceFolder url="file://$MODULE_DIR$/validator/tests" isTestSource="true" packagePrefix="Tests\" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
