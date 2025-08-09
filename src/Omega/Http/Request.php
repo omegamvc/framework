@@ -6,7 +6,7 @@ namespace Omega\Http;
 
 use Omega\Collection\Collection;
 use Omega\Collection\CollectionImmutable;
-use Omega\Support\Marco;
+use Omega\Macroable\MacroableTrait;
 use Omega\Text\Str;
 
 /**
@@ -18,7 +18,7 @@ use Omega\Text\Str;
  */
 class Request implements \ArrayAccess, \IteratorAggregate
 {
-    use Marco;
+    use MacroableTrait;
 
     /**
      * Request method.

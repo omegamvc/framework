@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\Text;
 
-use Omega\Support\Marco;
+use Omega\Macroable\MacroableTrait;
 use Omega\Text\Exceptions\NoReturn;
 
 final class Str
 {
-    use Marco;
+    use MacroableTrait;
 
     /**
      * Create new instace.

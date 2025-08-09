@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Omega\Support;
+namespace Omega\Macroable;
 
-use Omega\Support\Exceptions\MacroNotFound;
+use Omega\Macroable\Exceptions\MacroNotFoundException;
 
-trait Marco
+trait MacroableTrait
 {
     /**
      * List registered macro.
@@ -36,12 +36,12 @@ trait Marco
      *
      * @return mixed
      *
-     * @throw MacroNotFound
+     * @throw MacroNotFoundException
      */
     public static function __callStatic(string $method, array $parameters)
     {
         if (!array_key_exists($method, self::$macros)) {
-            throw new MacroNotFound($method);
+            throw new MacroNotFoundException($method);
         }
 
         /** @var \Closure */
@@ -62,12 +62,12 @@ trait Marco
      *
      * @return mixed
      *
-     * @throw MacroNotFound
+     * @throw MacroNotFoundException
      */
     public function __call(string $method, array $parameters)
     {
         if (!array_key_exists($method, self::$macros)) {
-            throw new MacroNotFound($method);
+            throw new MacroNotFoundException($method);
         }
 
         /** @var \Closure */

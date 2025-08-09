@@ -299,9 +299,9 @@ if (!function_exists('app')) {
     /**
      * Get Application container.
      */
-    function app(): System\Integrate\Application
+    function app(): Omega\Integrate\Application
     {
-        $app = System\Integrate\Application::getIntance();
+        $app = Omega\Integrate\Application::getIntance();
         if (null === $app) {
             throw new ApplicationNotAvailable();
         }
@@ -314,11 +314,11 @@ if (!function_exists('config')) {
     /**
      * Get Application Configuration.
      *
-     * @return System\Collection\CollectionImmutable<string, mixed>
+     * @return Omega\Collection\CollectionImmutable<string, mixed>
      */
     function config()
     {
-        return new System\Collection\CollectionImmutable(app()->get('config'));
+        return new Omega\Collection\CollectionImmutable(app()->get('config'));
     }
 }
 
@@ -329,9 +329,9 @@ if (!function_exists('view')) {
      * @param array<string, mixed> $data
      * @param array<string, mixed> $option
      */
-    function view(string $view_path, array $data = [], array $option = []): System\Http\Response
+    function view(string $view_path, array $data = [], array $option = []): Omega\Http\Response
     {
-        /** @var System\Http\Response */
+        /** @var Omega\Http\Response */
         $view        = app()->get('view.response');
         $status_code = $option['status'] ?? 200;
         $headers     = $option['header'] ?? [];
@@ -352,7 +352,7 @@ if (!function_exists('vite')) {
      */
     function vite(...$entry_ponits)
     {
-        /** @var System\Integrate\Vite */
+        /** @var Omega\Integrate\Vite */
         $vite = app()->get('vite.gets');
 
         return $vite(...$entry_ponits);
