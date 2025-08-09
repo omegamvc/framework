@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "System\\": "src/System/",
+            "System\\": "src/System/"
         },
         "files": [
             "src/System/Collection/helper.php",
