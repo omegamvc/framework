@@ -43,7 +43,7 @@ class ServeCommand extends Command
                 'serve' => 'Serve server with port number (default 8080)',
             ],
             'options'   => [
-                '--port'   => 'Serve with costume port',
+                '--port'   => 'Serve with custom port',
                 '--expose' => 'Make server run public network',
             ],
             'relation'  => [

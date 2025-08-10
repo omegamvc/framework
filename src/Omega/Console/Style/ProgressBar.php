@@ -35,7 +35,7 @@ class ProgressBar
      *
      * @var array<callable(int, int): string>
      */
-    public static array $costume_binds = [];
+    public static array $custom_binds = [];
 
     /**
      * @param array<callable(int, int): string> $binds
@@ -110,7 +110,7 @@ class ProgressBar
      */
     public function binding($binds): void
     {
-        $binds = array_merge($binds, self::$costume_binds);
+        $binds = array_merge($binds, self::$custom_binds);
         if (false === array_key_exists(':progress', $binds)) {
             $binds[':progress'] =  fn ($current, $maks): string => $this->progress($current, $maks);
         }

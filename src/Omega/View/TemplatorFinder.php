@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\View;
 
-use Omega\View\Exceptions\ViewFileNotFound;
+use Omega\View\Exceptions\ViewFileNotFoundException;
+
+use function array_unshift;
+use function file_exists;
+use function in_array;
+use function realpath;
 
 class TemplatorFinder
 {
@@ -23,14 +28,14 @@ class TemplatorFinder
     protected array $paths = [];
 
     /**
-     * Extetions.
+     * Extensions.
      *
      * @var string[]
      */
     protected array $extensions;
 
     /**
-     * Create new View Finder intance.
+     * Create new View Finder instance.
      *
      * @param string[] $paths
      * @param string[] $extensions
@@ -44,30 +49,35 @@ class TemplatorFinder
     /**
      * Find file location by view_name given.
      *
-     * @throws ViewFileNotFound
+     * @param string $viewName
+     * @return string
+     * @throws ViewFileNotFoundException
      */
-    public function find(string $view_name): string
+    public function find(string $viewName): string
     {
-        if (isset($this->views[$view_name])) {
-            return $this->views[$view_name];
+        if (isset($this->views[$viewName])) {
+            return $this->views[$viewName];
         }
 
-        return $this->views[$view_name] = $this->findInPath($view_name, $this->paths);
+        return $this->views[$viewName] = $this->findInPath($viewName, $this->paths);
     }
 
     /**
      * Check view name exist.
+     *
+     * @param string $viewName
+     * @return bool
      */
-    public function exists(string $view_name): bool
+    public function exists(string $viewName): bool
     {
-        if (isset($this->views[$view_name])) {
+        if (isset($this->views[$viewName])) {
             return true;
         }
 
         foreach ($this->paths as $path) {
-            foreach ($this->extensions as $extenstion) {
-                if (file_exists($file = $path . DIRECTORY_SEPARATOR . $view_name . $extenstion)) {
-                    $this->views[$view_name] = $file;
+            foreach ($this->extensions as $extension) {
+                if (file_exists($file = $path . DIRECTORY_SEPARATOR . $viewName . $extension)) {
+                    $this->views[$viewName] = $file;
 
                     return true;
                 }
@@ -78,27 +88,31 @@ class TemplatorFinder
     }
 
     /**
-     * Find view name posible paths given.
+     * Find view name possible paths given.
      *
+     * @param string   $viewName
      * @param string[] $paths
-     *
-     * @throws ViewFileNotFound
+     * @return string
+     * @throws ViewFileNotFoundException
      */
-    protected function findInPath(string $view_name, array $paths): string
+    protected function findInPath(string $viewName, array $paths): string
     {
         foreach ($paths as $path) {
-            foreach ($this->extensions as $extenstion) {
-                if (file_exists($find = $path . DIRECTORY_SEPARATOR . $view_name . $extenstion)) {
+            foreach ($this->extensions as $extension) {
+                if (file_exists($find = $path . DIRECTORY_SEPARATOR . $viewName . $extension)) {
                     return $find;
                 }
             }
         }
 
-        throw new ViewFileNotFound($view_name);
+        throw new ViewFileNotFoundException($viewName);
     }
 
     /**
-     * Add path to posible path location.
+     * Add path to possible path location.
+     *
+     * @param string $path
+     * @return self
      */
     public function addPath(string $path): self
     {
@@ -110,7 +124,10 @@ class TemplatorFinder
     }
 
     /**
-     * Add exteention in first array.
+     * Add extension in first array.
+     *
+     * @param string $extension
+     * @return self
      */
     public function addExtension(string $extension): self
     {
@@ -121,6 +138,8 @@ class TemplatorFinder
 
     /**
      * Flush view register file location.
+     *
+     * @return void
      */
     public function flush(): void
     {
@@ -131,6 +150,7 @@ class TemplatorFinder
      * Set paths registered.
      *
      * @param string[] $paths
+     * @return self
      */
     public function setPaths(array $paths): self
     {
@@ -166,10 +186,9 @@ class TemplatorFinder
      * Resolve the path.
      *
      * @param string $path
-     *
      * @return string
      */
-    protected function resolvePath($path)
+    protected function resolvePath(string $path): string
     {
         return realpath($path) ?: $path;
     }

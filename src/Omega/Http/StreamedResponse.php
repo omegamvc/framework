@@ -26,7 +26,7 @@ class StreamedResponse extends Response
         array $headers = [],
     ) {
         $this->setStream($callable_stream);
-        $this->setResponeCode($respone_code);
+        $this->setResponseCode($respone_code);
         $this->headers   = new HeaderCollection($headers);
         $this->is_stream = false;
     }

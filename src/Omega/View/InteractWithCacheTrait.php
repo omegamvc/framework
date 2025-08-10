@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Omega\View;
 
+use function array_key_exists;
+use function file_get_contents;
+
 trait InteractWithCacheTrait
 {
     /**

@@ -38,7 +38,7 @@ class Request implements \ArrayAccess, \IteratorAggregate
     private Collection $query;
 
     /**
-     * Costume request information.
+     * Custom request information.
      *
      * @var array<string, string|int|bool>
      */
@@ -444,8 +444,8 @@ class Request implements \ArrayAccess, \IteratorAggregate
     }
 
     /**
-     * Push costume attributes to the request,
-     * uses for costume request to server.
+     * Push custom attributes to the request,
+     * uses for custom request to server.
      *
      * @param array<string, string|int|bool> $push_attributes Push a attributes as array
      *

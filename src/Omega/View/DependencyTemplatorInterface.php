@@ -11,5 +11,5 @@ interface DependencyTemplatorInterface
      *
      * @return array<string, int>
      */
-    public function dependentOn(): array;
+    public function dependOn(): array;
 }

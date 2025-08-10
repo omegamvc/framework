@@ -6,8 +6,14 @@ namespace Omega\View\Templator;
 
 use Omega\View\AbstractTemplatorParse;
 
+use function preg_replace;
+use function preg_replace_callback;
+
 class NameTemplator extends AbstractTemplatorParse
 {
+    /**
+     * {@inheritdoc}
+     */
     public function parse(string $template): string
     {
         $rawBlocks = [];

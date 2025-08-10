@@ -12,7 +12,7 @@ use Omega\Integrate\Bootstrap\RegisterFacades;
 use Omega\Integrate\Bootstrap\RegisterProviders;
 use Omega\Integrate\ValueObjects\CommandMap;
 
-class Karnel
+class Kernel
 {
     /**
      * Application Container.

@@ -8,14 +8,14 @@ use PHPUnit\Framework\TestCase as BaseTestCase;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Integrate\Application;
-use Omega\Integrate\Http\Karnel;
+use Omega\Integrate\Http\Kernel;
 use Omega\Integrate\ServiceProvider;
 use Omega\Support\Facades\Facade;
 
 class TestCase extends BaseTestCase
 {
     protected Application $app;
-    protected Karnel $kernel;
+    protected Kernel $kernel;
     protected string $class;
 
     protected function tearDown(): void
@@ -36,7 +36,7 @@ class TestCase extends BaseTestCase
         $data     = $this->app->call($call, $params);
         $response = new Response($data);
         if (array_key_exists('code', $data)) {
-            $response->setResponeCode((int) $data['code']);
+            $response->setResponseCode((int) $data['code']);
         }
         if (array_key_exists('headers', $data)) {
             $response->setHeaders($data['headers']);
@@ -65,8 +65,8 @@ class TestCase extends BaseTestCase
         string $remoteAddress = '::1',
         ?string $rawBody = null,
     ): TestResponse {
-        /** @var Karnel */
-        $kernel   = $this->app->make(Karnel::class);
+        /** @var Kernel */
+        $kernel   = $this->app->make(Kernel::class);
         $request  = new Request($url, $query, $post, $attributes, $cookies, $files, $headers, $method, $remoteAddress, $rawBody);
         $response = $kernel->handle($request);
 

@@ -82,8 +82,6 @@ final class Application extends Container
      * Cache path.
      *
      * @var string
-     *
-     * @deprecated version 0.32 use compiled_view_path isnted.
      */
     private $cache_path;
 
@@ -525,8 +523,6 @@ final class Application extends Container
      * @param string $path Cache path
      *
      * @return self
-     *
-     * @deprecated version 0.32 use compiled_view_path isnted.
      */
     public function setCachePath(string $path)
     {
@@ -740,8 +736,6 @@ final class Application extends Container
      * Get cache path.
      *
      * @return string
-     *
-     * @deprecated version 0.32 use compiled_view_path isnted.
      */
     public function cachePath()
     {

@@ -4,17 +4,28 @@ declare(strict_types=1);
 
 namespace Omega\View\Templator;
 
+use Exception;
 use Omega\Text\Str;
 use Omega\View\AbstractTemplatorParse;
 use Omega\View\DependencyTemplatorInterface;
 use Omega\View\InteractWithCacheTrait;
+
+use function array_key_exists;
+use function explode;
+use function htmlspecialchars;
+use function preg_match;
+use function preg_replace_callback;
+use function str_replace;
+use function trim;
+
+use const PHP_EOL;
 
 class SectionTemplator extends AbstractTemplatorParse implements DependencyTemplatorInterface
 {
     use InteractWithCacheTrait;
 
     /** @var array<string, mixed> */
-    private $sections     = [];
+    private $section     = [];
 
     /**
      * File get content cached.
@@ -24,49 +35,53 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
     private static array $cache = [];
 
     /**
-     * Dependen on.
+     * Depend on.
      *
      * @var array<string, int>
      */
-    private array $dependent_on = [];
+    private array $dependOn = [];
 
     /**
      * @return array<string, int>
      */
-    public function dependentOn(): array
+    public function dependOn(): array
     {
-        return $this->dependent_on;
+        return $this->dependOn;
     }
 
+    /**
+     * {@inheritdoc}
+     * @throws Exception
+     */
     public function parse(string $template): string
     {
         self::$cache = [];
 
-        preg_match('/{%\s*extend\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*%}/', $template, $matches_layout);
-        if (!array_key_exists(1, $matches_layout)) {
+        preg_match('/{%\s*extend\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*%}/', $template, $matchesLayout);
+        if (!array_key_exists(1, $matchesLayout)) {
             return $template;
         }
 
-        if (false === $this->finder->exists($matches_layout[1])) {
-            throw new \Exception('Template file not found: ' . $matches_layout[1]);
+        if (false === $this->finder->exists($matchesLayout[1])) {
+            throw new Exception('Template file not found: ' . $matchesLayout[1]);
         }
 
-        $templatePath = $this->finder->find($matches_layout[1]);
+        $templatePath = $this->finder->find($matchesLayout[1]);
         $layout       = $this->getContents($templatePath);
 
         // add parent dependency
-        $this->dependent_on[$templatePath] = 1;
+        $this->dependOn[$templatePath] = 1;
 
         // Process all sections first
         $template = preg_replace_callback(
             '/{%\s*section\s*\(\s*[\'"]([^\'"]+)[\'"]\s*,\s*[\'"]([^\'"]+)[\'"]\s*\)\s*%}/s',
-            fn ($matches) => $this->sections[$matches[1]] = htmlspecialchars(trim($matches[2])),
+            fn ($matches) => $this->section[$matches[1]] = htmlspecialchars(trim($matches[2])),
             $template
         );
 
         $template = preg_replace_callback(
             '/{%\s*section\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*%}(.*?){%\s*endsection\s*%}/s',
-            fn ($matches) => $this->sections[$matches[1]] = trim($matches[2]),
+            fn ($matches) => $this->section[$matches[1]] = trim($matches[2]),
             $template
         );
 
@@ -77,7 +92,7 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
                 foreach ($lines as $line) {
                     if (Str::contains($line, ':')) {
                         $current                           = explode(':', trim($line));
-                        $this->sections[trim($current[0])] = trim($current[1]);
+                        $this->section[trim($current[0])] = trim($current[1]);
                     }
                 }
 
@@ -90,14 +105,14 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
         return preg_replace_callback(
             '/{%\s*yield(?:\s*\(\s*[\'"](\w+)[\'"](?:\s*,\s*([\'\"].*?[\'\"]|null))?\s*\))?\s*%}(?:(.*?){%\s*endyield\s*%})?/s',
             /** @param string[] $matches */
-            function (array $matches) use ($matches_layout): string {
+            function (array $matches) use ($matchesLayout): string {
                 if (isset($matches[2]) && '' != $matches[2] && isset($matches[3])) {
-                    throw new \Exception('The yield statement cannot have both a default value and content.');
+                    throw new Exception('The yield statement cannot have both a default value and content.');
                 }
 
                 // yield with given section
-                if (isset($matches[1]) && array_key_exists($matches[1], $this->sections)) {
-                    return $this->sections[$matches[1]];
+                if (isset($matches[1]) && array_key_exists($matches[1], $this->section)) {
+                    return $this->section[$matches[1]];
                 }
 
                 // yield with default value
@@ -111,7 +126,7 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
                 }
 
                 if (isset($matches[1])) {
-                    throw new \Exception("Slot with extends '{$matches_layout[1]}' required '{$matches[1]}'");
+                    throw new Exception("Slot with extends '{$matchesLayout[1]}' required '{$matches[1]}'");
                 }
 
                 return '';

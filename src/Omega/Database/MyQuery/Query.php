@@ -117,16 +117,16 @@ abstract class Query
         $merging      = $this->mergeFilters();
         $where        = $this->splitGrupsFilters($merging);
         $glue         = $this->_strict_mode ? ' AND ' : ' OR ';
-        $whereCostume = implode($glue, $this->_where);
+        $whereCustom  = implode($glue, $this->_where);
 
-        if ($where !== '' && $whereCostume !== '') {
-            // menggabungkan basic where dengan costume where
-            $whereString = $this->_strict_mode ? "AND $whereCostume" : "OR $whereCostume";
+        if ($where !== '' && $whereCustom !== '') {
+            // menggabungkan basic where dengan custom where
+            $whereString = $this->_strict_mode ? "AND $whereCustom" : "OR $whereCustom";
 
             return "WHERE $where $whereString";
-        } elseif ($where === '' && $whereCostume !== '') {
-            // hanya menggunkan costume where
-            $whereString = $this->_strict_mode ? "$whereCostume" : "$whereCostume";
+        } elseif ($where === '' && $whereCustom !== '') {
+            // hanya menggunkan custom where
+            $whereString = $this->_strict_mode ? "$whereCustom" : "$whereCustom";
 
             return "WHERE $whereString";
         } elseif ($where !== '') {

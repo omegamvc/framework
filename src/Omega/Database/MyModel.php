@@ -43,19 +43,19 @@ abstract class MyModel
     protected bool $_STRICT_SEARCH = true;
 
     /**
-     * costume where optional added to where statment.
+     * custom where optional added to where statment.
      *
      * @var array<int, array<string, array<string|int, string>>>
      */
-    protected $_COSTUME_WHERE = [];
+    protected $_CUSTOM_WHERE = [];
 
     /** @var int Limit start from */
     protected $_limit_start = 0;
     /** @var int Limit end to */
     protected $_limit_end = 10;
-    /** @var string costume join */
-    protected $_COSTUME_JOIN = '';
-    /** @var string[] costume join */
+    /** @var string custom join */
+    protected $_CUSTOM_JOIN = '';
+    /** @var string[] custom join */
     protected $_JOIN = [];
 
     public const ORDER_ASC  = 0;
@@ -123,16 +123,16 @@ abstract class MyModel
     }
 
     /**
-     * Add costume where to query.
+     * Add custom where to query.
      *
      * @param string                $statment Where query statment
      * @param array<string, string> $bind     Where query bind
      *
      * @return $this
      */
-    public function costumeWhere(string $statment, array $bind)
+    public function customWhere(string $statment, array $bind)
     {
-        $this->_COSTUME_WHERE[] = [
+        $this->_CUSTOM_WHERE[] = [
             'statment' => "($statment)",
             'bind'     => $bind,
         ];
@@ -141,15 +141,15 @@ abstract class MyModel
     }
 
     /**
-     * reset value of filters andor costume where,
+     * reset value of filters andor custom where,
      * to prevent duplicate.
      */
-    public function reset(bool $costumeWhere = true): void
+    public function reset(bool $customWhere = true): void
     {
         $this->_FILTERS      = [];
         $this->_GROUP_FILTER = [];
-        if ($costumeWhere) {
-            $this->_COSTUME_WHERE = [];
+        if ($customWhere) {
+            $this->_CUSTOM_WHERE = [];
         }
     }
 
@@ -213,7 +213,7 @@ abstract class MyModel
         $limit          = $this->_limit_start < 0 ? "LIMIT $this->_limit_end" : "LIMIT $this->_limit_start, $this->_limit_end";
         $limit          = $this->_limit_end < 1 ? '' : $limit;
         // merge join
-        $this->_JOIN[] = $this->_COSTUME_JOIN;
+        $this->_JOIN[] = $this->_CUSTOM_JOIN;
         $join          = implode(' ', $this->_JOIN);
 
         return "SELECT $column FROM $table
@@ -229,7 +229,7 @@ abstract class MyModel
         $column    = implode(', ', $this->_COLUMNS);
         $sortOrder = $this->_SORT_ORDER;
         // merge join
-        $this->_JOIN[] = $this->_COSTUME_JOIN;
+        $this->_JOIN[] = $this->_CUSTOM_JOIN;
         $join          = implode(' ', $this->_JOIN);
 
         return "SELECT $column FROM $table
@@ -265,7 +265,7 @@ abstract class MyModel
     protected function grupQueryFilters(array $grup_fillters): string
     {
         /** @var string[] */
-        $where_statment = array_values(array_column($this->_COSTUME_WHERE, 'statment'));
+        $where_statment = array_values(array_column($this->_CUSTOM_WHERE, 'statment'));
         foreach ($grup_fillters as $filter) {
             $query = $this->queryfilters($filter['filters'], $filter['strict']);
             if (!empty($query)) {
@@ -336,8 +336,8 @@ abstract class MyModel
             }
         }
 
-        // binding from costume where
-        $bindWhere = array_values(array_column($this->_COSTUME_WHERE, 'bind'));
+        // binding from custom where
+        $bindWhere = array_values(array_column($this->_CUSTOM_WHERE, 'bind'));
         foreach ($bindWhere as $binds) {
             foreach ($binds as $bind) {
                 $this->PDO->bind($bind[0], $bind[1]);
@@ -400,8 +400,8 @@ abstract class MyModel
             }
         }
 
-        // binding from costume where
-        $bindWhere = array_values(array_column($this->_COSTUME_WHERE, 'bind'));
+        // binding from custom where
+        $bindWhere = array_values(array_column($this->_CUSTOM_WHERE, 'bind'));
         foreach ($bindWhere as $binds) {
             foreach ($binds as $bind) {
                 $this->PDO->bind($bind[0], $bind[1]);
@@ -423,7 +423,7 @@ abstract class MyModel
     }
 
     /**
-     * Its like costumeWhere() but more elegant syntax.
+     * Its like customWhere() but more elegant syntax.
      * Intreget with Select() class.
      */
     public function select(): Select

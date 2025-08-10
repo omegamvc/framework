@@ -19,7 +19,7 @@ final class Select extends Fetch
      * @param string|InnerQuery $table_name   Table name
      * @param string[]          $columns_name Selected cloumn
      * @param MyPDO             $PDO          MyPDO class
-     * @param string[]          $options      Add costume option (eg: query)
+     * @param string[]          $options      Add custom option (eg: query)
      *
      * @return void
      */

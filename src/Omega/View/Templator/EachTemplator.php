@@ -6,8 +6,13 @@ namespace Omega\View\Templator;
 
 use Omega\View\AbstractTemplatorParse;
 
+use function preg_replace;
+
 class EachTemplator extends AbstractTemplatorParse
 {
+    /**
+     * {@inheritdoc}
+     */
     public function parse(string $template): string
     {
         $template = preg_replace(

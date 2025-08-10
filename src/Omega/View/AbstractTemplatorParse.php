@@ -6,21 +6,28 @@ namespace Omega\View;
 
 abstract class AbstractTemplatorParse
 {
-    protected TemplatorFinder $finder;
-    protected string $cacheDir;
-
     /**
      * Uses poller.
      *
      * @var string[]
      */
-    protected $uses = [];
+    protected array $uses = [];
 
-    final public function __construct(TemplatorFinder $finder, string $cacheDir)
+    /**
+     * Constructor.
+     *
+     * @param TemplatorFinder $finder
+     * @param string $cacheDir
+     */
+    final public function __construct(protected TemplatorFinder $finder, protected string $cacheDir)
     {
-        $this->finder      = $finder;
-        $this->cacheDir    = $cacheDir;
     }
 
+    /**
+     * Parse.
+     *
+     * @param string $template
+     * @return string
+     */
     abstract public function parse(string $template): string;
 }

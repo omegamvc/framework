@@ -6,8 +6,13 @@ namespace Omega\View\Templator;
 
 use Omega\View\AbstractTemplatorParse;
 
+use function preg_replace_callback;
+
 final class BooleanTemplator extends AbstractTemplatorParse
 {
+    /**
+     * {@inheritdoc}
+     */
     public function parse(string $template): string
     {
         return preg_replace_callback(

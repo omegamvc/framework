@@ -5,24 +5,26 @@ declare(strict_types=1);
 namespace Omega\View;
 
 use Omega\Http\Response;
-use Omega\View\Exceptions\ViewFileNotFound;
+use Omega\View\Exceptions\ViewFileNotFoundException;
+
+use function file_exists;
+use function ob_get_clean;
+use function ob_start;
 
 class View
 {
     /**
      * Render view template with data.
      *
-     * @param string               $view_path View path location
-     * @param array<string, mixed> $portal    Data to push
-     *
+     * @param string               $viewPath View path location
+     * @param array<string, mixed> $portal   Data to push
      * @return Response
-     *
-     * @throw ViewFileNotFound
+     * @throw ViewFileNotFoundException
      */
-    public static function render(string $view_path, array $portal = [])
+    public static function render(string $viewPath, array $portal = [])
     {
-        if (!file_exists($view_path)) {
-            throw new ViewFileNotFound($view_path);
+        if (!file_exists($viewPath)) {
+            throw new ViewFileNotFoundException($viewPath);
         }
 
         $auth         = new Portal($portal['auth'] ?? []);
@@ -31,13 +33,13 @@ class View
 
         // get render content
         ob_start();
-        require_once $view_path;
+        require_once $viewPath;
         $html = ob_get_clean();
 
         // send render content to client
         return (new Response())
             ->setContent($html)
-            ->setResponeCode(Response::HTTP_OK)
+            ->setResponseCode(Response::HTTP_OK)
             ->removeHeaders([
                 'Expires',
                 'Pragma',

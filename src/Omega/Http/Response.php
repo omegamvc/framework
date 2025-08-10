@@ -92,7 +92,7 @@ class Response
     public function __construct($content = '', int $respone_code = Response::HTTP_OK, array $headers = [])
     {
         $this->setContent($content);
-        $this->setResponeCode($respone_code);
+        $this->setResponseCode($respone_code);
         $this->headers = new HeaderCollection($headers);
         $this->setProtocolVersion('1.1');
     }
@@ -145,7 +145,7 @@ class Response
 
         // header
         $this->headers->set('Content-Type', $this->content_type);
-        // add costume header
+        // add custom header
         foreach ($this->headers as $key => $header) {
             header($key . ':' . $header);
         }
@@ -332,7 +332,7 @@ class Response
      *
      * @return self
      */
-    public function setResponeCode(int $respone_code)
+    public function setResponseCode(int $respone_code)
     {
         $this->respone_code = $respone_code;
 

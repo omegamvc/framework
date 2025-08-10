@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Omega\Integrate\Exceptions;
 
-/**
- * @internal
- */
-final class ApplicationNotAvailable extends \RuntimeException
+use RuntimeException;
+
+class ApplicationNotAvailableException extends RuntimeException
 {
     /**
      * Creates a new Exception instance.
      */
     public function __construct()
     {
-        parent::__construct('Apllication not start yet!');
+        parent::__construct('Application not start yet!');
     }
 }

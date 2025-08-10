@@ -72,17 +72,17 @@ class Command implements \ArrayAccess
      * Parse commandline.
      *
      * @param array<int, string>                  $argv
-     * @param array<string, string|bool|int|null> $default_option
+     * @param array<string, string|bool|int|null> $defaultOption
      *
      * @return void
      */
-    public function __construct(array $argv, $default_option = [])
+    public function __construct(array $argv, $defaultOption = [])
     {
         array_shift($argv);
 
         $this->CMD           = array_shift($argv) ?? '';
         $this->OPTION        = $argv;
-        $this->option_mapper = $default_option;
+        $this->option_mapper = $defaultOption;
 
         foreach ($this->option_mapper($argv) as $key => $value) {
             $this->option_mapper[$key] = $value;

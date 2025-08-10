@@ -6,8 +6,17 @@ namespace Omega\View\Templator;
 
 use Omega\View\AbstractTemplatorParse;
 
+use function array_map;
+use function count;
+use function implode;
+use function preg_match;
+use function preg_replace_callback;
+
 class UseTemplator extends AbstractTemplatorParse
 {
+    /**
+     * {@inheritdoc}
+     */
     public function parse(string $template): string
     {
         preg_match('/{%\s*use\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*%}/', $template, $matches);

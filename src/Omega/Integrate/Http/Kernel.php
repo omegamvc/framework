@@ -16,7 +16,7 @@ use Omega\Integrate\Exceptions\Handler;
 use Omega\Integrate\Http\Middleware\MaintenanceMiddleware;
 use Omega\Router\Router;
 
-class Karnel
+class Kernel
 {
     /**
      * Application Container.

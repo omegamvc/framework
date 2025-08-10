@@ -97,7 +97,7 @@ class Handler
             ]], 500);
 
         if ($th instanceof HttpException) {
-            $respone->setResponeCode($th->getStatusCode());
+            $respone->setResponseCode($th->getStatusCode());
             $respone->headers->add($th->getHeaders());
         }
 
@@ -133,7 +133,7 @@ class Handler
         $this->app->set('view.instance', fn () => $templator);
 
         $response = view((string) $code);
-        $response->setResponeCode($code);
+        $response->setResponseCode($code);
         $response->headers->add($e->getHeaders());
 
         return $response;

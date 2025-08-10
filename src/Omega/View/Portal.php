@@ -4,33 +4,24 @@ declare(strict_types=1);
 
 namespace Omega\View;
 
-class Portal
+readonly class Portal
 {
-    /**
-     * Item collection.
-     *
-     * @var array<string, mixed>
-     */
-    private array $items;
-
     /**
      * Set portal items.
      *
      * @param array<string, mixed> $items
      */
-    public function __construct(array $items)
+    public function __construct(private array $items)
     {
-        $this->items = $items;
     }
 
     /**
      * Get property value.
      *
      * @param string $name Property name
-     *
      * @return mixed Property value, null if not found     *
      */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         return $this->items[$name] ?? null;
     }
@@ -39,10 +30,9 @@ class Portal
      * Check property has exists or not.
      *
      * @param string $name Property name
-     *
      * @return bool True if property name exists
      */
-    public function has($name): bool
+    public function has(string $name): bool
     {
         return isset($this->items[$name]);
     }

@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace Omega\View\Templator;
 
+use Exception;
 use Omega\View\AbstractTemplatorParse;
 use Omega\View\DependencyTemplatorInterface;
 use Omega\View\InteractWithCacheTrait;
+
+use function preg_replace_callback;
+use function trim;
 
 class IncludeTemplator extends AbstractTemplatorParse implements DependencyTemplatorInterface
 {
     use InteractWithCacheTrait;
 
-    private int $maks_dept = 5;
+    private int $makeDept = 5;
 
     private int $dept = 0;
 
     /**
-     * Dependen on.
+     * Depend on.
      *
      * @var array<string, int>
      */
-    private array $dependent_on = [];
+    private array $dependOn = [];
 
     /**
      * File get content cached.
@@ -30,9 +34,9 @@ class IncludeTemplator extends AbstractTemplatorParse implements DependencyTempl
      */
     private static array $cache = [];
 
-    public function maksDept(int $maks_dept): self
+    public function maksDept(int $makeDept): self
     {
-        $this->maks_dept = $maks_dept;
+        $this->makeDept = $makeDept;
 
         return $this;
     }
@@ -40,11 +44,15 @@ class IncludeTemplator extends AbstractTemplatorParse implements DependencyTempl
     /**
      * @return array<string, int>
      */
-    public function dependentOn(): array
+    public function dependOn(): array
     {
-        return $this->dependent_on;
+        return $this->dependOn;
     }
 
+    /**
+     * {@inheritdoc}
+     * @throws Exception
+     */
     public function parse(string $template): string
     {
         self::$cache = [];
@@ -53,18 +61,18 @@ class IncludeTemplator extends AbstractTemplatorParse implements DependencyTempl
             '/{%\s*include\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*%}/',
             function ($matches) {
                 if (false === $this->finder->exists($matches[1])) {
-                    throw new \Exception('Template file not found: ' . $matches[1]);
+                    throw new Exception('Template file not found: ' . $matches[1]);
                 }
 
                 $templatePath     = $this->finder->find($matches[1]);
                 $includedTemplate = $this->getContents($templatePath);
 
-                if ($this->maks_dept === 0) {
+                if ($this->makeDept === 0) {
                     return $includedTemplate;
                 }
 
-                $this->maks_dept--;
-                $this->dependent_on[$templatePath] = ++$this->dept;
+                $this->makeDept--;
+                $this->dependOn[$templatePath] = ++$this->dept;
 
                 return trim($this->parse($includedTemplate));
             },

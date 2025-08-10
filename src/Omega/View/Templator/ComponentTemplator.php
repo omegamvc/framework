@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace Omega\View\Templator;
 
+use Exception;
 use Omega\View\AbstractTemplatorParse;
 use Omega\View\DependencyTemplatorInterface;
-use Omega\View\Exceptions\ViewFileNotFound;
+use Omega\View\Exceptions\ViewFileNotFoundException;
 use Omega\View\InteractWithCacheTrait;
+
+use function array_key_exists;
+use function class_exists;
+use function explode;
+use function preg_replace_callback;
+use function str_contains;
+use function trim;
 
 class ComponentTemplator extends AbstractTemplatorParse implements DependencyTemplatorInterface
 {
@@ -20,23 +28,37 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
      */
     private static array $cache = [];
 
+    /**
+     * Namespace.
+     *
+     * @var string
+     */
     private string $namespace = '';
 
     /**
-     * Dependen on.
+     * Depend on.
      *
      * @var array<string, int>
      */
-    private array $dependent_on = [];
+    private array $dependOn = [];
 
     /**
+     * DependOn.
+     *
      * @return array<string, int>
      */
-    public function dependentOn(): array
+    public function dependOn(): array
     {
-        return $this->dependent_on;
+        return $this->dependOn;
     }
 
+    /**
+     * Parse.
+     *
+     * @param string $template
+     * @return string
+     * @throws Exception
+     */
     public function parse(string $template): string
     {
         self::$cache = [];
@@ -44,6 +66,12 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
         return $this->parseComponent($template);
     }
 
+    /**
+     * Set namespace.
+     *
+     * @param string $namespace
+     * @return $this
+     */
     public function setNamespace(string $namespace): self
     {
         $this->namespace = $namespace;
@@ -51,6 +79,13 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
         return $this;
     }
 
+    /**
+     * Parse component.
+     *
+     * @param string $template
+     * @return string
+     * @throws Exception
+     */
     private function parseComponent(string $template): string
     {
         return preg_replace_callback(
@@ -74,27 +109,27 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
                 }
 
                 if (false === $this->finder->exists($componentName)) {
-                    throw new ViewFileNotFound('Template file not found: ' . $componentName);
+                    throw new ViewFileNotFoundException('Template file not found: ' . $componentName);
                 }
 
                 $templatePath = $this->finder->find($componentName);
                 $layout       = $this->getContents($templatePath);
                 $content      = $this->parseComponent($layout);
-                // add perent dependency
-                $this->dependent_on[$templatePath] = 1;
+                // add parent dependency
+                $this->dependOn[$templatePath] = 1;
 
                 return preg_replace_callback(
                     "/{%\s*yield\(\'([^\']+)\'\)\s*%}/",
-                    function ($yield_matches) use ($componentName, $innerContent, $params) {
-                        if ($componentName === $yield_matches[1]) {
+                    function ($yieldMatches) use ($componentName, $innerContent, $params) {
+                        if ($componentName === $yieldMatches[1]) {
                             return $innerContent;
                         }
 
-                        if (array_key_exists($yield_matches[1], $params)) {
-                            return $params[$yield_matches[1]];
+                        if (array_key_exists($yieldMatches[1], $params)) {
+                            return $params[$yieldMatches[1]];
                         }
 
-                        throw new \Exception('yield section not found: ' . $yield_matches[1]);
+                        throw new Exception('yield section not found: ' . $yieldMatches[1]);
                     },
                     $content
                 );
@@ -106,6 +141,7 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
     /**
      * Extract component name and parameters from raw params.
      *
+     * @param string $rawParams
      * @return array{0: string, 1: array<string, string>}
      */
     private function extractComponentAndParams(string $rawParams): array

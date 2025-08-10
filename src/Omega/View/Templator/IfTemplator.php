@@ -6,8 +6,20 @@ namespace Omega\View\Templator;
 
 use Omega\View\AbstractTemplatorParse;
 
+use function array_keys;
+use function array_reverse;
+use function preg_match;
+use function preg_match_all;
+use function str_replace;
+use function substr_replace;
+
+use const PREG_OFFSET_CAPTURE;
+
 class IfTemplator extends AbstractTemplatorParse
 {
+    /**
+     * {@inheritdoc}
+     */
     public function parse(string $template): string
     {
         $tokens = [

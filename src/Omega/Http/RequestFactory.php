@@ -14,16 +14,6 @@ class RequestFactory
         return (new self())->getFromGlobal();
     }
 
-    /**
-     * Derecated couse typo.
-     *
-     * @deprecated v0.35.5 Use `getFromGlobal()` instead
-     */
-    public function getFromGloball(): Request
-    {
-        return $this->getFromGlobal();
-    }
-
     public function getFromGlobal(): Request
     {
         return new Request(

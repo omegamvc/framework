@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\View;
 
+use Exception;
 use Omega\View\Templator\BooleanTemplator;
 use Omega\View\Templator\BreakTemplator;
 use Omega\View\Templator\CommentTemplator;
@@ -19,23 +20,42 @@ use Omega\View\Templator\PHPTemplator;
 use Omega\View\Templator\SectionTemplator;
 use Omega\View\Templator\SetTemplator;
 use Omega\View\Templator\UseTemplator;
+use Throwable;
+
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function filemtime;
+use function is_string;
+use function ltrim;
+use function md5;
+use function ob_end_clean;
+use function ob_get_clean;
+use function ob_get_level;
+use function ob_start;
 
 class Templator
 {
     protected TemplatorFinder $finder;
     private string $cacheDir;
-    public string $suffix               = '';
-    public int $max_depth               = 5;
-    private string $component_namespace = '';
+
+    public string $suffix = '';
+
+    public int $maxDepth = 5;
+
+    private string $componentNamespace = '';
+
     /** @var array<string, array<string, int>> */
     private array $dependency = [];
 
     /**
-     * Create new intance.
+     * Create new instance.
      *
-     * @param TemplatorFinder|string $finder If String will genarte TemplatorFinder with default extension
+     * @param string|TemplatorFinder $finder   If String will generate TemplatorFinder with default extension.
+     * @param string                 $cacheDir
+     * @return void
      */
-    public function __construct($finder, string $cacheDir)
+    public function __construct(TemplatorFinder|string $finder, string $cacheDir)
     {
         // Backwards compatibility with templator finder.
         $this->finder    = is_string($finder) ? new TemplatorFinder([$finder]) : $finder;
@@ -44,6 +64,9 @@ class Templator
 
     /**
      * Set Finder.
+     *
+     * @param TemplatorFinder $finder
+     * @return self
      */
     public function setFinder(TemplatorFinder $finder): self
     {
@@ -54,17 +77,28 @@ class Templator
 
     /**
      * Set Component Namespace.
+     *
+     * @param string $namespace
+     * @return self
      */
     public function setComponentNamespace(string $namespace): self
     {
-        $this->component_namespace = $namespace;
+        $this->componentNamespace = $namespace;
 
         return $this;
     }
 
-    public function addDependency(string $perent, string $child, int $depend_deep = 1): self
+    /**
+     * Add dependency.
+     *
+     * @param string $parent
+     * @param string $child
+     * @param int    $dependDeep
+     * @return self
+     */
+    public function addDependency(string $parent, string $child, int $dependDeep = 1): self
     {
-        $this->dependency[$perent][$child] = $depend_deep;
+        $this->dependency[$parent][$child] = $dependDeep;
 
         return $this;
     }
@@ -72,17 +106,19 @@ class Templator
     /**
      * Prepend Dependency.
      *
-     * @param array<string, int> $childs
+     * @param string             $parent
+     * @param array<string, int> $children
+     * @return self
      */
-    public function prependDependency(string $perent, array $childs): self
+    public function prependDependency(string $parent, array $children): self
     {
-        foreach ($childs as $child => $depth) {
-            if ($has_depeth = isset($this->dependency[$perent][$child]) && $depth > $this->dependency[$perent][$child]) {
-                $this->addDependency($perent, $child, $depth);
+        foreach ($children as $child => $depth) {
+            if ($hasDepth = isset($this->dependency[$parent][$child]) && $depth > $this->dependency[$parent][$child]) {
+                $this->addDependency($parent, $child, $depth);
             }
 
-            if (false === $has_depeth) {
-                $this->addDependency($perent, $child, $depth);
+            if (false === $hasDepth) {
+                $this->addDependency($parent, $child, $depth);
             }
         }
 
@@ -90,22 +126,30 @@ class Templator
     }
 
     /**
+     * Get dependency.
+     *
+     * @param string $parent
      * @return array<string, int>
      */
-    public function getDependency(string $perent): array
+    public function getDependency(string $parent): array
     {
-        return $this->dependency[$perent] ?? [];
+        return $this->dependency[$parent] ?? [];
     }
 
     /**
+     * Render
+     *
+     * @param string $templateName
      * @param array<string, mixed> $data
+     * @param bool $cache
+     * @return string
+     * @throws Throwable
      */
     public function render(string $templateName, array $data, bool $cache = true): string
     {
         $templateName .= $this->suffix;
         $templatePath  = $this->finder->find($templateName);
-
-        $cachePath = $this->cacheDir . '/' . md5($templateName) . '.php';
+        $cachePath     = $this->cacheDir . '/' . md5($templateName) . '.php';
 
         if ($cache && file_exists($cachePath) && filemtime($cachePath) >= filemtime($templatePath)) {
             return $this->getView($cachePath, $data);
@@ -121,16 +165,20 @@ class Templator
 
     /**
      * Compile templator file to php file.
+     *
+     * @param string $templateName
+     * @return string
+     * @throws Exception
      */
-    public function compile(string $template_name): string
+    public function compile(string $templateName): string
     {
-        $template_name .= $this->suffix;
-        $template_dir  = $this->finder->find($template_name);
+        $templateName .= $this->suffix;
+        $templateDir   = $this->finder->find($templateName);
 
-        $cachePath = $this->cacheDir . '/' . md5($template_name) . '.php';
+        $cachePath = $this->cacheDir . '/' . md5($templateName) . '.php';
 
-        $template = file_get_contents($template_dir);
-        $template = $this->templates($template, $template_dir);
+        $template = file_get_contents($templateDir);
+        $template = $this->templates($template, $templateDir);
 
         file_put_contents($cachePath, $template);
 
@@ -139,6 +187,9 @@ class Templator
 
     /**
      * Check view file exist.
+     *
+     * @param string $templateName
+     * @return bool
      */
     public function viewExist(string $templateName): bool
     {
@@ -148,9 +199,13 @@ class Templator
     }
 
     /**
+     * Get view.
+     *
+     * @param string               $templatePath
      * @param array<string, mixed> $data
+     * @return string
      */
-    private function getView(string $tempalte_path, array $data): string
+    private function getView(string $templatePath, array $data): string
     {
         $level = ob_get_level();
 
@@ -160,8 +215,8 @@ class Templator
             (static function ($__, $__file_name__) {
                 extract($__);
                 include $__file_name__;
-            })($data, $tempalte_path);
-        } catch (\Throwable $th) {
+            })($data, $templatePath);
+        } catch (Throwable $th) {
             while (ob_get_level() > $level) {
                 ob_end_clean();
             }
@@ -176,8 +231,13 @@ class Templator
 
     /**
      * Transform templator to php template.
+     *
+     * @param string $template
+     * @param string $viewLocation
+     * @return string
+     * @throws Exception
      */
-    public function templates(string $template, string $view_location = ''): string
+    public function templates(string $template, string $viewLocation = ''): string
     {
         return array_reduce([
             SetTemplator::class,
@@ -195,21 +255,21 @@ class Templator
             UseTemplator::class,
             JsonTemplator::class,
             BooleanTemplator::class,
-        ], function (string $template, string $templator) use ($view_location): string {
+        ], function (string $template, string $templator) use ($viewLocation): string {
             $templator = new $templator($this->finder, $this->cacheDir);
             if ($templator instanceof IncludeTemplator) {
-                $templator->maksDept($this->max_depth);
+                $templator->maksDept($this->maxDepth);
             }
 
             if ($templator instanceof ComponentTemplator) {
-                $templator->setNamespace($this->component_namespace);
+                $templator->setNamespace($this->componentNamespace);
             }
 
             $parse = $templator->parse($template);
 
-            // Get dependecy view file (perent) after parse template.
+            // Get dependency view file (parent) after parse template.
             if ($templator instanceof DependencyTemplatorInterface) {
-                $this->prependDependency($view_location, $templator->dependentOn());
+                $this->prependDependency($viewLocation, $templator->dependOn());
             }
 
             return $parse;
