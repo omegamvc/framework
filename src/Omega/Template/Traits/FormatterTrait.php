@@ -5,31 +5,33 @@ declare(strict_types=1);
 namespace Omega\Template\Traits;
 
 /**
- * Trait for format the printter.
+ * Trait for format the printer.
  */
 trait FormatterTrait
 {
-    protected int $tab_size      = 1;
-    protected string $tab_indent = "\t";
-    private string $customize_template;
+    protected int $tabSize = 1;
 
-    public function tabSize(int $tab_size): self
+    protected string $tabIndent = "\t";
+
+    private string $customizeTemplate;
+
+    public function tabSize(int $tabSize): self
     {
-        $this->tab_size = $tab_size;
+        $this->tabSize = $tabSize;
 
         return $this;
     }
 
-    public function tabIndent(string $tab_indent): self
+    public function tabIndent(string $tabIndent): self
     {
-        $this->tab_indent = $tab_indent;
+        $this->tabIndent = $tabIndent;
 
         return $this;
     }
 
     public function customizeTemplate(string $template): self
     {
-        $this->customize_template = $template;
+        $this->customizeTemplate = $template;
 
         return $this;
     }

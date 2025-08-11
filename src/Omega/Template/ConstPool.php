@@ -7,7 +7,7 @@ namespace Omega\Template;
 class ConstPool
 {
     /** @var Constant[] */
-    private $pools = [];
+    private array $pools = [];
 
     public function name(string $name): Constant
     {

@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace Omega\Security\Hashing;
 
+use RuntimeException;
+
+use function is_string;
+use function password_hash;
+
+use const PASSWORD_ARGON2I;
+
 class ArgonHasher extends DefaultHasher implements HashInterface
 {
     protected int $memory = 1024;
@@ -42,7 +49,7 @@ class ArgonHasher extends DefaultHasher implements HashInterface
         ]);
 
         if (!is_string($hash)) {
-            throw new \RuntimeException(PASSWORD_ARGON2I . ' hashing not supported.');
+            throw new RuntimeException(PASSWORD_ARGON2I . ' hashing not supported.');
         }
 
         return $hash;

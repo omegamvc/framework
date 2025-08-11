@@ -7,9 +7,9 @@ namespace Omega\Support\Facades;
 /**
  * @method static \Omega\Database\MyPDO instance()
  */
-final class PDO extends Facade
+final class PDO extends AbstractFacade
 {
-    protected static function getAccessor()
+    public static function getFacadeAccessor(): string
     {
         return \Omega\Database\MyPDO::class;
     }

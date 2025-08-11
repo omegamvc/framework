@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Omega\Security\Hashing;
 
+use RuntimeException;
+
 interface HashInterface
 {
     /**
@@ -18,14 +20,13 @@ interface HashInterface
      *
      * @param array<string, int|string|bool> $options
      */
-    public function verify(string $value, string $hashed_value, array $options = []): bool;
+    public function verify(string $value, string $hashedValue, array $options = []): bool;
 
     /**
      * Hash given string.
      *
      * @param array<string, int|string|bool> $options
-     *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function make(string $value, array $options = []): string;
 

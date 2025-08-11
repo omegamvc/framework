@@ -6,18 +6,23 @@ namespace Omega\Template;
 
 use Omega\Template\Traits\CommentTrait;
 use Omega\Template\Traits\FormatterTrait;
+use function count;
+use function str_repeat;
+use function str_replace;
 
 class Constant
 {
     use FormatterTrait;
     use CommentTrait;
 
-    private int $visibility     = self::PUBLIC_;
-    public const PUBLIC_        = 0;
-    public const PRIVATE_       = 1;
-    public const PROTECTED_     = 2;
+    public const int PUBLIC_ = 0;
+    public const int PRIVATE_ = 1;
+    public const int PROTECTED_ = 2;
 
-    private ?string $name      = null;
+    private int $visibility;
+
+    private ?string $name;
+
     private ?string $expecting = null;
 
     public function __construct(string $name)
@@ -26,7 +31,7 @@ class Constant
         $this->visibility = -1;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->generate();
     }
@@ -38,17 +43,17 @@ class Constant
 
     private function planTemplate(): string
     {
-        return $this->customize_template ?? '{{comment}}{{visibility}}const {{name}}{{expecting}};';
+        return $this->customizeTemplate ?? '{{comment}}{{visibility}}const {{name}}{{expecting}};';
     }
 
     public function generate(): string
     {
-        $tempalate = $this->planTemplate();
-        $tab_dept  = fn (int $dept) => str_repeat($this->tab_indent, $dept * $this->tab_size);
+        $template = $this->planTemplate();
+        $tabDept  = fn (int $dept) => str_repeat($this->tabIndent, $dept * $this->tabSize);
 
-        $comment = $this->generateComment(1, $this->tab_indent);
+        $comment = $this->generateComment(1, $this->tabIndent);
         $comment = count($this->comments) > 0
-            ? $comment . "\n" . $tab_dept(1)
+            ? $comment . "\n" . $tabDept(1)
             : $comment;
 
         // generate visibility
@@ -76,7 +81,7 @@ class Constant
         return str_replace(
             ['{{comment}}', '{{visibility}}', '{{name}}', '{{expecting}}'],
             [$comment, $visibility, $this->name, $expecting],
-            $tempalate
+            $template
         );
     }
 

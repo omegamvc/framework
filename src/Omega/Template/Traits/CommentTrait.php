@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Omega\Template\Traits;
 
+use function array_unshift;
+use function count;
+use function implode;
+use function str_repeat;
+use function str_replace;
+
 /**
  * Trait for adding comment.
  */
 trait CommentTrait
 {
     /** @var string[] */
-    private $comments = [];
+    private array $comments = [];
 
     public function addComment(?string $comment): self
     {
@@ -34,7 +40,7 @@ trait CommentTrait
         return $this;
     }
 
-    public function addVaribaleComment(string $datatype, string $name = ''): self
+    public function addVariableComment(string $datatype, string $name = ''): self
     {
         $name = $name == '' ? $name : ' ' . $name;
 
@@ -58,25 +64,25 @@ trait CommentTrait
         return '/** {{body}} */';
     }
 
-    public function generateComment(int $tab_size = 0, string $tab_indent = "\t"): string
+    public function generateComment(int $tabSize = 0, string $tabIndent = "\t"): string
     {
-        $template      = $this->commentTemplate();
-        $count_commnet = count($this->comments);
-        $end_line      = '';
-        $tab_dept      = str_repeat($tab_indent, $tab_size);
+        $template     = $this->commentTemplate();
+        $countComment = count($this->comments);
+        $endLine      = '';
+        $tabDept      = str_repeat($tabIndent, $tabSize);
 
-        if ($count_commnet > 0) {
-            if ($count_commnet > 1) {
+        if ($countComment > 0) {
+            if ($countComment > 1) {
                 array_unshift($this->comments, '');
-                $end_line = "\n$tab_dept";
+                $endLine = "\n$tabDept";
             }
 
-            $comment = implode("\n$tab_dept * ", $this->comments) . $end_line;
+            $comment = implode("\n$tabDept * ", $this->comments) . $endLine;
 
             return str_replace('{{body}}', $comment, $template);
         }
 
-        // return empty if comment not avilabe
+        // return empty if comment not available
         return '';
     }
 }

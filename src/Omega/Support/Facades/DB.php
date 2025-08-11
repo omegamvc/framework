@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Omega\Support\Facades;
 
+use Omega\Database\MyQuery\Table;
+
 /**
- * @method static \Omega\Database\MyQuery\Table table(string $from)
+ * @method static Table table(string $from)
  */
-final class DB extends Facade
+final class DB extends AbstractFacade
 {
-    protected static function getAccessor()
+    public static function getFacadeAccessor(): string
     {
         return 'MyQuery';
     }

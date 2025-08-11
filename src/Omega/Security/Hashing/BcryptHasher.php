@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Omega\Security\Hashing;
 
+use function password_hash;
+
+use const PASSWORD_BCRYPT;
+
 class BcryptHasher extends DefaultHasher implements HashInterface
 {
     protected int $rounds = 12;
@@ -17,11 +21,9 @@ class BcryptHasher extends DefaultHasher implements HashInterface
 
     public function make(string $value, array $options = []): string
     {
-        $hash = password_hash($value, PASSWORD_BCRYPT, [
+        return password_hash($value, PASSWORD_BCRYPT, [
             'cost' => $options['rounds'] ?? $this->rounds,
         ]);
-
-        return $hash;
     }
 
     public function isValidAlgorithm(string $hash): bool

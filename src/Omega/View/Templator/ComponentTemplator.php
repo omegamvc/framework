@@ -8,6 +8,7 @@ use Exception;
 use Omega\View\AbstractTemplatorParse;
 use Omega\View\DependencyTemplatorInterface;
 use Omega\View\Exceptions\ViewFileNotFoundException;
+use Omega\View\Exceptions\YeldSectionNotFoundException;
 use Omega\View\InteractWithCacheTrait;
 
 use function array_key_exists;
@@ -84,7 +85,7 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
      *
      * @param string $template
      * @return string
-     * @throws Exception
+     * @throws YeldSectionNotFoundException
      */
     private function parseComponent(string $template): string
     {
@@ -109,7 +110,7 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
                 }
 
                 if (false === $this->finder->exists($componentName)) {
-                    throw new ViewFileNotFoundException('Template file not found: ' . $componentName);
+                    throw new ViewFileNotFoundException($componentName);
                 }
 
                 $templatePath = $this->finder->find($componentName);
@@ -129,7 +130,7 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
                             return $params[$yieldMatches[1]];
                         }
 
-                        throw new Exception('yield section not found: ' . $yieldMatches[1]);
+                        throw new YeldSectionNotFoundException('yield section not found: ' . $yieldMatches[1]);
                     },
                     $content
                 );

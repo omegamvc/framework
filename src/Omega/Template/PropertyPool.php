@@ -7,7 +7,7 @@ namespace Omega\Template;
 class PropertyPool
 {
     /** @var Property[] */
-    private $pools = [];
+    private array $pools = [];
 
     public function name(string $name): Property
     {

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Omega\Security\Hashing;
 
+use function array_key_exists;
+
 class HashManager implements HashInterface
 {
     /** @var array<string, HashInterface> */
-    private $driver = [];
+    private array $driver = [];
 
-    private HashInterface $default_driver;
+    private HashInterface $defaultDriver;
 
     public function __construct()
     {
@@ -18,14 +20,14 @@ class HashManager implements HashInterface
 
     public function setDefaultDriver(HashInterface $driver): self
     {
-        $this->default_driver = $driver;
+        $this->defaultDriver = $driver;
 
         return $this;
     }
 
-    public function setDriver(string $driver_name, HashInterface $driver): self
+    public function setDriver(string $driverName, HashInterface $driver): self
     {
-        $this->driver[$driver_name] = $driver;
+        $this->driver[$driverName] = $driver;
 
         return $this;
     }
@@ -36,12 +38,12 @@ class HashManager implements HashInterface
             return $this->driver[$driver];
         }
 
-        return $this->default_driver;
+        return $this->defaultDriver;
     }
 
-    public function info(string $hashed_value): array
+    public function info(string $hash): array
     {
-        return $this->driver()->info($hashed_value);
+        return $this->driver()->info($hash);
     }
 
     public function make(string $value, array $options = []): string
@@ -49,9 +51,9 @@ class HashManager implements HashInterface
         return $this->driver()->make($value, $options);
     }
 
-    public function verify(string $value, string $hashed_value, array $options = []): bool
+    public function verify(string $value, string $hashedValue, array $options = []): bool
     {
-        return $this->driver()->verify($value, $hashed_value, $options);
+        return $this->driver()->verify($value, $hashedValue, $options);
     }
 
     public function isValidAlgorithm(string $hash): bool

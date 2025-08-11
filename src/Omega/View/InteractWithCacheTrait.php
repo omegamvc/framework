@@ -12,12 +12,12 @@ trait InteractWithCacheTrait
     /**
      * Get contents using cache first.
      */
-    private function getContents(string $file_name): string
+    private function getContents(string $fileName): string
     {
-        if (false === array_key_exists($file_name, self::$cache)) {
-            self::$cache[$file_name] = file_get_contents($file_name);
+        if (false === array_key_exists($fileName, self::$cache)) {
+            self::$cache[$fileName] = file_get_contents($fileName);
         }
 
-        return self::$cache[$file_name];
+        return self::$cache[$fileName];
     }
 }

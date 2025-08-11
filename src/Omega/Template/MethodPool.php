@@ -7,7 +7,7 @@ namespace Omega\Template;
 class MethodPool
 {
     /** @var Method[] */
-    private $pools = [];
+    private array $pools = [];
 
     public function name(string $name): Method
     {

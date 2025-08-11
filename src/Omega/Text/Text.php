@@ -4,37 +4,39 @@ declare(strict_types=1);
 
 namespace Omega\Text;
 
-use Omega\Text\Exceptions\NoReturn;
+use Omega\Text\Exceptions\NoReturnException;
+
+use function gettype;
 
 class Text
 {
     /**
-     * Orinal string input.
+     * Original string input.
      *
      * @var string
      */
-    private $_original;
+    private string $original;
 
     /**
      * Current string.
      *
      * @var string
      */
-    private $_current;
+    private string $current;
 
     /**
      * Log string modifier.
      *
      * @var array<string, array<string, string>>
      */
-    private $_latest;
+    private array $latest;
 
     /**
      * Throw when string method return 'false' instance 'string'.
      *
      * @var bool
      */
-    private $_throw_on_failure = false;
+    private bool $throwOnFailure = false;
 
     /**
      * Create string class.
@@ -43,28 +45,27 @@ class Text
      */
     public function __construct(string $text)
     {
-        $this->_original = $text;
+        $this->original = $text;
         $this->execute($text, __FUNCTION__);
     }
 
     /**
-     * Basicly is history for text modify.
+     * Basically is history for text modify.
      *
-     * @param string|bool|array<int|string, string> $text          new incoming text
-     * @param string                                $function_name Method to call (Str::class)
-     *
+     * @param bool|string|array<int|string, string> $text          new incoming text
+     * @param string                                $functionName Method to call (Str::class)
      * @return string
      */
-    private function execute($text, string $function_name)
+    private function execute(array|bool|string $text, string $functionName): string
     {
         if (Str::isString($text)) {
-            $this->_current = $text;
+            $this->current = $text;
         }
 
-        $this->_latest[] = [
-            'function'  => $function_name,
+        $this->latest[] = [
+            'function'  => $functionName,
             'return'    => $text,
-            'type'      => \gettype($text),
+            'type'      => gettype($text),
         ];
 
         return $text;
@@ -74,10 +75,9 @@ class Text
      * Push new string text without erase history.
      *
      * @param string $text New text
-     *
      * @return self
      */
-    public function text(string $text)
+    public function text(string $text): self
     {
         $this->execute($text, __FUNCTION__);
 
@@ -89,9 +89,9 @@ class Text
      *
      * @return string
      */
-    public function getText()
+    public function getText(): string
     {
-        return $this->_current;
+        return $this->current;
     }
 
     /**
@@ -99,7 +99,7 @@ class Text
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getText();
     }
@@ -109,9 +109,9 @@ class Text
      *
      * @return array<string, array<string, string>>
      */
-    public function logs()
+    public function logs(): array
     {
-        return $this->_latest;
+        return $this->latest;
     }
 
     /**
@@ -119,11 +119,11 @@ class Text
      *
      * @return self
      */
-    public function reset()
+    public function reset(): self
     {
-        $this->_current          = $this->_original;
-        $this->_latest           = [];
-        $this->_throw_on_failure = false;
+        $this->current          = $this->original;
+        $this->latest           = [];
+        $this->throwOnFailure = false;
 
         return $this;
     }
@@ -132,12 +132,11 @@ class Text
      * Refresh class with new text.
      *
      * @param string $text Input string
-     *
      * @return self
      */
-    public function refresh(string $text)
+    public function refresh(string $text): self
     {
-        $this->_original = $text;
+        $this->original = $text;
 
         return $this->reset();
     }
@@ -145,29 +144,25 @@ class Text
     /**
      * Throw when string method return 'false' instance 'string'.
      *
-     * @param bool $throw_error Throw on failure
-     *
+     * @param bool $throwError Throw on failure
      * @return self
      */
-    public function throwOnFailure(bool $throw_error)
+    public function throwOnFailure(bool $throwError): self
     {
-        $this->_throw_on_failure = $throw_error;
+        $this->throwOnFailure = $throwError;
 
         return $this;
     }
 
-    // logic ----------------------------------
-
     /**
-     * Return the character at the specifid postion.
+     * Return the character at the specified position.
      *
      * @param int $index character position
-     *
      * @return self
      */
-    public function chartAt(int $index)
+    public function charAt(int $index): self
     {
-        $text = Str::chartAt($this->_current, $index);
+        $text = Str::charAt($this->current, $index);
 
         $this->execute($text, __FUNCTION__);
 
@@ -179,15 +174,14 @@ class Text
      *
      * @param int      $start  Start position text
      * @param int|null $length Length of string
-     *
      * @return self
      */
-    public function slice(int $start, ?int $length = null)
+    public function slice(int $start, ?int $length = null): self
     {
-        $text = Str::slice($this->_current, $start, $length);
+        $text = Str::slice($this->current, $start, $length);
 
-        if ($this->_throw_on_failure && false === $text) {
-            throw new NoReturn(__FUNCTION__, $this->_current);
+        if ($this->throwOnFailure && false === $text) {
+            throw new NoReturnException(__FUNCTION__, $this->current);
         }
 
         $this->execute($text, __FUNCTION__);
@@ -200,9 +194,9 @@ class Text
      *
      * @return self
      */
-    public function lower()
+    public function lower(): self
     {
-        $text = Str::toLowerCase($this->_current);
+        $text = Str::toLowerCase($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -213,61 +207,61 @@ class Text
      *
      * @return self
      */
-    public function upper()
+    public function upper(): self
     {
-        $text = Str::toUpperCase($this->_current);
+        $text = Str::toUpperCase($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
     }
 
     /**
-     * Make frist charater uppercase.
+     * Make first character uppercase.
      *
      * @return self
      */
-    public function firstUpper()
+    public function firstUpper(): self
     {
-        $text = Str::firstUpper($this->_current);
+        $text = Str::firstUpper($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
     }
 
     /**
-     * Make frist charater uppercase each words.
+     * Make first character uppercase each words.
      *
      * @return self
      */
-    public function firstUpperAll()
+    public function firstUpperAll(): self
     {
-        $text = Str::firstUpperAll($this->_current);
+        $text = Str::firstUpperAll($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
     }
 
     /**
-     * Make text sparate with dash (snackcase).
+     * Make text separate with underscore (snake_case).
      *
      * @return self
      */
-    public function snack()
+    public function snake(): self
     {
-        $text = Str::toSnackCase($this->_current);
+        $text = Str::toSnakeCase($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
     }
 
     /**
-     * Make text sparate with - (kebabcase).
+     * Make text separate with - (kebab case).
      *
      * @return self
      */
-    public function kebab()
+    public function kebab(): self
     {
-        $text = Str::toKebabCase($this->_current);
+        $text = Str::toKebabCase($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -278,9 +272,9 @@ class Text
      *
      * @return self
      */
-    public function pascal()
+    public function pascal():self
     {
-        $text = Str::toPascalCase($this->_current);
+        $text = Str::toPascalCase($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -291,9 +285,9 @@ class Text
      *
      * @return self
      */
-    public function camel()
+    public function camel(): self
     {
-        $text = Str::toCamelCase($this->_current);
+        $text = Str::toCamelCase($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -304,9 +298,9 @@ class Text
      *
      * @return self
      */
-    public function slug()
+    public function slug(): self
     {
-        $text = Str::slug($this->_current);
+        $text = Str::slug($this->current);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -317,12 +311,11 @@ class Text
      *
      * @param string $fill   String fill for miss length
      * @param int    $length Max length of output string
-     *
      * @return self
      */
-    public function fill(string $fill, $length)
+    public function fill(string $fill, int $length): self
     {
-        $text = Str::fill($this->_current, $fill, $length);
+        $text = Str::fill($this->current, $fill, $length);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -333,12 +326,11 @@ class Text
      *
      * @param string $fill   String fill for miss length
      * @param int    $length Max length of output string
-     *
      * @return self
      */
-    public function fillEnd(string $fill, $length)
+    public function fillEnd(string $fill, int $length): self
     {
-        $text = Str::fillEnd($this->_current, $fill, $length);
+        $text = Str::fillEnd($this->current, $fill, $length);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -347,15 +339,14 @@ class Text
     /**
      * Create mask string.
      *
-     * @param string $mask        Mask
-     * @param int    $start       Start postion mask
-     * @param int    $mask_length Mask lenght
-     *
+     * @param string $mask       Mask
+     * @param int    $start      Start position mask
+     * @param int    $maskLength Mask length
      * @return self
      */
-    public function mask(string $mask, int $start, int $mask_length = 9999)
+    public function mask(string $mask, int $start, int $maskLength = 9999): self
     {
-        $text = Str::mask($this->_current, $mask, $start, $mask_length);
+        $text = Str::mask($this->current, $mask, $start, $maskLength);
         $this->execute($text, __FUNCTION__);
 
         return $this;
@@ -365,99 +356,90 @@ class Text
      * Truncate text to limited length.
      *
      * @param int    $length            Length text
-     * @param string $truncate_caracter Truncate caracter
-     *
+     * @param string $truncateCharacter Truncate character
      * @return self
      */
-    public function limit(int $length, string $truncate_caracter = '...')
+    public function limit(int $length, string $truncateCharacter = '...'): self
     {
-        $text = Str::limit($this->_current, $length, $truncate_caracter);
+        $text = Str::limit($this->current, $length, $truncateCharacter);
         $this->execute($text, __FUNCTION__);
 
         return $this;
     }
 
     /**
-     * Get text after text finded.
+     * Get text after text found.
      */
     public function after(string $find): self
     {
         $this->execute(
-            Str::after($this->_current, $find),
+            Str::after($this->current, $find),
             __FUNCTION__
         );
 
         return $this;
     }
 
-    // int -----------------------------------------------
-
     /**
      * Get string length (0 if empty).
      *
      * @return int
      */
-    public function length()
+    public function length(): int
     {
-        return Str::length($this->_current);
+        return Str::length($this->current);
     }
 
     /**
-     * Index of first occorrent of specified text with in string.
+     * Index of first occurrence of specified text with in string.
      *
      * @param string $find Find
-     *
      * @return int|false
      */
-    public function indexOf(string $find)
+    public function indexOf(string $find): int|false
     {
-        return Str::indexOf($this->_current, $find);
+        return Str::indexOf($this->current, $find);
     }
 
     /**
-     * Last index of first occorrent of specified text with in string.
+     * Last index of first occurrence of specified text with in string.
      *
      * @param string $find Find
-     *
      * @return int|false
      */
-    public function lastIndexOf(string $find)
+    public function lastIndexOf(string $find): int|false
     {
-        return Str::lastIndexOf($this->_current, $find);
+        return Str::lastIndexOf($this->current, $find);
     }
-
-    // boolean -------------------------------------------
 
     /**
      * Check string is empty string.
      *
      * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
-        return Str::isEmpty($this->_current);
+        return Str::isEmpty($this->current);
     }
 
     /**
      * Check string is empty string.
      *
-     * @param string $pattern String leguler expresstion
-     *
+     * @param string $pattern String regular expression
      * @return bool
      */
-    public function is(string $pattern)
+    public function is(string $pattern): bool
     {
-        return Str::isMatch($this->_current, $pattern);
+        return Str::isMatch($this->current, $pattern);
     }
 
     /**
      * Check string is empty string.
      *
-     * @param string $pattern String leguler expresstion
-     *
+     * @param string $pattern String regular expression
      * @return bool
      */
-    public function isMatch(string $pattern)
+    public function isMatch(string $pattern): bool
     {
         return $this->is($pattern);
     }
@@ -466,35 +448,32 @@ class Text
      * Check text contain with.
      *
      * @param string $find Text contain
-     *
      * @return bool True if text contain
      */
-    public function contains(string $find)
+    public function contains(string $find): bool
     {
-        return Str::contains($this->_current, $find);
+        return Str::contains($this->current, $find);
     }
 
     /**
-     * Check text starts with with.
+     * Check text starts with.
      *
-     * @param string $start_with Start with
-     *
+     * @param string $startWith Start with
      * @return bool True if text starts with
      */
-    public function startsWith(string $start_with)
+    public function startsWith(string $startWith): bool
     {
-        return Str::startsWith($this->_current, $start_with);
+        return Str::startsWith($this->current, $startWith);
     }
 
     /**
-     * Check text ends with with.
+     * Check text ends with.
      *
-     * @param string $end_with Start with
-     *
+     * @param string $endWith Start with
      * @return bool True if text ends with
      */
-    public function endsWith(string $end_with)
+    public function endsWith(string $endWith): bool
     {
-        return Str::endsWith($this->_current, $end_with);
+        return Str::endsWith($this->current, $endWith);
     }
 }

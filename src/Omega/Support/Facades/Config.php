@@ -7,15 +7,15 @@ namespace Omega\Support\Facades;
 use Omega\Integrate\ConfigRepository;
 
 /**
- * @method static bool                 has(string $key)
- * @method static mixed                get(string $key, mixed $default = null)
- * @method static void                 set(string $key, mixed $value)
- * @method static void                 push(string $key, mixed $value)
+ * @method static bool has(string $key)
+ * @method static mixed get(string $key, mixed $default = null)
+ * @method static void set(string $key, mixed $value)
+ * @method static void push(string $key, mixed $value)
  * @method static array<string, mixed> toArray()
  */
-final class Config extends Facade
+final class Config extends AbstractFacade
 {
-    protected static function getAccessor()
+    public static function getFacadeAccessor(): string
     {
         return ConfigRepository::class;
     }

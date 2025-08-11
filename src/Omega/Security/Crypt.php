@@ -4,46 +4,67 @@ declare(strict_types=1);
 
 namespace Omega\Security;
 
+use Exception;
+use Random\RandomException;
+
+use function base64_decode;
+use function base64_encode;
+use function count;
+use function explode;
+use function hash;
+use function openssl_decrypt;
+use function openssl_encrypt;
+use function random_bytes;
+
+use const OPENSSL_RAW_DATA;
+
 class Crypt
 {
-    private string $cipher_algo;
+    private string $cipherAlgo;
+
     private string $iv;
+
     private string $hash;
 
-    public function __construct(string $passphrase, string $cipher_algo)
+    /**
+     * @throws RandomException
+     * @throws Exception
+     */
+    public function __construct(string $passPhrase, string $cipherAlgo)
     {
-        [$this->cipher_algo, $chars] = $this->algoParse($cipher_algo);
-        $this->iv                    = random_bytes($chars);
-        $this->hash                  = $this->hash($passphrase);
+        [$this->cipherAlgo, $chars] = $this->algoParse($cipherAlgo);
+        $this->iv                   = random_bytes($chars);
+        $this->hash                 = $this->hash($passPhrase);
     }
 
     /**
      * @return string[]|int[]
+     * @throws Exception
      */
-    private function algoParse(string $chiper_algo): array
+    private function algoParse(string $cipherAlgo): array
     {
-        $parse = explode(';', $chiper_algo);
+        $parse = explode(';', $cipherAlgo);
 
         if (count($parse) < 2) {
-            throw new \Exception('Chiper algo must provide chars length');
+            throw new Exception('Cipher algo must provide chars length');
         }
 
-        return [(string) $parse[0], (int) $parse[1]];
+        return [$parse[0], (int) $parse[1]];
     }
 
-    public function hash(string $passphrase): string
+    public function hash(string $passPhrase): string
     {
-        return hash('sha256', $passphrase, true);
+        return hash('sha256', $passPhrase, true);
     }
 
-    public function encrypt(string $plain_text, ?string $passphrase = null): string
+    public function encrypt(string $plainText, ?string $passPhrase = null): string
     {
-        $hash = $passphrase === null ? null : $this->hash($passphrase);
+        $hash = $passPhrase === null ? null : $this->hash($passPhrase);
 
         return base64_encode(
             openssl_encrypt(
-                $plain_text,
-                $this->cipher_algo,
+                $plainText,
+                $this->cipherAlgo,
                 $hash ?? $this->hash,
                 OPENSSL_RAW_DATA,
                 $this->iv
@@ -51,13 +72,13 @@ class Crypt
         );
     }
 
-    public function decrypt(string $encrypted, ?string $passphrase = null): string
+    public function decrypt(string $encrypted, ?string $passPhrase = null): string
     {
-        $hash = $passphrase === null ? null : $this->hash($passphrase);
+        $hash = $passPhrase === null ? null : $this->hash($passPhrase);
 
         return openssl_decrypt(
             base64_decode($encrypted),
-            $this->cipher_algo,
+            $this->cipherAlgo,
             $hash ?? $this->hash,
             OPENSSL_RAW_DATA,
             $this->iv

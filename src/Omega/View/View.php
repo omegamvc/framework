@@ -19,9 +19,9 @@ class View
      * @param string               $viewPath View path location
      * @param array<string, mixed> $portal   Data to push
      * @return Response
-     * @throw ViewFileNotFoundException
+     * @throws ViewFileNotFoundException
      */
-    public static function render(string $viewPath, array $portal = [])
+    public static function render(string $viewPath, array $portal = []): Response
     {
         if (!file_exists($viewPath)) {
             throw new ViewFileNotFoundException($viewPath);

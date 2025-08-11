@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Omega\Security\Hashing;
 
+use RuntimeException;
+
+use const PASSWORD_ARGON2ID;
+
 class Argon2IdHasher extends ArgonHasher implements HashInterface
 {
     public function make(string $value, array $options = []): string
@@ -15,7 +19,7 @@ class Argon2IdHasher extends ArgonHasher implements HashInterface
         ]);
 
         if (!is_string($hash)) {
-            throw new \RuntimeException(PASSWORD_ARGON2ID . ' hashing not supported.');
+            throw new RuntimeException(PASSWORD_ARGON2ID . ' hashing not supported.');
         }
 
         return $hash;

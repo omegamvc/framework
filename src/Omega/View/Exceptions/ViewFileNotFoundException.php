@@ -6,11 +6,8 @@ namespace Omega\View\Exceptions;
 
 class ViewFileNotFoundException extends AbstractViewException
 {
-    /**
-     * Creates a new Exception instance.
-     */
     public function __construct(string $fileName)
     {
-        parent::__construct('View path not exists `%s`', $fileName);
+        parent::__construct('View file not found: `%s`', $fileName);
     }
 }

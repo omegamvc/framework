@@ -10,7 +10,7 @@ use Omega\Http\Response;
 use Omega\Integrate\Application;
 use Omega\Integrate\Http\Kernel;
 use Omega\Integrate\ServiceProvider;
-use Omega\Support\Facades\Facade;
+use Omega\Support\Facades\AbstractFacade;
 
 class TestCase extends BaseTestCase
 {
@@ -21,7 +21,7 @@ class TestCase extends BaseTestCase
     protected function tearDown(): void
     {
         $this->app->flush();
-        Facade::flushInstance();
+        AbstractFacade::flushInstance();
         ServiceProvider::flushModule();
         unset($this->app);
         unset($this->kernel);

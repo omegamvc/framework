@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Security;
 
-class Algo
+final class Algo
 {
-    public const AES_128_CBC = 'aes-256-cbc;16';
-    public const AES_256_CBC = 'aes-256-cbc;16';
+    public const string AES_256_CBC = 'aes-256-cbc;16';
 }

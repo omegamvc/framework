@@ -6,29 +6,41 @@ namespace Omega\Template;
 
 use Omega\Template\Traits\CommentTrait;
 use Omega\Template\Traits\FormatterTrait;
+use function array_filter;
+use function count;
+use function implode;
+use function is_array;
+use function str_repeat;
+use function str_replace;
+use const ARRAY_FILTER_USE_KEY;
 
 class Property
 {
     use FormatterTrait;
     use CommentTrait;
 
-    private bool $is_static      = false;
-    private int $visibility      = self::PRIVATE_;
-    public const PUBLIC_         = 0;
-    public const PRIVATE_        = 1;
-    public const PROTECTED_      = 2;
+    private bool $isStatic = false;
 
-    private string $data_type;
+    private int $visibility = self::PRIVATE_;
+
+    public const int PUBLIC_ = 0;
+
+    public const int PRIVATE_ = 1;
+
+    public const int PROTECTED_ = 2;
+
+    private string $dataType;
     private string $name;
+
     /** @var string[] */
-    private $expecting;
+    private array $expecting;
 
     public function __construct(string $name)
     {
         $this->name = $name;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->generate();
     }
@@ -45,12 +57,12 @@ class Property
 
     public function generate(): string
     {
-        $tempalate = $this->planTemplate();
-        $tab_dept  = fn (int $dept) => str_repeat($this->tab_indent, $dept * $this->tab_size);
+        $template = $this->planTemplate();
+        $tabDept  = fn (int $dept) => str_repeat($this->tabIndent, $dept * $this->tabSize);
 
         $comment = $this->generateComment(1);
         $comment = count($this->comments) > 0
-      ? $comment . "\n" . $tab_dept(1)
+      ? $comment . "\n" . $tabDept(1)
       : $comment;
 
         // generate visibility
@@ -70,10 +82,10 @@ class Property
         }
 
         // generate static
-        $static = $this->is_static ? 'static ' : '';
+        $static = $this->isStatic ? 'static ' : '';
 
         // data type
-        $data_type = $this->data_type ?? '';
+        $data_type = $this->dataType ?? '';
 
         // generate name
         $name = '$' . $this->name;
@@ -81,28 +93,28 @@ class Property
         // generate value or expecting
         $expecting = '';
         if ($this->expecting !== null) {
-            $single_line  = $this->expecting[0] ?? '';
-            $multy_line   = implode(
-                "\n" . $tab_dept(1),
+            $singleLine  = $this->expecting[0] ?? '';
+            $multiLine   = implode(
+                "\n" . $tabDept(1),
                 array_filter($this->expecting, fn ($key) => $key > 0, ARRAY_FILTER_USE_KEY)
             );
             $expecting = count($this->expecting) > 1
-        ? ' ' . $single_line . "\n" . $tab_dept(1) . $multy_line
-        : ' ' . $single_line;
+        ? ' ' . $singleLine . "\n" . $tabDept(1) . $multiLine
+        : ' ' . $singleLine;
         }
 
         // final
         return str_replace(
             ['{{comment}}', '{{visibility}}', '{{static}}', '{{data type}}', '{{name}}', '{{expecting}}'],
             [$comment, $visibility, $static, $data_type, $name, $expecting],
-            $tempalate
+            $template
         );
     }
 
     // setter
-    public function setStatic(bool $is_static = true): self
+    public function setStatic(bool $isStatic = true): self
     {
-        $this->is_static = $is_static;
+        $this->isStatic = $isStatic;
 
         return $this;
     }
@@ -114,9 +126,9 @@ class Property
         return $this;
     }
 
-    public function dataType(string $data_type): self
+    public function dataType(string $dataType): self
     {
-        $this->data_type = $data_type . ' ';
+        $this->dataType = $dataType . ' ';
 
         return $this;
     }
@@ -129,9 +141,9 @@ class Property
     }
 
     /**
-     * @param string|string[] $expecting Add expecting as string or array for multy line
+     * @param string|string[] $expecting Add expecting as string or array for multi line
      */
-    public function expecting($expecting): self
+    public function expecting(array|string $expecting): self
     {
         $this->expecting = is_array($expecting)
             ? $expecting

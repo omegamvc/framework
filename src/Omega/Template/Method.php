@@ -6,33 +6,46 @@ namespace Omega\Template;
 
 use Omega\Template\Traits\CommentTrait;
 use Omega\Template\Traits\FormatterTrait;
+use function array_filter;
+use function array_map;
+use function count;
+use function implode;
+use function is_array;
+use function str_repeat;
 
 class Method
 {
     use FormatterTrait;
     use CommentTrait;
 
-    public const PUBLIC_    = 0;
-    public const PRIVATE_   = 1;
-    public const PROTECTED_ = 2;
+    public const int PUBLIC_ = 0;
 
-    private int $visibility  = -1;
-    private bool $is_final   = false;
-    private bool $is_static  = false;
+    public const int PRIVATE_ = 1;
+
+    public const int PROTECTED_ = 2;
+
+    private int $visibility = -1;
+
+    private bool $isFinal = false;
+
+    private bool $isStatic = false;
 
     private string $name;
+
     /** @var string[] */
-    private $params              = [];
-    private ?string $return_type = null;
+    private array $params = [];
+
+    private ?string $returnType = null;
+
     /** @var string[] */
-    private $body = [];
+    private array $body = [];
 
     public function __construct(string $name)
     {
         $this->name = $name;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->generate();
     }
@@ -44,28 +57,29 @@ class Method
 
     public function planTemplate(): string
     {
-        return $this->customize_template ?? "{{comment}}{{before}}function {{name}}({{params}}){{return type}}{{new line}}{\n{{body}}{{new line}}}";
+        return $this->customizeTemplate
+            ?? "{{comment}}{{before}}function {{name}}({{params}}){{return type}}{{new line}}{\n{{body}}{{new line}}}";
     }
 
     public function generate(): string
     {
-        $tempalate = $this->planTemplate();
-        $tab_dept  = fn (int $dept) => str_repeat($this->tab_indent, $dept * $this->tab_size);
+        $template = $this->planTemplate();
+        $tabDept  = fn (int $dept) => str_repeat($this->tabIndent, $dept * $this->tabSize);
         // new line
-        $new_line = "\n" . $tab_dept(1);
+        $newLine = "\n" . $tabDept(1);
 
         // comment
-        $comment = $this->generateComment(1, $this->tab_indent);
+        $comment = $this->generateComment(1, $this->tabIndent);
         $comment = count($this->comments) > 0
-            ? $comment . $new_line
+            ? $comment . $newLine
             : $comment;
 
         $pre = [];
         // final
-        $pre[] = $this->is_final ? 'final' : '';
+        $pre[] = $this->isFinal ? 'final' : '';
 
         // static
-        $pre[] = $this->is_static ? 'static' : '';
+        $pre[] = $this->isStatic ? 'static' : '';
 
         // visibility
         $pre[] = match ($this->visibility) {
@@ -87,17 +101,17 @@ class Method
         $params = implode(', ', $this->params);
 
         // return type
-        $return = isset($this->return_type) ? ': ' : '';
-        $return .= $this->return_type;
+        $return = isset($this->returnType) ? ': ' : '';
+        $return .= $this->returnType;
 
         // body
-        $bodys = array_map(fn ($x) => $tab_dept(2) . $x, $this->body);
-        $body  = implode("\n", $bodys);
+        $bodies = array_map(fn ($x) => $tabDept(2) . $x, $this->body);
+        $body   = implode("\n", $bodies);
 
         return str_replace(
             ['{{comment}}', '{{before}}', '{{name}}', '{{params}}', '{{new line}}', '{{body}}', '{{return type}}'],
-            [$comment, $before, $name, $params, $new_line, $body, $return],
-            $tempalate
+            [$comment, $before, $name, $params, $newLine, $body, $return],
+            $template
         );
     }
 
@@ -117,14 +131,14 @@ class Method
 
     public function isFinal(bool $is_final = true): self
     {
-        $this->is_final = $is_final;
+        $this->isFinal = $is_final;
 
         return $this;
     }
 
     public function isStatic(bool $is_static = true): self
     {
-        $this->is_static = $is_static;
+        $this->isStatic = $is_static;
 
         return $this;
     }
@@ -146,17 +160,17 @@ class Method
         return $this;
     }
 
-    public function setReturnType(?string $return_type): self
+    public function setReturnType(?string $returnType): self
     {
-        $this->return_type = $return_type ?? '';
+        $this->returnType = $returnType ?? '';
 
         return $this;
     }
 
     /**
-     * @param string|string[]|null $body Raw string body (delimete multy line with array)
+     * @param string|string[]|null $body Raw string body (delimiter multi line with array)
      */
-    public function body($body): self
+    public function body(array|string|null $body): self
     {
         $body ??= [];
 

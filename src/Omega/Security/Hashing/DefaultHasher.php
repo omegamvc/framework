@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\Security\Hashing;
 
+use function password_get_info;
+use function password_hash;
+use function password_verify;
+
+use const PASSWORD_DEFAULT;
+
 class DefaultHasher implements HashInterface
 {
     public function info(string $hash): array
@@ -11,9 +17,9 @@ class DefaultHasher implements HashInterface
         return password_get_info($hash);
     }
 
-    public function verify(string $value, string $hashed_value, array $options = []): bool
+    public function verify(string $value, string $hashedValue, array $options = []): bool
     {
-        return password_verify($value, $hashed_value);
+        return password_verify($value, $hashedValue);
     }
 
     public function make(string $value, array $options = []): string
