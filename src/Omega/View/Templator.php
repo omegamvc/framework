@@ -58,8 +58,8 @@ class Templator
     public function __construct(TemplatorFinder|string $finder, string $cacheDir)
     {
         // Backwards compatibility with templator finder.
-        $this->finder    = is_string($finder) ? new TemplatorFinder([$finder]) : $finder;
-        $this->cacheDir  = $cacheDir;
+        $this->finder   = is_string($finder) ? new TemplatorFinder([$finder]) : $finder;
+        $this->cacheDir = $cacheDir;
     }
 
     /**

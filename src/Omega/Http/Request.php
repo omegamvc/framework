@@ -4,19 +4,40 @@ declare(strict_types=1);
 
 namespace Omega\Http;
 
+use ArrayAccess;
+use ArrayIterator;
+use Closure;
+use Exception;
+use IteratorAggregate;
 use Omega\Collection\Collection;
 use Omega\Collection\CollectionImmutable;
+use Omega\Http\Upload\UploadFile;
 use Omega\Macroable\MacroableTrait;
 use Omega\Text\Str;
+use Omega\Validator\Validator;
+use ReturnTypeWillChange;
+use Traversable;
+use function array_merge;
+use function func_num_args;
+use function get_debug_type;
+use function in_array;
+use function is_array;
+use function json_decode;
+use function sprintf;
+use function strcasecmp;
+use function strtoupper;
+use function substr;
+use const JSON_BIGINT_AS_STRING;
+use const JSON_THROW_ON_ERROR;
 
 /**
- * @method \Validator\Validator    validate(?\Closure $rule = null, ?\Closure $filter = null)
- * @method \Omega\File\UploadFile upload(array $file_name)
+ * @method Validator    validate(?Closure $rule = null, ?Closure $filter = null)
+ * @method UploadFile upload(array $fileName)
  *
- * @implements \ArrayAccess<string, string>
- * @implements \IteratorAggregate<string, string>
+ * @implements ArrayAccess<string, string>
+ * @implements IteratorAggregate<string, string>
  */
-class Request implements \ArrayAccess, \IteratorAggregate
+class Request implements ArrayAccess, IteratorAggregate
 {
     use MacroableTrait;
 
@@ -73,16 +94,16 @@ class Request implements \ArrayAccess, \IteratorAggregate
     private array $headers;
 
     /**
-     * Request remote addres (IP).
+     * Request remote address (IP).
      */
     private string $remoteAddress;
 
     /**
      * Request Body content.
      *
-     * @var ?string
+     * @var string|null
      */
-    private $rawBody;
+    private ?string $rawBody;
 
     /**
      * Json body rendered.
@@ -95,8 +116,6 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Initialize mime format.
      *
      * @var array<string, string[]>
-     *
-     * @see https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php
      */
     protected array $formats = [
         'html'   => ['text/html', 'application/xhtml+xml'],
@@ -132,19 +151,33 @@ class Request implements \ArrayAccess, \IteratorAggregate
         string $remoteAddress = '::1',
         ?string $rawBody = null,
     ) {
-        $this->initialize($url, $query, $post, $attributes, $cookies, $files, $headers, $method, $remoteAddress, $rawBody);
+        $this->initialize(
+            $url,
+            $query,
+            $post,
+            $attributes,
+            $cookies,
+            $files,
+            $headers,
+            $method,
+            $remoteAddress,
+            $rawBody
+        );
     }
 
     /**
      * Initial request.
      *
+     * @param string                $url
      * @param array<string, string> $query
      * @param array<string, string> $post
      * @param array<string, string> $attributes
      * @param array<string, string> $cookies
      * @param array<string, string> $files
      * @param array<string, string> $headers
-     *
+     * @param string                $method
+     * @param string                $remoteAddress
+     * @param string|null           $rawBody
      * @return self
      */
     public function initialize(
@@ -158,7 +191,7 @@ class Request implements \ArrayAccess, \IteratorAggregate
         string $method = 'GET',
         string $remoteAddress = '::1',
         ?string $rawBody = null,
-    ) {
+    ): self {
         $this->url             = $url;
         $this->query           = new Collection($query);
         $this->post            = new Collection($post);
@@ -182,8 +215,7 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * @param array<string, string>|null $cookies
      * @param array<string, string>|null $files
      * @param array<string, string>|null $headers
-     *
-     * @return static
+     * @return self
      */
     public function duplicate(
         ?array $query = null,
@@ -192,32 +224,32 @@ class Request implements \ArrayAccess, \IteratorAggregate
         ?array $cookies = null,
         ?array $files = null,
         ?array $headers = null,
-    ) {
-        $dupplicate = clone $this;
+    ): self {
+        $duplicate = clone $this;
 
         if (null !== $query) {
-            $dupplicate->query = new Collection($query);
+            $duplicate->query = new Collection($query);
         }
         if (null !== $post) {
-            $dupplicate->post = new Collection($post);
+            $duplicate->post = new Collection($post);
         }
         if (null !== $attributes) {
-            $dupplicate->attributes = $attributes;
+            $duplicate->attributes = $attributes;
         }
         if (null !== $cookies) {
-            $dupplicate->cookies = $cookies;
+            $duplicate->cookies = $cookies;
         }
         if (null !== $files) {
-            $dupplicate->files = $files;
+            $duplicate->files = $files;
         }
         if (null !== $headers) {
-            $dupplicate->headers = $headers;
+            $duplicate->headers = $headers;
         }
 
-        return $dupplicate;
+        return $duplicate;
     }
 
-    public function __clone()
+    public function __clone(): void
     {
         $this->query      = clone $this->query;
         $this->post       = clone $this->post;
@@ -228,6 +260,9 @@ class Request implements \ArrayAccess, \IteratorAggregate
         $this->headers    = (new Collection($this->headers))->all();
     }
 
+    /**
+     * @return string
+     */
     public function getUrl(): string
     {
         return $this->url;
@@ -246,9 +281,10 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Get Post/s ($_GET).
      *
+     * @param string|null $key
      * @return array<string, string>|string
      */
-    public function getQuery(?string $key = null)
+    public function getQuery(?string $key = null): array|string
     {
         if (func_num_args() === 0) {
             return $this->query->all();
@@ -270,9 +306,10 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Get Post/s ($_POST).
      *
+     * @param string|null $key
      * @return array<string, string>|string
      */
-    public function getPost(?string $key = null)
+    public function getPost(?string $key = null): array|string
     {
         if (func_num_args() === 0) {
             return $this->post->all();
@@ -284,9 +321,10 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Get file/s ($_FILE).
      *
+     * @param string|null $key
      * @return array<string, array<int, string>|string>|array<int, string>|string
      */
-    public function getFile(?string $key = null)
+    public function getFile(?string $key = null): array|string
     {
         if (func_num_args() === 0) {
             return $this->files;
@@ -295,7 +333,7 @@ class Request implements \ArrayAccess, \IteratorAggregate
         return $this->files[$key];
     }
 
-    public function getCookie(string $key): string
+    public function getCookie(string $key): ?string
     {
         return $this->cookies[$key] ?? null;
     }
@@ -305,14 +343,14 @@ class Request implements \ArrayAccess, \IteratorAggregate
      *
      * @return array<string, string>|null
      */
-    public function getCookies()
+    public function getCookies(): ?array
     {
         return $this->cookies;
     }
 
     public function getMethod(): string
     {
-        return \strtoupper($this->method);
+        return strtoupper($this->method);
     }
 
     public function isMethod(string $method): bool
@@ -323,9 +361,10 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Get header/s.
      *
+     * @param string|null $header
      * @return array<string, string>|string|null get header/s
      */
-    public function getHeaders(?string $header = null)
+    public function getHeaders(?string $header = null): array|string|null
     {
         if ($header === null) {
             return $this->headers;
@@ -337,6 +376,7 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Gets the mime types associated with the format.
      *
+     * @param string $format
      * @return string[]
      */
     public function getMimeTypes(string $format): array
@@ -347,14 +387,13 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Gets format using mimetype.
      *
-     * @param string|null $mime_type
-     *
+     * @param string|null $mimeType
      * @return string|null
      */
-    public function getFormat($mime_type)
+    public function getFormat(?string $mimeType): ?string
     {
-        foreach ($this->formats as $format => $mime_types) {
-            if (in_array($mime_type, $mime_types)) {
+        foreach ($this->formats as $format => $mimeTypes) {
+            if (in_array($mimeType, $mimeTypes)) {
                 return $format;
             }
         }
@@ -367,39 +406,55 @@ class Request implements \ArrayAccess, \IteratorAggregate
      *
      * @return string|null
      */
-    public function getRequestFormat()
+    public function getRequestFormat(): ?string
     {
         $content_type = $this->getHeaders('content-type');
 
         return $this->getFormat($content_type);
     }
 
-    public function isHeader(string $header_key, string $header_val): bool
+    /**
+     * @param string $headerKey
+     * @param string $headerVal
+     * @return bool
+     */
+    public function isHeader(string $headerKey, string $headerVal): bool
     {
-        if (isset($this->headers[$header_key])) {
-            return $this->headers[$header_key] === $header_val;
+        if (isset($this->headers[$headerKey])) {
+            return $this->headers[$headerKey] === $headerVal;
         }
 
         return false;
     }
 
+    /**
+     * @param string $header_key
+     * @return bool
+     */
     public function hasHeader(string $header_key): bool
     {
         return isset($this->headers[$header_key]);
     }
 
+    /**
+     * @return bool
+     */
     public function isSecured(): bool
     {
-        return !empty($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'], 'off')
-            ? true    // https
-            : false;  // http;
+        return !empty($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'], 'off');  // http;
     }
 
+    /**
+     * @return string
+     */
     public function getRemoteAddress(): string
     {
         return $this->remoteAddress;
     }
 
+    /**
+     * @return string|null
+     */
     public function getRawBody(): ?string
     {
         return $this->rawBody;
@@ -408,24 +463,34 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Get Json array.
      *
-     * @return array<mixed, mixed>
-     *
-     * @see https://github.com/symfony/symfony/blob/6.2/src/Symfony/Component/HttpFoundation/Request.php
+     * @return array
+     * @throws Exception
      */
-    public function getJsonBody()
+    public function getJsonBody(): array
     {
         if ('' === $content = $this->rawBody) {
-            throw new \Exception('Request body is empty.');
+            throw new Exception(
+                'Request body is empty.'
+            );
         }
 
         try {
-            $content = json_decode($content, true, 512, \JSON_BIGINT_AS_STRING | \JSON_THROW_ON_ERROR);
-        } catch (\Exception $e) {
-            throw new \Exception('Could not decode request body.', $e->getCode(), $e);
+            $content = json_decode($content, true, 512, JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR);
+        } catch (Exception $e) {
+            throw new Exception(
+                'Could not decode request body.',
+                $e->getCode(),
+                $e
+            );
         }
 
-        if (!\is_array($content)) {
-            throw new \Exception(sprintf('JSON content was expected to decode to an array, "%s" returned.', get_debug_type($content)));
+        if (!is_array($content)) {
+            throw new Exception(
+                sprintf(
+                    'JSON content was expected to decode to an array, "%s" returned.',
+                    get_debug_type($content)
+                )
+            );
         }
 
         return $content;
@@ -434,11 +499,11 @@ class Request implements \ArrayAccess, \IteratorAggregate
     /**
      * Get attribute.
      *
+     * @param string          $key
      * @param string|int|bool $default
-     *
      * @return string|int|bool
      */
-    public function getAttribute(string $key, $default)
+    public function getAttribute(string $key, string|int|bool $default): string|int|bool
     {
         return $this->attributes[$key] ?? $default;
     }
@@ -447,13 +512,12 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Push custom attributes to the request,
      * uses for custom request to server.
      *
-     * @param array<string, string|int|bool> $push_attributes Push a attributes as array
-     *
+     * @param array<string, string|int|bool> $pushAttributes Push an attributes as array
      * @return self
      */
-    public function with($push_attributes)
+    public function with(array $pushAttributes): self
     {
-        $this->attributes = array_merge($this->attributes, $push_attributes);
+        $this->attributes = array_merge($this->attributes, $pushAttributes);
 
         return $this;
     }
@@ -462,13 +526,14 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Get all request as array.
      *
      * @return array<string, mixed> All request
+     * @throws Exception
      */
-    public function all()
+    public function all(): array
     {
-        /** @var Collection<string, string> */
+        /** @var Collection<string, string> $input */
         $input = $this->input();
 
-        $all = array_merge(
+        return array_merge(
             $this->headers,
             $input->toArray(),
             $this->attributes,
@@ -479,22 +544,23 @@ class Request implements \ArrayAccess, \IteratorAggregate
                 'files'     => $this->files,
             ]
         );
-
-        return $all;
     }
 
     /**
      * Get all request and wrap it.
      *
      * @return array<int, array<string, mixed>> Insert all request array in single array
+     * @throws Exception
      */
-    public function wrap()
+    public function wrap(): array
     {
         return [$this->all()];
     }
 
     /**
      * Determinate request is ajax.
+     *
+     * @return bool
      */
     public function isAjax(): bool
     {
@@ -506,14 +572,15 @@ class Request implements \ArrayAccess, \IteratorAggregate
      */
     public function isJson(): bool
     {
-        /** @var string */
-        $content_type = $this->getHeaders('content-type') ?? '';
+        /** @var string $contentType */
+        $contentType = $this->getHeaders('content-type') ?? '';
 
-        return Str::contains($content_type, '/json') || Str::contains($content_type, '+json');
+        return Str::contains($contentType, '/json') || Str::contains($contentType, '+json');
     }
 
     /**
      * @return Collection<string, string>
+     * @throws Exception
      */
     public function json(): Collection
     {
@@ -530,6 +597,8 @@ class Request implements \ArrayAccess, \IteratorAggregate
 
     /**
      * Get Authorization header.
+     *
+     * @returm ?string
      */
     public function getAuthorization(): ?string
     {
@@ -538,6 +607,8 @@ class Request implements \ArrayAccess, \IteratorAggregate
 
     /**
      * Get Bearer token from Authorization header.
+     *
+     * @return ?string
      */
     public function getBearerToken(): ?string
     {
@@ -557,12 +628,11 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Compine all request input.
      *
      * @template TGetDefault
-     *
      * @param TGetDefault $default
-     *
      * @return Collection<string, string>|string|TGetDefault
+     * @throws Exception
      */
-    public function input(?string $key = null, $default = null)
+    public function input(?string $key = null, $default = null): Collection|string
     {
         $input = $this->source()->add($this->query->all());
         if (null === $key) {
@@ -576,6 +646,7 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Get input resource base on method type.
      *
      * @return Collection<string, string>
+     * @throws Exception
      */
     private function source(): Collection
     {
@@ -590,6 +661,7 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Determine if the given offset exists.
      *
      * @param string $offset
+     * @throws Exception
      */
     public function offsetExists($offset): bool
     {
@@ -600,11 +672,11 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Get the value at the given offset.
      *
      * @param string $offset
-     *
      * @return string|null
+     * @throws Exception
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    #[ReturnTypeWillChange]
+    public function offsetGet(mixed $offset): ?string
     {
         return $this->__get($offset);
     }
@@ -614,8 +686,10 @@ class Request implements \ArrayAccess, \IteratorAggregate
      *
      * @param string $offset
      * @param string $value
+     * @return void
+     * @throws Exception
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->source()->set($offset, $value);
     }
@@ -624,8 +698,10 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Remove the value at the given offset.
      *
      * @param string $offset
+     * @return void
+     * @throws Exception
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         $this->source()->remove($offset);
     }
@@ -634,19 +710,22 @@ class Request implements \ArrayAccess, \IteratorAggregate
      * Get an input element from the request.
      *
      * @param string $key
-     *
      * @return string|null
+     * @throws Exception
      */
-    public function __get($key)
+    public function __get(string $key): ?string
     {
         return $this->all()[$key] ?? null;
     }
 
     /**
      * Iterator.
+     *
+     * @return Traversable
+     * @throws Exception
      */
-    public function getIterator(): \Traversable
+    public function getIterator(): Traversable
     {
-        return new \ArrayIterator($this->source()->all());
+        return new ArrayIterator($this->source()->all());
     }
 }

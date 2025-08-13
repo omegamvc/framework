@@ -81,7 +81,7 @@ trait MacroableTrait
     }
 
     /**
-     * Cek macro already register.
+     * Check macro already register.
      *
      * @param string $macro_name Macro name
      *

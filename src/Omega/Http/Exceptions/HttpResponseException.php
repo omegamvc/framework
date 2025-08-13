@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace Omega\Http\Exceptions;
 
 use Omega\Http\Response;
+use RuntimeException;
 
-class HttpResponse extends \RuntimeException
+class HttpResponseException extends RuntimeException
 {
-    protected Response $response;
-
     /**
      * Creates a Responser Exception.
      */
-    public function __construct(Response $response)
+    public function __construct(protected Response $response)
     {
-        $this->response = $response;
     }
 
     public function getResponse(): Response

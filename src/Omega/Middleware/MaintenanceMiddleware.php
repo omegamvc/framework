@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Http\Middleware;
+namespace Omega\Middleware;
 
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Integrate\Application;
-use Omega\Integrate\Http\Exception\HttpException;
+use Omega\Http\Exceptions\HttpException;
 
 class MaintenanceMiddleware
 {

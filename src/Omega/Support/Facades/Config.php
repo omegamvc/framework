@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Support\Facades;
 
-use Omega\Integrate\ConfigRepository;
+use Omega\Config\ConfigRepository;
 
 /**
  * @method static bool has(string $key)

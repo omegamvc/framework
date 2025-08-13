@@ -4,60 +4,63 @@ declare(strict_types=1);
 
 namespace Omega\Http;
 
-use Omega\Http\Exceptions\StreamedResponseCallable;
+use Omega\Http\Exceptions\StreamedResponseCallableException;
 
 class StreamedResponse extends Response
 {
     /** @var (callable(): void)|null */
-    private $callable_stream;
+    private $callableStream;
 
-    private bool $is_stream;
+    private bool $isStream;
 
     /**
      * Create new Stream Response.
      *
-     * @param (callable(): void)|null $callable_stream
-     * @param int                     $respone_code    Respone code
-     * @param array<string, string>   $headers         Header tosend to client
+     * @param (callable(): void)|null $callableStream
+     * @param int                     $responseCode    Response code
+     * @param array<string, string>   $headers         Header to send to client
      */
     public function __construct(
-        $callable_stream,
-        int $respone_code = Response::HTTP_OK,
+        $callableStream,
+        int $responseCode = Response::HTTP_OK,
         array $headers = [],
     ) {
-        $this->setStream($callable_stream);
-        $this->setResponseCode($respone_code);
+        $this->setStream($callableStream);
+        $this->setResponseCode($responseCode);
         $this->headers   = new HeaderCollection($headers);
-        $this->is_stream = false;
+        $this->isStream = false;
     }
 
     /**
      * Set stream callback.
      *
-     * @param (callable(): void)|null $callable_stream
+     * @param (callable(): void)|null $callableStream
+     * @return StreamedResponse
      */
-    public function setStream($callable_stream): self
+    public function setStream(?callable $callableStream): self
     {
-        $this->callable_stream = $callable_stream;
+        $this->callableStream = $callableStream;
 
         return $this;
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws StreamedResponseCallableException
      */
-    protected function sendContent()
+    protected function sendContent(): void
     {
-        if ($this->is_stream) {
+        if ($this->isStream) {
             return;
         }
 
-        $this->is_stream = true;
+        $this->isStream = true;
 
-        if (null === $this->callable_stream) {
-            throw new StreamedResponseCallable();
+        if (null === $this->callableStream) {
+            throw new StreamedResponseCallableException();
         }
 
-        ($this->callable_stream)();
+        ($this->callableStream)();
     }
 }

@@ -5,84 +5,89 @@ declare(strict_types=1);
 namespace Omega\Router;
 
 use Omega\Http\Request;
+use function array_shift;
+use function parse_url;
+use function preg_match;
+use function rtrim;
+use function strtolower;
 
 final class RouteDispatcher
 {
-    // dispatch
     /** @var Request */
-    private $request;
-    /** @var Route[] */
-    private $routes = [];
+    private Request $request;
 
-    // callback ------------------
+    /** @var Route[] */
+    private array $routes;
+
     /** @var callable */
     private $found;
-    /** @var ?callable(string): mixed */
-    private $not_found;
-    /** @var ?callable(string, string): mixed */
-    private $method_not_allowed;
 
-    // setup --------------------
-    private string $basepath             = '';
-    private bool $case_matters           = false;
-    private bool $trailing_slash_matters = false;
-    private bool $multimatch             = false;
+    /** @var ?callable(string): mixed */
+    private $notFound;
+
+    /** @var ?callable(string, string): mixed */
+    private $methodNotAllowed;
+
+    private string $basepath = '';
+
+    private bool $caseMatters = false;
+
+    private bool $trailingSlashMatters = false;
+
+    private bool $multiMatch = false;
 
     /** @var array<string, mixed> */
-    private $trigger;
+    private array $trigger;
+
     /** @var Route */
-    private $current;
+    private Route $current;
 
     /**
      * @param Request $request Incoming request
      * @param Route[] $routes  Array of route
      */
-    public function __construct(Request $request, $routes)
+    public function __construct(Request $request, array $routes)
     {
         $this->request = $request;
         $this->routes  = $routes;
     }
 
     /**
-     * Create new costruct using uri and method.
+     * Create new construct using uri and method.
      *
      * @param string  $uri    Ulr
      * @param string  $method Method
      * @param Route[] $routes Array of route
      */
-    public static function dispatchFrom(string $uri, string $method, $routes): self
+    public static function dispatchFrom(string $uri, string $method, array $routes): self
     {
-        $create_request = new Request($uri, [], [], [], [], [], [], $method);
+        $createRequest = new Request($uri, [], [], [], [], [], [], $method);
 
-        return new static($create_request, $routes);
+        return new RouteDispatcher($createRequest, $routes);
     }
-
-    // setter -----------------------------------
 
     /**
      * Setup Base Path.
      *
-     * @param string $base_path Base Path
-     *
+     * @param string $basePath Base Path
      * @return self
      */
-    public function basePath(string $base_path)
+    public function basePath(string $basePath): self
     {
-        $this->basepath = $base_path;
+        $this->basepath = $basePath;
 
         return $this;
     }
 
     /**
-     * Cese sensitive metters.
+     * Case-sensitive matters.
      *
-     * @param bool $case_matters Cese sensitive metters
-     *
+     * @param bool $case_matters Case-sensitive matters
      * @return self
      */
-    public function caseMatters(bool $case_matters)
+    public function caseMatters(bool $case_matters): self
     {
-        $this->case_matters = $case_matters;
+        $this->caseMatters = $case_matters;
 
         return $this;
     }
@@ -90,57 +95,54 @@ final class RouteDispatcher
     /**
      * Trailing slash matters.
      *
-     * @param bool $trailling_slash_metters Trailing slash matters
-     *
+     * @param bool $trailingSlashMatters Trailing slash matters
      * @return self
      */
-    public function trailingSlashMatters(bool $trailling_slash_metters)
+    public function trailingSlashMatters(bool $trailingSlashMatters): self
     {
-        $this->trailing_slash_matters = $trailling_slash_metters;
+        $this->trailingSlashMatters = $trailingSlashMatters;
 
         return $this;
     }
 
     /**
-     * Return Multy route.
+     * Return multi route.
      *
-     * @param bool $multimath Return Multy route
-     *
+     * @param bool $multiMatch Return multi route
      * @return self
      */
-    public function multimatch(bool $multimath)
+    public function multiMatch(bool $multiMatch): self
     {
-        $this->multimatch = $multimath;
+        $this->multiMatch = $multiMatch;
 
         return $this;
     }
-
-    // getter -----------------------------------
 
     /**
      * Get current router after dispatch.
      *
      * @return Route
      */
-    public function current()
+    public function current(): Route
     {
         return $this->current;
     }
 
-    // method -----------------------------------
-
     /**
      * Setup action and dispatch route.
      *
-     * @return array<string, mixed> trigger arction ['callable' => callable, 'param' => param]
+     * @param callable $found
+     * @param callable $notFound
+     * @param callable $methodNotAllowed
+     * @return array<string, mixed> trigger action ['callable' => callable, 'param' => param]
      */
-    public function run(callable $found, callable $not_found, callable $method_not_allowed)
+    public function run(callable $found, callable $notFound, callable $methodNotAllowed): array
     {
-        $this->found              = $found;
-        $this->not_found          = $not_found;
-        $this->method_not_allowed = $method_not_allowed;
+        $this->found            = $found;
+        $this->notFound         = $notFound;
+        $this->methodNotAllowed = $methodNotAllowed;
 
-        $this->dispatch($this->basepath, $this->case_matters, $this->trailing_slash_matters, $this->multimatch);
+        $this->dispatch($this->basepath, $this->caseMatters, $this->trailingSlashMatters, $this->multiMatch);
 
         return $this->trigger;
     }
@@ -149,10 +151,10 @@ final class RouteDispatcher
      * Catch action from callable (found, not_found, method_not_allowed).
      *
      * @param callable                   $callable   Callback
-     * @param array<int, mixed|string[]> $params     Callaback params
+     * @param array<int, mixed|string[]> $params     Callback params
      * @param class-string[]             $middleware Array of middleware class-name
      */
-    private function trigger(callable $callable, $params, $middleware = []): void
+    private function trigger(callable $callable, array $params, array $middleware = []): void
     {
         $this->trigger = [
             'callable'      => $callable,
@@ -164,34 +166,38 @@ final class RouteDispatcher
     /**
      * Dispatch routes and setup trigger.
      *
-     * @param string $basepath               Base Path
-     * @param bool   $case_matters           Cese sensitive metters
-     * @param bool   $trailing_slash_matters Trailing slash matters
-     * @param bool   $multimatch             Return Multy route
+     * @param string $basePath             Base Path
+     * @param bool   $caseMatters          Case-sensitive matters
+     * @param bool   $trailingSlashMatters Trailing slash matters
+     * @param bool   $multiMatch           Return multi route
      */
-    private function dispatch($basepath = '', $case_matters = false, $trailing_slash_matters = false, $multimatch = false): void
-    {
+    private function dispatch(
+        string $basePath = '',
+        bool $caseMatters = false,
+        bool $trailingSlashMatters = false,
+        bool $multiMatch = false
+    ): void {
         // The basepath never needs a trailing slash
         // Because the trailing slash will be added using the route expressions
-        $basepath = rtrim($basepath, '/');
+        $basePath = rtrim($basePath, '/');
 
         // Parse current URL
-        $parsed_url = parse_url($this->request->getUrl());
+        $parsedUrl = parse_url($this->request->getUrl());
 
         $path = '/';
 
         // If there is a path available
-        if (isset($parsed_url['path'])) {
+        if (isset($parsedUrl['path'])) {
             // If the trailing slash matters
-            if ($trailing_slash_matters) {
-                $path = $parsed_url['path'];
+            if ($trailingSlashMatters) {
+                $path = $parsedUrl['path'];
             } else {
                 // If the path is not equal to the base path (including a trailing slash)
-                if ($basepath . '/' != $parsed_url['path']) {
-                    // Cut the trailing slash away because it does not matters
-                    $path = rtrim($parsed_url['path'], '/');
+                if ($basePath . '/' != $parsedUrl['path']) {
+                    // Cut the trailing slash away because it does not matter
+                    $path = rtrim($parsedUrl['path'], '/');
                 } else {
-                    $path = $parsed_url['path'];
+                    $path = $parsedUrl['path'];
                 }
             }
         }
@@ -199,15 +205,15 @@ final class RouteDispatcher
         // Get current request method
         $method = $this->request->getMethod();
 
-        $path_match_found  = false;
-        $route_match_found = false;
+        $pathMatchFound  = false;
+        $routeMatchFound = false;
 
         foreach ($this->routes as $route) {
             // If the method matches check the path
 
             // Add basepath to matching string
-            if ($basepath != '' && $basepath != '/') {
-                $route['expression'] = '(' . $basepath . ')' . $route['expression'];
+            if ($basePath != '' && $basePath != '/') {
+                $route['expression'] = '(' . $basePath . ')' . $route['expression'];
             }
 
             // Add 'find string start' automatically
@@ -217,8 +223,8 @@ final class RouteDispatcher
             $route['expression'] .= '$';
 
             // Check path match
-            if (preg_match('#' . $route['expression'] . '#' . ($case_matters ? '' : 'i') . 'u', $path, $matches)) {
-                $path_match_found = true;
+            if (preg_match('#' . $route['expression'] . '#' . ($caseMatters ? '' : 'i') . 'u', $path, $matches)) {
+                $pathMatchFound = true;
 
                 // Cast allowed method to array if it's not one already, then run through all methods
                 foreach ((array) $route['method'] as $allowedMethod) {
@@ -226,7 +232,7 @@ final class RouteDispatcher
                     if (strtolower($method) == strtolower($allowedMethod)) {
                         array_shift($matches); // Always remove first element. This contains the whole string
 
-                        if ($basepath != '' && $basepath != '/') {
+                        if ($basePath != '' && $basePath != '/') {
                             array_shift($matches); // Remove basepath
                         }
 
@@ -234,7 +240,7 @@ final class RouteDispatcher
                         $this->trigger($this->found, [$route['function'], $matches], $route['middleware'] ?? []);
                         $this->current = $route;
 
-                        $route_match_found = true;
+                        $routeMatchFound = true;
 
                         // Do not check other routes
                         break;
@@ -243,21 +249,21 @@ final class RouteDispatcher
             }
 
             // Break the loop if the first found route is a match
-            if ($route_match_found && !$multimatch) {
+            if ($routeMatchFound && !$multiMatch) {
                 break;
             }
         }
 
         // No matching route was found
-        if (!$route_match_found) {
+        if (!$routeMatchFound) {
             // But a matching path exists
-            if ($path_match_found) {
-                if ($this->method_not_allowed) {
-                    $this->trigger($this->method_not_allowed, [$path, $method]);
+            if ($pathMatchFound) {
+                if ($this->methodNotAllowed) {
+                    $this->trigger($this->methodNotAllowed, [$path, $method]);
                 }
             } else {
-                if ($this->not_found) {
-                    $this->trigger($this->not_found, [$path]);
+                if ($this->notFound) {
+                    $this->trigger($this->notFound, [$path]);
                 }
             }
         }

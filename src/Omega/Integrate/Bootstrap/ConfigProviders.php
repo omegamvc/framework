@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Omega\Integrate\Bootstrap;
 
 use Omega\Integrate\Application;
-use Omega\Integrate\ConfigRepository;
+use Omega\Config\ConfigRepository;
 
 class ConfigProviders
 {

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Omega\Integrate;
 
+use Omega\Config\ConfigRepository;
 use Omega\Container\Container;
 use Omega\Http\Request;
 use Omega\Integrate\Contracts\Paths;
-use Omega\Integrate\Http\Exception\HttpException;
+use Omega\Http\Exceptions\HttpException;
 use Omega\Integrate\Providers\IntegrateServiceProvider;
+use Omega\Support\Vite;
 use Omega\View\Templator;
 
 final class Application extends Container
@@ -276,7 +278,7 @@ final class Application extends Container
         $this->set('config.view.extensions', $configs['VIEW_EXTENSIONS']);
         // load provider
         $this->providers = $configs['PROVIDERS'];
-        $this->defineder($configs->toArray());
+        $this->defineder($configs->getAll());
     }
 
     /**

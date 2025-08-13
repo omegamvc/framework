@@ -9,7 +9,7 @@ use Omega\Http\RedirectResponse;
 use Omega\Http\Response;
 use Omega\Integrate\Application;
 use Omega\Integrate\Exceptions\ApplicationNotAvailableException;
-use Omega\Integrate\Vite;
+use Omega\Support\Vite;
 use Omega\Router\Router;
 
 if (!function_exists('app_path')) {
@@ -235,7 +235,7 @@ if (!function_exists('base_path')) {
 
 if (!function_exists('app_env')) {
     /**
-     * Cek application environment mode.
+     * Check application environment mode.
      *
      * @return string Application environment mode.
      */
@@ -247,7 +247,7 @@ if (!function_exists('app_env')) {
 
 if (!function_exists('is_production')) {
     /**
-     * Cek application production mode.
+     * Check application production mode.
      *
      * @return bool True if in production mode.
      */
@@ -259,7 +259,7 @@ if (!function_exists('is_production')) {
 
 if (!function_exists('is_dev')) {
     /**
-     * Cek application development mode.
+     * Check application development mode.
      *
      * @return bool True if in dev mode.
      */

@@ -8,14 +8,14 @@ use PHPUnit\Framework\TestCase as BaseTestCase;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Integrate\Application;
-use Omega\Integrate\Http\Kernel;
+use Omega\Http\HttpKernel;
 use Omega\Integrate\ServiceProvider;
 use Omega\Support\Facades\AbstractFacade;
 
 class TestCase extends BaseTestCase
 {
     protected Application $app;
-    protected Kernel $kernel;
+    protected HttpKernel $kernel;
     protected string $class;
 
     protected function tearDown(): void
@@ -65,8 +65,8 @@ class TestCase extends BaseTestCase
         string $remoteAddress = '::1',
         ?string $rawBody = null,
     ): TestResponse {
-        /** @var Kernel */
-        $kernel   = $this->app->make(Kernel::class);
+        /** @var HttpKernel */
+        $kernel   = $this->app->make(HttpKernel::class);
         $request  = new Request($url, $query, $post, $attributes, $cookies, $files, $headers, $method, $remoteAddress, $rawBody);
         $response = $kernel->handle($request);
 

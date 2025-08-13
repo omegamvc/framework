@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Omega\Http\Exceptions;
 
-/**
- * @internal
- */
-final class StreamedResponseCallable extends \Exception
+use Exception;
+
+class StreamedResponseCallableException extends Exception
 {
     /**
      * Creates a new Exception instance.

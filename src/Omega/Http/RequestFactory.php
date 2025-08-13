@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 namespace Omega\Http;
 
+use function apache_request_headers;
+use function array_change_key_case;
+use function base64_encode;
+use function file_get_contents;
+use function function_exists;
+use function preg_match;
+use function strncmp;
+use function strtr;
+use function substr;
+use function trim;
+
 class RequestFactory
 {
     /**

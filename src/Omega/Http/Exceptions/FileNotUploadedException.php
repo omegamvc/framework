@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Omega\File\Exceptions;
+namespace Omega\Http\Exceptions;
 
-/**
- * @internal
- */
-final class FileNotUploaded extends \RuntimeException
+use RuntimeException;
+
+class FileNotUploadedException extends RuntimeException
 {
     /**
      * Creates a new Exception instance.

@@ -4,39 +4,51 @@ declare(strict_types=1);
 
 namespace Omega\Http;
 
+use function array_key_exists;
+use function parse_str;
+use function parse_url;
+
 class Url
 {
     private ?string $schema;
+
     private ?string $host;
+
     private ?int $port;
+
     private ?string $user;
+
     private ?string $password;
+
     private ?string $path;
+
     /**
      * @var array<int|string, string>|null
      */
     private ?array $query = null;
+
     private ?string $fragment;
 
     /**
-     * @param array<string, string|int|array<int|string, string>|null> $parse_url
+     * @param array<string, string|int|array<int|string, string>|null> $parseUrl
      */
-    public function __construct(array $parse_url)
+    public function __construct(array $parseUrl)
     {
-        $this->schema    = $parse_url['scheme'] ?? null;
-        $this->host      = $parse_url['host'] ?? null;
-        $this->port      = $parse_url['port'] ?? null;
-        $this->user      = $parse_url['user'] ?? null;
-        $this->password  = $parse_url['pass'] ?? null;
-        $this->path      = $parse_url['path'] ?? null;
-        $this->fragment  = $parse_url['fragment'] ?? null;
+        $this->schema    = $parseUrl['scheme'] ?? null;
+        $this->host      = $parseUrl['host'] ?? null;
+        $this->port      = $parseUrl['port'] ?? null;
+        $this->user      = $parseUrl['user'] ?? null;
+        $this->password  = $parseUrl['pass'] ?? null;
+        $this->path      = $parseUrl['path'] ?? null;
+        $this->fragment  = $parseUrl['fragment'] ?? null;
 
-        if (array_key_exists('query', $parse_url)) {
-            $this->query = $this->parseQuery($parse_url['query']);
+        if (array_key_exists('query', $parseUrl)) {
+            $this->query = $this->parseQuery($parseUrl['query']);
         }
     }
 
     /**
+     * @param string $query
      * @return array<int|string, string>
      */
     private function parseQuery(string $query): array
@@ -47,6 +59,10 @@ class Url
         return $result;
     }
 
+    /**
+     * @param string $url
+     * @return self
+     */
     public static function parse(string $url): self
     {
         return new self(parse_url($url));
@@ -58,49 +74,49 @@ class Url
     }
 
     /**
-     * @return string|null
+     * @return array|int|string|null
      */
-    public function schema()
+    public function schema(): array|int|string|null
     {
         return $this->schema;
     }
 
     /**
-     * @return string|null
+     * @return array|int|string|null
      */
-    public function host()
+    public function host(): array|int|string|null
     {
         return $this->host;
     }
 
     /**
-     * @return int|null
+     * @return array|int|string|null
      */
-    public function port()
+    public function port(): array|int|string|null
     {
         return $this->port;
     }
 
     /**
-     * @return string|null
+     * @return array|int|string|null
      */
-    public function user()
+    public function user(): array|int|string|null
     {
         return $this->user;
     }
 
     /**
-     * @return string|null
+     * @return array|int|string|null
      */
-    public function password()
+    public function password(): array|int|string|null
     {
         return $this->password;
     }
 
     /**
-     * @return string|null
+     * @return array|int|string|null
      */
-    public function path()
+    public function path(): array|int|string|null
     {
         return $this->path;
     }
@@ -108,15 +124,15 @@ class Url
     /**
      * @return array<int|string, string>|null
      */
-    public function query()
+    public function query(): ?array
     {
         return $this->query;
     }
 
     /**
-     * @return string|null
+     * @return array|int|string|null
      */
-    public function fragment()
+    public function fragment(): array|int|string|null
     {
         return $this->fragment;
     }

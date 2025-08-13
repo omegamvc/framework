@@ -5,51 +5,55 @@ declare(strict_types=1);
 namespace Omega\Router;
 
 use ArrayAccess;
+use Exception;
+use ReturnTypeWillChange;
+
+use function sprintf;
 
 /**
- * @implements \ArrayAccess<string, mixed>
+ * @implements ArrayAccess<string, mixed>
  */
-class Route implements \ArrayAccess
+class Route implements ArrayAccess
 {
     /** @var array<string, mixed> */
-    private $route;
-    private string $prefix_name;
+    private array $route;
+
+    private string $prefixName;
 
     /**
      * @param array<string, mixed> $route
      */
     public function __construct(array $route)
     {
-        $this->prefix_name = Router::$group['as'] ?? '';
-        $route['name']     = $this->prefix_name;
+        $this->prefixName = Router::$group['as'] ?? '';
+        $route['name']    = $this->prefixName;
         $this->route       = $route;
     }
 
     /**
-     * @param string   $name
+     * @param string $name
      * @param string[] $arguments
-     *
      * @return array<string, mixed>
+     * @throws Exception
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if ($name === 'route') {
             return $this->route;
         }
 
-        throw new \Exception("Route {$name} not registered.");
+        throw new Exception(sprintf("Route %s not registered.", $name));
     }
 
     /**
      * Set Route name.
      *
      * @param string $name Route name (uniq)
-     *
      * @return self
      */
-    public function name(string $name)
+    public function name(string $name): self
     {
-        $this->route['name'] = $this->prefix_name . $name;
+        $this->route['name'] = $this->prefixName . $name;
 
         return $this;
     }
@@ -58,10 +62,9 @@ class Route implements \ArrayAccess
      * Add middleware this route.
      *
      * @param class-string[] $middlewares Route class-name
-     *
      * @return self
      */
-    public function middleware($middlewares)
+    public function middleware(array $middlewares): self
     {
         foreach ($middlewares as $middleware) {
             $this->route['middleware'][] = $middleware;
@@ -70,28 +73,25 @@ class Route implements \ArrayAccess
         return $this;
     }
 
-    // ArrayAccess ---------------------------------------------
-
     /**
      * Assigns a value to the specified offset.
      *
      * @param string $offset the offset to assign the value to
      * @param mixed  $value  the value to set
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->route[$offset] = $value;
     }
 
     /**
-     * Whether or not an offset exists.
+     * Whether an offset exists.
      * This method is executed when using isset() or empty().
      *
      * @param string $offset an offset to check for
-     *
      * @return bool returns true on success or false on failure
      */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->route[$offset]);
     }
@@ -100,8 +100,9 @@ class Route implements \ArrayAccess
      * Unsets an offset.
      *
      * @param string $offset unsets an offset
+     * @return void
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->route[$offset]);
     }
@@ -110,11 +111,10 @@ class Route implements \ArrayAccess
      * Returns the value at specified offset.
      *
      * @param string $offset the offset to retrieve
-     *
      * @return mixed|null Can return all value types
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    #[ReturnTypeWillChange]
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->route[$offset] ?? null;
     }

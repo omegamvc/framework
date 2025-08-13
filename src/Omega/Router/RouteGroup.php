@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Omega\Router;
 
+use Closure;
+
 class RouteGroup
 {
     /** @var callable */
     private $setup;
+
     /** @var callable */
     private $cleanup;
 
-    public function __construct(\Closure $setup, \Closure $cleanup)
+    public function __construct(Closure $setup, Closure $cleanup)
     {
         $this->setup   = $setup;
         $this->cleanup = $cleanup;
@@ -21,10 +24,9 @@ class RouteGroup
      * @template T
      *
      * @param callable(): T $callback
-     *
      * @return T
      */
-    public function group($callback)
+    public function group(callable $callback)
     {
         // call stack
         ($this->setup)();

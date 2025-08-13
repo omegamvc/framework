@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Console;
+namespace Omega\Console;
 
 use Omega\Console\Style\Style;
 use Omega\Integrate\Application;
@@ -10,9 +10,10 @@ use Omega\Integrate\Bootstrap\BootProviders;
 use Omega\Integrate\Bootstrap\ConfigProviders;
 use Omega\Integrate\Bootstrap\RegisterFacades;
 use Omega\Integrate\Bootstrap\RegisterProviders;
+use Omega\Integrate\Console\Util;
 use Omega\Integrate\ValueObjects\CommandMap;
 
-class Kernel
+class ConsoleKernel
 {
     /**
      * Application Container.

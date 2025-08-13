@@ -38,6 +38,9 @@ class Now
 {
     use DateTimeFormatTrait;
 
+    /** @var int|false */
+    private int|false $timestamp;
+
     private DateTime $date;
 
     /** @var int */
@@ -144,7 +147,7 @@ class Now
      */
     private function refresh(): void
     {
-        $timestamp = $this->date->getTimestamp();
+        $this->timestamp = $this->date->getTimestamp();
         $this->year      = (int) $this->date->format('Y');
         $this->month     = (int) $this->date->format('n');
         $this->day       = (int) $this->date->format('d');
@@ -157,7 +160,7 @@ class Now
         $this->timeZone  = $this->date->format('e');
         $this->shortDay  = $this->date->format('D');
 
-        $this->age = max(0, (int) floor((time() - $timestamp) / (365.25 * 24 * 60 * 60)));
+        $this->age = max(0, (int) floor((time() - $this->timestamp) / (365.25 * 24 * 60 * 60)));
     }
 
     /**

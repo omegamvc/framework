@@ -2,24 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate;
+namespace Omega\Config;
+
+use ArrayAccess;
+
+use function array_key_exists;
 
 /**
- * @implements \ArrayAccess<string, mixed>
+ * @implements ArrayAccess<string, mixed>
  */
-class ConfigRepository implements \ArrayAccess
+class ConfigRepository implements ArrayAccess
 {
     /**
      * Create new config using array.
      *
      * @param array<string, mixed> $config
      */
-    public function __construct(protected $config = [])
+    public function __construct(protected array $config = [])
     {
     }
 
     /**
      * Checks if the given key or index exists in the config.
+     *
+     * @param string $key
+     * @return bool
      */
     public function has(string $key): bool
     {
@@ -28,6 +35,10 @@ class ConfigRepository implements \ArrayAccess
 
     /**
      * Get config.
+     *
+     * @param string     $key
+     * @param mixed|null $default
+     * @return mixed
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -36,6 +47,10 @@ class ConfigRepository implements \ArrayAccess
 
     /**
      * Set new or create config.
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @return void
      */
     public function set(string $key, mixed $value): void
     {
@@ -44,6 +59,10 @@ class ConfigRepository implements \ArrayAccess
 
     /**
      * Push value in an array items.
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @return void
      */
     public function push(string $key, mixed $value): void
     {
@@ -57,15 +76,16 @@ class ConfigRepository implements \ArrayAccess
      *
      * @return array<string, mixed>
      */
-    public function toArray(): array
+    public function getAll(): array
     {
         return $this->config;
     }
 
-    // array access
-
     /**
      * Checks if the given key or index exists in the config.
+     *
+     * @param mixed $offset
+     * @return bool
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -74,6 +94,9 @@ class ConfigRepository implements \ArrayAccess
 
     /**
      * Get config.
+     *
+     * @param mixed $offset
+     * @return mixed
      */
     public function offsetGet(mixed $offset): mixed
     {
@@ -82,6 +105,10 @@ class ConfigRepository implements \ArrayAccess
 
     /**
      * Set new or create config.
+     *
+     * @param mixed $offset
+     * @param mixed $value
+     * @return void
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -90,6 +117,9 @@ class ConfigRepository implements \ArrayAccess
 
     /**
      * Unset or set to null.
+     *
+     * @param mixed $offset
+     * @return void
      */
     public function offsetUnset(mixed $offset): void
     {

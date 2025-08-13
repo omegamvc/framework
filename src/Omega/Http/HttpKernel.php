@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Http;
+namespace Omega\Http;
 
-use Omega\Http\Request;
-use Omega\Http\Response;
+use DI\DependencyException;
+use DI\NotFoundException;
+use Exception;
 use Omega\Integrate\Application;
 use Omega\Integrate\Bootstrap\BootProviders;
 use Omega\Integrate\Bootstrap\ConfigProviders;
@@ -13,10 +14,16 @@ use Omega\Integrate\Bootstrap\HandleExceptions;
 use Omega\Integrate\Bootstrap\RegisterFacades;
 use Omega\Integrate\Bootstrap\RegisterProviders;
 use Omega\Integrate\Exceptions\Handler;
-use Omega\Integrate\Http\Middleware\MaintenanceMiddleware;
+use Omega\Middleware\MaintenanceMiddleware;
 use Omega\Router\Router;
+use Throwable;
+use function array_merge;
+use function array_reduce;
+use function is_array;
+use function is_string;
+use function method_exists;
 
-class Kernel
+class HttpKernel
 {
     /**
      * Application Container.
@@ -24,14 +31,14 @@ class Kernel
     protected Application $app;
 
     /** @var array<int, class-string> Global middleware */
-    protected $middleware = [
+    protected array $middleware = [
         MaintenanceMiddleware::class,
     ];
 
     /** @var array<int, class-string> Middleware has register */
-    protected $middleware_used = [];
+    protected array $middlewareUsed = [];
 
-    /** @var array<int, class-string> Apllication bootstrap register. */
+    /** @var array<int, class-string> Application bootstrap register. */
     protected array $bootstrappers = [
         ConfigProviders::class,
         HandleExceptions::class,
@@ -52,10 +59,16 @@ class Kernel
      * Handle http request.
      *
      * @param Request $request Incoming request
-     *
-     * @return Response Respone handle
+     * @return Response Response handle
      */
-    public function handle(Request $request)
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Throwable
+     */
+    public function handle(Request $request): Response
     {
         $this->app->set('request', $request);
 
@@ -67,11 +80,11 @@ class Kernel
             $pipeline = array_reduce(
                 array_merge($this->middleware, $dispatcher['middleware']),
                 fn ($next, $middleware) => fn ($req) => $this->app->call([$middleware, 'handle'], ['request' => $req, 'next' => $next]),
-                fn ()                   => $this->responesType($dispatcher['callable'], $dispatcher['parameters'])
+                fn ()                   => $this->responseType($dispatcher['callable'], $dispatcher['parameters'])
             );
 
             $response = $pipeline($request);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $handler = $this->app->get(Handler::class);
 
             $handler->report($th);
@@ -82,7 +95,7 @@ class Kernel
     }
 
     /**
-     * Register bootstraper application.
+     * Register bootstrap application.
      */
     public function bootstrap(): void
     {
@@ -90,7 +103,11 @@ class Kernel
     }
 
     /**
-     * Terminate Requesr and Response.
+     * Terminate Request and Response.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return void
      */
     public function terminate(Request $request, Response $response): void
     {
@@ -105,12 +122,12 @@ class Kernel
     }
 
     /**
-     * @param callable|mixed[]|string $callable   function to call
-     * @param mixed[]                 $parameters parameters to use
-     *
-     * @throws \Exception
+     * @param callable|array|string $callable   function to call
+     * @param array $parameters parameters to use
+     * @return Response
+     * @throws Exception
      */
-    private function responesType($callable, $parameters): Response
+    private function responseType(callable|array|string $callable, array $parameters): Response
     {
         $content = $this->app->call($callable, $parameters);
         if ($content instanceof Response) {
@@ -125,7 +142,7 @@ class Kernel
             return new Response($content);
         }
 
-        throw new \Exception('Content must return as respone|string|array');
+        throw new Exception('Content must return as response|string|array');
     }
 
     /**
@@ -137,12 +154,13 @@ class Kernel
     }
 
     /**
-     * Dispatch to get requets middleware.
+     * Dispatch to get request middleware.
      *
+     * @param Request $request
      * @return array<int, class-string>|null
      */
-    protected function dispatcherMiddleware(Request $request)
+    protected function dispatcherMiddleware(Request $request): ?array
     {
-        return Router::current()['middleware'] ?? [];
+        return Router::getCurrent()['middleware'] ?? [];
     }
 }

@@ -8,7 +8,7 @@ use Omega\Container\Container;
 use Omega\Http\Exceptions;
 use Omega\Http\Request;
 use Omega\Http\Response;
-use Omega\Integrate\Http\Exception\HttpException;
+use Omega\Http\Exceptions\HttpException;
 use Omega\View\Templator;
 use Omega\View\TemplatorFinder;
 
@@ -29,7 +29,7 @@ class Handler
      * @var array<int, class-string<\Throwable>>
      */
     protected array $dont_report_internal = [
-        Exceptions\HttpResponse::class,
+        Exceptions\HttpResponseException::class,
         HttpException::class,
     ];
 
@@ -49,7 +49,7 @@ class Handler
             return $this->handleJsonResponse($th);
         }
 
-        if ($th instanceof Exceptions\HttpResponse) {
+        if ($th instanceof Exceptions\HttpResponseException) {
             return $th->getResponse();
         }
 

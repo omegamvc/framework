@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
@@ -6,18 +6,19 @@ namespace Omega\Router;
 
 use Omega\Collection\Collection;
 use Omega\Collection\CollectionImmutable;
+use function array_key_exists;
 
 class ResourceController
 {
     /** @var Collection<string, Route> */
-    private $resource;
+    private Collection $resource;
 
     /**
      * List resource method.
      *
      * @return array<string, string>
      */
-    public static function method()
+    public static function method(): array
     {
         return [
             'index'   => 'index',
@@ -31,20 +32,23 @@ class ResourceController
     }
 
     /**
-     * @param class-string          $class_name
+     * @param string                $url
+     * @param class-string          $className
      * @param array<string, string> $map
      */
-    public function __construct(string $url, $class_name, $map)
+    public function __construct(string $url, string $className, array $map)
     {
         $this->resource = new Collection([]);
-        $this->ganerate($url, $class_name, $map);
+        $this->generate($url, $className, $map);
     }
 
     /**
-     * @param class-string          $class_name
+     * @param string                $uri
+     * @param class-string $className
      * @param array<string, string> $map
+     * @return self
      */
-    public function ganerate(string $uri, $class_name, $map): self
+    public function generate(string $uri, string $className, array $map): self
     {
         $uri  = Router::$group['prefix'] . $uri;
 
@@ -52,10 +56,10 @@ class ResourceController
             $this->resource->set($map['index'],
                 (new Route([
                     'expression' => Router::mapPatterns($uri),
-                    'function'   => [$class_name, $map['index']],
+                    'function'   => [$className, $map['index']],
                     'method'     => 'get',
                     'middleware' => Router::$group['middleware'] ?? [],
-                ]))->name("{$class_name}.index")
+                ]))->name("{$className}.index")
             );
         }
 
@@ -63,10 +67,10 @@ class ResourceController
             $this->resource->set($map['create'],
                 (new Route([
                     'expression' => Router::mapPatterns("{$uri}create"),
-                    'function'   => [$class_name, $map['create']],
+                    'function'   => [$className, $map['create']],
                     'method'     => 'get',
                     'middleware' => Router::$group['middleware'] ?? [],
-                ]))->name("{$class_name}.create")
+                ]))->name("{$className}.create")
             );
         }
 
@@ -74,10 +78,10 @@ class ResourceController
             $this->resource->set($map['store'],
                 (new Route([
                     'expression' => Router::mapPatterns($uri),
-                    'function'   => [$class_name, $map['store']],
+                    'function'   => [$className, $map['store']],
                     'method'     => 'post',
                     'middleware' => Router::$group['middleware'] ?? [],
-                ]))->name("{$class_name}.store")
+                ]))->name("{$className}.store")
             );
         }
 
@@ -85,10 +89,10 @@ class ResourceController
             $this->resource->set($map['show'],
                 (new Route([
                     'expression' => Router::mapPatterns("{$uri}(:id)"),
-                    'function'   => [$class_name, $map['show']],
+                    'function'   => [$className, $map['show']],
                     'method'     => 'get',
                     'middleware' => Router::$group['middleware'] ?? [],
-                ]))->name("{$class_name}.show")
+                ]))->name("{$className}.show")
             );
         }
 
@@ -96,10 +100,10 @@ class ResourceController
             $this->resource->set($map['edit'],
                 (new Route([
                     'expression' => Router::mapPatterns("{$uri}(:id)/edit"),
-                    'function'   => [$class_name, $map['edit']],
+                    'function'   => [$className, $map['edit']],
                     'method'     => 'get',
                     'middleware' => Router::$group['middleware'] ?? [],
-                ]))->name("{$class_name}.edit")
+                ]))->name("{$className}.edit")
             );
         }
 
@@ -107,10 +111,10 @@ class ResourceController
             $this->resource->set($map['update'],
                 (new Route([
                     'expression' => Router::mapPatterns("{$uri}(:id)"),
-                    'function'   => [$class_name, $map['update']],
+                    'function'   => [$className, $map['update']],
                     'method'     => ['put', 'patch'],
                     'middleware' => Router::$group['middleware'] ?? [],
-                ]))->name("{$class_name}.update")
+                ]))->name("{$className}.update")
             );
         }
 
@@ -118,10 +122,10 @@ class ResourceController
             $this->resource->set($map['destroy'],
                 (new Route([
                     'expression' => Router::mapPatterns("{$uri}(:id)"),
-                    'function'   => [$class_name, $map['destroy']],
+                    'function'   => [$className, $map['destroy']],
                     'method'     => 'delete',
                     'middleware' => Router::$group['middleware'] ?? [],
-                ]))->name("{$class_name}.destroy")
+                ]))->name("{$className}.destroy")
             );
         }
 
@@ -138,6 +142,7 @@ class ResourceController
 
     /**
      * @param string[] $resource
+     * @return self
      */
     public function only(array $resource): self
     {
@@ -148,6 +153,7 @@ class ResourceController
 
     /**
      * @param string[] $resource
+     * @return self
      */
     public function except(array $resource): self
     {
