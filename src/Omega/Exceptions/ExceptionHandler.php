@@ -14,6 +14,7 @@ use Omega\Http\Response;
 use Omega\View\Templator;
 use Omega\View\TemplatorFinder;
 use Throwable;
+
 use function array_map;
 use function array_merge;
 
@@ -81,7 +82,7 @@ class ExceptionHandler
     public function report(Throwable $th): void
     {
         if ($this->dontReport($th)) {
-            //return;
+            return;
         }
     }
 

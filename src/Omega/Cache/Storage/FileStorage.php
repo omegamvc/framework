@@ -4,13 +4,41 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Storage;
 
-use Omega\Cache\CacheInterface;
+use DateInterval;
+use DateTimeImmutable;
+use DateTimeInterface;
+use FilesystemIterator;
+use Omega\Cache\Exceptions\InvalidValueIncrementException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
-class FileStorage implements CacheInterface
+use function array_slice;
+use function basename;
+use function dirname;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function implode;
+use function is_dir;
+use function is_int;
+use function is_null;
+use function mkdir;
+use function serialize;
+use function sha1;
+use function str_split;
+use function time;
+use function unlink;
+use function unserialize;
+
+use const LOCK_EX;
+
+class FileStorage extends AbstractStorage
 {
+    use StorageTrait;
+
     public function __construct(
-        private string $path,
-        private int $defaultTTL = 3_600,
+        private readonly string $path,
+        private readonly int $defaultTTL = 3_600,
     ) {
         if (false === is_dir($this->path)) {
             mkdir($this->path, 0777, true);
@@ -20,6 +48,7 @@ class FileStorage implements CacheInterface
     /**
      * Get info of storage.
      *
+     * @param string $key
      * @return array<string, array{value: mixed, timestamp?: int, mtime?: float}>
      */
     public function getInfo(string $key): array
@@ -39,6 +68,9 @@ class FileStorage implements CacheInterface
         return unserialize($data);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function get(string $key, mixed $default = null): mixed
     {
         $filePath = $this->makePath($key);
@@ -64,7 +96,10 @@ class FileStorage implements CacheInterface
         return $cacheData['value'];
     }
 
-    public function set(string $key, mixed $value, int|\DateInterval|null $ttl = null): bool
+    /**
+     * {@inheritdoc}
+     */
+    public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
     {
         $filePath  = $this->makePath($key);
         $directory = dirname($filePath);
@@ -84,6 +119,9 @@ class FileStorage implements CacheInterface
         return file_put_contents($filePath, $serializedData, LOCK_EX) !== false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delete(string $key): bool
     {
         $filePath = $this->makePath($key);
@@ -95,39 +133,34 @@ class FileStorage implements CacheInterface
         return false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clear(): bool
     {
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($this->path, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->path, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        foreach ($files as $fileinfo) {
-            $filePath = $fileinfo->getRealPath();
+        foreach ($files as $fileInfo) {
+            $filePath = $fileInfo->getRealPath();
 
             if (basename($filePath) === '.gitignore') {
                 continue;
             }
 
-            $action = $fileinfo->isDir() ? 'rmdir' : 'unlink';
+            $action = $fileInfo->isDir() ? 'rmdir' : 'unlink';
             $action($filePath);
         }
 
         return true;
     }
 
-    public function getMultiple(iterable $keys, mixed $default = null): iterable
-    {
-        $result = [];
-
-        foreach ($keys as $key) {
-            $result[$key] = $this->get($key, $default);
-        }
-
-        return $result;
-    }
-
-    public function setMultiple(iterable $values, int|\DateInterval|null $ttl = null): bool
+    /**
+     * {@inheritdoc}
+     */
+    public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool
     {
         $state = null;
 
@@ -139,23 +172,19 @@ class FileStorage implements CacheInterface
         return $state ?: false;
     }
 
-    public function deleteMultiple(iterable $keys): bool
-    {
-        $state = null;
-
-        foreach ($keys as $key) {
-            $result = $this->delete($key);
-            $state  = is_null($state) ? $result : $result && $state;
-        }
-
-        return $state ?: false;
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     public function has(string $key): bool
     {
         return file_exists($this->makePath($key));
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @throws InvalidValueIncrementException
+     */
     public function increment(string $key, int $value): int
     {
         if (false === $this->has($key)) {
@@ -170,7 +199,7 @@ class FileStorage implements CacheInterface
         $ttl = $info['timestamp'] ?? 0;
 
         if (false === is_int($ori)) {
-            throw new \InvalidArgumentException('Value incremnet must be interger.');
+            throw new InvalidValueIncrementException('Value increment must be an integer.');
         }
 
         $result = (int) ($ori + $value);
@@ -180,42 +209,17 @@ class FileStorage implements CacheInterface
         return $result;
     }
 
-    public function decrement(string $key, int $value): int
-    {
-        return $this->increment($key, $value * -1);
-    }
-
-    public function remember(string $key, \Closure $callback, int|\DateInterval|null $ttl = null): mixed
-    {
-        $value = $this->get($key);
-
-        if (null !== $value) {
-            return $value;
-        }
-
-        $this->set($key, $value = $callback(), $ttl);
-
-        return $value;
-    }
-
     /**
-     * Generate the full file path for the given cache key.
+     * @param int|DateInterval|DateTimeInterface|null $ttl
+     * @return int
      */
-    protected function makePath(string $key): string
+    protected function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int
     {
-        $hash  = sha1($key);
-        $parts = array_slice(str_split($hash, 2), 0, 2);
-
-        return $this->path . '/' . implode('/', $parts) . '/' . $hash;
-    }
-
-    private function calculateExpirationTimestamp(int|\DateInterval|\DateTimeInterface|null $ttl): int
-    {
-        if ($ttl instanceof \DateInterval) {
-            return (new \DateTimeImmutable())->add($ttl)->getTimestamp();
+        if ($ttl instanceof DateInterval) {
+            return (new DateTimeImmutable())->add($ttl)->getTimestamp();
         }
 
-        if ($ttl instanceof \DateTimeInterface) {
+        if ($ttl instanceof DateTimeInterface) {
             return $ttl->getTimestamp();
         }
 
@@ -225,22 +229,16 @@ class FileStorage implements CacheInterface
     }
 
     /**
-     * Calculate the microtime based on the current time and microtime.
+     * Generate the full file path for the given cache key.
+     *
+     * @param string $key
+     * @return string
      */
-    private function createMtime(): float
+    protected function makePath(string $key): string
     {
-        $currentTime = time();
-        $microtime   = microtime(true);
+        $hash  = sha1($key);
+        $parts = array_slice(str_split($hash, 2), 0, 2);
 
-        $fractionalPart = $microtime - $currentTime;
-
-        if ($fractionalPart >= 1) {
-            $currentTime += (int) $fractionalPart;
-            $fractionalPart -= (int) $fractionalPart;
-        }
-
-        $mtime = $currentTime + $fractionalPart;
-
-        return round($mtime, 3);
+        return $this->path . '/' . implode('/', $parts) . '/' . $hash;
     }
 }

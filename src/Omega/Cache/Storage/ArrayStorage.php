@@ -4,22 +4,33 @@ declare(strict_types=1);
 
 namespace Omega\Cache\Storage;
 
-use Omega\Cache\CacheInterface;
+use DateInterval;
+use DateTimeImmutable;
+use DateTimeInterface;
 
-class ArrayStorage implements CacheInterface
+use function array_key_exists;
+use function time;
+
+class ArrayStorage extends AbstractStorage
 {
+    use StorageTrait;
+
     /**
      * @var array<string, array{value: mixed, timestamp?: int, mtime?: float}>
      */
     protected array $storage = [];
 
-    public function __construct(private int $defaultTTL = 3_600)
+    /**
+     * @param int $defaultTTL
+     */
+    public function __construct(private readonly int $defaultTTL = 3_600)
     {
     }
 
     /**
      * Get info of storage.
      *
+     * @param string $key
      * @return array<string, array{value: mixed, timestamp?: int, mtime?: float}>
      */
     public function getInfo(string $key): array
@@ -27,6 +38,9 @@ class ArrayStorage implements CacheInterface
         return $this->storage[$key] ?? [];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function get(string $key, mixed $default = null): mixed
     {
         if (false === array_key_exists($key, $this->storage)) {
@@ -46,7 +60,10 @@ class ArrayStorage implements CacheInterface
         return $item['value'];
     }
 
-    public function set(string $key, mixed $value, int|\DateInterval|null $ttl = null): bool
+    /**
+     * {@inheritdoc}
+     */
+    public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
     {
         $this->storage[$key] = [
             'value'     => $value,
@@ -57,6 +74,9 @@ class ArrayStorage implements CacheInterface
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delete(string $key): bool
     {
         if ($this->has($key)) {
@@ -68,6 +88,9 @@ class ArrayStorage implements CacheInterface
         return false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clear(): bool
     {
         $this->storage = [];
@@ -75,18 +98,10 @@ class ArrayStorage implements CacheInterface
         return true;
     }
 
-    public function getMultiple(iterable $keys, mixed $default = null): iterable
-    {
-        $result = [];
-
-        foreach ($keys as $key) {
-            $result[$key] = $this->get($key, $default);
-        }
-
-        return $result;
-    }
-
-    public function setMultiple(iterable $values, int|\DateInterval|null $ttl = null): bool
+    /**
+     * {@inheritdoc}
+     */
+    public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool
     {
         foreach ($values as $key => $value) {
             $this->set($key, $value, $ttl);
@@ -95,24 +110,18 @@ class ArrayStorage implements CacheInterface
         return false;
     }
 
-    public function deleteMultiple(iterable $keys): bool
-    {
-        $state = null;
 
-        foreach ($keys as $key) {
-            $result = $this->delete($key);
-
-            $state = null === $state ? $result : $result && $state;
-        }
-
-        return $state ?: false;
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     public function has(string $key): bool
     {
         return array_key_exists($key, $this->storage);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function increment(string $key, int $value): int
     {
         if (false === $this->has($key)) {
@@ -126,61 +135,31 @@ class ArrayStorage implements CacheInterface
         return $this->storage[$key]['value'];
     }
 
-    public function decrement(string $key, int $value): int
+    /**
+     * @param int|DateInterval|DateTimeInterface|null $ttl
+     * @return int
+     */
+    protected function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int
     {
-        return $this->increment($key, $value * -1);
-    }
-
-    public function remember(string $key, \Closure $callback, int|\DateInterval|null $ttl = null): mixed
-    {
-        $value = $this->get($key);
-
-        if (null !== $value) {
-            return $value;
+        if ($ttl instanceof DateInterval) {
+            return (new DateTimeImmutable())->add($ttl)->getTimestamp();
         }
 
-        $this->set($key, $value = $callback(), $ttl);
-
-        return $value;
-    }
-
-    private function calculateExpirationTimestamp(int|\DateInterval|\DateTimeInterface|null $ttl): int
-    {
-        if ($ttl instanceof \DateInterval) {
-            return (new \DateTimeImmutable())->add($ttl)->getTimestamp();
-        }
-
-        if ($ttl instanceof \DateTimeInterface) {
+        if ($ttl instanceof DateTimeInterface) {
             return $ttl->getTimestamp();
         }
 
         $ttl ??= $this->defaultTTL;
 
-        return (new \DateTimeImmutable())->add(new \DateInterval("PT{$ttl}S"))->getTimestamp();
-    }
-
-    private function isExpired(int $timestamp): bool
-    {
-        return $timestamp !== 0 && time() >= $timestamp;
+        return (new DateTimeImmutable())->add(new DateInterval("PT{$ttl}S"))->getTimestamp();
     }
 
     /**
-     * Calculate the microtime based on the current time and microtime.
+     * @param int $timestamp
+     * @return bool
      */
-    private function createMtime(): float
+    private function isExpired(int $timestamp): bool
     {
-        $currentTime = time();
-        $microtime   = microtime(true);
-
-        $fractionalPart = $microtime - $currentTime;
-
-        if ($fractionalPart >= 1) {
-            $currentTime += (int) $fractionalPart;
-            $fractionalPart -= (int) $fractionalPart;
-        }
-
-        $mtime = $currentTime + $fractionalPart;
-
-        return round($mtime, 3);
+        return $timestamp !== 0 && time() >= $timestamp;
     }
 }

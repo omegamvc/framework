@@ -6,12 +6,12 @@ namespace Omega\View\Exceptions;
 
 use InvalidArgumentException;
 
-use function vsprintf;
+use function sprintf;
 
 abstract class AbstractViewException extends InvalidArgumentException implements ViewExceptionInterface
 {
     public function __construct(string $message, ...$args)
     {
-        parent::__construct(vsprintf($message, $args));
+        parent::__construct(sprintf($message, $args));
     }
 }
