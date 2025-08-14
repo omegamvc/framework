@@ -6,7 +6,7 @@ namespace Omega\Middleware;
 
 use Omega\Http\Request;
 use Omega\Http\Response;
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 use Omega\Http\Exceptions\HttpException;
 
 class MaintenanceMiddleware

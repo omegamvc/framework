@@ -2,22 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\ValueObjects;
+namespace Omega\Console;
 
+use ArrayAccess;
+use Exception;
+use InvalidArgumentException;
 use Omega\Text\Str;
+use ReturnTypeWillChange;
+
+use function array_key_exists;
+use function is_array;
 
 /**
- * @implements \ArrayAccess<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)>
+ * @implements ArrayAccess<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)>
  */
-class CommandMap implements \ArrayAccess
+class CommandMap implements ArrayAccess
 {
     /** @var array<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)> */
-    private $command = [
-        'cmd'       => '',
-        'mode'      => '',
-        'class'     => '',
-        'fn'        => '',
-    ];
+    private array $command;
 
     /**
      * @param array<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)> $command
@@ -32,7 +34,7 @@ class CommandMap implements \ArrayAccess
      *
      * @return string[]
      */
-    public function cmd()
+    public function cmd(): array
     {
         if (false === array_key_exists('cmd', $this->command)) {
             return [];
@@ -42,6 +44,9 @@ class CommandMap implements \ArrayAccess
         return is_array($cmd) ? $cmd : [$cmd];
     }
 
+    /**
+     * @return string
+     */
     public function mode(): string
     {
         return $this->command['mode'] ?? 'full';
@@ -52,16 +57,20 @@ class CommandMap implements \ArrayAccess
      *
      * @return string[]
      */
-    public function patterns()
+    public function patterns(): array
     {
         if (false === array_key_exists('pattern', $this->command)) {
             return [];
         }
+
         $pattern = $this->command['pattern'];
 
         return is_array($pattern) ? $pattern : [$pattern];
     }
 
+    /**
+     * @return string
+     */
     public function class(): string
     {
         if (is_array($this->fn()) && array_key_exists(0, $this->fn())) {
@@ -72,17 +81,20 @@ class CommandMap implements \ArrayAccess
             return $this->command['class'];
         }
 
-        throw new \InvalidArgumentException('Command map require class in (class or fn).');
+        throw new InvalidArgumentException('Command map require class in (class or fn).');
     }
 
     /**
      * @return string|string[]
      */
-    public function fn()
+    public function fn(): string|array
     {
         return $this->command['fn'] ?? 'main';
     }
 
+    /**
+     * @return string
+     */
     public function method(): string
     {
         return is_array($this->fn()) ? $this->fn()[1] : $this->fn();
@@ -91,7 +103,7 @@ class CommandMap implements \ArrayAccess
     /**
      * @return array<string, string|bool|int|null>
      */
-    public function defaultOption()
+    public function defaultOption(): array
     {
         return $this->command['default'] ?? [];
     }
@@ -99,7 +111,7 @@ class CommandMap implements \ArrayAccess
     /**
      * @return callable(string): bool
      */
-    public function match()
+    public function match(): callable
     {
         if (array_key_exists('pattern', $this->command)) {
             $pattern  = $this->command['pattern'];
@@ -141,6 +153,10 @@ class CommandMap implements \ArrayAccess
         return fn ($given) => false;
     }
 
+    /**
+     * @param string $given
+     * @return bool
+     */
     public function isMatch(string $given): bool
     {
         return ($this->match())($given);
@@ -158,29 +174,43 @@ class CommandMap implements \ArrayAccess
             : [$this->class(), $this->fn()];
     }
 
-    // arrayaccess
-
-    public function offsetExists($offset): bool
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists(mixed $offset): bool
     {
         return array_key_exists($offset, $this->command);
     }
 
     /**
+     * @param mixed $offset
      * @return string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    #[ReturnTypeWillChange]
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->command[$offset];
     }
 
-    public function offsetSet($offset, $value): void
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     * @return void
+     * @throws Exception
+     */
+    public function offsetSet(mixed $offset, mixed $value): void
     {
-        throw new \Exception('CommandMap cant be reassigmnet');
+        throw new Exception('CommandMap cant be reassignment');
     }
 
-    public function offsetUnset($offset): void
+    /**
+     * @param mixed $offset
+     * @return void
+     * @throws Exception
+     */
+    public function offsetUnset(mixed $offset): void
     {
-        throw new \Exception('CommandMap cant be reassigmnet');
+        throw new Exception('CommandMap cant be reassignment');
     }
 }

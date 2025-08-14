@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Console;
+namespace Omega\Console\Commands;
 
 use Omega\Console\Command;
 use Omega\Console\Traits\PrintHelpTrait;
@@ -53,11 +53,11 @@ class MaintenanceCommand extends Command
             return 1;
         }
 
-        if (false === file_exists($down = app()->storage_path() . 'app' . DIRECTORY_SEPARATOR . 'down')) {
+        if (false === file_exists($down = storage_path() . 'app' . DIRECTORY_SEPARATOR . 'down')) {
             file_put_contents($down, file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'down'));
         }
 
-        file_put_contents(app()->storage_path() . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'maintenance'));
+        file_put_contents(storage_path() . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'maintenance'));
         ok('Successfull, your apllication now in under maintenance.')->out();
 
         return 0;
@@ -71,7 +71,7 @@ class MaintenanceCommand extends Command
             return 1;
         }
 
-        if (false === unlink($up = app()->storage_path() . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php')) {
+        if (false === unlink($up = storage_path() . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php')) {
             warn('Application stil maintenance mode.')->out(false);
             info("Remove manualy mantenance file in `{$up}`.")->out();
 

@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Console;
+namespace Omega\Console\Commands;
 
 use Omega\Console\Command;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
-use Omega\Integrate\Application;
-use Omega\Integrate\ValueObjects\CommandMap;
+use Omega\Application\Application;
+use Omega\Console\CommandMap;
+use Omega\Console\Util;
 use Omega\Text\Str;
 
 use function Omega\Console\info;
@@ -256,10 +257,10 @@ class HelpCommand extends Command
     /**
      * Transform commandsmap array to CommandMap.
      *
-     * @return CommandMap[]
+     * @return \Omega\Console\CommandMap[]
      */
     private function commandMaps()
     {
-        return Util::loadCommandFromConfig(Application::getIntance());
+        return Util::loadCommandFromConfig(Application::getInstance());
     }
 }

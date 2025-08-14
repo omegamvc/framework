@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Console;
+namespace Omega\Console\Commands;
 
 use Omega\Console\Command;
 use Omega\Console\Style\ProgressBar;

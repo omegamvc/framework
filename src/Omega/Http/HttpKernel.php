@@ -7,7 +7,7 @@ namespace Omega\Http;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 use Omega\Support\Bootstrap\BootProviders;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\HandleExceptions;

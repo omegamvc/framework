@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Support\Bootstrap;
 
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 use Omega\Config\ConfigRepository;
 
 use function array_merge;
@@ -16,7 +16,7 @@ class ConfigProviders
 {
     public function bootstrap(Application $app): void
     {
-        $configPath = $app->configPath();
+        $configPath = $app->getConfigPath();
         $config     =  $app->defaultConfigs();
         $hasCache   = false;
 

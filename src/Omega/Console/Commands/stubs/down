@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'redirect' => null,
-    'retry' => null, // in secconds
-    'status' => 503,
+    'retry'    => null, // in seconds
+    'status'   => 503,
     'template' => null,
 ];

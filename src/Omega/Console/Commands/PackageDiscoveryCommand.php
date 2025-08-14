@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Console;
+namespace Omega\Console\Commands;
 
 use Omega\Console\Command;
 use Omega\Console\Style\Style;
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 use Omega\Support\PackageManifest;
 
 use function Omega\Console\fail;

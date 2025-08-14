@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Support\Bootstrap;
 
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 
 class RegisterProviders
 {

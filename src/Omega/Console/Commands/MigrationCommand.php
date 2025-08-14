@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Console;
+namespace Omega\Console\Commands;
 
 use Omega\Collection\Collection;
 use Omega\Console\Command;
@@ -11,6 +11,7 @@ use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Database\MyQuery;
 use Omega\Database\MySchema\Table\Create;
+use Omega\Console\Commands\SeedCommand;
 use Omega\Support\Facades\DB;
 use Omega\Support\Facades\PDO;
 use Omega\Support\Facades\Schema;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Container\Provider;
 
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 
 use function array_key_exists;
 use function array_merge;

@@ -7,7 +7,7 @@ use DI\NotFoundException;
 use Omega\Collection\CollectionImmutable;
 use Omega\Http\RedirectResponse;
 use Omega\Http\Response;
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 use Omega\Exceptions\ApplicationNotAvailableException;
 use Omega\Support\Vite;
 use Omega\Router\Router;
@@ -21,7 +21,7 @@ if (!function_exists('app_path')) {
      */
     function app_path(string $folder_name): string
     {
-        $path = app()->appPath();
+        $path = app()->getAppPath();
 
         return $path . DIRECTORY_SEPARATOR . $folder_name;
     }
@@ -36,7 +36,7 @@ if (!function_exists('model_path')) {
      */
     function model_path(string $suffix_path = ''): string
     {
-        return app()->modelPath() . $suffix_path;
+        return app()->getModelPath() . $suffix_path;
     }
 }
 
@@ -51,7 +51,7 @@ if (!function_exists('view_path')) {
      */
     function view_path(string $suffix_path = ''): string
     {
-        return app()->viewPath() . $suffix_path;
+        return app()->getViewPath() . $suffix_path;
     }
 }
 
@@ -63,7 +63,7 @@ if (!function_exists('view_paths')) {
      */
     function view_paths(): array
     {
-        return app()->view_paths();
+        return app()->getViewPaths();
     }
 }
 
@@ -76,7 +76,7 @@ if (!function_exists('controllers_path')) {
      */
     function controllers_path(string $suffix_path = ''): string
     {
-        return app()->controllerPath() . $suffix_path;
+        return app()->getControllerPath() . $suffix_path;
     }
 }
 
@@ -89,7 +89,7 @@ if (!function_exists('services_path')) {
      */
     function services_path(string $suffix_path = ''): string
     {
-        return app()->servicesPath() . $suffix_path;
+        return app()->getServicesPath() . $suffix_path;
     }
 }
 
@@ -102,7 +102,7 @@ if (!function_exists('component_path')) {
      */
     function component_path(string $suffix_path = ''): string
     {
-        return app()->componentPath() . $suffix_path;
+        return app()->getComponentPath() . $suffix_path;
     }
 }
 
@@ -115,7 +115,7 @@ if (!function_exists('commands_path')) {
      */
     function commands_path(string $suffix_path = ''): string
     {
-        return app()->commandPath() . $suffix_path;
+        return app()->getCommandPath() . $suffix_path;
     }
 }
 
@@ -128,7 +128,7 @@ if (!function_exists('storage_path')) {
      */
     function storage_path(string $suffix_path = ''): string
     {
-        return app()->storagePath() . $suffix_path;
+        return app()->getStoragePath() . $suffix_path;
     }
 }
 
@@ -141,7 +141,7 @@ if (!function_exists('cache_path')) {
      */
     function cache_path(string $suffix_path = ''): string
     {
-        return app()->cachePath() . $suffix_path;
+        return app()->getCachePath() . $suffix_path;
     }
 }
 
@@ -151,7 +151,7 @@ if (!function_exists('compiled_view_path')) {
      */
     function compiled_view_path(): string
     {
-        return app()->compiledViewPath();
+        return app()->getCompiledViewPath();
     }
 }
 
@@ -164,7 +164,7 @@ if (!function_exists('config_path')) {
      */
     function config_path(string $suffix_path = ''): string
     {
-        return app()->configPath() . $suffix_path;
+        return app()->getConfigPath() . $suffix_path;
     }
 }
 
@@ -177,7 +177,7 @@ if (!function_exists('middleware_path')) {
      */
     function middleware_path(string $suffix_path = ''): string
     {
-        return app()->middlewarePath() . $suffix_path;
+        return app()->getMiddlewarePath() . $suffix_path;
     }
 }
 
@@ -190,7 +190,7 @@ if (!function_exists('provider_path')) {
      */
     function provider_path(string $suffix_path = ''): string
     {
-        return app()->providerPath() . $suffix_path;
+        return app()->getProviderPath() . $suffix_path;
     }
 }
 
@@ -203,7 +203,7 @@ if (!function_exists('migration_path')) {
      */
     function migration_path(string $suffix_path = ''): string
     {
-        return app()->migrationPath() . $suffix_path;
+        return app()->getMigrationPath() . $suffix_path;
     }
 }
 
@@ -216,7 +216,7 @@ if (!function_exists('seeder_path')) {
      */
     function seeder_path(string $suffix_path = ''): string
     {
-        return app()->seederPath() . $suffix_path;
+        return app()->getSeederPath() . $suffix_path;
     }
 }
 
@@ -229,7 +229,7 @@ if (!function_exists('base_path')) {
      */
     function base_path(string $insert_path = ''): string
     {
-        return app()->basePath() . $insert_path;
+        return app()->getBasePath() . $insert_path;
     }
 }
 
@@ -278,7 +278,7 @@ if (!function_exists('app')) {
      */
     function app(): Application
     {
-        $app = Application::getIntance();
+        $app = Application::getInstance();
         if (null === $app) {
             throw new ApplicationNotAvailableException();
         }

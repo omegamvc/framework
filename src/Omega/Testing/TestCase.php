@@ -10,7 +10,7 @@ use Exception;
 use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 use Omega\Http\Request;
 use Omega\Http\Response;
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 use Omega\Http\HttpKernel;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Support\Facades\AbstractFacade;

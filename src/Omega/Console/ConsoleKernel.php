@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Omega\Console;
 
 use Omega\Console\Style\Style;
-use Omega\Integrate\Application;
+use Omega\Application\Application;
 use Omega\Support\Bootstrap\BootProviders;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\RegisterFacades;
 use Omega\Support\Bootstrap\RegisterProviders;
-use Omega\Integrate\Console\Util;
-use Omega\Integrate\ValueObjects\CommandMap;
+use Omega\Console\Util;
+use Omega\Console\CommandMap;
 
 class ConsoleKernel
 {

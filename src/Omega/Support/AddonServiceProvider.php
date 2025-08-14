@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Providers;
+namespace Omega\Support;
 
 use Closure;
 use Omega\Container\Provider\AbstractServiceProvider;
@@ -10,7 +10,7 @@ use Omega\Http\Request;
 use Omega\Http\Upload\UploadFile;
 use Omega\Validator\Validator;
 
-class IntegrateServiceProvider extends AbstractServiceProvider
+class AddonServiceProvider extends AbstractServiceProvider
 {
     /**
      * {@inheritDoc}
