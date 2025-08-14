@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace Omega\Integrate\Providers;
 
-use Omega\Http\Upload\UploadFile;
+use Closure;
+use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Http\Request;
-use Omega\Integrate\ServiceProvider;
-use Validator\Validator;
+use Omega\Http\Upload\UploadFile;
+use Omega\Validator\Validator;
 
-class IntegrateServiceProvider extends ServiceProvider
+class IntegrateServiceProvider extends AbstractServiceProvider
 {
     /**
      * {@inheritDoc}
      */
-    public function register()
+    public function register(): void
     {
         Request::macro(
             'validate',
-            fn (?\Closure $rule = null, ?\Closure $filter = null) => Validator::make($this->{'all'}(), $rule, $filter)
+            fn (?Closure $rule = null, ?Closure $filter = null) => Validator::make($this->{'all'}(), $rule, $filter)
         );
 
         Request::macro(

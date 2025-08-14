@@ -6,17 +6,16 @@ namespace Omega\Integrate;
 
 use Omega\Config\ConfigRepository;
 use Omega\Container\Container;
+use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Http\Request;
-use Omega\Integrate\Contracts\Paths;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Integrate\Providers\IntegrateServiceProvider;
+use Omega\Support\PackageManifest;
 use Omega\Support\Vite;
 use Omega\View\Templator;
 
 final class Application extends Container
 {
-    use Paths;
-
     /**
      * Application instance.
      *
@@ -145,21 +144,21 @@ final class Application extends Container
     /**
      * All service provider.
      *
-     * @var ServiceProvider[]
+     * @var AbstractServiceProvider[]
      */
     private $providers = [];
 
     /**
      * Booted service provider.
      *
-     * @var ServiceProvider[]
+     * @var AbstractServiceProvider[]
      */
     private $booted_providers = [];
 
     /**
      * Looded service provider.
      *
-     * @var ServiceProvider[]
+     * @var AbstractServiceProvider[]
      */
     private $looded_providers = [];
 
@@ -987,7 +986,7 @@ final class Application extends Container
      *
      * @param string $provider Class-name service provider
      *
-     * @return ServiceProvider
+     * @return AbstractServiceProvider
      */
     public function register($provider)
     {
@@ -1101,7 +1100,7 @@ final class Application extends Container
     /**
      * Merge applicationproveder and vendor package provider.
      *
-     * @return ServiceProvider[]
+     * @return AbstractServiceProvider[]
      */
     protected function getMergeProviders(): array
     {

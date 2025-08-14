@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Exceptions;
+namespace Omega\Exceptions;
 
 use RuntimeException;
 

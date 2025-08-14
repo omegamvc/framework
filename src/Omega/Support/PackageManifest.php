@@ -2,7 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate;
+namespace Omega\Support;
+
+use function array_filter;
+use function array_key_exists;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function json_decode;
+use function var_export;
+
+use const PHP_EOL;
 
 final class PackageManifest
 {
@@ -14,8 +24,8 @@ final class PackageManifest
     public ?array $package_manifest = null;
 
     public function __construct(
-        private string $base_path,
-        private string $application_cache_path,
+        private readonly string $base_path,
+        private readonly string $application_cache_path,
         private ?string $vendor_path = null,
     ) {
         $this->vendor_path ??= DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'composer' . DIRECTORY_SEPARATOR;
@@ -32,7 +42,7 @@ final class PackageManifest
     }
 
     /**
-     * Get array of provider..
+     * Get array of provider.
      *
      * @return string[]
      */
@@ -90,12 +100,18 @@ final class PackageManifest
         }
 
         foreach ($packages as $package) {
-            if (isset($package['extra']['savanna'])) {
-                $provider[$package['name']] = $package['extra']['savanna'];
+            if (isset($package['extra']['omegamvc'])) {
+                $provider[$package['name']] = $package['extra']['omegamvc'];
             }
         }
         array_filter($provider);
 
-        file_put_contents($this->application_cache_path . 'packages.php', '<?php return ' . var_export($provider, true) . ';' . PHP_EOL);
+        file_put_contents(
+            $this->application_cache_path
+            . 'packages.php', '<?php return '
+            . var_export($provider, true)
+            . ';'
+            . PHP_EOL
+        );
     }
 }

@@ -2,10 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Bootstrap;
+namespace Omega\Support\Bootstrap;
 
+use ErrorException;
 use Omega\Integrate\Application;
-use Omega\Integrate\Exceptions\Handler;
+use Omega\Exceptions\ExceptionHandler;
+use Throwable;
+
+use function error_get_last;
+use function error_reporting;
+use function in_array;
+use function ini_set;
+use function php_sapi_name;
+use function register_shutdown_function;
+use function set_error_handler;
+use function set_exception_handler;
+use function str_repeat;
+
+use const E_COMPILE_ERROR;
+use const E_CORE_ERROR;
+use const E_DEPRECATED;
+use const E_ERROR;
+use const E_PARSE;
+use const E_USER_DEPRECATED;
 
 class HandleExceptions
 {
@@ -32,6 +51,14 @@ class HandleExceptions
         }
     }
 
+    /**
+     * @param int $level
+     * @param string $message
+     * @param string $file
+     * @param int|null $line
+     * @return void
+     * @throws ErrorException
+     */
     public function handleError(int $level, string $message, string $file = '', ?int $line = 0): void
     {
         if ($this->isDeprecation($level)) {
@@ -39,16 +66,28 @@ class HandleExceptions
         }
 
         if (error_reporting() & $level) {
-            throw new \ErrorException($message, 0, $level, $file, $line);
+            throw new ErrorException($message, 0, $level, $file, $line);
         }
     }
 
+    /**
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @param int $level
+     * @return void
+     */
     private function handleDeprecationError(string $message, string $file, int $line, int $level): void
     {
         $this->log($level, $message);
     }
 
-    public function handleException(\Throwable $th): void
+    /**
+     * @param Throwable $th
+     * @return void
+     * @throws Throwable
+     */
+    public function handleException(Throwable $th): void
     {
         self::$reserveMemory = null;
 
@@ -59,15 +98,26 @@ class HandleExceptions
         }
     }
 
+    /**
+     * @return void
+     * @throws Throwable
+     */
     public function handleShutdown(): void
     {
         self::$reserveMemory = null;
         $error               = error_get_last();
         if ($error && $this->isFatal($error['type'])) {
-            $this->handleException(new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']));
+            $this->handleException(
+                new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line'])
+            );
         }
     }
 
+    /**
+     * @param int $level
+     * @param string $message
+     * @return bool
+     */
     private function log(int $level, string $message): bool
     {
         if ($this->app->has('log')) {
@@ -79,9 +129,12 @@ class HandleExceptions
         return false;
     }
 
-    private function getHandler(): Handler
+    /**
+     * @return ExceptionHandler
+     */
+    private function getHandler(): ExceptionHandler
     {
-        return $this->app[Handler::class];
+        return $this->app[ExceptionHandler::class];
     }
 
     private function isDeprecation(int $level): bool

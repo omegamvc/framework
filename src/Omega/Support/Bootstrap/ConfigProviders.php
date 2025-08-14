@@ -2,25 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Bootstrap;
+namespace Omega\Support\Bootstrap;
 
 use Omega\Integrate\Application;
 use Omega\Config\ConfigRepository;
+
+use function array_merge;
+use function date_default_timezone_set;
+use function file_exists;
+use function glob;
 
 class ConfigProviders
 {
     public function bootstrap(Application $app): void
     {
-        $config_path = $app->configPath();
-        $config      =  $app->defaultConfigs();
-        $has_cache   = false;
+        $configPath = $app->configPath();
+        $config     =  $app->defaultConfigs();
+        $hasCache   = false;
+
         if (file_exists($file = $app->getApplicationCachePath() . 'config.php')) {
             $config    = array_merge($config, require $file);
-            $has_cache = true;
+            $hasCache = true;
         }
 
-        if (false === $has_cache) {
-            foreach (glob("{$config_path}*.php") as $path) {
+        if (false === $hasCache) {
+            foreach (glob($configPath . "*.php") as $path) {
                 foreach (include $path as $key => $value) {
                     $config[$key] = $value;
                 }

@@ -8,7 +8,7 @@ use Omega\Collection\CollectionImmutable;
 use Omega\Http\RedirectResponse;
 use Omega\Http\Response;
 use Omega\Integrate\Application;
-use Omega\Integrate\Exceptions\ApplicationNotAvailableException;
+use Omega\Exceptions\ApplicationNotAvailableException;
 use Omega\Support\Vite;
 use Omega\Router\Router;
 
@@ -332,6 +332,7 @@ if (!function_exists('vite')) {
      * @return array<string, string>|string
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws Exception
      */
     function vite(string ...$entry_points): array|string
     {
@@ -384,6 +385,7 @@ if (!function_exists('redirect')) {
      *
      * @param string $url
      * @return RedirectResponse
+     * @throws Exception
      */
     function redirect(string $url): RedirectResponse
     {

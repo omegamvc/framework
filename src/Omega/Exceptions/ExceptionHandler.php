@@ -2,34 +2,39 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Exceptions;
+namespace Omega\Exceptions;
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Omega\Container\Container;
-use Omega\Http\Exceptions;
+use Omega\Http\Exceptions\HttpException;
+use Omega\Http\Exceptions\HttpResponseException;
 use Omega\Http\Request;
 use Omega\Http\Response;
-use Omega\Http\Exceptions\HttpException;
 use Omega\View\Templator;
 use Omega\View\TemplatorFinder;
+use Throwable;
+use function array_map;
+use function array_merge;
 
-class Handler
+class ExceptionHandler
 {
     protected Container $app;
 
     /**
      * Do not report exception list.
      *
-     * @var array<int, class-string<\Throwable>>
+     * @var array<int, class-string<Throwable>>
      */
-    protected array $dont_report = [];
+    protected array $dontReport = [];
 
     /**
      * Do not report exception list internal (framework).
      *
-     * @var array<int, class-string<\Throwable>>
+     * @var array<int, class-string<Throwable>>
      */
-    protected array $dont_report_internal = [
-        Exceptions\HttpResponseException::class,
+    protected array $dontReportInternal = [
+        HttpResponseException::class,
         HttpException::class,
     ];
 
@@ -41,15 +46,18 @@ class Handler
     /**
      * Render exception.
      *
-     * @throws \Throwable
+     * @param Request   $request
+     * @param Throwable $th
+     * @return Response
+     * @throws Throwable
      */
-    public function render(Request $request, \Throwable $th): Response
+    public function render(Request $request, Throwable $th): Response
     {
         if ($request->isJson()) {
             return $this->handleJsonResponse($th);
         }
 
-        if ($th instanceof Exceptions\HttpResponseException) {
+        if ($th instanceof HttpResponseException) {
             return $th->getResponse();
         }
 
@@ -65,21 +73,27 @@ class Handler
     }
 
     /**
-     * Report exception (usefull for logging).
+     * Report exception (usefully for logging).
+     *
+     * @param Throwable $th
+     * @return void
      */
-    public function report(\Throwable $th): void
+    public function report(Throwable $th): void
     {
         if ($this->dontReport($th)) {
-            return;
+            //return;
         }
     }
 
     /**
      * Determinate if exception in list of do not report.
+     *
+     * @param Throwable $th
+     * @return bool
      */
-    protected function dontReport(\Throwable $th): bool
+    protected function dontReport(Throwable $th): bool
     {
-        foreach (array_merge($this->dont_report, $this->dont_report_internal) as $report) {
+        foreach (array_merge($this->dontReport, $this->dontReportInternal) as $report) {
             if ($th instanceof $report) {
                 return true;
             }
@@ -88,22 +102,28 @@ class Handler
         return false;
     }
 
-    protected function handleJsonResponse(\Throwable $th): Response
+    /**
+     * @param Throwable $th
+     * @return Response
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    protected function handleJsonResponse(Throwable $th): Response
     {
-        $respone = new Response([
+        $response = new Response([
             'code'     => 500,
             'messages' => [
                 'message'   => 'Internal Server Error',
             ]], 500);
 
         if ($th instanceof HttpException) {
-            $respone->setResponseCode($th->getStatusCode());
-            $respone->headers->add($th->getHeaders());
+            $response->setResponseCode($th->getStatusCode());
+            $response->headers->add($th->getHeaders());
         }
 
         if ($this->isDebug()) {
-            return $respone->json([
-                'code'     => $respone->getStatusCode(),
+            return $response->json([
+                'code'     => $response->getStatusCode(),
                 'messages' => [
                     'message'   => $th->getMessage(),
                     'exception' => $th::class,
@@ -113,16 +133,28 @@ class Handler
             ]);
         }
 
-        return $respone->json();
+        return $response->json();
     }
 
-    protected function handleResponse(\Throwable $th): Response
+    /**
+     * @param Throwable $th
+     * @return Response
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    protected function handleResponse(Throwable $th): Response
     {
         return $this->isProduction()
             ? $this->handleHttpException(new HttpException(500, 'Internal Server Error'))
             : new Response($th->getMessage(), 500);
     }
 
+    /**
+     * @param HttpException $e
+     * @return Response
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     protected function handleHttpException(HttpException $e): Response
     {
         $templator = $this->registerViewPath();
@@ -141,27 +173,41 @@ class Handler
 
     /**
      * Register error view path.
+     *
+     * @return Templator
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function registerViewPath(): Templator
     {
         $view_paths   = array_map(fn ($path): string => $path . 'pages/', $this->app->get('paths.view'));
         $view_paths[] = $this->app->get('path.view');
-        /** @var TemplatorFinder */
+        /** @var TemplatorFinder $finder */
         $finder = $this->app->make(TemplatorFinder::class);
         $finder->setPaths($view_paths);
 
-        /** @var Templator */
+        /** @var Templator $view */
         $view = $this->app->make('view.instance');
         $view->setFinder($finder);
 
         return $view;
     }
 
+    /**
+     * @return bool
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     private function isDebug(): bool
     {
         return $this->app->get('app.debug');
     }
 
+    /**
+     * @return bool
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     private function isProduction(): bool
     {
         return $this->app->get('environment') === 'prod';

@@ -2,36 +2,45 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Testing;
+namespace Omega\Testing;
 
-use PHPUnit\Framework\TestCase as BaseTestCase;
+use DI\DependencyException;
+use DI\NotFoundException;
+use Exception;
+use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Integrate\Application;
 use Omega\Http\HttpKernel;
-use Omega\Integrate\ServiceProvider;
+use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Support\Facades\AbstractFacade;
+use Throwable;
 
-class TestCase extends BaseTestCase
+use function array_key_exists;
+
+class TestCase extends PhpUnitTestCase
 {
     protected Application $app;
+
     protected HttpKernel $kernel;
+
     protected string $class;
 
     protected function tearDown(): void
     {
         $this->app->flush();
         AbstractFacade::flushInstance();
-        ServiceProvider::flushModule();
+        AbstractServiceProvider::flushModule();
         unset($this->app);
         unset($this->kernel);
     }
 
     /**
-     * @param array<string, string>|string $call   call the given function using the given parameters
-     * @param array<string, string>        $params
+     * @param string|array<string, string> $call call the given function using the given parameters
+     * @param array<string, string> $params
+     * @throws Exception
      */
-    protected function json($call, array $params = []): TestJsonResponse
+    protected function json(array|string $call, array $params = []): TestJsonResponse
     {
         $data     = $this->app->call($call, $params);
         $response = new Response($data);
@@ -46,12 +55,20 @@ class TestCase extends BaseTestCase
     }
 
     /**
-     * @param array<string, string> $query
-     * @param array<string, string> $post
-     * @param array<string, string> $attributes
-     * @param array<string, string> $cookies
-     * @param array<string, string> $files
-     * @param array<string, string> $headers
+     * @param string $url
+     * @param array $query
+     * @param array $post
+     * @param array $attributes
+     * @param array $cookies
+     * @param array $files
+     * @param array $headers
+     * @param string $method
+     * @param string $remoteAddress
+     * @param string|null $rawBody
+     * @return TestResponse
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Throwable
      */
     protected function call(
         string $url,
@@ -65,9 +82,20 @@ class TestCase extends BaseTestCase
         string $remoteAddress = '::1',
         ?string $rawBody = null,
     ): TestResponse {
-        /** @var HttpKernel */
-        $kernel   = $this->app->make(HttpKernel::class);
-        $request  = new Request($url, $query, $post, $attributes, $cookies, $files, $headers, $method, $remoteAddress, $rawBody);
+        /** @var HttpKernel $kernel */
+        $kernel  = $this->app->make(HttpKernel::class);
+        $request = new Request(
+            $url,
+            $query,
+            $post,
+            $attributes,
+            $cookies,
+            $files,
+            $headers,
+            $method,
+            $remoteAddress,
+            $rawBody
+        );
         $response = $kernel->handle($request);
 
         $kernel->terminate($request, $response);
@@ -78,14 +106,28 @@ class TestCase extends BaseTestCase
     /**
      * @param array<string, string> $parameter
      */
+    /**
+     * @param string                $url
+     * @param array<string, string> $parameter
+     * @return TestResponse
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Throwable
+     */
     protected function get(string $url, array $parameter = []): TestResponse
     {
+        /** @noinspection PhpRedundantOptionalArgumentInspection */
         return $this->call(url: $url, query: $parameter, method: 'GET');
     }
 
     /**
+     * @param string $url
      * @param array<string, string> $post
      * @param array<string, string> $files
+     * @return TestResponse
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Throwable
      */
     protected function post(string $url, array $post, array $files =[]): TestResponse
     {
@@ -93,8 +135,13 @@ class TestCase extends BaseTestCase
     }
 
     /**
+     * @param string                $url
      * @param array<string, string> $put
      * @param array<string, string> $files
+     * @return TestResponse
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Throwable
      */
     protected function put(string $url, array $put, array $files = []): TestResponse
     {
@@ -102,7 +149,12 @@ class TestCase extends BaseTestCase
     }
 
     /**
+     * @param string                $url
      * @param array<string, string> $delete
+     * @return TestResponse
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Throwable
      */
     protected function delete(string $url, array $delete): TestResponse
     {

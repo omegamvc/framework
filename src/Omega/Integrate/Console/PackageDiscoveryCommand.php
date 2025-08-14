@@ -7,7 +7,7 @@ namespace Omega\Integrate\Console;
 use Omega\Console\Command;
 use Omega\Console\Style\Style;
 use Omega\Integrate\Application;
-use Omega\Integrate\PackageManifest;
+use Omega\Support\PackageManifest;
 
 use function Omega\Console\fail;
 use function Omega\Console\info;

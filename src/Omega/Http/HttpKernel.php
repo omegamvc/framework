@@ -8,12 +8,12 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
 use Omega\Integrate\Application;
-use Omega\Integrate\Bootstrap\BootProviders;
-use Omega\Integrate\Bootstrap\ConfigProviders;
-use Omega\Integrate\Bootstrap\HandleExceptions;
-use Omega\Integrate\Bootstrap\RegisterFacades;
-use Omega\Integrate\Bootstrap\RegisterProviders;
-use Omega\Integrate\Exceptions\Handler;
+use Omega\Support\Bootstrap\BootProviders;
+use Omega\Support\Bootstrap\ConfigProviders;
+use Omega\Support\Bootstrap\HandleExceptions;
+use Omega\Support\Bootstrap\RegisterFacades;
+use Omega\Support\Bootstrap\RegisterProviders;
+use Omega\Exceptions\ExceptionHandler;
 use Omega\Middleware\MaintenanceMiddleware;
 use Omega\Router\Router;
 use Throwable;
@@ -85,7 +85,7 @@ class HttpKernel
 
             $response = $pipeline($request);
         } catch (Throwable $th) {
-            $handler = $this->app->get(Handler::class);
+            $handler = $this->app->get(ExceptionHandler::class);
 
             $handler->report($th);
             $response = $handler->render($request, $th);

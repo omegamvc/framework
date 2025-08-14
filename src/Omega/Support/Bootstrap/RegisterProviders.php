@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Bootstrap;
+namespace Omega\Support\Bootstrap;
 
 use Omega\Integrate\Application;
 

@@ -2,15 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate;
+namespace Omega\Container\Provider;
 
-abstract class ServiceProvider
+use Omega\Integrate\Application;
+
+use function array_key_exists;
+use function array_merge;
+use function closedir;
+use function copy;
+use function file_exists;
+use function is_dir;
+use function mkdir;
+use function opendir;
+use function pathinfo;
+use function readdir;
+
+abstract class AbstractServiceProvider
 {
     /** @var Application */
-    protected $app;
+    protected Application $app;
 
     /** @var array<int|string, class-string> Class register */
-    protected $register = [
+    protected array $register = [
         // register
     ];
 
@@ -36,7 +49,7 @@ abstract class ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         // boot
     }
@@ -46,7 +59,7 @@ abstract class ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         // register application container
     }

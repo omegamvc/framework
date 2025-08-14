@@ -6,7 +6,7 @@ namespace Omega\Integrate\Console;
 
 use Omega\Console\Command;
 use Omega\Integrate\Application;
-use Omega\Integrate\Bootstrap\ConfigProviders;
+use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Config\ConfigRepository;
 
 use function Omega\Console\fail;

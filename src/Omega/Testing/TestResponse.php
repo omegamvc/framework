@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Omega\Integrate\Testing;
+namespace Omega\Testing;
 
 use PHPUnit\Framework\Assert;
 use Omega\Http\Response;
-use Omega\Integrate\Testing\Traits\ResponseStatusTrait;
+use Omega\Testing\Traits\ResponseStatusTrait;
 
 class TestResponse
 {

@@ -6,10 +6,10 @@ namespace Omega\Console;
 
 use Omega\Console\Style\Style;
 use Omega\Integrate\Application;
-use Omega\Integrate\Bootstrap\BootProviders;
-use Omega\Integrate\Bootstrap\ConfigProviders;
-use Omega\Integrate\Bootstrap\RegisterFacades;
-use Omega\Integrate\Bootstrap\RegisterProviders;
+use Omega\Support\Bootstrap\BootProviders;
+use Omega\Support\Bootstrap\ConfigProviders;
+use Omega\Support\Bootstrap\RegisterFacades;
+use Omega\Support\Bootstrap\RegisterProviders;
 use Omega\Integrate\Console\Util;
 use Omega\Integrate\ValueObjects\CommandMap;
 
