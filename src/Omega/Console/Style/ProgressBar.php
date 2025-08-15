@@ -12,7 +12,7 @@ class ProgressBar
 
     private string $template;
     public int $current = 0;
-    public int $maks    = 1;
+    public int $mask    = 1;
 
     private string $progress;
 
@@ -54,7 +54,7 @@ class ProgressBar
         foreach ($this->binds as $key => $bind) {
             $binds[$key] = call_user_func_array($bind, [
                 $this->current,
-                $this->maks,
+                $this->mask,
             ]);
         }
 
@@ -66,7 +66,7 @@ class ProgressBar
         $this->progress = (string) $this;
         (new Style())->replace($this->progress);
 
-        if ($this->current + 1 > $this->maks) {
+        if ($this->current + 1 > $this->mask) {
             $complete = (string) call_user_func($this->complete);
             (new Style())->clear();
             (new Style())->replace($complete . PHP_EOL);
@@ -85,7 +85,7 @@ class ProgressBar
         $this->progress = (string) $this;
         (new Style())->replace($this->progress);
 
-        if ($this->current + 1 > $this->maks) {
+        if ($this->current + 1 > $this->mask) {
             $complete = (string) call_user_func($this->complete);
             (new Style())->clear();
             (new Style())->replace($complete . PHP_EOL);

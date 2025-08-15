@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Collection;
 
-use Omega\Collection\Exceptions\NoModify;
+use Omega\Collection\Exceptions\ImmutableCollectionException;
 
 /**
  * @template TKey of array-key
@@ -17,20 +17,20 @@ class CollectionImmutable extends AbstractCollectionImmutable
     /**
      * {@inheritdoc}
      *
-     * @throws NoModify
+     * @throws ImmutableCollectionException
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
-        throw new NoModify();
+        throw new ImmutableCollectionException();
     }
 
     /**
      * {@inheritdoc}
      *
-     * @throws NoModify
+     * @throws ImmutableCollectionException
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
-        throw new NoModify();
+        throw new ImmutableCollectionException();
     }
 }

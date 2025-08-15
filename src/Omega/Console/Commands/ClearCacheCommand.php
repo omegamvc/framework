@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use Omega\Cache\CacheManager;
+use Omega\Cache\Exceptions\UnknownStorageDriverException;
 use Omega\Console\Command;
 use Omega\Console\Traits\CommandTrait;
 use Omega\Application\Application;
-use Omega\Template\Property;
 
+use function array_keys;
+use function is_array;
 use function Omega\Console\fail;
 use function Omega\Console\info;
 use function Omega\Console\ok;
@@ -36,7 +39,7 @@ class ClearCacheCommand extends Command
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
@@ -44,7 +47,7 @@ class ClearCacheCommand extends Command
             ],
             'options'   => [
                 '--all'     => 'Clear all registered cache driver.',
-                '--drivers' => 'Clear spesific driver name.',
+                '--drivers' => 'Clear specific driver name.',
             ],
             'relation'  => [
                 'cache:clear' => ['--all', '--drivers'],
@@ -52,6 +55,9 @@ class ClearCacheCommand extends Command
         ];
     }
 
+    /**
+     * @throws UnknownStorageDriverException
+     */
     public function clear(Application $app): int
     {
         if (false === $app->has('cache')) {
@@ -60,23 +66,23 @@ class ClearCacheCommand extends Command
             return 1;
         }
 
-        /** @var \Omega\Cache\CacheManager|null */
+        /** @var CacheManager|null $cache */
         $cache = $app['cache'];
 
-        /** @var string[]|null */
+        /** @var string[]|null $drivers */
         $drivers = null;
 
-        /** @var string[]|string|bool */
-        $user_drivers = $this->option('drivers', false);
+        /** @var string[]|string|bool $userDrivers */
+        $userDrivers = $this->option('drivers', false);
 
-        if ($this->option('all', false) && false === $user_drivers) {
+        if ($this->option('all', false) && false === $userDrivers) {
             $drivers = array_keys(
-                (fn (): array => $this->{'driver'})->call($cache) // @phpstan-ignore-line
+                (fn (): array => $this->{'driver'})->call($cache)
             );
         }
 
-        if ($user_drivers) {
-            $drivers = is_array($user_drivers) ? $user_drivers : [$user_drivers];
+        if ($userDrivers) {
+            $drivers = is_array($userDrivers) ? $userDrivers : [$userDrivers];
         }
 
         if (null === $drivers) {
@@ -88,7 +94,7 @@ class ClearCacheCommand extends Command
 
         foreach ($drivers as $driver) {
             $cache->driver($driver)->clear();
-            info("clear '{$driver}' driver.")->out(false);
+            info("clear '$driver' driver.")->out(false);
         }
 
         return 0;

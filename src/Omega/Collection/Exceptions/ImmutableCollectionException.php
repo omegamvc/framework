@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Omega\Collection\Exceptions;
 
-/**
- * @internal
- */
-final class NoModify extends \InvalidArgumentException
+use InvalidArgumentException;
+
+class ImmutableCollectionException extends InvalidArgumentException
 {
     /**
      * Creates a new Exception instance.
      */
     public function __construct()
     {
-        parent::__construct('Collection imutable can not be modify');
+        parent::__construct('Collection immutable can not be modify');
     }
 }

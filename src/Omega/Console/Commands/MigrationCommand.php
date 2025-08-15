@@ -170,7 +170,7 @@ class MigrationCommand extends Command
     public function baseMigrate(&$batch = false): Collection
     {
         $migartion_batch = $this->getMigrationTable();
-        $hights          = $migartion_batch->lenght() > 0
+        $hights          = $migartion_batch->length() > 0
             ? $migartion_batch->max() + 1
             : 0;
         $batch = false === $batch ? $hights : $batch;

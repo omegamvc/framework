@@ -11,7 +11,11 @@ use Omega\Cron\Schedule;
 use Omega\Support\Facades\Schedule as Scheduler;
 use Omega\Time\Now;
 
+use function max;
+use function microtime;
 use function Omega\Console\info;
+use function round;
+use function strlen;
 
 class CronCommand extends Command
 {
@@ -38,13 +42,13 @@ class CronCommand extends Command
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
-                'cron'      => 'Run cron job (all shadule)',
-                'cron:work' => 'Run virtual cron job in terminal (ansync)',
-                'cron:list' => 'Get list of shadule',
+                'cron'      => 'Run cron job (all schedule)',
+                'cron:work' => 'Run virtual cron job in terminal (async)',
+                'cron:list' => 'Get list of schedule',
             ],
             'options'   => [],
             'relation'  => [],
@@ -53,13 +57,13 @@ class CronCommand extends Command
 
     public function main(): int
     {
-        $watch_start = microtime(true);
+        $watchStart = microtime(true);
 
         $this->getSchedule()->execute();
 
-        $watch_end = round(microtime(true) - $watch_start, 3) * 1000;
+        $watchEnd = round(microtime(true) - $watchStart, 3) * 1000;
         info('done in')
-            ->push($watch_end . 'ms')->textGreen()
+            ->push($watchEnd . 'ms')->textGreen()
             ->out();
 
         return 0;
@@ -67,8 +71,8 @@ class CronCommand extends Command
 
     public function list(): int
     {
-        $watch_start = microtime(true);
-        $print       = new Style("\n");
+        $watchStart = microtime(true);
+        $print      = new Style("\n");
 
         $info = [];
         $max  = 0;
@@ -80,7 +84,7 @@ class CronCommand extends Command
                 'name'   => $name,
                 'animus' => $cron->isAnimusly(),
             ];
-            $max = strlen($time) > $max ? strlen($time) : $max;
+            $max = max(strlen($time), $max);
         }
         foreach ($info as $cron) {
             $print->push('#');
@@ -92,9 +96,9 @@ class CronCommand extends Command
             $print->push($cron['name'])->textYellow()->newLines();
         }
 
-        $watch_end = round(microtime(true) - $watch_start, 3) * 1000;
+        $watchEnd = round(microtime(true) - $watchStart, 3) * 1000;
         $print->newLines()->push('done in ')
-            ->push($watch_end . ' ms')->textGreen()
+            ->push($watchEnd . ' ms')->textGreen()
             ->out();
 
         return 0;
@@ -109,7 +113,7 @@ class CronCommand extends Command
             ->push('type ctrl+c to stop')->textGreen()->underline()
             ->out();
 
-        $terminal_width = $this->getWidth(34, 50);
+        $terminalWidth = $this->getWidth(34, 50);
 
         /* @phpstan-ignore-next-line */
         while (true) {
@@ -121,15 +125,15 @@ class CronCommand extends Command
                 ->push('Run cron at - ' . $time)->textDim()
                 ->push(' ' . $clock->hour . ':' . $clock->minute . ':' . $clock->second);
 
-            $watch_start = microtime(true);
+            $watchStart = microtime(true);
 
             $this->getSchedule()->execute();
 
-            $watch_end = round(microtime(true) - $watch_start, 3) * 1000;
+            $watchEnd = round(microtime(true) - $watchStart, 3) * 1000;
             $print
-                ->repeat(' ', $terminal_width - $print->length())
+                ->repeat(' ', $terminalWidth - $print->length())
                 ->push('-> ')->textDim()
-                ->push($watch_end . 'ms')->textYellow()
+                ->push($watchEnd . 'ms')->textYellow()
                 ->out()
             ;
 
@@ -138,6 +142,9 @@ class CronCommand extends Command
         }
     }
 
+    /**
+     * @return Schedule
+     */
     protected function getSchedule(): Schedule
     {
         $schedule = Scheduler::add(new Schedule());
@@ -146,6 +153,10 @@ class CronCommand extends Command
         return $schedule;
     }
 
+    /**
+     * @param Schedule $schedule
+     * @return void
+     */
     public function scheduler(Schedule $schedule): void
     {
         $schedule->call(fn () => [

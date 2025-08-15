@@ -10,12 +10,10 @@ if (!function_exists('collection')) {
      *
      * @template TKey of array-key
      * @template TValue
-     *
      * @param iterable<TKey, TValue> $collection Array collection
-     *
      * @return Collection<TKey, TValue>
      */
-    function collection($collection = []): Collection
+    function collection(iterable $collection = []): Collection
     {
         return new Collection($collection);
     }
@@ -27,12 +25,10 @@ if (!function_exists('collection_immutable')) {
      *
      * @template TKey of array-key
      * @template TValue
-     *
      * @param iterable<TKey, TValue> $collection Array collection
-     *
      * @return Collection<TKey, TValue>
      */
-    function collection_immutable($collection = []): Collection
+    function collection_immutable(iterable $collection = []): Collection
     {
         return new Collection($collection);
     }
@@ -44,14 +40,12 @@ if (!function_exists('data_get')) {
      *
      * @template TValue
      * @template TGetDefault
-     *
      * @param array<array-key, TValue> $array
      * @param array-key                $key     String of dot array key
      * @param TGetDefault              $default
-     *
      * @return TGetDefault|array<array-key, TValue>|null
      */
-    function data_get($array, $key, $default = null)
+    function data_get(array $array, int|string $key, $default = null): ?array
     {
         $segments = explode('.', (string) $key);
         foreach ($segments as $segment) {

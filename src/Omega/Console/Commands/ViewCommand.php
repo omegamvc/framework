@@ -11,11 +11,19 @@ use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Text\Str;
 use Omega\View\Templator;
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use function array_key_exists;
+use function count;
+use function fnmatch;
+use function is_file;
+use function microtime;
 use function Omega\Console\exit_prompt;
 use function Omega\Console\info;
 use function Omega\Console\ok;
 use function Omega\Console\style;
 use function Omega\Console\warn;
+use function round;
 
 /**
  * @property string|null $prefix
@@ -29,7 +37,7 @@ class ViewCommand extends Command
      *
      * @var array<int, array<string, mixed>>
      */
-    public static $command = [
+    public static array $command = [
         [
             'pattern' => 'view:cache',
             'fn'      => [ViewCommand::class, 'cache'],
@@ -54,7 +62,7 @@ class ViewCommand extends Command
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
@@ -81,9 +89,9 @@ class ViewCommand extends Command
     private function findFiles(string $directory, string $pattern): array
     {
         $files    = [];
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($directory),
-            \RecursiveIteratorIterator::SELF_FIRST
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory),
+            RecursiveIteratorIterator::SELF_FIRST
         );
 
         foreach ($iterator as $file) {
@@ -95,6 +103,9 @@ class ViewCommand extends Command
         return $files;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function cache(Templator $templator): int
     {
         $files = $this->findFiles(view_path(), $this->prefix);
@@ -103,22 +114,22 @@ class ViewCommand extends Command
         }
         info('build compiler cache')->out(false);
         $count     = 0;
-        $proggress = new ProgressBar(':progress :percent - :current', [
+        $progress = new ProgressBar(':progress :percent - :current', [
             ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], view_path(), '') : '',
         ]);
 
-        $proggress->maks = count($files);
-        $watch_start     = microtime(true);
+        $progress->mask = count($files);
+        $watch_start    = microtime(true);
         foreach ($files as $file) {
             if (is_file($file)) {
                 $filename = Str::replace($file, view_path(), '');
                 $templator->compile($filename);
                 $count++;
             }
-            $proggress->current++;
-            $time                = round(microtime(true) - $watch_start, 3) * 1000;
-            $proggress->complete = static fn (): string => (string) ok("Success, {$count} file compiled ({$time} ms).");
-            $proggress->tick();
+            $progress->current++;
+            $time               = round(microtime(true) - $watch_start, 3) * 1000;
+            $progress->complete = static fn (): string => (string) ok("Success, {$count} file compiled ({$time} ms).");
+            $progress->tick();
         }
 
         return 0;
@@ -136,20 +147,20 @@ class ViewCommand extends Command
         }
 
         $count     = 0;
-        $proggress = new ProgressBar(':progress :percent - :current', [
+        $progress = new ProgressBar(':progress :percent - :current', [
             ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], view_path(), '') : '',
         ]);
 
-        $proggress->maks = count($files);
+        $progress->mask = count($files);
         $watch_start     = microtime(true);
         foreach ($files as $file) {
             if (is_file($file)) {
                 $count += unlink($file) ? 1 : 0;
             }
-            $proggress->current++;
+            $progress->current++;
             $time                = round(microtime(true) - $watch_start, 3) * 1000;
-            $proggress->complete = static fn (): string => (string) ok("Success, {$count} cache clear ({$time} ms).");
-            $proggress->tick();
+            $progress->complete = static fn (): string => (string) ok("Success, {$count} cache clear ({$time} ms).");
+            $progress->tick();
         }
 
         return 0;
@@ -184,7 +195,7 @@ class ViewCommand extends Command
                 clearstatcache(true, $file);
                 $now = filemtime($file);
 
-                // compile only newst file
+                // compile only newest file
                 if ($now > $time) {
                     $dependency = $this->compile($templator, $file, $width);
                     foreach ($dependency as $compile => $time) {
@@ -250,19 +261,20 @@ class ViewCommand extends Command
 
     /**
      * @return array<string, int>
+     * @throws \Exception
      */
     private function compile(Templator $templator, string $file_path, int $width): array
     {
         $watch_start     = microtime(true);
         $filename        = Str::replace($file_path, view_path(), '');
         $templator->compile($filename);
-        $lenght                  = strlen($filename);
-        $excutime                = round(microtime(true) - $watch_start, 3) * 1000;
-        $excutime_length         = strlen((string) $excutime);
+        $length            = strlen($filename);
+        $executeTime       = round(microtime(true) - $watch_start, 3) * 1000;
+        $executeTimeLength = strlen((string) $executeTime);
 
         style($filename)
-            ->repeat('.', $width - $lenght - $excutime_length - 2)->textDim()
-            ->push((string) $excutime)
+            ->repeat('.', $width - $length - $executeTimeLength - 2)->textDim()
+            ->push((string) $executeTime)
             ->push('ms')->textYellow()
             ->out();
 
@@ -287,12 +299,12 @@ class ViewCommand extends Command
                 $compiled[$compile][$file] = $time;
             }
         }
-        $excutime        = round(microtime(true) - $watch_start, 3) * 1000;
-        $excutime_length = strlen((string) $excutime);
+        $executeTime        = round(microtime(true) - $watch_start, 3) * 1000;
+        $executeTimeLength = strlen((string) $executeTime);
         style('PRE-COMPILE')
             ->bold()->rawReset([Decorate::RESET])->textYellow()
-            ->repeat('.', $width - $excutime_length - 13)->textDim()
-            ->push((string) $excutime)
+            ->repeat('.', $width - $executeTimeLength - 13)->textDim()
+            ->push((string) $executeTime)
             ->push('ms')->textYellow()
             ->out();
 

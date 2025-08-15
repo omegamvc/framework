@@ -4,7 +4,33 @@ declare(strict_types=1);
 
 namespace Omega\Collection;
 
-use Omega\Collection\Interfaces\CollectionInterface;
+use ArrayIterator;
+use ReturnTypeWillChange;
+use Traversable;
+
+use function array_column;
+use function array_count_values;
+use function array_key_exists;
+use function array_key_first;
+use function array_key_last;
+use function array_keys;
+use function array_rand;
+use function array_slice;
+use function array_sum;
+use function array_values;
+use function call_user_func;
+use function count;
+use function current;
+use function in_array;
+use function is_array;
+use function is_null;
+use function is_object;
+use function json_encode;
+use function max;
+use function min;
+use function next;
+use function prev;
+use function var_dump;
 
 /**
  * @template TKey of array-key
@@ -22,7 +48,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     /**
      * @param iterable<TKey, TValue> $collection
      */
-    public function __construct($collection)
+    public function __construct(array $collection)
     {
         foreach ($collection as $key => $item) {
             $this->set($key, $item);
@@ -31,7 +57,6 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param TKey $name
-     *
      * @return TValue|null
      */
     public function __get($name)
@@ -57,13 +82,11 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @template TGetDefault
-     *
      * @param TKey             $name
      * @param TGetDefault|null $default
-     *
      * @return TValue|TGetDefault|null
      */
-    public function get($name, $default = null)
+    public function get($name, $default = null): mixed
     {
         return $this->collection[$name] ?? $default;
     }
@@ -71,7 +94,6 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     /**
      * @param TKey   $name
      * @param TValue $value
-     *
      * @return $this
      */
     protected function set($name, $value): self
@@ -85,7 +107,6 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
      * Push item (set without key).
      *
      * @param TValue $value
-     *
      * @return $this
      */
     protected function push($value): self
@@ -97,6 +118,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param TKey $key
+     * @return bool
      */
     public function has($key): bool
     {
@@ -105,6 +127,8 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param TValue $item
+     * @param bool $strict
+     * @return bool
      */
     public function contain($item, bool $strict = false): bool
     {
@@ -132,10 +156,9 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
      *
      * @param TKey      $value Pluck key target as value
      * @param TKey|null $key   Pluck key target as key
-     *
      * @return array<TKey, TValue>
      */
-    public function pluck($value, $key = null)
+    public function pluck($value, $key = null): array
     {
         $results = [];
 
@@ -154,6 +177,9 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
         return $results;
     }
 
+    /**
+     * @return int
+     */
     public function count(): int
     {
         return count($this->collection);
@@ -166,9 +192,9 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     {
         $count = 0;
         foreach ($this->collection as $key => $item) {
-            $do_somethink = call_user_func($condition, $item, $key);
+            $doSomething = call_user_func($condition, $item, $key);
 
-            $count += $do_somethink === true ? 1 : 0;
+            $count += $doSomething === true ? 1 : 0;
         }
 
         return $count;
@@ -184,15 +210,14 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param callable(TValue, TKey=): (bool|void) $callable
-     *
      * @return $this
      */
-    public function each($callable): self
+    public function each(callable $callable): self
     {
         foreach ($this->collection as $key => $item) {
-            $do_somethink = call_user_func($callable, $item, $key);
+            $doSomething = call_user_func($callable, $item, $key);
 
-            if (false === $do_somethink) {
+            if (false === $doSomething) {
                 break;
             }
         }
@@ -212,6 +237,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param callable(TValue, TKey=): bool $condition
+     * @return bool
      */
     public function some(callable $condition): bool
     {
@@ -228,6 +254,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param callable(TValue, TKey=): bool $condition
+     * @return bool
      */
     public function every(callable $condition): bool
     {
@@ -249,12 +276,10 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @template TGetDefault
-     *
      * @param TGetDefault|null $default
-     *
      * @return TValue|TGetDefault|null
      */
-    public function first($default = null)
+    public function first($default = null): mixed
     {
         $key = array_key_first($this->collection) ?? 0;
 
@@ -263,22 +288,19 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param positive-int $take
-     *
      * @return array<TKey, TValue>
      */
-    public function firsts(int $take)
+    public function firsts(int $take): array
     {
         return array_slice($this->collection, 0, (int) $take);
     }
 
     /**
      * @template TGetDefault
-     *
      * @param TGetDefault|null $default
-     *
      * @return TValue|TGetDefault|null
      */
-    public function last($default = null)
+    public function last($default = null): mixed
     {
         $key = array_key_last($this->collection);
 
@@ -287,10 +309,9 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param positive-int $take
-     *
      * @return array<TKey, TValue>
      */
-    public function lasts(int $take)
+    public function lasts(int $take): array
     {
         return array_slice($this->collection, -$take, (int) $take);
     }
@@ -298,7 +319,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     /**
      * @return TKey|null
      */
-    public function firstKey()
+    public function firstKey(): mixed
     {
         return array_key_first($this->collection);
     }
@@ -306,7 +327,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     /**
      * @return TKey|null
      */
-    public function lastKey()
+    public function lastKey(): mixed
     {
         return array_key_last($this->collection);
     }
@@ -338,7 +359,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     /**
      * @return TValue
      */
-    public function rand()
+    public function rand(): mixed
     {
         $rand = array_rand($this->collection);
 
@@ -350,7 +371,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
         return empty($this->collection);
     }
 
-    public function lenght(): int
+    public function length(): int
     {
         return count($this->collection);
     }
@@ -366,11 +387,12 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     }
 
     /**
-     * Find higest value.
+     * Find the highest value.
      *
-     * @param string|int|null $key
+     * @param int|string|null $key
+     * @return int
      */
-    public function max($key = null): int
+    public function max(int|string $key = null): int
     {
         return max(array_column($this->collection, $key));
     }
@@ -378,35 +400,33 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     /**
      * Find lowest value.
      *
-     * @param string|int|null $key
+     * @param int|string|null $key
+     * @return int
      */
-    public function min($key = null): int
+    public function min(int|string $key = null): int
     {
         return min(array_column($this->collection, $key));
     }
 
-    // array able
-
     /**
      * @param TKey $offset
      */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return $this->has($offset);
     }
 
     /**
      * @param TKey $offset
-     *
      * @return TValue|null
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    #[ReturnTypeWillChange]
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->__get($offset);
     }
 
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->set($offset, $value);
     }
@@ -416,11 +436,11 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
     }
 
     /**
-     * @return \Traversable<TKey, TValue>
+     * @return Traversable<TKey, TValue>
      */
-    public function getIterator(): \Traversable
+    public function getIterator(): Traversable
     {
-        return new \ArrayIterator($this->all());
+        return new ArrayIterator($this->all());
     }
 
     public function __clone()
@@ -430,10 +450,9 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
 
     /**
      * @param array<TKey, TValue> $collection
-     *
      * @return array<TKey, TValue>
      */
-    protected function deepClone($collection)
+    protected function deepClone(array $collection): array
     {
         $clone = [];
         foreach ($collection as $key => $value) {

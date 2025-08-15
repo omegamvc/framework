@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Omega\Console\Command;
 use Omega\Application\Application;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Config\ConfigRepository;
 
+use function file_exists;
+use function file_put_contents;
 use function Omega\Console\fail;
 use function Omega\Console\ok;
+use function unlink;
+
+use const PHP_EOL;
 
 class ConfigCommand extends Command
 {
@@ -32,7 +39,7 @@ class ConfigCommand extends Command
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
@@ -44,15 +51,19 @@ class ConfigCommand extends Command
         ];
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function main(): int
     {
         $app = Application::getInstance();
         (new ConfigProviders())->bootstrap($app);
 
         $this->clear();
-        $config        = $app->get(ConfigRepository::class)->getAll();
-        $cached_config = '<?php return ' . var_export($config, true) . ';' . PHP_EOL;
-        if (file_put_contents($app->getApplicationCachePath() . 'config.php', $cached_config)) {
+        $config       = $app->get(ConfigRepository::class)->getAll();
+        $cachedConfig = '<?php return ' . var_export($config, true) . ';' . PHP_EOL;
+        if (file_put_contents($app->getApplicationCachePath() . 'config.php', $cachedConfig)) {
             ok('Config file has successfully created.')->out();
 
             return 0;
@@ -62,6 +73,10 @@ class ConfigCommand extends Command
         return 1;
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function clear(): int
     {
         if (file_exists($file = Application::getInstance()->getApplicationCachePath() . 'config.php')) {

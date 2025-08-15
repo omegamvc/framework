@@ -11,6 +11,8 @@ use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Router\Router;
 use Omega\Text\Str;
 
+use function count;
+use function is_array;
 use function Omega\Console\style;
 
 class RouteCommand extends Command
@@ -23,7 +25,7 @@ class RouteCommand extends Command
      *
      * @var array<int, array<string, mixed>>
      */
-    public static $command = [
+    public static array $command = [
         [
             'cmd' => 'route:list',
             'fn'  => [RouteCommand::class, 'main'],
@@ -33,7 +35,7 @@ class RouteCommand extends Command
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
@@ -49,7 +51,7 @@ class RouteCommand extends Command
         $print = new Style();
         $print->tap(Alert::render()->ok('route list'));
         foreach (Router::getRoutes() as $key => $route) {
-            $method = $this->methodToStye($route['method']);
+            $method = $this->methodToStyle($route['method']);
             $name   = style($route['name'])->textWhite();
             $length = $method->length() + $name->length();
 
@@ -71,7 +73,7 @@ class RouteCommand extends Command
     /**
      * @param string|string[] $methods
      */
-    private function methodToStye($methods): Style
+    private function methodToStyle(array|string $methods): Style
     {
         if (is_array($methods)) {
             $group  = new Style();

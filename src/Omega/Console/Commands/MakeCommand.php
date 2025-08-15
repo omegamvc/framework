@@ -85,7 +85,7 @@ class MakeCommand extends Command
     {
         info('Making controller file...')->out(false);
 
-        $success = $this->makeTemplate($this->OPTION[0], [
+        $success = $this->makeTemplate($this->option[0], [
             'template_location' => __DIR__ . '/stubs/controller',
             'save_location'     => controllers_path(),
             'pattern'           => '__controller__',
@@ -107,7 +107,7 @@ class MakeCommand extends Command
     {
         info('Making view file...')->out(false);
 
-        $success = $this->makeTemplate($this->OPTION[0], [
+        $success = $this->makeTemplate($this->option[0], [
             'template_location' => __DIR__ . '/stubs/view',
             'save_location'     => view_path(),
             'pattern'           => '__view__',
@@ -129,7 +129,7 @@ class MakeCommand extends Command
     {
         info('Making service file...')->out(false);
 
-        $success = $this->makeTemplate($this->OPTION[0], [
+        $success = $this->makeTemplate($this->option[0], [
             'template_location' => __DIR__ . '/stubs/service',
             'save_location'     => services_path(),
             'pattern'           => '__service__',
@@ -150,7 +150,7 @@ class MakeCommand extends Command
     public function make_model(): int
     {
         info('Making model file...')->out(false);
-        $name           = ucfirst($this->OPTION[0]);
+        $name           = ucfirst($this->option[0]);
         $model_location = model_path() . $name . '.php';
 
         if (file_exists($model_location) && false === $this->option('force', false)) {
@@ -172,7 +172,7 @@ class MakeCommand extends Command
         $class->extend('Model');
 
         $primery_key = 'id';
-        $table_name  = $this->OPTION[0];
+        $table_name  = $this->option[0];
         if ($this->option('table-name', false)) {
             $table_name = $this->option('table-name');
             info("Getting Information from table {$table_name}.")->out(false);
@@ -235,7 +235,7 @@ class MakeCommand extends Command
     public function make_command(): int
     {
         info('Making command file...')->out(false);
-        $name    = $this->OPTION[0];
+        $name    = $this->option[0];
         $success = $this->makeTemplate($name, [
             'template_location' => __DIR__ . '/stubs/command',
             'save_location'     => commands_path(),
@@ -267,7 +267,7 @@ class MakeCommand extends Command
     {
         info('Making migration')->out(false);
 
-        $name = $this->OPTION[0] ?? false;
+        $name = $this->option[0] ?? false;
         if (false === $name) {
             warn('Table name cant be empty.')->out(false);
             do {

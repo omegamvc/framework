@@ -66,7 +66,7 @@ class SeedCommand extends Command
         }
 
         /* @var bool */
-        return (new Prompt(style('Runing seeder in production?')->textRed(), [
+        return (new Prompt(style('Running seeder in production?')->textRed(), [
             'yes' => fn () => true,
             'no'  => fn () => false,
         ], 'no'))
@@ -126,7 +126,7 @@ class SeedCommand extends Command
 
     public function make(): int
     {
-        $class = $this->OPTION[0] ?? null;
+        $class = $this->option[0] ?? null;
 
         if (null === $class) {
             warn('command make:seed require class name')->out(false);

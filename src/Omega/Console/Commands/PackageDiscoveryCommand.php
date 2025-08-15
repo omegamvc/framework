@@ -9,6 +9,8 @@ use Omega\Console\Style\Style;
 use Omega\Application\Application;
 use Omega\Support\PackageManifest;
 
+use Throwable;
+use function array_keys;
 use function Omega\Console\fail;
 use function Omega\Console\info;
 
@@ -29,11 +31,11 @@ class PackageDiscoveryCommand extends Command
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
-                'package:discovery' => 'Discovery packe in composer',
+                'package:discovery' => 'Discovery package in composer',
             ],
             'options'   => [],
             'relation'  => [],
@@ -50,13 +52,13 @@ class PackageDiscoveryCommand extends Command
             $packages = (fn () => $this->{'getPackageManifest'}())->call($package) ?? [];
             $style    = new Style();
             foreach (array_keys($packages) as $name) {
-                $lenght = $this->getWidth(40, 60) - strlen($name) - 4;
-                $style->push($name)->repeat('.', $lenght)->textDim()->push('DONE')->textGreen()->newLines();
+                $length = $this->getWidth(40, 60) - strlen($name) - 4;
+                $style->push($name)->repeat('.', $length)->textDim()->push('DONE')->textGreen()->newLines();
             }
             $style->out(false);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             fail($th->getMessage())->out(false);
-            fail('Can\'t create package mainfest cahce file.')->out();
+            fail('Can\'t create package manifest cache file.')->out();
 
             return 1;
         }

@@ -300,7 +300,7 @@ class Style
     }
 
     /**
-     * Get text lenght witout rule counted.
+     * Get text length witout rule counted.
      *
      * @return int
      */

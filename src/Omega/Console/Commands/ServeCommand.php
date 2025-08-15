@@ -8,6 +8,7 @@ use Omega\Console\Command;
 use Omega\Console\Style\Alert;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
+use function shell_exec;
 
 /**
  * @property string $port
@@ -22,7 +23,7 @@ class ServeCommand extends Command
      *
      * @var array<int, array<string, mixed>>
      */
-    public static $command = [
+    public static array $command = [
         [
             'pattern' => 'serve',
             'fn'      => [ServeCommand::class, 'main'],
@@ -36,7 +37,7 @@ class ServeCommand extends Command
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
@@ -57,7 +58,7 @@ class ServeCommand extends Command
         $port    = $this->port;
         $localIP = gethostbyname(gethostname());
 
-        $print = new Style('Server runing add:');
+        $print = new Style('Server running add:');
 
         $print
             ->newLines()
@@ -71,11 +72,11 @@ class ServeCommand extends Command
             ->newLines(2)
             ->push('ctrl+c to stop server')
             ->newLines()
-            ->tap(Alert::render()->info('server runing...'))
+            ->tap(Alert::render()->info('server running...'))
             ->out(false);
 
-        $adress = $this->expose ? '0.0.0.0' : '127.0.0.1';
+        $address = $this->expose ? '0.0.0.0' : '127.0.0.1';
 
-        shell_exec("php -S {$adress}:{$port} -t public/");
+        shell_exec("php -S {$address}:{$port} -t public/");
     }
 }

@@ -31,7 +31,7 @@ class Command implements \ArrayAccess
      *
      * @var array<int, string>
      */
-    protected $OPTION;
+    protected $option;
 
     /**
      * Base dir.
@@ -52,21 +52,21 @@ class Command implements \ArrayAccess
      *
      * @var array<string, string>
      */
-    protected $command_describes = [];
+    protected $commandDescribes = [];
 
     /**
      * Option describe for print.
      *
      * @var array<string, string>
      */
-    protected $option_describes = [];
+    protected $optionDescribes = [];
 
     /**
      * Relation between Option and Argument.
      *
      * @var array<string, array<int, string>>
      */
-    protected $command_relation = [];
+    protected $commandRelation = [];
 
     /**
      * Parse commandline.
@@ -81,7 +81,7 @@ class Command implements \ArrayAccess
         array_shift($argv);
 
         $this->CMD           = array_shift($argv) ?? '';
-        $this->OPTION        = $argv;
+        $this->option        = $argv;
         $this->option_mapper = $defaultOption;
 
         foreach ($this->option_mapper($argv) as $key => $value) {

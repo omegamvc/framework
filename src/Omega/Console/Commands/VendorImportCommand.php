@@ -9,6 +9,8 @@ use Omega\Console\Style\ProgressBar;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Container\Provider\AbstractServiceProvider;
 
+use function count;
+use function is_dir;
 use function Omega\Console\ok;
 
 /**
@@ -80,7 +82,7 @@ class VendorImportCommand extends Command
      */
     protected function importItem(array $modules): void
     {
-        $this->status->maks = count($modules);
+        $this->status->mask = count($modules);
         $current            = 0;
         $added              = 0;
 
