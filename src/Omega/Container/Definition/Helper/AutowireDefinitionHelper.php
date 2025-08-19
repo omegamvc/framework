@@ -13,6 +13,7 @@ use Omega\Container\Definition\AutowireDefinition;
  */
 class AutowireDefinitionHelper extends CreateDefinitionHelper
 {
+    /** @var string  */
     public const string DEFINITION_CLASS = AutowireDefinition::class;
 
     /**
@@ -25,7 +26,6 @@ class AutowireDefinitionHelper extends CreateDefinitionHelper
      *
      * @param string|int $parameter Parameter name of position for which the value will be given.
      * @param mixed $value Value to give to this parameter.
-     *
      * @return $this
      */
     public function constructorParameter(string|int $parameter, mixed $value) : self
@@ -49,7 +49,6 @@ class AutowireDefinitionHelper extends CreateDefinitionHelper
      * @param string $method Name of the method to call.
      * @param string|int $parameter Parameter name of position for which the value will be given.
      * @param mixed $value Value to give to this parameter.
-     *
      * @return $this
      */
     public function methodParameter(string $method, string|int $parameter, mixed $value) : self

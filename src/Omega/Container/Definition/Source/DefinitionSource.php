@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Omega\Container\Definition\Source;
 
 use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 
 /**
  * Source of definitions for entries of the container.
@@ -17,7 +17,7 @@ interface DefinitionSource
     /**
      * Returns the DI definition for the entry name.
      *
-     * @throws InvalidDefinition An invalid definition was found.
+     * @throws InvalidDefinitionException An invalid definition was found.
      */
     public function getDefinition(string $name) : ?Definition;
 

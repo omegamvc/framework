@@ -5,30 +5,27 @@ declare(strict_types=1);
 namespace Omega\Container\Definition\Resolver;
 
 use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ObjectDefinition\MethodInjection;
 use ReflectionMethod;
 use ReflectionParameter;
 
 /**
  * Resolves parameters for a function call.
- *
- * @since  4.2
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class ParameterResolver
 {
     /**
-     * @param DefinitionResolver $definitionResolver Will be used to resolve nested definitions.
+     * @param DefinitionResolverInterface $definitionResolver Will be used to resolve nested definitions.
      */
     public function __construct(
-        private DefinitionResolver $definitionResolver,
+        private DefinitionResolverInterface $definitionResolver,
     ) {
     }
 
     /**
      * @return array Parameters to use to call the function.
-     * @throws InvalidDefinition A parameter has no value defined or guessable.
+     * @throws InvalidDefinitionException A parameter has no value defined or guessable.
      */
     public function resolveParameters(
         ?MethodInjection $definition = null,
@@ -41,7 +38,7 @@ class ParameterResolver
             return $args;
         }
 
-        $definitionParameters = $definition ? $definition->getParameters() : [];
+        $definitionParameters = $definition ? $definition->parameters : [];
 
         foreach ($method->getParameters() as $index => $parameter) {
             if (array_key_exists($parameter->getName(), $parameters)) {
@@ -57,7 +54,7 @@ class ParameterResolver
                     continue;
                 }
 
-                throw new InvalidDefinition(sprintf(
+                throw new InvalidDefinitionException(sprintf(
                     'Parameter $%s of %s has no value defined or guessable',
                     $parameter->getName(),
                     $this->getFunctionName($method)
@@ -83,14 +80,14 @@ class ParameterResolver
     /**
      * Returns the default value of a function parameter.
      *
-     * @throws InvalidDefinition Can't get default values from PHP internal classes and functions
+     * @throws InvalidDefinitionException Can't get default values from PHP internal classes and functions
      */
     private function getParameterDefaultValue(ReflectionParameter $parameter, ReflectionMethod $function) : mixed
     {
         try {
             return $parameter->getDefaultValue();
         } catch (\ReflectionException) {
-            throw new InvalidDefinition(sprintf(
+            throw new InvalidDefinitionException(sprintf(
                 'The parameter "%s" of %s has no type defined or guessable. It has a default value, '
                 . 'but the default value can\'t be read through Reflection because it is a PHP internal class.',
                 $parameter->getName(),

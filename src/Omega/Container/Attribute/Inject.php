@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Omega\Container\Attribute;
 
 use Attribute;
-use Omega\Container\Definition\Exception\InvalidAttribute;
+use Omega\Container\Definition\Exceptions\InvalidAttributeException;
 
 /**
  * #[Inject] attribute.
@@ -28,7 +28,7 @@ class Inject
     private array $parameters = [];
 
     /**
-     * @throws InvalidAttribute
+     * @throws InvalidAttributeException
      */
     public function __construct(string|array|null $name = null)
     {
@@ -41,7 +41,7 @@ class Inject
         if (is_array($name)) {
             foreach ($name as $key => $value) {
                 if (! is_string($value)) {
-                    throw new InvalidAttribute(sprintf(
+                    throw new InvalidAttributeException(sprintf(
                         "#[Inject(['param' => 'value'])] expects \"value\" to be a string, %s given.",
                         json_encode($value, \JSON_THROW_ON_ERROR)
                     ));

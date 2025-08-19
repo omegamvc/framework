@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Omega\Container;
 
+use LogicException;
 use Omega\Container\Compiler\RequestedEntryHolder;
 use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
-use Omega\Container\Invoker\FactoryParameterResolver;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Invoker\Exception\InvocationException;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Invoker\FactoryParameterResolver;
 use Omega\Container\Invoker\Invoker;
 use Omega\Container\Invoker\InvokerInterface;
 use Omega\Container\Invoker\ParameterResolver\AssociativeArrayResolver;
@@ -17,21 +21,28 @@ use Omega\Container\Invoker\ParameterResolver\DefaultValueResolver;
 use Omega\Container\Invoker\ParameterResolver\NumericArrayResolver;
 use Omega\Container\Invoker\ParameterResolver\ResolverChain;
 
+use function array_key_exists;
+use function array_keys;
+use function implode;
+
 /**
  * Compiled version of the dependency injection container.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 abstract class CompiledContainer extends Container
 {
-    /**
-     * This const is overridden in child classes (compiled containers).
-     * @var array
-     */
-    protected const METHOD_MAPPING = [];
+    /** @var array This const is overridden in child classes (compiled containers). */
+    protected const array METHOD_MAPPING = [];
 
+    /** @var InvokerInterface|null  */
     private ?InvokerInterface $factoryInvoker = null;
 
+    /**
+     * @param string $id
+     * @return mixed
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws InvalidDefinitionException
+     */
     public function get(string $id) : mixed
     {
         // Try to find the entry in the singleton map
@@ -47,7 +58,13 @@ abstract class CompiledContainer extends Container
             // Check if we are already getting this entry -> circular dependency
             if (isset($this->entriesBeingResolved[$id])) {
                 $idList = implode(' -> ', [...array_keys($this->entriesBeingResolved), $id]);
-                throw new DependencyException("Circular dependency detected while trying to resolve entry '$id': Dependencies: " . $idList);
+                throw new DependencyException(
+                    sprintf(
+                        "Circular dependency detected while trying to resolve entry '%s': Dependencies: '%s'",
+                        $id,
+                        $idList
+                    )
+                );
             }
             $this->entriesBeingResolved[$id] = true;
 
@@ -77,15 +94,33 @@ abstract class CompiledContainer extends Container
         return parent::has($id);
     }
 
-    protected function setDefinition(string $name, Definition $definition) : void
+    /**
+     * @param string $name
+     * @param Definition $definition
+     * @return void
+     */
+    protected function setDefinition(string $name, Definition $definition): void
     {
-        // It needs to be forbidden because that would mean get() must go through the definitions
-        // every time, which kinds of defeats the performance gains of the compiled container
-        throw new \LogicException('You cannot set a definition at runtime on a compiled container. You can either put your definitions in a file, disable compilation or ->set() a raw value directly (PHP object, string, int, ...) instead of a PHP-DI definition.');
+        throw new LogicException(
+            'You cannot set a definition at runtime on a compiled container. ' .
+            'This would force get() to process definitions every time, ' .
+            'defeating the performance gains of the compiled container. ' .
+            'You can either put your definitions in a file, disable compilation, ' .
+            'or ->set() a raw value directly (PHP object, string, int, ...) ' .
+            'instead of a PHP-DI definition.'
+        );
     }
 
     /**
      * Invoke the given callable.
+     *
+     * @param $callable
+     * @param $entryName
+     * @param array $extraParameters
+     * @return mixed
+     * @throws InvalidDefinitionException
+     * @throws InvocationException
+     *
      */
     protected function resolveFactory($callable, $entryName, array $extraParameters = []) : mixed
     {
@@ -108,9 +143,13 @@ abstract class CompiledContainer extends Container
         try {
             return $this->factoryInvoker->call($callable, $parameters);
         } catch (NotCallableException $e) {
-            throw new InvalidDefinition("Entry \"$entryName\" cannot be resolved: factory " . $e->getMessage());
+            throw new InvalidDefinitionException(
+                "Entry \"$entryName\" cannot be resolved: factory " . $e->getMessage()
+            );
         } catch (NotEnoughParametersException $e) {
-            throw new InvalidDefinition("Entry \"$entryName\" cannot be resolved: " . $e->getMessage());
+            throw new InvalidDefinitionException(
+                "Entry \"$entryName\" cannot be resolved: " . $e->getMessage()
+            );
         }
     }
 }

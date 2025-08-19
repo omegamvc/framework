@@ -6,23 +6,27 @@ namespace Omega\Container\Definition\Resolver;
 
 use Omega\Container\Definition\Definition;
 use Omega\Container\Definition\EnvironmentVariableDefinition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use function call_user_func;
 
 /**
  * Resolves a environment variable definition to a value.
  *
- * @template-implements DefinitionResolver<EnvironmentVariableDefinition>
- *
- * @author James Harris <james.harris@icecave.com.au>
+ * @template-implements DefinitionResolverInterface<EnvironmentVariableDefinition>
  */
-class EnvironmentVariableResolver implements DefinitionResolver
+class EnvironmentVariableResolver implements DefinitionResolverInterface
 {
     /** @var callable */
     private $variableReader;
 
+    /**
+     * @param DefinitionResolverInterface $definitionResolver
+     * @param callable|null $variableReader
+     */
     public function __construct(
-        private DefinitionResolver $definitionResolver,
-        $variableReader = null,
+        private readonly DefinitionResolverInterface $definitionResolver,
+        ?callable $variableReader = null
     ) {
         $this->variableReader = $variableReader ?? [$this, 'getEnvVariable'];
     }
@@ -31,6 +35,10 @@ class EnvironmentVariableResolver implements DefinitionResolver
      * Resolve an environment variable definition to a value.
      *
      * @param EnvironmentVariableDefinition $definition
+     * @param array $parameters
+     * @return mixed
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
      */
     public function resolve(Definition $definition, array $parameters = []) : mixed
     {
@@ -41,7 +49,7 @@ class EnvironmentVariableResolver implements DefinitionResolver
         }
 
         if (!$definition->isOptional()) {
-            throw new InvalidDefinition(sprintf(
+            throw new InvalidDefinitionException(sprintf(
                 "The environment variable '%s' has not been defined",
                 $definition->getVariableName()
             ));
@@ -57,12 +65,21 @@ class EnvironmentVariableResolver implements DefinitionResolver
         return $value;
     }
 
+    /**
+     * @param Definition $definition
+     * @param array $parameters
+     * @return bool
+     */
     public function isResolvable(Definition $definition, array $parameters = []) : bool
     {
         return true;
     }
 
-    protected function getEnvVariable(string $variableName)
+    /**
+     * @param string $variableName
+     * @return array|false|mixed|string
+     */
+    protected function getEnvVariable(string $variableName): mixed
     {
         return $_ENV[$variableName] ?? $_SERVER[$variableName] ?? getenv($variableName);
     }

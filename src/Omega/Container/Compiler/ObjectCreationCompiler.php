@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace Omega\Container\Compiler;
 
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ObjectDefinition\MethodInjection;
+use Omega\Container\Exceptions\DependencyException;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
+
+use function array_key_exists;
+use function array_map;
+use function implode;
+use function sprintf;
+use function str_contains;
+use function var_export;
+
+use const PHP_VERSION_ID;
 
 /**
  * Compiles an object definition into native PHP code that, when executed, creates the object.
@@ -24,6 +35,13 @@ class ObjectCreationCompiler
     ) {
     }
 
+    /**
+     * @param ObjectDefinition $definition
+     * @return string
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws ReflectionException
+     */
     public function compile(ObjectDefinition $definition) : string
     {
         $this->assertClassIsNotAnonymous($definition);
@@ -38,12 +56,14 @@ class ObjectCreationCompiler
 
         try {
             $classReflection = new ReflectionClass($className);
-            $constructorArguments = $this->resolveParameters($definition->getConstructorInjection(), $classReflection->getConstructor());
+            $constructorArguments = $this->resolveParameters(
+                $definition->getConstructorInjection(), $classReflection->getConstructor()
+            );
             $dumpedConstructorArguments = array_map(function ($value) {
                 return $this->compiler->compileValue($value);
             }, $constructorArguments);
 
-            $code = [];
+            $code   = [];
             $code[] = sprintf(
                 '$object = new %s(%s);',
                 $className,
@@ -52,19 +72,19 @@ class ObjectCreationCompiler
 
             // Property injections
             foreach ($definition->getPropertyInjections() as $propertyInjection) {
-                $value = $propertyInjection->getValue();
+                $value = $propertyInjection->value;
                 $value = $this->compiler->compileValue($value);
 
-                $propertyClassName = $propertyInjection->getClassName() ?: $className;
-                $property = new ReflectionProperty($propertyClassName, $propertyInjection->getPropertyName());
-                if ($property->isPublic() && !(\PHP_VERSION_ID >= 80100 && $property->isReadOnly())) {
-                    $code[] = sprintf('$object->%s = %s;', $propertyInjection->getPropertyName(), $value);
+                $propertyClassName = $propertyInjection->className ?: $className;
+                $property = new ReflectionProperty($propertyClassName, $propertyInjection->propertyName);
+                if ($property->isPublic() && !(PHP_VERSION_ID >= 80100 && $property->isReadOnly())) {
+                    $code[] = sprintf('$object->%s = %s;', $propertyInjection->propertyName, $value);
                 } else {
                     // Private/protected/readonly property
                     $code[] = sprintf(
-                        '\DI\Definition\Resolver\ObjectCreator::setPrivatePropertyValue(%s, $object, \'%s\', %s);',
-                        var_export($propertyInjection->getClassName(), true),
-                        $propertyInjection->getPropertyName(),
+                        '\Omega\Container\Definition\Resolver\ObjectCreator::setPrivatePropertyValue(%s, $object, \'%s\', %s);',
+                        var_export($propertyInjection->className, true),
+                        $propertyInjection->propertyName,
                         $value
                     );
                 }
@@ -72,7 +92,7 @@ class ObjectCreationCompiler
 
             // Method injections
             foreach ($definition->getMethodInjections() as $methodInjection) {
-                $methodReflection = new ReflectionMethod($className, $methodInjection->getMethodName());
+                $methodReflection = new ReflectionMethod($className, $methodInjection->methodName);
                 $parameters = $this->resolveParameters($methodInjection, $methodReflection);
 
                 $dumpedParameters = array_map(function ($value) {
@@ -81,12 +101,12 @@ class ObjectCreationCompiler
 
                 $code[] = sprintf(
                     '$object->%s(%s);',
-                    $methodInjection->getMethodName(),
+                    $methodInjection->methodName,
                     implode(', ', $dumpedParameters)
                 );
             }
-        } catch (InvalidDefinition $e) {
-            throw InvalidDefinition::create($definition, sprintf(
+        } catch (InvalidDefinitionException $e) {
+            throw InvalidDefinitionException::create($definition, sprintf(
                 'Entry "%s" cannot be compiled: %s',
                 $definition->getName(),
                 $e->getMessage()
@@ -96,6 +116,12 @@ class ObjectCreationCompiler
         return implode("\n        ", $code);
     }
 
+    /**
+     * @param MethodInjection|null $definition
+     * @param ReflectionMethod|null $method
+     * @return array
+     * @throws InvalidDefinitionException
+     */
     public function resolveParameters(?MethodInjection $definition, ?ReflectionMethod $method) : array
     {
         $args = [];
@@ -104,7 +130,7 @@ class ObjectCreationCompiler
             return $args;
         }
 
-        $definitionParameters = $definition ? $definition->getParameters() : [];
+        $definitionParameters = $definition ? $definition->parameters : [];
 
         foreach ($method->getParameters() as $index => $parameter) {
             if (array_key_exists($index, $definitionParameters)) {
@@ -115,7 +141,7 @@ class ObjectCreationCompiler
                 $args[] = $this->getParameterDefaultValue($parameter, $method);
                 continue;
             } else {
-                throw new InvalidDefinition(sprintf(
+                throw new InvalidDefinitionException(sprintf(
                     'Parameter $%s of %s has no value defined or guessable',
                     $parameter->getName(),
                     $this->getFunctionName($method)
@@ -128,6 +154,13 @@ class ObjectCreationCompiler
         return $args;
     }
 
+    /**
+     * @param ObjectDefinition $definition
+     * @return string
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws ReflectionException
+     */
     private function compileLazyDefinition(ObjectDefinition $definition) : string
     {
         $subDefinition = clone $definition;
@@ -152,14 +185,14 @@ class ObjectCreationCompiler
     /**
      * Returns the default value of a function parameter.
      *
-     * @throws InvalidDefinition Can't get default values from PHP internal classes and functions
+     * @throws InvalidDefinitionException Can't get default values from PHP internal classes and functions
      */
     private function getParameterDefaultValue(ReflectionParameter $parameter, ReflectionMethod $function) : mixed
     {
         try {
             return $parameter->getDefaultValue();
-        } catch (\ReflectionException) {
-            throw new InvalidDefinition(sprintf(
+        } catch (ReflectionException) {
+            throw new InvalidDefinitionException(sprintf(
                 'The parameter "%s" of %s has no type defined or guessable. It has a default value, '
                 . 'but the default value can\'t be read through Reflection because it is a PHP internal class.',
                 $parameter->getName(),
@@ -168,21 +201,35 @@ class ObjectCreationCompiler
         }
     }
 
+    /**
+     * @param ReflectionMethod $method
+     * @return string
+     */
     private function getFunctionName(ReflectionMethod $method) : string
     {
         return $method->getName() . '()';
     }
 
+    /**
+     * @param ObjectDefinition $definition
+     * @return void
+     * @throws InvalidDefinitionException
+     */
     private function assertClassIsNotAnonymous(ObjectDefinition $definition) : void
     {
         if (str_contains($definition->getClassName(), '@')) {
-            throw InvalidDefinition::create($definition, sprintf(
+            throw InvalidDefinitionException::create($definition, sprintf(
                 'Entry "%s" cannot be compiled: anonymous classes cannot be compiled',
                 $definition->getName()
             ));
         }
     }
 
+    /**
+     * @param ObjectDefinition $definition
+     * @return void
+     * @throws InvalidDefinitionException
+     */
     private function assertClassIsInstantiable(ObjectDefinition $definition) : void
     {
         if ($definition->isInstantiable()) {
@@ -193,6 +240,6 @@ class ObjectCreationCompiler
             ? 'Entry "%s" cannot be compiled: the class does\'t exist'
             : 'Entry "%s" cannot be compiled: the class is not instantiable';
 
-        throw InvalidDefinition::create($definition, sprintf($message, $definition->getName()));
+        throw InvalidDefinitionException::create($definition, sprintf($message, $definition->getName()));
     }
 }

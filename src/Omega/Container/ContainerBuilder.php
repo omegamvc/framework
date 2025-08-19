@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Omega\Container;
 
+use Exception;
+use InvalidArgumentException;
+use LogicException;
 use Omega\Container\Compiler\Compiler;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\Source\AttributeBasedAutowiring;
 use Omega\Container\Definition\Source\DefinitionArray;
 use Omega\Container\Definition\Source\DefinitionFile;
@@ -15,7 +19,12 @@ use Omega\Container\Definition\Source\SourceCache;
 use Omega\Container\Definition\Source\SourceChain;
 use Omega\Container\Proxy\NativeProxyFactory;
 use Omega\Container\Proxy\ProxyFactory;
-use InvalidArgumentException;
+use function array_map;
+use function array_reverse;
+use function class_exists;
+use function is_array;
+use function is_string;
+use const PHP_VERSION_ID;
 
 /**
  * Helper to create and configure a Container.
@@ -23,45 +32,31 @@ use InvalidArgumentException;
  * With the default options, the container created is appropriate for the development environment.
  *
  * Example:
- *
+ * ```php
  *     $builder = new ContainerBuilder();
  *     $container = $builder->build();
- *
- * @api
- *
- * @since  3.2
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ * ```
  *
  * @psalm-template ContainerClass of Container
  */
 class ContainerBuilder
 {
-    /**
-     * Name of the container class, used to create the container.
-     * @var class-string<Container>
-     * @psalm-var class-string<ContainerClass>
-     */
+    /** @var class-string<Container> Name of the container class, used to create the container. */
     private string $containerClass;
 
-    /**
-     * Name of the container parent class, used on compiled container.
-     * @var class-string<Container>
-     * @psalm-var class-string<ContainerClass>
-     */
+    /** @var class-string<Container> Name of the container parent class, used on compiled container. */
     private string $containerParentClass;
 
+    /** @var bool */
     private bool $useAutowiring = true;
 
+    /** @var bool */
     private bool $useAttributes = false;
 
-    /**
-     * If set, write the proxies to disk in this directory to improve performances.
-     */
+    /** @var string|null If set, write the proxies to disk in this directory to improve performances. */
     private ?string $proxyDirectory = null;
 
-    /**
-     * If PHP-DI is wrapped in another container, this references the wrapper.
-     */
+    /** @var ContainerInterface|null If PHP-DI is wrapped in another container, this references the wrapper. */
     private ?ContainerInterface $wrapperContainer = null;
 
     /**
@@ -69,15 +64,16 @@ class ContainerBuilder
      */
     private array $definitionSources = [];
 
-    /**
-     * Whether the container has already been built.
-     */
+    /** @var bool Whether the container has already been built. */
     private bool $locked = false;
 
+    /** @var string|null  */
     private ?string $compileToDirectory = null;
 
+    /** @var bool  */
     private bool $sourceCache = false;
 
+    /** @var string  */
     protected string $sourceCacheNamespace = '';
 
     /**
@@ -94,8 +90,10 @@ class ContainerBuilder
      *
      * @return Container
      * @psalm-return ContainerClass
+     * @throws InvalidDefinitionException
+     * @throws Exception
      */
-    public function build()
+    public function build(): Container
     {
         $sources = array_reverse($this->definitionSources);
 
@@ -127,13 +125,13 @@ class ContainerBuilder
 
         if ($this->sourceCache) {
             if (!SourceCache::isSupported()) {
-                throw new \Exception('APCu is not enabled, PHP-DI cannot use it as a cache');
+                throw new Exception('APCu is not enabled, PHP-DI cannot use it as a cache');
             }
             // Wrap the source with the cache decorator
             $source = new SourceCache($source, $this->sourceCacheNamespace);
         }
 
-        $proxyFactory = (\PHP_VERSION_ID >= 80400)
+        $proxyFactory = (PHP_VERSION_ID >= 80400)
             ? new NativeProxyFactory()
             : new ProxyFactory($this->proxyDirectory);
 
@@ -178,7 +176,6 @@ class ContainerBuilder
      * @param string $containerClass Name of the compiled class. Customize only if necessary.
      * @param class-string<Container> $containerParentClass Name of the compiled container parent class. Customize only if necessary.
      * @psalm-param class-string<T> $containerParentClass
-     *
      * @psalm-return self<T>
      */
     public function enableCompilation(
@@ -200,6 +197,7 @@ class ContainerBuilder
      *
      * Enabled by default.
      *
+     * @param bool $bool
      * @return $this
      */
     public function useAutowiring(bool $bool) : self
@@ -216,6 +214,7 @@ class ContainerBuilder
      *
      * Disabled by default.
      *
+     * @param bool $bool
      * @return $this
      */
     public function useAttributes(bool $bool) : self
@@ -258,6 +257,7 @@ class ContainerBuilder
      * If PHP-DI's container is wrapped by another container, we can
      * set this so that PHP-DI will use the wrapper rather than itself for building objects.
      *
+     * @param ContainerInterface $otherContainer
      * @return $this
      */
     public function wrapContainer(ContainerInterface $otherContainer) : self
@@ -303,9 +303,8 @@ class ContainerBuilder
      * Remember to clear APCu on each deploy else your application will have a stale cache. Do not enable the cache
      * in development environment: any change you will make to the code will be ignored because of the cache.
      *
-     * @see https://php-di.org/doc/performances.html
-     *
-     * @param string $cacheNamespace use unique namespace per container when sharing a single APC memory pool to prevent cache collisions
+     * @param string $cacheNamespace use unique namespace per container when sharing a single APC memory pool
+     *                               to prevent cache collisions
      * @return $this
      */
     public function enableDefinitionCache(string $cacheNamespace = '') : self
@@ -320,16 +319,23 @@ class ContainerBuilder
 
     /**
      * Are we building a compiled container?
+     *
+     * @return bool
      */
     public function isCompilationEnabled() : bool
     {
         return (bool) $this->compileToDirectory;
     }
 
+    /**
+     * @return void
+     */
     private function ensureNotLocked() : void
     {
         if ($this->locked) {
-            throw new \LogicException('The ContainerBuilder cannot be modified after the container has been built');
+            throw new LogicException(
+                'The ContainerBuilder cannot be modified after the container has been built'
+            );
         }
     }
 }

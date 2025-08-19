@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Omega\Container;
 
+use Omega\Container\Exceptions\ContainerExceptionInterface;
+use Omega\Container\Exceptions\NotFoundExceptionInterface;
+
 /**
  * Describes the interface of a container that exposes methods to read its entries.
  */
@@ -19,7 +22,7 @@ interface ContainerInterface
      *
      * @return mixed Entry.
      */
-    public function get(string $id);
+    public function get(string $id): mixed;
 
     /**
      * Returns true if the container can return an entry for the given identifier.

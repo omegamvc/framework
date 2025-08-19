@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Source;
 
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ObjectDefinition;
 
 /**
@@ -16,7 +16,7 @@ class NoAutowiring implements Autowiring
 {
     public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition
     {
-        throw new InvalidDefinition(sprintf(
+        throw new InvalidDefinitionException(sprintf(
             'Cannot autowire entry "%s" because autowiring is disabled',
             $name
         ));

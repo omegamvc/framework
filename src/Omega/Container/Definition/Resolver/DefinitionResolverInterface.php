@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Omega\Container\Definition\Resolver;
 
 use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
-use Omega\Container\DependencyException;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+
 
 /**
  * Resolves a definition to a value.
@@ -16,17 +17,17 @@ use Omega\Container\DependencyException;
  *
  * @template T of Definition
  */
-interface DefinitionResolver
+interface DefinitionResolverInterface
 {
     /**
      * Resolve a definition to a value.
      *
      * @param Definition $definition Object that defines how the value should be obtained.
-     * @psalm-param T $definition
+     * @psalm-param T    $definition
      * @param array      $parameters Optional parameters to use to build the entry.
      * @return mixed Value obtained from the definition.
      *
-     * @throws InvalidDefinition If the definition cannot be resolved.
+     * @throws InvalidDefinitionException If the definition cannot be resolved.
      * @throws DependencyException
      */
     public function resolve(Definition $definition, array $parameters = []) : mixed;
@@ -35,7 +36,7 @@ interface DefinitionResolver
      * Check if a definition can be resolved.
      *
      * @param Definition $definition Object that defines how the value should be obtained.
-     * @psalm-param T $definition
+     * @psalm-param T    $definition
      * @param array      $parameters Optional parameters to use to build the entry.
      */
     public function isResolvable(Definition $definition, array $parameters = []) : bool;

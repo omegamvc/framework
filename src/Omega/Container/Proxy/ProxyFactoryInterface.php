@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Omega\Container\Proxy;
 
+use Closure;
+
 /**
  * Generic interface for proxy factories.
  *
@@ -17,9 +19,9 @@ interface ProxyFactoryInterface
      * the given initializer.
      *
      * @param class-string $className name of the class to be proxied
-     * @param \Closure $createFunction initializer to be passed to the proxy initializer to be passed to the proxy
+     * @param Closure $createFunction initializer to be passed to the proxy initializer to be passed to the proxy
      */
-    public function createProxy(string $className, \Closure $createFunction) : object;
+    public function createProxy(string $className, Closure $createFunction) : object;
 
     /**
      * If the proxy generator depends on a filesystem component,

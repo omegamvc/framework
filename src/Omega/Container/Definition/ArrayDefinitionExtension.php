@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition;
 
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 
 /**
  * Extends an array definition by adding new elements into it.
@@ -28,7 +28,7 @@ class ArrayDefinitionExtension extends ArrayDefinition implements ExtendsPreviou
     public function setExtendedDefinition(Definition $definition) : void
     {
         if (! $definition instanceof ArrayDefinition) {
-            throw new InvalidDefinition(sprintf(
+            throw new InvalidDefinitionException(sprintf(
                 'Definition %s tries to add array entries but the previous definition is not an array',
                 $this->getName()
             ));

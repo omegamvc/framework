@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Omega\Container\Definition\Exception;
+namespace Omega\Container\Definition\Exceptions;
 
 use Omega\Container\Definition\Definition;
 use Omega\Container\Exceptions\ContainerExceptionInterface;
@@ -12,7 +12,7 @@ use Omega\Container\Exceptions\ContainerExceptionInterface;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class InvalidDefinition extends \Exception implements ContainerExceptionInterface
+class InvalidDefinitionException extends \Exception implements ContainerExceptionInterface
 {
     public static function create(Definition $definition, string $message, ?\Exception $previous = null) : self
     {

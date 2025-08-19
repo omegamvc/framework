@@ -8,7 +8,7 @@ use Omega\Container\Definition\ArrayDefinition;
 use Omega\Container\Definition\DecoratorDefinition;
 use Omega\Container\Definition\Definition;
 use Omega\Container\Definition\EnvironmentVariableDefinition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Definition\InstanceDefinition;
 use Omega\Container\Definition\ObjectDefinition;
@@ -26,7 +26,7 @@ use Omega\Container\ContainerInterface;
  *
  * @psalm-suppress MissingTemplateParam
  */
-class ResolverDispatcher implements DefinitionResolver
+class ResolverDispatcher implements DefinitionResolverInterface
 {
     private ?ArrayResolver $arrayResolver = null;
     private ?FactoryResolver $factoryResolver = null;
@@ -48,7 +48,7 @@ class ResolverDispatcher implements DefinitionResolver
      * @param array      $parameters Optional parameters to use to build the entry.
      *
      * @return mixed Value obtained from the definition.
-     * @throws InvalidDefinition If the definition cannot be resolved.
+     * @throws InvalidDefinitionException If the definition cannot be resolved.
      */
     public function resolve(Definition $definition, array $parameters = []) : mixed
     {
@@ -79,7 +79,7 @@ class ResolverDispatcher implements DefinitionResolver
      *
      * @throws \RuntimeException No definition resolver was found for this type of definition.
      */
-    private function getDefinitionResolver(Definition $definition) : DefinitionResolver
+    private function getDefinitionResolver(Definition $definition) : DefinitionResolverInterface
     {
         switch (true) {
             case $definition instanceof ObjectDefinition:

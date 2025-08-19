@@ -8,9 +8,9 @@ use Omega\Container\Definition\ArrayDefinition;
 use Omega\Container\Definition\AutowireDefinition;
 use Omega\Container\Definition\DecoratorDefinition;
 use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
-use Omega\Container\Definition\Helper\DefinitionHelper;
+use Omega\Container\Definition\Helper\DefinitionHelperInterface;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ValueDefinition;
 
@@ -35,11 +35,11 @@ class DefinitionNormalizer
      * @param string $name The definition name.
      * @param string[] $wildcardsReplacements Replacements for wildcard definitions.
      *
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      */
     public function normalizeRootDefinition(mixed $definition, string $name, ?array $wildcardsReplacements = null) : Definition
     {
-        if ($definition instanceof DefinitionHelper) {
+        if ($definition instanceof DefinitionHelperInterface) {
             $definition = $definition->getDefinition($name);
         } elseif (is_array($definition)) {
             $definition = new ArrayDefinition($definition);
@@ -64,8 +64,8 @@ class DefinitionNormalizer
 
         try {
             $definition->replaceNestedDefinitions([$this, 'normalizeNestedDefinition']);
-        } catch (InvalidDefinition $e) {
-            throw InvalidDefinition::create($definition, sprintf(
+        } catch (InvalidDefinitionException $e) {
+            throw InvalidDefinitionException::create($definition, sprintf(
                 'Definition "%s" contains an error: %s',
                 $definition->getName(),
                 $e->getMessage()
@@ -78,13 +78,13 @@ class DefinitionNormalizer
     /**
      * Normalize a definition that is nested in another one.
      *
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      */
     public function normalizeNestedDefinition(mixed $definition) : mixed
     {
         $name = '<nested definition>';
 
-        if ($definition instanceof DefinitionHelper) {
+        if ($definition instanceof DefinitionHelperInterface) {
             $definition = $definition->getDefinition($name);
         } elseif (is_array($definition)) {
             $definition = new ArrayDefinition($definition);
@@ -93,7 +93,7 @@ class DefinitionNormalizer
         }
 
         if ($definition instanceof DecoratorDefinition) {
-            throw new InvalidDefinition('Decorators cannot be nested in another definition');
+            throw new InvalidDefinitionException('Decorators cannot be nested in another definition');
         }
 
         if ($definition instanceof AutowireDefinition) {

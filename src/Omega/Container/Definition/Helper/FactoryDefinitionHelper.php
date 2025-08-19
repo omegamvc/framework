@@ -12,23 +12,24 @@ use Omega\Container\Definition\FactoryDefinition;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class FactoryDefinitionHelper implements DefinitionHelper
+class FactoryDefinitionHelper implements DefinitionHelperInterface
 {
-    /**
-     * @var callable
-     */
+    /** @var callable*/
     private $factory;
 
+    /** @var bool  */
     private bool $decorate;
 
+    /** @var array  */
     private array $parameters = [];
 
     /**
-     * @param bool $decorate Is the factory decorating a previous definition?
+     * @param callable|array|string $factory
+     * @param bool                  $decorate Is the factory decorating a previous definition?
      */
     public function __construct(callable|array|string $factory, bool $decorate = false)
     {
-        $this->factory = $factory;
+        $this->factory  = $factory;
         $this->decorate = $decorate;
     }
 

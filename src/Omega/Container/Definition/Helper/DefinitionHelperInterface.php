@@ -11,7 +11,7 @@ use Omega\Container\Definition\Definition;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-interface DefinitionHelper
+interface DefinitionHelperInterface
 {
     /**
      * @param string $entryName Container entry name

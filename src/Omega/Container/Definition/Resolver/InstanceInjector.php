@@ -8,29 +8,32 @@ use Omega\Container\Definition\Definition;
 use Omega\Container\Definition\InstanceDefinition;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundExceptionInterface;
+use function get_class;
+use function sprintf;
 
 /**
  * Injects dependencies on an existing instance.
  *
- * @template-implements DefinitionResolver<InstanceDefinition>
- *
- * @since 5.0
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ * @template-implements DefinitionResolverInterface<InstanceDefinition>
  */
-class InstanceInjector extends ObjectCreator implements DefinitionResolver
+class InstanceInjector extends ObjectCreator implements DefinitionResolverInterface
 {
     /**
      * Injects dependencies on an existing instance.
      *
-     * @param InstanceDefinition $definition
-     * @psalm-suppress ImplementedParamTypeMismatch
+     * @param Definition $definition
+     * @param array $parameters
+     * @return object|null
+     * @throws DependencyException
      */
     public function resolve(Definition $definition, array $parameters = []) : ?object
     {
         /** @psalm-suppress InvalidCatch */
         try {
+            /** @noinspection PhpPossiblePolymorphicInvocationInspection */
             $this->injectMethodsAndProperties($definition->getInstance(), $definition->getObjectDefinition());
         } catch (NotFoundExceptionInterface $e) {
+            /** @noinspection PhpPossiblePolymorphicInvocationInspection */
             $message = sprintf(
                 'Error while injecting dependencies into %s: %s',
                 get_class($definition->getInstance()),
@@ -43,6 +46,11 @@ class InstanceInjector extends ObjectCreator implements DefinitionResolver
         return $definition;
     }
 
+    /**
+     * @param Definition $definition
+     * @param array $parameters
+     * @return bool
+     */
     public function isResolvable(Definition $definition, array $parameters = []) : bool
     {
         return true;

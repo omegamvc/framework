@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Omega\Container\Compiler;
 
+use ArrayIterator;
+use Closure;
+use Exception;
 use InvalidArgumentException;
 use Omega\Container\Definition\ArrayDefinition;
 use Omega\Container\Definition\DecoratorDefinition;
 use Omega\Container\Definition\Definition;
 use Omega\Container\Definition\EnvironmentVariableDefinition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\Reference;
@@ -19,24 +22,47 @@ use Omega\Container\Definition\ValueDefinition;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Proxy\ProxyFactoryInterface;
 use Omega\SerializableClosure\Support\ReflectionClosure;
+use ReflectionException;
+use UnitEnum;
 
+use function array_keys;
+use function array_map;
 use function chmod;
+use function class_exists;
 use function dirname;
+use function file_exists;
 use function file_put_contents;
+use function implode;
+use function is_array;
+use function is_dir;
+use function is_object;
+use function is_resource;
+use function is_string;
+use function is_writable;
+use function method_exists;
+use function mkdir;
+use function ob_get_clean;
+use function ob_start;
+use function preg_match;
 use function rename;
+use function rtrim;
 use function sprintf;
 use function tempnam;
+use function trim;
 use function unlink;
+use function var_export;
+
+use const PHP_VERSION_ID;
 
 /**
  * Compiles the container into PHP code much more optimized for performances.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class Compiler
 {
+    /** @var string */
     private string $containerClass;
 
+    /** @var string */
     private string $containerParentClass;
 
     /**
@@ -44,7 +70,7 @@ class Compiler
      *
      * Keys are strings, values are `Definition` objects or null.
      */
-    private \ArrayIterator $entriesToCompile;
+    private ArrayIterator $entriesToCompile;
 
     /**
      * Progressive counter for definitions.
@@ -76,6 +102,7 @@ class Compiler
      */
     private array $methods = [];
 
+    /** @var bool  */
     private bool $autowiringEnabled;
 
     public function __construct(
@@ -91,7 +118,14 @@ class Compiler
     /**
      * Compile the container.
      *
+     * @param DefinitionSource $definitionSource
+     * @param string $directory
+     * @param string $className
+     * @param string $parentClassName
+     * @param bool $autowiringEnabled
      * @return string The compiled container file name.
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
      */
     public function compile(
         DefinitionSource $definitionSource,
@@ -112,10 +146,15 @@ class Compiler
         // Validate that a valid class name was provided
         $validClassName = preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $className);
         if (!$validClassName) {
-            throw new InvalidArgumentException("The container cannot be compiled: `$className` is not a valid PHP class name");
+            throw new InvalidArgumentException(
+                sprintf(
+                    "The container cannot be compiled: `%s` is not a valid PHP class name",
+                    $className
+                )
+            );
         }
 
-        $this->entriesToCompile = new \ArrayIterator($definitionSource->getDefinitions());
+        $this->entriesToCompile = new ArrayIterator($definitionSource->getDefinitions());
 
         // We use an ArrayIterator so that we can keep adding new items to the list while we compile entries
         foreach ($this->entriesToCompile as $entryName => $definition) {
@@ -139,7 +178,7 @@ class Compiler
             }
             try {
                 $this->compileDefinition($entryName, $definition);
-            } catch (InvalidDefinition $e) {
+            } catch (InvalidDefinitionException $e) {
                 if ($silenceErrors) {
                     // forget the entry
                     unset($this->entryToMethodMapping[$entryName]);
@@ -164,6 +203,11 @@ class Compiler
         return $fileName;
     }
 
+    /**
+     * @param string $fileName
+     * @param string $content
+     * @return void
+     */
     private function writeFileAtomic(string $fileName, string $content) : void
     {
         $tmpFile = @tempnam(dirname($fileName), 'swap-compile');
@@ -191,9 +235,12 @@ class Compiler
     }
 
     /**
+     * @param string $entryName
+     * @param Definition $definition
      * @return string The method name
      * @throws DependencyException
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
+     * @throws Exception
      */
     private function compileDefinition(string $entryName, Definition $definition) : string
     {
@@ -217,7 +264,7 @@ class Compiler
             case $definition instanceof StringDefinition:
                 $entryName = $this->compileValue($definition->getName());
                 $expression = $this->compileValue($definition->getExpression());
-                $code = 'return \DI\Definition\StringDefinition::resolveExpression(' . $entryName . ', ' . $expression . ', $this->delegateContainer);';
+                $code = 'return \Omega\Container\Definition\StringDefinition::resolveExpression(' . $entryName . ', ' . $expression . ', $this->delegateContainer);';
                 break;
             case $definition instanceof EnvironmentVariableDefinition:
                 $variableName = $this->compileValue($definition->getVariableName());
@@ -227,7 +274,7 @@ class Compiler
                             \$value = \$_ENV[$variableName] ?? \$_SERVER[$variableName] ?? getenv($variableName);
                             if (false !== \$value) return \$value;
                             if (!$isOptional) {
-                                throw new \DI\Definition\Exception\InvalidDefinition("The environment variable '{$definition->getVariableName()}' has not been defined");
+                                throw new \Omega\Container\Definition\Exceptions\InvalidDefinitionException("The environment variable '{$definition->getVariableName()}' has not been defined");
                             }
                             return $defaultValue;
                     PHP;
@@ -235,7 +282,7 @@ class Compiler
             case $definition instanceof ArrayDefinition:
                 try {
                     $code = 'return ' . $this->compileValue($definition->getValues()) . ';';
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     throw new DependencyException(sprintf(
                         'Error while compiling %s. %s',
                         $definition->getName(),
@@ -252,9 +299,9 @@ class Compiler
                 $decoratedDefinition = $definition->getDecoratedDefinition();
                 if (! $decoratedDefinition instanceof Definition) {
                     if (! $definition->getName()) {
-                        throw new InvalidDefinition('Decorators cannot be nested in another definition');
+                        throw new InvalidDefinitionException('Decorators cannot be nested in another definition');
                     }
-                    throw new InvalidDefinition(sprintf(
+                    throw new InvalidDefinitionException(sprintf(
                         'Entry "%s" decorates nothing: no previous definition with the same name was found',
                         $definition->getName()
                     ));
@@ -271,8 +318,10 @@ class Compiler
                 // Custom error message to help debugging
                 $isInvokableClass = is_string($value) && class_exists($value) && method_exists($value, '__invoke');
                 if ($isInvokableClass && !$this->autowiringEnabled) {
-                    throw new InvalidDefinition(sprintf(
-                        'Entry "%s" cannot be compiled. Invokable classes cannot be automatically resolved if autowiring is disabled on the container, you need to enable autowiring or define the entry manually.',
+                    throw new InvalidDefinitionException(sprintf(
+                        'Entry "%s" cannot be compiled. Invokable classes cannot be automatically resolved if'.
+                        'autowiring is disabled on the container, you need to enable autowiring or define the entry'
+                        .'manually.',
                         $entryName
                     ));
                 }
@@ -292,7 +341,7 @@ class Compiler
                 break;
             default:
                 // This case should not happen (so it cannot be tested)
-                throw new \Exception('Cannot compile definition of type ' . $definition::class);
+                throw new Exception('Cannot compile definition of type ' . $definition::class);
         }
 
         $this->methods[$methodName] = $code;
@@ -300,12 +349,19 @@ class Compiler
         return $methodName;
     }
 
+    /**
+     * @param mixed $value
+     * @return string
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws ReflectionException
+     */
     public function compileValue(mixed $value) : string
     {
         // Check that the value can be compiled
         $errorMessage = $this->isCompilable($value);
         if ($errorMessage !== true) {
-            throw new InvalidDefinition($errorMessage);
+            throw new InvalidDefinitionException($errorMessage);
         }
 
         if ($value instanceof Definition) {
@@ -330,20 +386,34 @@ class Compiler
             return "[\n$value        ]";
         }
 
-        if ($value instanceof \Closure) {
+        if ($value instanceof Closure) {
             return $this->compileClosure($value);
         }
 
         return var_export($value, true);
     }
 
+    /**
+     * @param string $directory
+     * @return void
+     */
     private function createCompilationDirectory(string $directory) : void
     {
         if (!is_dir($directory) && !@mkdir($directory, 0777, true) && !is_dir($directory)) {
-            throw new InvalidArgumentException(sprintf('Compilation directory does not exist and cannot be created: %s.', $directory));
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Compilation directory does not exist and cannot be created: %s.',
+                    $directory
+                )
+            );
         }
         if (!is_writable($directory)) {
-            throw new InvalidArgumentException(sprintf('Compilation directory is not writable: %s.', $directory));
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Compilation directory is not writable: %s.',
+                    $directory
+                )
+            );
         }
     }
 
@@ -362,11 +432,11 @@ class Compiler
         if ($value instanceof Definition) {
             return true;
         }
-        if ($value instanceof \Closure) {
+        if ($value instanceof Closure) {
             return true;
         }
         /** @psalm-suppress UndefinedClass */
-        if ((\PHP_VERSION_ID >= 80100) && ($value instanceof \UnitEnum)) {
+        if ((PHP_VERSION_ID >= 80100) && ($value instanceof UnitEnum)) {
             return true;
         }
         if (is_object($value)) {
@@ -380,18 +450,23 @@ class Compiler
     }
 
     /**
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
+     * @throws ReflectionException
      */
-    private function compileClosure(\Closure $closure) : string
+    private function compileClosure(Closure $closure) : string
     {
         $reflector = new ReflectionClosure($closure);
 
         if ($reflector->getUseVariables()) {
-            throw new InvalidDefinition('Cannot compile closures which import variables using the `use` keyword');
+            throw new InvalidDefinitionException(
+                'Cannot compile closures which import variables using the `use` keyword'
+            );
         }
 
         if ($reflector->isBindingRequired() || $reflector->isScopeRequired()) {
-            throw new InvalidDefinition('Cannot compile closures which use $this or self/static/parent references');
+            throw new InvalidDefinitionException(
+                'Cannot compile closures which use $this or self/static/parent references'
+            );
         }
 
         // Force all closures to be static (add the `static` keyword), i.e. they can't use

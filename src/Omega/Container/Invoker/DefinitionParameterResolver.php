@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Omega\Container\Invoker;
 
 use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\Helper\DefinitionHelper;
-use Omega\Container\Definition\Resolver\DefinitionResolver;
+use Omega\Container\Definition\Helper\DefinitionHelperInterface;
+use Omega\Container\Definition\Resolver\DefinitionResolverInterface;
 use Omega\Container\Invoker\ParameterResolver\ParameterResolver;
 use ReflectionFunctionAbstract;
 
@@ -19,7 +19,7 @@ use ReflectionFunctionAbstract;
 class DefinitionParameterResolver implements ParameterResolver
 {
     public function __construct(
-        private DefinitionResolver $definitionResolver,
+        private DefinitionResolverInterface $definitionResolver,
     ) {
     }
 
@@ -34,7 +34,7 @@ class DefinitionParameterResolver implements ParameterResolver
         }
 
         foreach ($providedParameters as $key => $value) {
-            if ($value instanceof DefinitionHelper) {
+            if ($value instanceof DefinitionHelperInterface) {
                 $value = $value->getDefinition('');
             }
 

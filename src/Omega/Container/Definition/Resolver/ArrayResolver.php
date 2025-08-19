@@ -8,22 +8,20 @@ use Omega\Container\Definition\ArrayDefinition;
 use Omega\Container\Definition\Definition;
 use Omega\Container\Exceptions\DependencyException;
 use Exception;
+use function array_walk_recursive;
 
 /**
  * Resolves an array definition to a value.
  *
- * @template-implements DefinitionResolver<ArrayDefinition>
- *
- * @since 5.0
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ * @template-implements DefinitionResolverInterface<ArrayDefinition>
  */
-class ArrayResolver implements DefinitionResolver
+readonly class ArrayResolver implements DefinitionResolverInterface
 {
     /**
-     * @param DefinitionResolver $definitionResolver Used to resolve nested definitions.
+     * @param DefinitionResolverInterface $definitionResolver Used to resolve nested definitions.
      */
     public function __construct(
-        private DefinitionResolver $definitionResolver,
+        private DefinitionResolverInterface $definitionResolver,
     ) {
     }
 
@@ -35,6 +33,7 @@ class ArrayResolver implements DefinitionResolver
      * An array definition can contain simple values or references to other entries.
      *
      * @param ArrayDefinition $definition
+     * @throws DependencyException
      */
     public function resolve(Definition $definition, array $parameters = []) : array
     {
@@ -50,12 +49,21 @@ class ArrayResolver implements DefinitionResolver
         return $values;
     }
 
+    /**
+     * @param Definition $definition
+     * @param array $parameters
+     * @return bool
+     */
     public function isResolvable(Definition $definition, array $parameters = []) : bool
     {
         return true;
     }
 
     /**
+     * @param Definition      $value
+     * @param ArrayDefinition $definition
+     * @param int|string      $key
+     * @return mixed
      * @throws DependencyException
      */
     private function resolveDefinition(Definition $value, ArrayDefinition $definition, int|string $key) : mixed

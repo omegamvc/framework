@@ -111,13 +111,13 @@ class ObjectDefinition implements Definition
 
     public function addPropertyInjection(PropertyInjection $propertyInjection) : void
     {
-        $className = $propertyInjection->getClassName();
+        $className = $propertyInjection->className;
         if ($className) {
             // Index with the class name to avoid collisions between parent and
             // child private properties with the same name
-            $key = $className . '::' . $propertyInjection->getPropertyName();
+            $key = $className . '::' . $propertyInjection->propertyName;
         } else {
-            $key = $propertyInjection->getPropertyName();
+            $key = $propertyInjection->propertyName;
         }
 
         $this->propertyInjections[$key] = $propertyInjection;
@@ -139,7 +139,7 @@ class ObjectDefinition implements Definition
 
     public function addMethodInjection(MethodInjection $methodInjection) : void
     {
-        $method = $methodInjection->getMethodName();
+        $method = $methodInjection->methodName;
         if (! isset($this->methodInjections[$method])) {
             $this->methodInjections[$method] = [];
         }
@@ -148,7 +148,7 @@ class ObjectDefinition implements Definition
 
     public function completeFirstMethodInjection(MethodInjection $injection) : void
     {
-        $method = $injection->getMethodName();
+        $method = $injection->methodName;
 
         if (isset($this->methodInjections[$method][0])) {
             // Merge

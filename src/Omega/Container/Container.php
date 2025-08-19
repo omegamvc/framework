@@ -7,13 +7,14 @@ namespace Omega\Container;
 use ArrayAccess;
 use Closure;
 use Exception;
+use InvalidArgumentException;
 use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
-use Omega\Container\Definition\Helper\DefinitionHelper;
+use Omega\Container\Definition\Helper\DefinitionHelperInterface;
 use Omega\Container\Definition\InstanceDefinition;
 use Omega\Container\Definition\ObjectDefinition;
-use Omega\Container\Definition\Resolver\DefinitionResolver;
+use Omega\Container\Definition\Resolver\DefinitionResolverInterface;
 use Omega\Container\Definition\Resolver\ResolverDispatcher;
 use Omega\Container\Definition\Source\DefinitionArray;
 use Omega\Container\Definition\Source\MutableDefinitionSource;
@@ -26,10 +27,6 @@ use Omega\Container\Invoker\DefinitionParameterResolver;
 use Omega\Container\Invoker\Exception\InvocationException;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
-use Omega\Container\Proxy\NativeProxyFactory;
-use Omega\Container\Proxy\ProxyFactory;
-use Omega\Container\Proxy\ProxyFactoryInterface;
-use InvalidArgumentException;
 use Omega\Container\Invoker\Invoker;
 use Omega\Container\Invoker\InvokerInterface;
 use Omega\Container\Invoker\ParameterResolver\AssociativeArrayResolver;
@@ -37,6 +34,9 @@ use Omega\Container\Invoker\ParameterResolver\Container\TypeHintContainerResolve
 use Omega\Container\Invoker\ParameterResolver\DefaultValueResolver;
 use Omega\Container\Invoker\ParameterResolver\NumericArrayResolver;
 use Omega\Container\Invoker\ParameterResolver\ResolverChain;
+use Omega\Container\Proxy\NativeProxyFactory;
+use Omega\Container\Proxy\ProxyFactory;
+use Omega\Container\Proxy\ProxyFactoryInterface;
 use ReturnTypeWillChange;
 
 use function array_key_exists;
@@ -72,8 +72,8 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
     /** @var array|MutableDefinitionSource|SourceChain */
     private MutableDefinitionSource|array|SourceChain $definitionSource;
 
-    /** @var DefinitionResolver|ResolverDispatcher */
-    private DefinitionResolver|ResolverDispatcher $definitionResolver;
+    /** @var DefinitionResolverInterface|ResolverDispatcher */
+    private DefinitionResolverInterface|ResolverDispatcher $definitionResolver;
 
     /**  @var array<Definition|null> Map of definitions that are already fetched (local cache). */
     private array $fetchedDefinitions = [];
@@ -156,7 +156,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      * @param string|class-string<T> $id Entry name or a class name.
      * @return mixed|T
      * @throws DependencyException Error while resolving the entry.
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      * @throws NotFoundException No entry found for the given name.
      */
     public function get(string $id) : mixed
@@ -183,7 +183,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
     /**
      * @param string $name
      * @return Definition|null
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      */
     private function getDefinition(string $name) : ?Definition
     {
@@ -212,7 +212,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      * @return mixed|T
      * @throws InvalidArgumentException The name parameter must be of type string.
      * @throws DependencyException Error while resolving the entry.
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      * @throws NotFoundException No entry found for the given name.
      */
     public function make(string $name, array $parameters = []) : mixed
@@ -235,7 +235,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
     /**
      * @param string $id
      * @return bool
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      */
     public function has(string $id) : bool
     {
@@ -260,7 +260,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      * @param object|T $instance Object to perform injection upon
      * @return object|T $instance Returns the same instance
      * @throws InvalidArgumentException
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      */
     public function injectOn(object $instance) : object
     {
@@ -306,11 +306,11 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      * Define an object or a value in the container.
      *
      * @param string $name Entry name
-     * @param mixed|DefinitionHelper $value Value, use definition helpers to define objects
+     * @param mixed|DefinitionHelperInterface $value Value, use definition helpers to define objects
      */
     public function set(string $name, mixed $value) : void
     {
-        if ($value instanceof DefinitionHelper) {
+        if ($value instanceof DefinitionHelperInterface) {
             $value = $value->getDefinition($name);
         } elseif ($value instanceof Closure) {
             $value = new FactoryDefinition($name, $value);
@@ -347,7 +347,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      *
      * @param string $name Entry name
      *
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     public function debugEntry(string $name) : string
@@ -397,7 +397,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      * @param array $parameters
      * @return mixed
      * @throws DependencyException Error while resolving the entry.
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      */
     private function resolveDefinition(Definition $definition, array $parameters = []) : mixed
     {
@@ -518,7 +518,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      *
      * @param string $offset
      * @return bool
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -531,7 +531,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      * @param string|class-string<mixed> $offset entry name or a class name
      * @return mixed
      * @throws DependencyException
-     * @throws InvalidDefinition
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     #[ReturnTypeWillChange]

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Source;
 
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ObjectDefinition;
 
 /**
@@ -17,7 +17,7 @@ interface Autowiring
     /**
      * Autowire the given definition.
      *
-     * @throws InvalidDefinition An invalid definition was found.
+     * @throws InvalidDefinitionException An invalid definition was found.
      */
     public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition;
 }

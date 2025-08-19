@@ -4,37 +4,39 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Helper;
 
-use Omega\Container\Definition\Exception\InvalidDefinition;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ObjectDefinition\MethodInjection;
 use Omega\Container\Definition\ObjectDefinition\PropertyInjection;
+use ReflectionException;
+use ReflectionParameter;
+
+use function is_string;
+use function sprintf;
 
 /**
  * Helps to define how to create an instance of a class.
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class CreateDefinitionHelper implements DefinitionHelper
+class CreateDefinitionHelper implements DefinitionHelperInterface
 {
-    private const DEFINITION_CLASS = ObjectDefinition::class;
+    /** @var string  */
+    private const string DEFINITION_CLASS = ObjectDefinition::class;
 
+    /** @var string|null  */
     private ?string $className;
 
+    /** @var bool|null  */
     private ?bool $lazy = null;
 
-    /**
-     * Array of constructor parameters.
-     */
+    /** @var array Array of constructor parameters. */
     protected array $constructor = [];
 
-    /**
-     * Array of properties and their value.
-     */
+    /** @var array Array of properties and their value. */
     private array $properties = [];
 
-    /**
-     * Array of methods and their parameters.
-     */
+    /** @var array Array of methods and their parameters. */
     protected array $methods = [];
 
     /**
@@ -69,7 +71,6 @@ class CreateDefinitionHelper implements DefinitionHelper
      *     ->constructor($param1, $param2, $param3)
      *
      * @param mixed ...$parameters Parameters to use for calling the constructor of the class.
-     *
      * @return $this
      */
     public function constructor(mixed ...$parameters) : self
@@ -84,7 +85,6 @@ class CreateDefinitionHelper implements DefinitionHelper
      *
      * @param string $property Entry in which to inject the value.
      * @param mixed  $value    Value to inject in the property.
-     *
      * @return $this
      */
     public function property(string $property, mixed $value) : self
@@ -105,7 +105,6 @@ class CreateDefinitionHelper implements DefinitionHelper
      *
      * @param string $method       Name of the method to call.
      * @param mixed ...$parameters Parameters to use for calling the method.
-     *
      * @return $this
      */
     public function method(string $method, mixed ...$parameters) : self
@@ -119,10 +118,14 @@ class CreateDefinitionHelper implements DefinitionHelper
         return $this;
     }
 
+    /**
+     * @param string $entryName
+     * @return ObjectDefinition
+     * @throws InvalidDefinitionException
+     */
     public function getDefinition(string $entryName) : ObjectDefinition
     {
         $class = $this::DEFINITION_CLASS;
-        /** @var ObjectDefinition $definition */
         $definition = new $class($entryName, $this->className);
 
         if ($this->lazy !== null) {
@@ -161,7 +164,11 @@ class CreateDefinitionHelper implements DefinitionHelper
      *
      * This is necessary so that merging definitions between sources is possible.
      *
-     * @throws InvalidDefinition
+     * @param ObjectDefinition $definition
+     * @param string $method
+     * @param array $parameters
+     * @return array
+     * @throws InvalidDefinitionException
      */
     private function fixParameters(ObjectDefinition $definition, string $method, array $parameters) : array
     {
@@ -173,9 +180,16 @@ class CreateDefinitionHelper implements DefinitionHelper
                 $callable = [$definition->getClassName(), $method];
 
                 try {
-                    $reflectionParameter = new \ReflectionParameter($callable, $index);
-                } catch (\ReflectionException $e) {
-                    throw InvalidDefinition::create($definition, sprintf("Parameter with name '%s' could not be found. %s.", $index, $e->getMessage()));
+                    $reflectionParameter = new ReflectionParameter($callable, $index);
+                } catch (ReflectionException $e) {
+                    throw InvalidDefinitionException::create(
+                        $definition,
+                        sprintf(
+                            "Parameter with name '%s' could not be found. %s.",
+                            $index,
+                            $e->getMessage()
+                        )
+                    );
                 }
 
                 $index = $reflectionParameter->getPosition();

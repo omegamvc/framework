@@ -6,7 +6,7 @@ namespace Omega\Container\Definition\Source;
 
 use Omega\Container\Attribute\Inject;
 use Omega\Container\Attribute\Injectable;
-use Omega\Container\Definition\Exception\InvalidAttribute;
+use Omega\Container\Definition\Exceptions\InvalidAttributeException;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ObjectDefinition\MethodInjection;
 use Omega\Container\Definition\ObjectDefinition\PropertyInjection;
@@ -29,7 +29,7 @@ use Throwable;
 class AttributeBasedAutowiring implements DefinitionSource, Autowiring
 {
     /**
-     * @throws InvalidAttribute
+     * @throws InvalidAttributeException
      */
     public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition
     {
@@ -55,7 +55,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
     }
 
     /**
-     * @throws InvalidAttribute
+     * @throws InvalidAttributeException
      * @throws InvalidArgumentException The class doesn't exist
      */
     public function getDefinition(string $name) : ?ObjectDefinition
@@ -90,7 +90,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
     }
 
     /**
-     * @throws InvalidAttribute
+     * @throws InvalidAttributeException
      */
     private function readProperty(ReflectionProperty $property, ObjectDefinition $definition, ?string $classname = null) : void
     {
@@ -107,7 +107,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
             /** @var Inject $inject */
             $inject = $attribute->newInstance();
         } catch (Throwable $e) {
-            throw new InvalidAttribute(sprintf(
+            throw new InvalidAttributeException(sprintf(
                 '#[Inject] annotation on property %s::%s is malformed. %s',
                 $property->getDeclaringClass()->getName(),
                 $property->getName(),
@@ -122,7 +122,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
         $propertyType = $property->getType();
         if ($entryName === null && $propertyType instanceof ReflectionNamedType) {
             if (! class_exists($propertyType->getName()) && ! interface_exists($propertyType->getName())) {
-                throw new InvalidAttribute(sprintf(
+                throw new InvalidAttributeException(sprintf(
                     '#[Inject] found on property %s::%s but unable to guess what to inject, the type of the property does not look like a valid class or interface name',
                     $property->getDeclaringClass()->getName(),
                     $property->getName()
@@ -132,7 +132,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
         }
 
         if ($entryName === null) {
-            throw new InvalidAttribute(sprintf(
+            throw new InvalidAttributeException(sprintf(
                 '#[Inject] found on property %s::%s but unable to guess what to inject, please add a type to the property',
                 $property->getDeclaringClass()->getName(),
                 $property->getName()
@@ -238,7 +238,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
     }
 
     /**
-     * @throws InvalidAttribute
+     * @throws InvalidAttributeException
      */
     private function readInjectableAttribute(ReflectionClass $class, ObjectDefinition $definition) : void
     {
@@ -249,7 +249,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
             }
             $attribute = $attribute->newInstance();
         } catch (Throwable $e) {
-            throw new InvalidAttribute(sprintf(
+            throw new InvalidAttributeException(sprintf(
                 'Error while reading #[Injectable] on %s: %s',
                 $class->getName(),
                 $e->getMessage()
