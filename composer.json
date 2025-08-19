@@ -18,7 +18,6 @@
         "ext-mbstring": "*",
         "ext-openssl": "*",
         "php-di/php-di": "^7.0.11",
-        "friendsofphp/proxy-manager-lts": "^1.0",
         "omegamvc/serializable-closure":  "^2.0.0",
         "omegamvc/validator": "^2.0.0"
     },
