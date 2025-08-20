@@ -16,8 +16,6 @@ use function sprintf;
 
 /**
  * Helps to define how to create an instance of a class.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class CreateDefinitionHelper implements DefinitionHelperInterface
 {

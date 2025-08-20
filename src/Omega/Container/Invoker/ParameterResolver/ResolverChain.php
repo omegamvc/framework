@@ -3,22 +3,33 @@
 namespace Omega\Container\Invoker\ParameterResolver;
 
 use ReflectionFunctionAbstract;
+use function array_diff_key;
+use function array_unshift;
 
 /**
  * Dispatches the call to other resolvers until all parameters are resolved.
  *
  * Chain of responsibility pattern.
  */
-class ResolverChain implements ParameterResolver
+class ResolverChain implements ParameterResolverInterface
 {
-    /** @var ParameterResolver[] */
-    private $resolvers;
+    /** @var ParameterResolverInterface[] */
+    private array $resolvers;
 
+    /**
+     * @param array $resolvers
+     */
     public function __construct(array $resolvers = [])
     {
         $this->resolvers = $resolvers;
     }
 
+    /**
+     * @param ReflectionFunctionAbstract $reflection
+     * @param array $providedParameters
+     * @param array $resolvedParameters
+     * @return array
+     */
     public function getParameters(
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,
@@ -45,16 +56,22 @@ class ResolverChain implements ParameterResolver
 
     /**
      * Push a parameter resolver after the ones already registered.
+     *
+     * @param ParameterResolverInterface $resolver
+     * @return void
      */
-    public function appendResolver(ParameterResolver $resolver): void
+    public function appendResolver(ParameterResolverInterface $resolver): void
     {
         $this->resolvers[] = $resolver;
     }
 
     /**
      * Insert a parameter resolver before the ones already registered.
+     *
+     * @param ParameterResolverInterface $resolver
+     * @return void
      */
-    public function prependResolver(ParameterResolver $resolver): void
+    public function prependResolver(ParameterResolverInterface $resolver): void
     {
         array_unshift($this->resolvers, $resolver);
     }

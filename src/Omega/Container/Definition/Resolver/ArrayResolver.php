@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Omega\Container\Definition\Resolver;
 
 use Omega\Container\Definition\ArrayDefinition;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Exceptions\DependencyException;
 use Exception;
+
+
 use function array_walk_recursive;
 
 /**
@@ -35,13 +37,13 @@ readonly class ArrayResolver implements DefinitionResolverInterface
      * @param ArrayDefinition $definition
      * @throws DependencyException
      */
-    public function resolve(Definition $definition, array $parameters = []) : array
+    public function resolve(DefinitionInterface $definition, array $parameters = []) : array
     {
         $values = $definition->getValues();
 
         // Resolve nested definitions
         array_walk_recursive($values, function (& $value, $key) use ($definition) {
-            if ($value instanceof Definition) {
+            if ($value instanceof DefinitionInterface) {
                 $value = $this->resolveDefinition($value, $definition, $key);
             }
         });
@@ -50,23 +52,23 @@ readonly class ArrayResolver implements DefinitionResolverInterface
     }
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(Definition $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
     {
         return true;
     }
 
     /**
-     * @param Definition      $value
+     * @param DefinitionInterface      $value
      * @param ArrayDefinition $definition
      * @param int|string      $key
      * @return mixed
      * @throws DependencyException
      */
-    private function resolveDefinition(Definition $value, ArrayDefinition $definition, int|string $key) : mixed
+    private function resolveDefinition(DefinitionInterface $value, ArrayDefinition $definition, int|string $key) : mixed
     {
         try {
             return $this->definitionResolver->resolve($value);

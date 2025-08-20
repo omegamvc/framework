@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Resolver;
 
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\EnvironmentVariableDefinition;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
+
 use function call_user_func;
 
 /**
@@ -40,25 +41,25 @@ class EnvironmentVariableResolver implements DefinitionResolverInterface
      * @throws InvalidDefinitionException
      * @throws DependencyException
      */
-    public function resolve(Definition $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
     {
-        $value = call_user_func($this->variableReader, $definition->getVariableName());
+        $value = call_user_func($this->variableReader, $definition->variableName);
 
         if (false !== $value) {
             return $value;
         }
 
-        if (!$definition->isOptional()) {
+        if (!$definition->isOptional) {
             throw new InvalidDefinitionException(sprintf(
                 "The environment variable '%s' has not been defined",
-                $definition->getVariableName()
+                $definition->variableName
             ));
         }
 
-        $value = $definition->getDefaultValue();
+        $value = $definition->defaultValue;
 
         // Nested definition
-        if ($value instanceof Definition) {
+        if ($value instanceof DefinitionInterface) {
             return $this->definitionResolver->resolve($value);
         }
 
@@ -66,11 +67,11 @@ class EnvironmentVariableResolver implements DefinitionResolverInterface
     }
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(Definition $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
     {
         return true;
     }

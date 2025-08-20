@@ -21,5 +21,5 @@ interface InvokerInterface
      * @throws NotCallableException
      * @throws NotEnoughParametersException
      */
-    public function call($callable, array $parameters = []);
+    public function call($callable, array $parameters = []): mixed;
 }

@@ -3,6 +3,8 @@
 namespace Omega\Container\Invoker\ParameterResolver;
 
 use ReflectionFunctionAbstract;
+use function array_diff_key;
+use function array_key_exists;
 
 /**
  * Tries to map an associative array (string-indexed) to the parameter names.
@@ -12,7 +14,7 @@ use ReflectionFunctionAbstract;
  *
  * Parameters that are not indexed by a string are ignored.
  */
-class AssociativeArrayResolver implements ParameterResolver
+class AssociativeArrayResolver implements ParameterResolverInterface
 {
     public function getParameters(
         ReflectionFunctionAbstract $reflection,

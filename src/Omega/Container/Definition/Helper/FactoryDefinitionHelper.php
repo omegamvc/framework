@@ -9,8 +9,6 @@ use Omega\Container\Definition\FactoryDefinition;
 
 /**
  * Helps to define how to create an instance of a class using a factory (callable).
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class FactoryDefinitionHelper implements DefinitionHelperInterface
 {

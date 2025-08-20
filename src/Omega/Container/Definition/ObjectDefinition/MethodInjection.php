@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\ObjectDefinition;
 
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 
 use function array_map;
 use function sprintf;
 
 /**
  * Describe an injection in an object method.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class MethodInjection implements Definition
+class MethodInjection implements DefinitionInterface
 {
     /**
      * @param string $methodName

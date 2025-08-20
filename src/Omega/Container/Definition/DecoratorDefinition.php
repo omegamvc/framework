@@ -6,29 +6,41 @@ namespace Omega\Container\Definition;
 
 /**
  * Factory that decorates a sub-definition.
- *
- * @since 5.0
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class DecoratorDefinition extends FactoryDefinition implements Definition, ExtendsPreviousDefinition
+class DecoratorDefinition extends FactoryDefinition implements DefinitionInterface, ExtendsPreviousDefinitionInterface
 {
-    private ?Definition $decorated = null;
+    /** @var DefinitionInterface|null */
+    private ?DefinitionInterface $decorated = null;
 
-    public function setExtendedDefinition(Definition $definition) : void
+    /**
+     * @param DefinitionInterface $definition
+     * @return void
+     */
+    public function setExtendedDefinition(DefinitionInterface $definition) : void
     {
         $this->decorated = $definition;
     }
 
-    public function getDecoratedDefinition() : ?Definition
+    /**
+     * @return DefinitionInterface|null
+     */
+    public function getDecoratedDefinition() : ?DefinitionInterface
     {
         return $this->decorated;
     }
 
+    /**
+     * @param callable $replacer
+     * @return void
+     */
     public function replaceNestedDefinitions(callable $replacer) : void
     {
         // no nested definitions
     }
 
+    /**
+     * @return string
+     */
     public function __toString() : string
     {
         return 'Decorate(' . $this->getName() . ')';

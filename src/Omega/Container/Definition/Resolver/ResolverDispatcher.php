@@ -6,25 +6,24 @@ namespace Omega\Container\Definition\Resolver;
 
 use Omega\Container\Definition\ArrayDefinition;
 use Omega\Container\Definition\DecoratorDefinition;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\EnvironmentVariableDefinition;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Definition\InstanceDefinition;
 use Omega\Container\Definition\ObjectDefinition;
-use Omega\Container\Definition\SelfResolvingDefinition;
+use Omega\Container\Definition\SelfResolvingDefinitionInterface;
+use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Proxy\ProxyFactoryInterface;
 use Omega\Container\ContainerInterface;
+use RuntimeException;
+
+use function sprintf;
 
 /**
  * Dispatches to more specific resolvers.
  *
  * Dynamic dispatch pattern.
- *
- * @since 5.0
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
- *
- * @psalm-suppress MissingTemplateParam
  */
 class ResolverDispatcher implements DefinitionResolverInterface
 {
@@ -36,24 +35,24 @@ class ResolverDispatcher implements DefinitionResolverInterface
     private ?EnvironmentVariableResolver $envVariableResolver = null;
 
     public function __construct(
-        private ContainerInterface $container,
-        private ProxyFactoryInterface $proxyFactory,
+        private readonly ContainerInterface    $container,
+        private readonly ProxyFactoryInterface $proxyFactory,
     ) {
     }
 
     /**
      * Resolve a definition to a value.
      *
-     * @param Definition $definition Object that defines how the value should be obtained.
+     * @param DefinitionInterface $definition Object that defines how the value should be obtained.
      * @param array      $parameters Optional parameters to use to build the entry.
-     *
      * @return mixed Value obtained from the definition.
      * @throws InvalidDefinitionException If the definition cannot be resolved.
+     * @throws DependencyException
      */
-    public function resolve(Definition $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
     {
         // Special case, tested early for speed
-        if ($definition instanceof SelfResolvingDefinition) {
+        if ($definition instanceof SelfResolvingDefinitionInterface) {
             return $definition->resolve($this->container);
         }
 
@@ -62,10 +61,10 @@ class ResolverDispatcher implements DefinitionResolverInterface
         return $definitionResolver->resolve($definition, $parameters);
     }
 
-    public function isResolvable(Definition $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
     {
         // Special case, tested early for speed
-        if ($definition instanceof SelfResolvingDefinition) {
+        if ($definition instanceof SelfResolvingDefinitionInterface) {
             return $definition->isResolvable($this->container);
         }
 
@@ -77,9 +76,9 @@ class ResolverDispatcher implements DefinitionResolverInterface
     /**
      * Returns a resolver capable of handling the given definition.
      *
-     * @throws \RuntimeException No definition resolver was found for this type of definition.
+     * @throws RuntimeException No definition resolver was found for this type of definition.
      */
-    private function getDefinitionResolver(Definition $definition) : DefinitionResolverInterface
+    private function getDefinitionResolver(DefinitionInterface $definition) : DefinitionResolverInterface
     {
         switch (true) {
             case $definition instanceof ObjectDefinition:
@@ -119,7 +118,12 @@ class ResolverDispatcher implements DefinitionResolverInterface
 
                 return $this->instanceResolver;
             default:
-                throw new \RuntimeException('No definition resolver was configured for definition of type ' . $definition::class);
+                throw new RuntimeException(
+                    sprintf(
+                        "No definition resolver was configured for definition of type '%s'",
+                        $definition::class
+                    )
+                );
         }
     }
 }

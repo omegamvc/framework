@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace Omega\Container\Attribute;
 
 use Attribute;
+use JsonException;
 use Omega\Container\Definition\Exceptions\InvalidAttributeException;
+use function is_array;
+use function is_string;
+use function json_encode;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * #[Inject] attribute.
@@ -18,7 +23,11 @@ class Inject
     /**
      * Entry name.
      */
-    private ?string $name = null;
+    public ?string $name = null {
+        get {
+            return $this->name;
+        }
+    }
 
     /**
      * Parameters, indexed by the parameter number (index) or name.
@@ -29,6 +38,7 @@ class Inject
 
     /**
      * @throws InvalidAttributeException
+     * @throws JsonException
      */
     public function __construct(string|array|null $name = null)
     {
@@ -40,24 +50,16 @@ class Inject
         // #[Inject([...])] on a method
         if (is_array($name)) {
             foreach ($name as $key => $value) {
-                if (! is_string($value)) {
+                if (!is_string($value)) {
                     throw new InvalidAttributeException(sprintf(
                         "#[Inject(['param' => 'value'])] expects \"value\" to be a string, %s given.",
-                        json_encode($value, \JSON_THROW_ON_ERROR)
+                        json_encode($value, JSON_THROW_ON_ERROR)
                     ));
                 }
 
                 $this->parameters[$key] = $value;
             }
         }
-    }
-
-    /**
-     * @return string|null Name of the entry to inject
-     */
-    public function getName() : ?string
-    {
-        return $this->name;
     }
 
     /**

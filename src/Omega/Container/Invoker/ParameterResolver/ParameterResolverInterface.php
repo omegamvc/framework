@@ -7,7 +7,7 @@ use ReflectionFunctionAbstract;
 /**
  * Resolves the parameters to use to call the callable.
  */
-interface ParameterResolver
+interface ParameterResolverInterface
 {
     /**
      * Resolves the parameters to use to call the callable.
@@ -26,5 +26,5 @@ interface ParameterResolver
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,
         array $resolvedParameters
-    );
+    ): array;
 }

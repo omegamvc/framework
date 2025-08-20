@@ -3,15 +3,27 @@
 namespace Omega\Container\Invoker;
 
 use Omega\Container\ContainerInterface;
+use Omega\Container\Exceptions\ContainerExceptionInterface;
+use Omega\Container\Exceptions\NotFoundExceptionInterface;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Container\Invoker\ParameterResolver\AssociativeArrayResolver;
 use Omega\Container\Invoker\ParameterResolver\DefaultValueResolver;
 use Omega\Container\Invoker\ParameterResolver\NumericArrayResolver;
-use Omega\Container\Invoker\ParameterResolver\ParameterResolver;
+use Omega\Container\Invoker\ParameterResolver\ParameterResolverInterface;
 use Omega\Container\Invoker\ParameterResolver\ResolverChain;
 use Omega\Container\Invoker\Reflection\CallableReflection;
+use ReflectionException;
 use ReflectionParameter;
+use function array_diff_key;
+use function assert;
+use function call_user_func_array;
+use function get_class;
+use function is_callable;
+use function is_object;
+use function ksort;
+use function reset;
+use function var_export;
 
 /**
  * Invoke a callable.
@@ -19,15 +31,31 @@ use ReflectionParameter;
 class Invoker implements InvokerInterface
 {
     /** @var CallableResolver|null */
-    private $callableResolver;
+    private ?CallableResolver $callableResolver {
+        get {
+            return $this->callableResolver;
+        }
+    }
 
-    /** @var ParameterResolver */
-    private $parameterResolver;
+    /** @var ParameterResolverInterface */
+    private ParameterResolverInterface $parameterResolver {
+        get {
+            return $this->parameterResolver;
+        }
+    }
 
     /** @var ContainerInterface|null */
-    private $container;
+    private ?ContainerInterface $container {
+        get {
+            return $this->container;
+        }
+    }
 
-    public function __construct(?ParameterResolver $parameterResolver = null, ?ContainerInterface $container = null)
+    /**
+     * @param ParameterResolverInterface|null $parameterResolver
+     * @param ContainerInterface|null $container
+     */
+    public function __construct(?ParameterResolverInterface $parameterResolver = null, ?ContainerInterface $container = null)
     {
         $this->parameterResolver = $parameterResolver ?: $this->createParameterResolver();
         $this->container = $container;
@@ -39,14 +67,20 @@ class Invoker implements InvokerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
-    public function call($callable, array $parameters = [])
+    public function call($callable, array $parameters = []): mixed
     {
         if ($this->callableResolver) {
             $callable = $this->callableResolver->resolve($callable);
         }
 
-        if (! is_callable($callable)) {
+        if (!is_callable($callable)) {
             throw new NotCallableException(sprintf(
                 '%s is not a callable',
                 is_object($callable) ? 'Instance of ' . get_class($callable) : var_export($callable, true)
@@ -63,7 +97,7 @@ class Invoker implements InvokerInterface
         // Check all parameters are resolved
         $diff = array_diff_key($callableReflection->getParameters(), $args);
         $parameter = reset($diff);
-        if ($parameter && \assert($parameter instanceof ReflectionParameter) && ! $parameter->isVariadic()) {
+        if ($parameter && assert($parameter instanceof ReflectionParameter) && ! $parameter->isVariadic()) {
             throw new NotEnoughParametersException(sprintf(
                 'Unable to invoke the callable because no value was given for parameter %d ($%s)',
                 $parameter->getPosition() + 1,
@@ -76,8 +110,10 @@ class Invoker implements InvokerInterface
 
     /**
      * Create the default parameter resolver.
+     *
+     * @return ParameterResolverInterface
      */
-    private function createParameterResolver(): ParameterResolver
+    private function createParameterResolver(): ParameterResolverInterface
     {
         return new ResolverChain([
             new NumericArrayResolver,
@@ -86,24 +122,4 @@ class Invoker implements InvokerInterface
         ]);
     }
 
-    /**
-     * @return ParameterResolver By default it's a ResolverChain
-     */
-    public function getParameterResolver(): ParameterResolver
-    {
-        return $this->parameterResolver;
-    }
-
-    public function getContainer(): ?ContainerInterface
-    {
-        return $this->container;
-    }
-
-    /**
-     * @return CallableResolver|null Returns null if no container was given in the constructor.
-     */
-    public function getCallableResolver(): ?CallableResolver
-    {
-        return $this->callableResolver;
-    }
 }

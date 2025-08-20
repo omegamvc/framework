@@ -25,10 +25,8 @@ use const PHP_VERSION_ID;
 
 /**
  * Compiles an object definition into native PHP code that, when executed, creates the object.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class ObjectCreationCompiler
+readonly class ObjectCreationCompiler
 {
     public function __construct(
         private Compiler $compiler,
@@ -71,7 +69,7 @@ class ObjectCreationCompiler
             );
 
             // Property injections
-            foreach ($definition->getPropertyInjections() as $propertyInjection) {
+            foreach ($definition->propertyInjections as $propertyInjection) {
                 $value = $propertyInjection->value;
                 $value = $this->compiler->compileValue($value);
 
@@ -232,7 +230,7 @@ class ObjectCreationCompiler
      */
     private function assertClassIsInstantiable(ObjectDefinition $definition) : void
     {
-        if ($definition->isInstantiable()) {
+        if ($definition->isInstantiable) {
             return;
         }
 

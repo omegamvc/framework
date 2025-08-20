@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Resolver;
 
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ObjectDefinition\PropertyInjection;
@@ -16,6 +16,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
+
 use const PHP_VERSION_ID;
 
 /**
@@ -44,13 +45,14 @@ class ObjectCreator implements DefinitionResolverInterface
      *
      * This will create a new instance of the class using the injections points defined.
      *
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
-     * @return object|mixed|null
+     * @return object|null
      * @throws DependencyException
      * @throws InvalidDefinitionException
+     * @throws ReflectionException
      */
-    public function resolve(Definition $definition, array $parameters = []) : ?object
+    public function resolve(DefinitionInterface $definition, array $parameters = []) : ?object
     {
         // Lazy?
         if ($definition->isLazy()) {
@@ -64,14 +66,14 @@ class ObjectCreator implements DefinitionResolverInterface
      * The definition is not resolvable if the class is not instantiable (interface or abstract)
      * or if the class doesn't exist.
      *
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(Definition $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
     {
         /** @noinspection PhpPossiblePolymorphicInvocationInspection */
-        return $definition->isInstantiable();
+        return $definition->isInstantiable;
     }
 
     /**
@@ -97,11 +99,12 @@ class ObjectCreator implements DefinitionResolverInterface
      *
      * @throws DependencyException
      * @throws InvalidDefinitionException
+     * @throws ReflectionException;
      */
     private function createInstance(ObjectDefinition $definition, array $parameters) : object
     {
         // Check that the class is instantiable
-        if (! $definition->isInstantiable()) {
+        if (!$definition->isInstantiable) {
             // Check that the class exists
             if (! $definition->classExists()) {
                 throw InvalidDefinitionException::create($definition, sprintf(
@@ -152,7 +155,8 @@ class ObjectCreator implements DefinitionResolverInterface
 
     /**
      * @param object $object
-     * @param Objectz
+     * @param ObjectDefinition $objectDefinition
+     * @return void
      * @throws InvalidDefinitionException
      * @throws ReflectionException
      * @throws DependencyException
@@ -160,7 +164,7 @@ class ObjectCreator implements DefinitionResolverInterface
     protected function injectMethodsAndProperties(object $object, ObjectDefinition $objectDefinition) : void
     {
         // Property injections
-        foreach ($objectDefinition->getPropertyInjections() as $propertyInjection) {
+        foreach ($objectDefinition->propertyInjections as $propertyInjection) {
             $this->injectProperty($object, $propertyInjection);
         }
 
@@ -188,7 +192,7 @@ class ObjectCreator implements DefinitionResolverInterface
 
         $value = $propertyInjection->value;
 
-        if ($value instanceof Definition) {
+        if ($value instanceof DefinitionInterface) {
             try {
                 $value = $this->definitionResolver->resolve($value);
             } catch (DependencyException $e) {

@@ -6,21 +6,25 @@ namespace Omega\Container\Definition;
 
 /**
  * Defines injections on an existing class instance.
- *
- * @since  5.0
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class InstanceDefinition implements Definition
+class InstanceDefinition implements DefinitionInterface
 {
     /**
      * @param object $instance Instance on which to inject dependencies.
      */
     public function __construct(
-        private object $instance,
-        private ObjectDefinition $objectDefinition,
+        private readonly object $instance,
+        public ObjectDefinition $objectDefinition {
+            get {
+                return $this->objectDefinition;
+            }
+        },
     ) {
     }
 
+    /**
+     * @return string
+     */
     public function getName() : string
     {
         // Name are superfluous for instance definitions
@@ -32,21 +36,26 @@ class InstanceDefinition implements Definition
         // Name are superfluous for instance definitions
     }
 
+    /**
+     * @return object
+     */
     public function getInstance() : object
     {
         return $this->instance;
     }
 
-    public function getObjectDefinition() : ObjectDefinition
-    {
-        return $this->objectDefinition;
-    }
-
+    /**
+     * @param callable $replacer
+     * @return void
+     */
     public function replaceNestedDefinitions(callable $replacer) : void
     {
         $this->objectDefinition->replaceNestedDefinitions($replacer);
     }
 
+    /**
+     * @return string
+     */
     public function __toString() : string
     {
         return 'Instance';

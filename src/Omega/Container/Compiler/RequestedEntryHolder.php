@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Omega\Container\Compiler;
 
-use Omega\Container\Factory\RequestedEntry;
+use Omega\Container\Factory\RequestedEntryInterface;
 
 /**
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class RequestedEntryHolder implements RequestedEntry
+readonly class RequestedEntryHolder implements RequestedEntryInterface
 {
     public function __construct(
         private string $name,

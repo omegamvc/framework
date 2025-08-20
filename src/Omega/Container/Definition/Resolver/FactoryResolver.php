@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Omega\Container\Definition\Resolver;
 
 use Omega\Container\ContainerInterface;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Exceptions\DependencyException;
@@ -18,6 +18,7 @@ use Omega\Container\Invoker\ParameterResolver\AssociativeArrayResolver;
 use Omega\Container\Invoker\ParameterResolver\DefaultValueResolver;
 use Omega\Container\Invoker\ParameterResolver\NumericArrayResolver;
 use Omega\Container\Invoker\ParameterResolver\ResolverChain;
+
 use function class_exists;
 use function is_string;
 use function method_exists;
@@ -55,7 +56,7 @@ class FactoryResolver implements DefinitionResolverInterface
      * @throws InvalidDefinitionException
      * @throws InvocationException
      */
-    public function resolve(Definition $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
     {
         if (! $this->invoker) {
             $parameterResolver = new ResolverChain([
@@ -104,11 +105,11 @@ class FactoryResolver implements DefinitionResolverInterface
     }
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(Definition $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
     {
         return true;
     }
@@ -124,7 +125,7 @@ class FactoryResolver implements DefinitionResolverInterface
         $resolved = [];
         foreach ($params as $key => $value) {
             // Nested definitions
-            if ($value instanceof Definition) {
+            if ($value instanceof DefinitionInterface) {
                 $value = $this->resolver->resolve($value);
             }
             $resolved[$key] = $value;

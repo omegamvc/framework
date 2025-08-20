@@ -6,8 +6,6 @@ namespace Omega\Container\Definition\ObjectDefinition;
 
 /**
  * Describe an injection in a class property.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class PropertyInjection
 {

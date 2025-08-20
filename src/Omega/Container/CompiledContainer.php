@@ -6,7 +6,7 @@ namespace Omega\Container;
 
 use LogicException;
 use Omega\Container\Compiler\RequestedEntryHolder;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
@@ -96,10 +96,10 @@ abstract class CompiledContainer extends Container
 
     /**
      * @param string $name
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @return void
      */
-    protected function setDefinition(string $name, Definition $definition): void
+    protected function setDefinition(string $name, DefinitionInterface $definition): void
     {
         throw new LogicException(
             'You cannot set a definition at runtime on a compiled container. ' .

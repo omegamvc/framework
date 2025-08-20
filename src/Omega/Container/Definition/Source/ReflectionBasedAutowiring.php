@@ -14,7 +14,7 @@ use ReflectionNamedType;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class ReflectionBasedAutowiring implements DefinitionSource, Autowiring
+class ReflectionBasedAutowiring implements DefinitionSourceInterface, AutowiringInterface
 {
     public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition
     {

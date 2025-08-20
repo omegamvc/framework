@@ -6,8 +6,9 @@ namespace Omega\Container\Definition\Resolver;
 
 use Omega\Container\ContainerInterface;
 use Omega\Container\Definition\DecoratorDefinition;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
 use function is_callable;
 
 /**
@@ -38,9 +39,10 @@ class DecoratorResolver implements DefinitionResolverInterface
      * @param DecoratorDefinition $definition
      * @param array $parameters
      * @return mixed
+     * @throws DependencyException
      * @throws InvalidDefinitionException
      */
-    public function resolve(Definition $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
     {
         $callable = $definition->getCallable();
 
@@ -53,7 +55,7 @@ class DecoratorResolver implements DefinitionResolverInterface
 
         $decoratedDefinition = $definition->getDecoratedDefinition();
 
-        if (! $decoratedDefinition instanceof Definition) {
+        if (! $decoratedDefinition instanceof DefinitionInterface) {
             if (! $definition->getName()) {
                 throw new InvalidDefinitionException('Decorators cannot be nested in another definition');
             }
@@ -70,11 +72,11 @@ class DecoratorResolver implements DefinitionResolverInterface
     }
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(Definition $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
     {
         return true;
     }

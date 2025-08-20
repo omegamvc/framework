@@ -4,11 +4,14 @@ namespace Omega\Container\Invoker\ParameterResolver;
 
 use ReflectionException;
 use ReflectionFunctionAbstract;
+use ReflectionParameter;
+use function array_diff_key;
+use function assert;
 
 /**
  * Finds the default value for a parameter, *if it exists*.
  */
-class DefaultValueResolver implements ParameterResolver
+class DefaultValueResolver implements ParameterResolverInterface
 {
     public function getParameters(
         ReflectionFunctionAbstract $reflection,
@@ -23,7 +26,7 @@ class DefaultValueResolver implements ParameterResolver
         }
 
         foreach ($parameters as $index => $parameter) {
-            \assert($parameter instanceof \ReflectionParameter);
+            assert($parameter instanceof ReflectionParameter);
             if ($parameter->isDefaultValueAvailable()) {
                 try {
                     $resolvedParameters[$index] = $parameter->getDefaultValue();

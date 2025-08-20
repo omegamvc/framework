@@ -8,8 +8,6 @@ use Omega\Container\Definition\AutowireDefinition;
 
 /**
  * Helps to define how to create an instance of a class using autowiring.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class AutowireDefinitionHelper extends CreateDefinitionHelper
 {

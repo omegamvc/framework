@@ -9,14 +9,15 @@ use Omega\Container\Definition\ObjectDefinition;
 
 /**
  * Source of definitions for entries of the container.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-interface Autowiring
+interface AutowiringInterface
 {
     /**
      * Autowire the given definition.
      *
+     * @param string $name
+     * @param ObjectDefinition|null $definition
+     * @return ObjectDefinition|null
      * @throws InvalidDefinitionException An invalid definition was found.
      */
     public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition;

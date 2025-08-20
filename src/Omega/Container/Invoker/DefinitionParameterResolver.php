@@ -4,25 +4,38 @@ declare(strict_types=1);
 
 namespace Omega\Container\Invoker;
 
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\Helper\DefinitionHelperInterface;
 use Omega\Container\Definition\Resolver\DefinitionResolverInterface;
-use Omega\Container\Invoker\ParameterResolver\ParameterResolver;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Invoker\ParameterResolver\ParameterResolverInterface;
 use ReflectionFunctionAbstract;
+
+use function array_diff_key;
+use function is_int;
 
 /**
  * Resolves callable parameters using definitions.
- *
- * @since 5.0
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class DefinitionParameterResolver implements ParameterResolver
+readonly class DefinitionParameterResolver implements ParameterResolverInterface
 {
+    /**
+     * @param DefinitionResolverInterface $definitionResolver
+     */
     public function __construct(
         private DefinitionResolverInterface $definitionResolver,
     ) {
     }
 
+    /**
+     * @param ReflectionFunctionAbstract $reflection
+     * @param array $providedParameters
+     * @param array $resolvedParameters
+     * @return array
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     */
     public function getParameters(
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,
@@ -38,7 +51,7 @@ class DefinitionParameterResolver implements ParameterResolver
                 $value = $value->getDefinition('');
             }
 
-            if (! $value instanceof Definition) {
+            if (! $value instanceof DefinitionInterface) {
                 continue;
             }
 

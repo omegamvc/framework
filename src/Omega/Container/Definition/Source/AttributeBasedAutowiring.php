@@ -19,16 +19,20 @@ use ReflectionParameter;
 use ReflectionProperty;
 use Throwable;
 
+use function class_exists;
+use function interface_exists;
+
 /**
  * Provides DI definitions by reading PHP 8 attributes such as #[Inject] and #[Injectable].
  *
  * This source automatically includes the reflection source.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class AttributeBasedAutowiring implements DefinitionSource, Autowiring
+class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringInterface
 {
     /**
+     * @param string $name
+     * @param ObjectDefinition|null $definition
+     * @return ObjectDefinition|null
      * @throws InvalidAttributeException
      */
     public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition
@@ -65,6 +69,8 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
 
     /**
      * Autowiring cannot guess all existing definitions.
+     *
+     * @return array
      */
     public function getDefinitions() : array
     {
@@ -73,6 +79,11 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
 
     /**
      * Browse the class properties looking for annotated properties.
+     *
+     * @param ReflectionClass $class
+     * @param ObjectDefinition $definition
+     * @return void
+     * @throws InvalidAttributeException
      */
     private function readProperties(ReflectionClass $class, ObjectDefinition $definition) : void
     {
@@ -90,6 +101,10 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
     }
 
     /**
+     * @param ReflectionProperty $property
+     * @param ObjectDefinition $definition
+     * @param string|null $classname
+     * @return void
      * @throws InvalidAttributeException
      */
     private function readProperty(ReflectionProperty $property, ObjectDefinition $definition, ?string $classname = null) : void
@@ -116,7 +131,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
         }
 
         // Try to #[Inject("name")] or look for the property type
-        $entryName = $inject->getName();
+        $entryName = $inject->name;
 
         // Try using typed properties
         $propertyType = $property->getType();
@@ -146,6 +161,10 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
 
     /**
      * Browse the object's methods looking for annotated methods.
+     *
+     * @param ReflectionClass $class
+     * @param ObjectDefinition $objectDefinition
+     * @return void
      */
     private function readMethods(ReflectionClass $class, ObjectDefinition $objectDefinition) : void
     {
@@ -169,6 +188,10 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
         }
     }
 
+    /**
+     * @param ReflectionMethod $method
+     * @return MethodInjection|null
+     */
     private function getMethodInjection(ReflectionMethod $method) : ?MethodInjection
     {
         // Look for #[Inject] attribute
@@ -202,7 +225,10 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
     }
 
     /**
-     * @return string|null Entry name or null if not found.
+     * @param int $parameterIndex
+     * @param ReflectionParameter $parameter
+     * @param array $annotationParameters
+     * @return string|null
      */
     private function getMethodParameter(int $parameterIndex, ReflectionParameter $parameter, array $annotationParameters) : ?string
     {
@@ -212,7 +238,7 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
             /** @var Inject $inject */
             $inject = $attribute->newInstance();
 
-            return $inject->getName();
+            return $inject->name;
         }
 
         // #[Inject] has definition for this parameter (by index, or by name)
@@ -238,6 +264,9 @@ class AttributeBasedAutowiring implements DefinitionSource, Autowiring
     }
 
     /**
+     * @param ReflectionClass $class
+     * @param ObjectDefinition $definition
+     * @return void
      * @throws InvalidAttributeException
      */
     private function readInjectableAttribute(ReflectionClass $class, ObjectDefinition $definition) : void

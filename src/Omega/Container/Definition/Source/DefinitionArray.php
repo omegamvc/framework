@@ -4,33 +4,51 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Source;
 
-use Omega\Container\Definition\Definition;
+use Exception;
+use Omega\Container\Definition\DefinitionInterface;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+
+use function array_filter;
+use function array_key_exists;
+use function array_shift;
+use function preg_match;
+use function preg_quote;
+use function str_contains;
+use function str_replace;
+
+use const ARRAY_FILTER_USE_KEY;
 
 /**
  * Reads DI definitions from a PHP array.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class DefinitionArray implements DefinitionSource, MutableDefinitionSource
+class DefinitionArray implements DefinitionSourceInterface, MutableDefinitionSourceInterface
 {
-    public const WILDCARD = '*';
-    /**
-     * Matches anything except "\".
-     */
-    private const WILDCARD_PATTERN = '([^\\\\]+)';
+    /** @var string  */
+    public const string WILDCARD = '*';
 
-    /** DI definitions in a PHP array. */
+    /** @var string Matches anything except "\". */
+    private const string WILDCARD_PATTERN = '([^\\\\]+)';
+
+    /** @var array DI definitions in a PHP array. */
     private array $definitions;
 
-    /** Cache of wildcard definitions. */
+    /** @var array|null Cache of wildcard definitions. */
     private ?array $wildcardDefinitions = null;
 
+    /** @var DefinitionNormalizer  */
     private DefinitionNormalizer $normalizer;
 
-    public function __construct(array $definitions = [], ?Autowiring $autowiring = null)
+    /**
+     * @param array $definitions
+     * @param AutowiringInterface|null $autowiring
+     * @throws Exception
+     */
+    public function __construct(array $definitions = [], ?AutowiringInterface $autowiring = null)
     {
         if (isset($definitions[0])) {
-            throw new \Exception('The PHP-DI definition is not indexed by an entry name in the definition array');
+            throw new Exception(
+                'The Container definition is not indexed by an entry name in the definition array'
+            );
         }
 
         $this->definitions = $definitions;
@@ -40,11 +58,15 @@ class DefinitionArray implements DefinitionSource, MutableDefinitionSource
 
     /**
      * @param array $definitions DI definitions in a PHP array indexed by the definition name.
+     * @return void
+     * @throws Exception
      */
     public function addDefinitions(array $definitions) : void
     {
         if (isset($definitions[0])) {
-            throw new \Exception('The PHP-DI definition is not indexed by an entry name in the definition array');
+            throw new Exception(
+                'The Container definition is not indexed by an entry name in the definition array'
+            );
         }
 
         // The newly added data prevails
@@ -55,7 +77,11 @@ class DefinitionArray implements DefinitionSource, MutableDefinitionSource
         $this->wildcardDefinitions = null;
     }
 
-    public function addDefinition(Definition $definition) : void
+    /**
+     * @param DefinitionInterface $definition
+     * @return void
+     */
+    public function addDefinition(DefinitionInterface $definition) : void
     {
         $this->definitions[$definition->getName()] = $definition;
 
@@ -63,7 +89,12 @@ class DefinitionArray implements DefinitionSource, MutableDefinitionSource
         $this->wildcardDefinitions = null;
     }
 
-    public function getDefinition(string $name) : ?Definition
+    /**
+     * @param string $name
+     * @return DefinitionInterface|null
+     * @throws InvalidDefinitionException
+     */
+    public function getDefinition(string $name) : ?DefinitionInterface
     {
         // Look for the definition by name
         if (array_key_exists($name, $this->definitions)) {
@@ -97,16 +128,14 @@ class DefinitionArray implements DefinitionSource, MutableDefinitionSource
         return null;
     }
 
+    /**
+     * @return array|DefinitionInterface[]
+     */
     public function getDefinitions() : array
     {
         // Return all definitions except wildcard definitions
-        $definitions = [];
-        foreach ($this->definitions as $key => $definition) {
-            if (! str_contains($key, self::WILDCARD)) {
-                $definitions[$key] = $definition;
-            }
-        }
-
-        return $definitions;
+        return array_filter($this->definitions, function ($key) {
+            return !str_contains($key, self::WILDCARD);
+        }, ARRAY_FILTER_USE_KEY);
     }
 }

@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition;
 
+use function array_map;
+use function is_string;
+use function str_replace;
+use function var_export;
+use const PHP_EOL;
+
 /**
  * Definition of an array containing values or references.
  *
  * @since 5.0
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class ArrayDefinition implements Definition
+class ArrayDefinition implements DefinitionInterface
 {
     /** Entry name. */
     private string $name = '';
@@ -42,7 +48,7 @@ class ArrayDefinition implements Definition
 
     public function __toString() : string
     {
-        $str = '[' . \PHP_EOL;
+        $str = '[' . PHP_EOL;
 
         foreach ($this->values as $key => $value) {
             if (is_string($key)) {
@@ -51,13 +57,13 @@ class ArrayDefinition implements Definition
 
             $str .= '    ' . $key . ' => ';
 
-            if ($value instanceof Definition) {
-                $str .= str_replace(\PHP_EOL, \PHP_EOL . '    ', (string) $value);
+            if ($value instanceof DefinitionInterface) {
+                $str .= str_replace(PHP_EOL, PHP_EOL . '    ', (string) $value);
             } else {
                 $str .= var_export($value, true);
             }
 
-            $str .= ',' . \PHP_EOL;
+            $str .= ',' . PHP_EOL;
         }
 
         return $str . ']';

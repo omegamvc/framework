@@ -4,13 +4,15 @@ namespace Omega\Container\Invoker\ParameterResolver;
 
 use ReflectionFunctionAbstract;
 use ReflectionNamedType;
+use function array_diff_key;
+use function array_key_exists;
 
 /**
  * Inject entries using type-hints.
  *
  * Tries to match type-hints with the parameters provided.
  */
-class TypeHintResolver implements ParameterResolver
+class TypeHintResolver implements ParameterResolverInterface
 {
     public function getParameters(
         ReflectionFunctionAbstract $reflection,

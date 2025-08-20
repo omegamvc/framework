@@ -4,20 +4,26 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Source;
 
-use Omega\Container\Definition\Definition;
-use Omega\Container\Definition\ExtendsPreviousDefinition;
+use LogicException;
+use Omega\Container\Definition\DefinitionInterface;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Definition\ExtendsPreviousDefinitionInterface;
+use function array_combine;
+use function array_filter;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function count;
 
 /**
  * Manages a chain of other definition sources.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class SourceChain implements DefinitionSource, MutableDefinitionSource
+class SourceChain implements DefinitionSourceInterface, MutableDefinitionSourceInterface
 {
-    private ?MutableDefinitionSource $mutableSource;
+    private ?MutableDefinitionSourceInterface $mutableSource;
 
     /**
-     * @param list<DefinitionSource> $sources
+     * @param list<DefinitionSourceInterface> $sources
      */
     public function __construct(
         private array $sources,
@@ -25,10 +31,18 @@ class SourceChain implements DefinitionSource, MutableDefinitionSource
     }
 
     /**
+     * @param string $name
      * @param int $startIndex Use this parameter to start looking from a specific
      *                        point in the source chain.
+     * @return DefinitionInterface|null
      */
-    public function getDefinition(string $name, int $startIndex = 0) : ?Definition
+    /**
+     * @param string $name
+     * @param int $startIndex
+     * @return DefinitionInterface|null
+     * @throws InvalidDefinitionException
+     */
+    public function getDefinition(string $name, int $startIndex = 0) : ?DefinitionInterface
     {
         $count = count($this->sources);
         for ($i = $startIndex; $i < $count; ++$i) {
@@ -37,7 +51,7 @@ class SourceChain implements DefinitionSource, MutableDefinitionSource
             $definition = $source->getDefinition($name);
 
             if ($definition) {
-                if ($definition instanceof ExtendsPreviousDefinition) {
+                if ($definition instanceof ExtendsPreviousDefinitionInterface) {
                     $this->resolveExtendedDefinition($definition, $i);
                 }
 
@@ -48,6 +62,10 @@ class SourceChain implements DefinitionSource, MutableDefinitionSource
         return null;
     }
 
+    /**
+     * @return array|DefinitionInterface[]
+     * @throws InvalidDefinitionException
+     */
     public function getDefinitions() : array
     {
         $allDefinitions = array_merge(...array_map(fn ($source) => $source->getDefinitions(), $this->sources));
@@ -60,16 +78,28 @@ class SourceChain implements DefinitionSource, MutableDefinitionSource
         return array_combine($allNames, $allValues);
     }
 
-    public function addDefinition(Definition $definition) : void
+    /**
+     * @param DefinitionInterface $definition
+     * @return void
+     */
+    public function addDefinition(DefinitionInterface $definition) : void
     {
         if (! $this->mutableSource) {
-            throw new \LogicException("The container's definition source has not been initialized correctly");
+            throw new LogicException(
+                "The container's definition source has not been initialized correctly"
+            );
         }
 
         $this->mutableSource->addDefinition($definition);
     }
 
-    private function resolveExtendedDefinition(ExtendsPreviousDefinition $definition, int $currentIndex)
+    /**
+     * @param ExtendsPreviousDefinitionInterface $definition
+     * @param int $currentIndex
+     * @return void
+     * @throws InvalidDefinitionException
+     */
+    private function resolveExtendedDefinition(ExtendsPreviousDefinitionInterface $definition, int $currentIndex): void
     {
         // Look in the next sources only (else infinite recursion, and we can only extend
         // entries defined in the previous definition files - a previous == next here because
@@ -81,7 +111,11 @@ class SourceChain implements DefinitionSource, MutableDefinitionSource
         }
     }
 
-    public function setMutableDefinitionSource(MutableDefinitionSource $mutableSource) : void
+    /**
+     * @param MutableDefinitionSourceInterface $mutableSource
+     * @return void
+     */
+    public function setMutableDefinitionSource(MutableDefinitionSourceInterface $mutableSource) : void
     {
         $this->mutableSource = $mutableSource;
 

@@ -10,13 +10,13 @@ use Exception;
 use InvalidArgumentException;
 use Omega\Container\Definition\ArrayDefinition;
 use Omega\Container\Definition\DecoratorDefinition;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\EnvironmentVariableDefinition;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\Reference;
-use Omega\Container\Definition\Source\DefinitionSource;
+use Omega\Container\Definition\Source\DefinitionSourceInterface;
 use Omega\Container\Definition\StringDefinition;
 use Omega\Container\Definition\ValueDefinition;
 use Omega\Container\Exceptions\DependencyException;
@@ -106,7 +106,7 @@ class Compiler
     private bool $autowiringEnabled;
 
     public function __construct(
-        private ProxyFactoryInterface $proxyFactory,
+        private readonly ProxyFactoryInterface $proxyFactory,
     ) {
     }
 
@@ -118,8 +118,8 @@ class Compiler
     /**
      * Compile the container.
      *
-     * @param DefinitionSource $definitionSource
-     * @param string $directory
+     * @param DefinitionSourceInterface $definitionSource
+     * @param string           $directory
      * @param string $className
      * @param string $parentClassName
      * @param bool $autowiringEnabled
@@ -128,11 +128,11 @@ class Compiler
      * @throws InvalidDefinitionException
      */
     public function compile(
-        DefinitionSource $definitionSource,
-        string $directory,
-        string $className,
-        string $parentClassName,
-        bool $autowiringEnabled,
+        DefinitionSourceInterface $definitionSource,
+        string                    $directory,
+        string                    $className,
+        string                    $parentClassName,
+        bool                      $autowiringEnabled,
     ) : string {
         $fileName = rtrim($directory, '/') . '/' . $className . '.php';
 
@@ -236,13 +236,13 @@ class Compiler
 
     /**
      * @param string $entryName
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @return string The method name
      * @throws DependencyException
      * @throws InvalidDefinitionException
      * @throws Exception
      */
-    private function compileDefinition(string $entryName, Definition $definition) : string
+    private function compileDefinition(string $entryName, DefinitionInterface $definition) : string
     {
         // Generate a unique method name
         $methodName = 'get' . (++$this->methodMappingCounter);
@@ -267,14 +267,14 @@ class Compiler
                 $code = 'return \Omega\Container\Definition\StringDefinition::resolveExpression(' . $entryName . ', ' . $expression . ', $this->delegateContainer);';
                 break;
             case $definition instanceof EnvironmentVariableDefinition:
-                $variableName = $this->compileValue($definition->getVariableName());
-                $isOptional = $this->compileValue($definition->isOptional());
-                $defaultValue = $this->compileValue($definition->getDefaultValue());
+                $variableName = $this->compileValue($definition->variableName);
+                $isOptional = $this->compileValue($definition->isOptional);
+                $defaultValue = $this->compileValue($definition->defaultValue);
                 $code = <<<PHP
                             \$value = \$_ENV[$variableName] ?? \$_SERVER[$variableName] ?? getenv($variableName);
                             if (false !== \$value) return \$value;
                             if (!$isOptional) {
-                                throw new \Omega\Container\Definition\Exceptions\InvalidDefinitionException("The environment variable '{$definition->getVariableName()}' has not been defined");
+                                throw new \Omega\Container\Definition\Exceptions\InvalidDefinitionException("The environment variable '{$definition->variableName}' has not been defined");
                             }
                             return $defaultValue;
                     PHP;
@@ -297,7 +297,7 @@ class Compiler
                 break;
             case $definition instanceof DecoratorDefinition:
                 $decoratedDefinition = $definition->getDecoratedDefinition();
-                if (! $decoratedDefinition instanceof Definition) {
+                if (! $decoratedDefinition instanceof DefinitionInterface) {
                     if (! $definition->getName()) {
                         throw new InvalidDefinitionException('Decorators cannot be nested in another definition');
                     }
@@ -364,7 +364,7 @@ class Compiler
             throw new InvalidDefinitionException($errorMessage);
         }
 
-        if ($value instanceof Definition) {
+        if ($value instanceof DefinitionInterface) {
             // Give it an arbitrary unique name
             $subEntryName = 'subEntry' . (++$this->subEntryCounter);
             // Compile the sub-definition in another method
@@ -429,7 +429,7 @@ class Compiler
             return 'Decorators cannot be nested in another definition';
         }
         // All other definitions are compilable
-        if ($value instanceof Definition) {
+        if ($value instanceof DefinitionInterface) {
             return true;
         }
         if ($value instanceof Closure) {

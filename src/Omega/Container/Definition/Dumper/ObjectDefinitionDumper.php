@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Dumper;
 
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ObjectDefinition\MethodInjection;
 use ReflectionClass;
@@ -92,9 +92,9 @@ class ObjectDefinitionDumper
     {
         $str = '';
 
-        foreach ($definition->getPropertyInjections() as $propertyInjection) {
+        foreach ($definition->propertyInjections as $propertyInjection) {
             $value = $propertyInjection->value;
-            $valueStr = $value instanceof Definition ? (string) $value : var_export($value, true);
+            $valueStr = $value instanceof DefinitionInterface ? (string) $value : var_export($value, true);
 
             $str .= sprintf(PHP_EOL . '    $%s = %s', $propertyInjection->propertyName, $valueStr);
         }
@@ -138,7 +138,7 @@ class ObjectDefinitionDumper
         foreach ($methodReflection->getParameters() as $index => $parameter) {
             if (array_key_exists($index, $definitionParameters)) {
                 $value = $definitionParameters[$index];
-                $valueStr = $value instanceof Definition ? (string) $value : var_export($value, true);
+                $valueStr = $value instanceof DefinitionInterface ? (string) $value : var_export($value, true);
 
                 $args[] = sprintf('$%s = %s', $parameter->getName(), $valueStr);
 

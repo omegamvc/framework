@@ -5,26 +5,34 @@ declare(strict_types=1);
 namespace Omega\Container\Invoker;
 
 use Omega\Container\ContainerInterface;
-use Omega\Container\Invoker\ParameterResolver\ParameterResolver;
+use Omega\Container\Exceptions\ContainerExceptionInterface;
+use Omega\Container\Exceptions\NotFoundExceptionInterface;
+use Omega\Container\Invoker\ParameterResolver\ParameterResolverInterface;
 use ReflectionFunctionAbstract;
 use ReflectionNamedType;
+use function array_diff_key;
 
 /**
  * Inject the container, the definition or any other service using type-hints.
- *
- * {@internal This class is similar to TypeHintingResolver and TypeHintingContainerResolver,
- *            we use this instead for performance reasons}
- *
- * @author Quim Calpe <quim@kalpe.com>
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class FactoryParameterResolver implements ParameterResolver
+readonly class FactoryParameterResolver implements ParameterResolverInterface
 {
+    /**
+     * @param ContainerInterface $container
+     */
     public function __construct(
         private ContainerInterface $container,
     ) {
     }
 
+    /**
+     * @param ReflectionFunctionAbstract $reflection
+     * @param array $providedParameters
+     * @param array $resolvedParameters
+     * @return array
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function getParameters(
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,
@@ -54,9 +62,9 @@ class FactoryParameterResolver implements ParameterResolver
 
             $parameterClass = $parameterType->getName();
 
-            if ($parameterClass === 'Psr\Container\ContainerInterface') {
+            if ($parameterClass === 'Omega\Container\ContainerInterface') {
                 $resolvedParameters[$index] = $this->container;
-            } elseif ($parameterClass === 'DI\Factory\RequestedEntry') {
+            } elseif ($parameterClass === 'Omega\Container\Factory\RequestedEntry') {
                 // By convention the second parameter is the definition
                 $resolvedParameters[$index] = $providedParameters[1];
             } elseif ($this->container->has($parameterClass)) {

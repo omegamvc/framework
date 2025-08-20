@@ -8,7 +8,7 @@ use ArrayAccess;
 use Closure;
 use Exception;
 use InvalidArgumentException;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Definition\Helper\DefinitionHelperInterface;
@@ -17,7 +17,7 @@ use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\Resolver\DefinitionResolverInterface;
 use Omega\Container\Definition\Resolver\ResolverDispatcher;
 use Omega\Container\Definition\Source\DefinitionArray;
-use Omega\Container\Definition\Source\MutableDefinitionSource;
+use Omega\Container\Definition\Source\MutableDefinitionSourceInterface;
 use Omega\Container\Definition\Source\ReflectionBasedAutowiring;
 use Omega\Container\Definition\Source\SourceChain;
 use Omega\Container\Definition\ValueDefinition;
@@ -69,13 +69,13 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
     /** @var array Map of entries that are already resolved. */
     protected array $resolvedEntries = [];
 
-    /** @var array|MutableDefinitionSource|SourceChain */
-    private MutableDefinitionSource|array|SourceChain $definitionSource;
+    /** @var array|MutableDefinitionSourceInterface|SourceChain */
+    private MutableDefinitionSourceInterface|array|SourceChain $definitionSource;
 
     /** @var DefinitionResolverInterface|ResolverDispatcher */
     private DefinitionResolverInterface|ResolverDispatcher $definitionResolver;
 
-    /**  @var array<Definition|null> Map of definitions that are already fetched (local cache). */
+    /**  @var array<DefinitionInterface|null> Map of definitions that are already fetched (local cache). */
     private array $fetchedDefinitions = [];
 
     /** @var array Array of entries being resolved. Used to avoid circular dependencies and infinite loops. */
@@ -112,18 +112,18 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      * If you want to customize the container's behavior, you are discouraged to create and pass the
      * dependencies yourself, the ContainerBuilder class is here to help you instead.
      *
-     * @see ContainerBuilder
-     *
-     * @param array|MutableDefinitionSource $definitions
+     * @param array|MutableDefinitionSourceInterface $definitions
      * @param ProxyFactoryInterface|null    $proxyFactory
      * @param ContainerInterface|null       $wrapperContainer If the container is wrapped by another container.
      * @return void
      * @throws Exception
+     *@see ContainerBuilder
+     *
      */
     public function __construct(
-        array|MutableDefinitionSource $definitions = [],
-        ?ProxyFactoryInterface $proxyFactory = null,
-        ?ContainerInterface $wrapperContainer = null,
+        array|MutableDefinitionSourceInterface $definitions = [],
+        ?ProxyFactoryInterface                 $proxyFactory = null,
+        ?ContainerInterface                    $wrapperContainer = null,
     ) {
         if (is_array($definitions)) {
             $this->definitionSource = $this->createDefaultDefinitionSource($definitions);
@@ -182,10 +182,10 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
 
     /**
      * @param string $name
-     * @return Definition|null
+     * @return DefinitionInterface|null
      * @throws InvalidDefinitionException
      */
-    private function getDefinition(string $name) : ?Definition
+    private function getDefinition(string $name) : ?DefinitionInterface
     {
         // Local cache that avoids fetching the same definition twice
         if (!array_key_exists($name, $this->fetchedDefinitions)) {
@@ -318,7 +318,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
 
         if ($value instanceof ValueDefinition) {
             $this->resolvedEntries[$name] = $value->getValue();
-        } elseif ($value instanceof Definition) {
+        } elseif ($value instanceof DefinitionInterface) {
             $value->setName($name);
             $this->setDefinition($name, $value);
         } else {
@@ -353,7 +353,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
     public function debugEntry(string $name) : string
     {
         $definition = $this->definitionSource->getDefinition($name);
-        if ($definition instanceof Definition) {
+        if ($definition instanceof DefinitionInterface) {
             return (string) $definition;
         }
 
@@ -393,13 +393,13 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
      *
      * Checks for circular dependencies while resolving the definition.
      *
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return mixed
      * @throws DependencyException Error while resolving the entry.
      * @throws InvalidDefinitionException
      */
-    private function resolveDefinition(Definition $definition, array $parameters = []) : mixed
+    private function resolveDefinition(DefinitionInterface $definition, array $parameters = []) : mixed
     {
         $entryName = $definition->getName();
 
@@ -426,7 +426,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
         return $value;
     }
 
-    protected function setDefinition(string $name, Definition $definition) : void
+    protected function setDefinition(string $name, DefinitionInterface $definition) : void
     {
         // Clear existing entry if it exists
         if (array_key_exists($name, $this->resolvedEntries)) {

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Source;
 
-use Omega\Container\Definition\Definition;
+use Exception;
+use Omega\Container\Definition\DefinitionInterface;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use function is_array;
+use function sprintf;
 
 /**
  * Reads DI definitions from a file returning a PHP array.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class DefinitionFile extends DefinitionArray
 {
@@ -17,22 +19,35 @@ class DefinitionFile extends DefinitionArray
 
     /**
      * @param string $file File in which the definitions are returned as an array.
+     * @param AutowiringInterface|null $autowiring
+     * @return void
+     * @throws Exception
      */
     public function __construct(
-        private string $file,
-        ?Autowiring $autowiring = null,
+        private readonly string $file,
+        ?AutowiringInterface    $autowiring = null,
     ) {
         // Lazy-loading to improve performances
         parent::__construct([], $autowiring);
     }
 
-    public function getDefinition(string $name) : ?Definition
+    /**
+     * @param string $name
+     * @return DefinitionInterface|null
+     * @throws InvalidDefinitionException
+     * @throws Exception
+     */
+    public function getDefinition(string $name) : ?DefinitionInterface
     {
         $this->initialize();
 
         return parent::getDefinition($name);
     }
 
+    /**
+     * @return array|DefinitionInterface[]
+     * @throws Exception
+     */
     public function getDefinitions() : array
     {
         $this->initialize();
@@ -43,6 +58,10 @@ class DefinitionFile extends DefinitionArray
     /**
      * Lazy-loading of the definitions.
      */
+    /**
+     * @return void
+     * @throws Exception
+     */
     private function initialize() : void
     {
         if ($this->initialized === true) {
@@ -51,8 +70,13 @@ class DefinitionFile extends DefinitionArray
 
         $definitions = require $this->file;
 
-        if (! is_array($definitions)) {
-            throw new \Exception("File $this->file should return an array of definitions");
+        if (!is_array($definitions)) {
+            throw new Exception(
+                sprintf(
+                    "File '%s' should return an array of definitions",
+                    $this->file
+                )
+            );
         }
 
         $this->addDefinitions($definitions);

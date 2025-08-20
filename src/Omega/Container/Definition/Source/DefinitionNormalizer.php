@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Source;
 
+use Closure;
 use Omega\Container\Definition\ArrayDefinition;
 use Omega\Container\Definition\AutowireDefinition;
 use Omega\Container\Definition\DecoratorDefinition;
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Definition\Helper\DefinitionHelperInterface;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ValueDefinition;
+use function is_array;
 
 /**
  * Turns raw definitions/definition helpers into definitions ready
  * to be resolved or compiled.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class DefinitionNormalizer
+readonly class DefinitionNormalizer
 {
     public function __construct(
-        private Autowiring $autowiring,
+        private AutowiringInterface $autowiring,
     ) {
     }
 
@@ -37,15 +37,15 @@ class DefinitionNormalizer
      *
      * @throws InvalidDefinitionException
      */
-    public function normalizeRootDefinition(mixed $definition, string $name, ?array $wildcardsReplacements = null) : Definition
+    public function normalizeRootDefinition(mixed $definition, string $name, ?array $wildcardsReplacements = null) : DefinitionInterface
     {
         if ($definition instanceof DefinitionHelperInterface) {
             $definition = $definition->getDefinition($name);
         } elseif (is_array($definition)) {
             $definition = new ArrayDefinition($definition);
-        } elseif ($definition instanceof \Closure) {
+        } elseif ($definition instanceof Closure) {
             $definition = new FactoryDefinition($name, $definition);
-        } elseif (! $definition instanceof Definition) {
+        } elseif (! $definition instanceof DefinitionInterface) {
             $definition = new ValueDefinition($definition);
         }
 
@@ -88,7 +88,7 @@ class DefinitionNormalizer
             $definition = $definition->getDefinition($name);
         } elseif (is_array($definition)) {
             $definition = new ArrayDefinition($definition);
-        } elseif ($definition instanceof \Closure) {
+        } elseif ($definition instanceof Closure) {
             $definition = new FactoryDefinition($name, $definition);
         }
 
@@ -100,7 +100,7 @@ class DefinitionNormalizer
             $definition = $this->autowiring->autowire($name, $definition);
         }
 
-        if ($definition instanceof Definition) {
+        if ($definition instanceof DefinitionInterface) {
             $definition->setName($name);
 
             // Recursively traverse nested definitions

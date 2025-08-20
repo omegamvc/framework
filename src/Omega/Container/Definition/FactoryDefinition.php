@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition;
 
+use function array_map;
+
 /**
  * Definition of a value or class with a factory.
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class FactoryDefinition implements Definition
+class FactoryDefinition implements DefinitionInterface
 {
     /**
      * Entry name.
@@ -40,11 +42,18 @@ class FactoryDefinition implements Definition
         $this->parameters = $parameters;
     }
 
+    /**
+     * @return string
+     */
     public function getName() : string
     {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return void
+     */
     public function setName(string $name) : void
     {
         $this->name = $name;
@@ -66,11 +75,18 @@ class FactoryDefinition implements Definition
         return $this->parameters;
     }
 
+    /**
+     * @param callable $replacer
+     * @return void
+     */
     public function replaceNestedDefinitions(callable $replacer) : void
     {
         $this->parameters = array_map($replacer, $this->parameters);
     }
 
+    /**
+     * @return string
+     */
     public function __toString() : string
     {
         return 'Factory';

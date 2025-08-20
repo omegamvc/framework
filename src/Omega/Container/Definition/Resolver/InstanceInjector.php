@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Resolver;
 
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\InstanceDefinition;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundExceptionInterface;
+use ReflectionException;
+
 use function get_class;
 use function sprintf;
 
@@ -21,17 +24,20 @@ class InstanceInjector extends ObjectCreator implements DefinitionResolverInterf
     /**
      * Injects dependencies on an existing instance.
      *
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return object|null
      * @throws DependencyException
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws ReflectionException
      */
-    public function resolve(Definition $definition, array $parameters = []) : ?object
+    public function resolve(DefinitionInterface $definition, array $parameters = []) : ?object
     {
         /** @psalm-suppress InvalidCatch */
         try {
             /** @noinspection PhpPossiblePolymorphicInvocationInspection */
-            $this->injectMethodsAndProperties($definition->getInstance(), $definition->getObjectDefinition());
+            $this->injectMethodsAndProperties($definition->getInstance(), $definition->objectDefinition);
         } catch (NotFoundExceptionInterface $e) {
             /** @noinspection PhpPossiblePolymorphicInvocationInspection */
             $message = sprintf(
@@ -47,11 +53,11 @@ class InstanceInjector extends ObjectCreator implements DefinitionResolverInterf
     }
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(Definition $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
     {
         return true;
     }

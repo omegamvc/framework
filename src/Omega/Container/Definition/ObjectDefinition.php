@@ -9,48 +9,47 @@ use Omega\Container\Definition\ObjectDefinition\MethodInjection;
 use Omega\Container\Definition\ObjectDefinition\PropertyInjection;
 use Omega\Container\Definition\Source\DefinitionArray;
 use ReflectionClass;
+use ReflectionException;
+
+use function array_walk;
+use function array_walk_recursive;
+use function class_exists;
+use function interface_exists;
+use function strpos;
+use function substr_replace;
 
 /**
  * Defines how an object can be instantiated.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class ObjectDefinition implements Definition
+class ObjectDefinition implements DefinitionInterface
 {
-    /**
-     * Entry name (most of the time, same as $classname).
-     */
+    /** @var string Entry name (most of the time, same as $classname). */
     private string $name;
 
-    /**
-     * Class name (if null, then the class name is $name).
-     */
+    /** @var string|null Class name (if null, then the class name is $name). */
     protected ?string $className = null;
 
+    /** @var MethodInjection|null  */
     protected ?MethodInjection $constructorInjection = null;
 
-    protected array $propertyInjections = [];
+    /** @var array  */
+    public array $propertyInjections = [];
 
-    /**
-     * Method calls.
-     * @var MethodInjection[][]
-     */
+    /** @var MethodInjection[][] Method calls. */
     protected array $methodInjections = [];
 
+    /** @var bool|null  */
     protected ?bool $lazy = null;
 
-    /**
-     * Store if the class exists. Storing it (in cache) avoids recomputing this.
-     */
+    /** @var bool Store if the class exists. Storing it (in cache) avoids recomputing this. */
     private bool $classExists;
 
-    /**
-     * Store if the class is instantiable. Storing it (in cache) avoids recomputing this.
-     */
-    private bool $isInstantiable;
+    /** @var bool Store if the class is instantiable. Storing it (in cache) avoids recomputing this. */
+    public bool $isInstantiable;
 
     /**
      * @param string $name Entry name
+     * @param string|null $className
      */
     public function __construct(string $name, ?string $className = null)
     {
@@ -58,16 +57,27 @@ class ObjectDefinition implements Definition
         $this->setClassName($className);
     }
 
+    /**
+     * @return string
+     */
     public function getName() : string
     {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return void
+     */
     public function setName(string $name) : void
     {
         $this->name = $name;
     }
 
+    /**
+     * @param string|null $className
+     * @return void
+     */
     public function setClassName(?string $className) : void
     {
         $this->className = $className;
@@ -75,21 +85,35 @@ class ObjectDefinition implements Definition
         $this->updateCache();
     }
 
+    /**
+     * @return string
+     */
     public function getClassName() : string
     {
         return $this->className ?? $this->name;
     }
 
+    /**
+     * @return MethodInjection|null
+     */
     public function getConstructorInjection() : ?MethodInjection
     {
         return $this->constructorInjection;
     }
 
+    /**
+     * @param MethodInjection $constructorInjection
+     * @return void
+     */
     public function setConstructorInjection(MethodInjection $constructorInjection) : void
     {
         $this->constructorInjection = $constructorInjection;
     }
 
+    /**
+     * @param MethodInjection $injection
+     * @return void
+     */
     public function completeConstructorInjection(MethodInjection $injection) : void
     {
         if ($this->constructorInjection !== null) {
@@ -102,13 +126,9 @@ class ObjectDefinition implements Definition
     }
 
     /**
-     * @return PropertyInjection[] Property injections
+     * @param PropertyInjection $propertyInjection
+     * @return void
      */
-    public function getPropertyInjections() : array
-    {
-        return $this->propertyInjections;
-    }
-
     public function addPropertyInjection(PropertyInjection $propertyInjection) : void
     {
         $className = $propertyInjection->className;
@@ -137,6 +157,10 @@ class ObjectDefinition implements Definition
         return $injections;
     }
 
+    /**
+     * @param MethodInjection $methodInjection
+     * @return void
+     */
     public function addMethodInjection(MethodInjection $methodInjection) : void
     {
         $method = $methodInjection->methodName;
@@ -146,6 +170,10 @@ class ObjectDefinition implements Definition
         $this->methodInjections[$method][] = $methodInjection;
     }
 
+    /**
+     * @param MethodInjection $injection
+     * @return void
+     */
     public function completeFirstMethodInjection(MethodInjection $injection) : void
     {
         $method = $injection->methodName;
@@ -159,11 +187,18 @@ class ObjectDefinition implements Definition
         }
     }
 
+    /**
+     * @param bool|null $lazy
+     * @return void
+     */
     public function setLazy(?bool $lazy = null) : void
     {
         $this->lazy = $lazy;
     }
 
+    /**
+     * @return bool
+     */
     public function isLazy() : bool
     {
         if ($this->lazy !== null) {
@@ -174,16 +209,18 @@ class ObjectDefinition implements Definition
         return false;
     }
 
+    /**
+     * @return bool
+     */
     public function classExists() : bool
     {
         return $this->classExists;
     }
 
-    public function isInstantiable() : bool
-    {
-        return $this->isInstantiable;
-    }
-
+    /**
+     * @param callable $replacer
+     * @return void
+     */
     public function replaceNestedDefinitions(callable $replacer) : void
     {
         array_walk($this->propertyInjections, function (PropertyInjection $propertyInjection) use ($replacer) {
@@ -203,6 +240,7 @@ class ObjectDefinition implements Definition
      * Replaces all the wildcards in the string with the given replacements.
      *
      * @param string[] $replacements
+     * @return void
      */
     public function replaceWildcards(array $replacements) : void
     {
@@ -218,11 +256,18 @@ class ObjectDefinition implements Definition
         $this->setClassName($className);
     }
 
+    /**
+     * @return string
+     * @throws ReflectionException
+     */
     public function __toString() : string
     {
         return (new ObjectDefinitionDumper)->dump($this);
     }
 
+    /**
+     * @return void
+     */
     private function updateCache() : void
     {
         $className = $this->getClassName();

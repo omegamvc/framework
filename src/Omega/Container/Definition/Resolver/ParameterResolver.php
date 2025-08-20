@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition\Resolver;
 
-use Omega\Container\Definition\Definition;
+use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ObjectDefinition\MethodInjection;
+use Omega\Container\Exceptions\DependencyException;
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
+
+use function array_key_exists;
 
 /**
  * Resolves parameters for a function call.
  */
-class ParameterResolver
+readonly class ParameterResolver
 {
     /**
      * @param DefinitionResolverInterface $definitionResolver Will be used to resolve nested definitions.
@@ -26,6 +30,7 @@ class ParameterResolver
     /**
      * @return array Parameters to use to call the function.
      * @throws InvalidDefinitionException A parameter has no value defined or guessable.
+     * @throws DependencyException
      */
     public function resolveParameters(
         ?MethodInjection $definition = null,
@@ -62,7 +67,7 @@ class ParameterResolver
             }
 
             // Nested definitions
-            if ($value instanceof Definition) {
+            if ($value instanceof DefinitionInterface) {
                 // If the container cannot produce the entry, we can use the default parameter value
                 if ($parameter->isOptional() && ! $this->definitionResolver->isResolvable($value)) {
                     $value = $this->getParameterDefaultValue($parameter, $method);
@@ -86,7 +91,7 @@ class ParameterResolver
     {
         try {
             return $parameter->getDefaultValue();
-        } catch (\ReflectionException) {
+        } catch (ReflectionException) {
             throw new InvalidDefinitionException(sprintf(
                 'The parameter "%s" of %s has no type defined or guessable. It has a default value, '
                 . 'but the default value can\'t be read through Reflection because it is a PHP internal class.',

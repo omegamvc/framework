@@ -3,6 +3,8 @@
 namespace Omega\Container\Invoker\ParameterResolver;
 
 use ReflectionFunctionAbstract;
+use function array_diff_key;
+use function is_int;
 
 /**
  * Simply returns all the values of the $providedParameters array that are
@@ -14,8 +16,14 @@ use ReflectionFunctionAbstract;
  * Parameters that are not indexed by a number (i.e. parameter position)
  * will be ignored.
  */
-class NumericArrayResolver implements ParameterResolver
+class NumericArrayResolver implements ParameterResolverInterface
 {
+    /**
+     * @param ReflectionFunctionAbstract $reflection
+     * @param array $providedParameters
+     * @param array $resolvedParameters
+     * @return array
+     */
     public function getParameters(
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,

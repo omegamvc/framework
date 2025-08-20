@@ -4,10 +4,16 @@ namespace Omega\Container\Invoker;
 
 use Closure;
 use Omega\Container\ContainerInterface;
+use Omega\Container\Exceptions\ContainerExceptionInterface;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Exceptions\NotFoundExceptionInterface;
-use ReflectionException;
 use ReflectionMethod;
+
+use function explode;
+use function is_array;
+use function is_callable;
+use function is_string;
+use function method_exists;
 
 /**
  * Resolves a callable from a container.
@@ -15,7 +21,7 @@ use ReflectionMethod;
 class CallableResolver
 {
     /** @var ContainerInterface */
-    private $container;
+    private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
@@ -25,13 +31,15 @@ class CallableResolver
     /**
      * Resolve the given callable into a real PHP callable.
      *
-     * @param callable|string|array $callable
+     * @param callable|array|string $callable
      * @return callable Real PHP callable.
-     * @throws NotCallableException|ReflectionException
+     * @throws ContainerExceptionInterface
+     * @throws NotCallableException
+     * @throws NotFoundExceptionInterface
      */
-    public function resolve($callable): callable
+    public function resolve(callable|array|string $callable): callable
     {
-        if (is_string($callable) && strpos($callable, '::') !== false) {
+        if (is_string($callable) && str_contains($callable, '::')) {
             $callable = explode('::', $callable, 2);
         }
 
@@ -45,11 +53,13 @@ class CallableResolver
     }
 
     /**
-     * @param callable|string|array $callable
+     * @param callable|array|string $callable
      * @return callable|mixed
-     * @throws NotCallableException|ReflectionException
+     * @throws NotCallableException
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
      */
-    private function resolveFromContainer($callable)
+    private function resolveFromContainer(callable|array|string $callable): mixed
     {
         // Shortcut for a very common use case
         if ($callable instanceof Closure) {
@@ -103,9 +113,9 @@ class CallableResolver
      * Check if the callable represents a static call to a non-static method.
      *
      * @param mixed $callable
-     * @throws ReflectionException
+     * @return bool
      */
-    private function isStaticCallToNonStaticMethod($callable): bool
+    private function isStaticCallToNonStaticMethod(mixed $callable): bool
     {
         if (is_array($callable) && is_string($callable[0])) {
             [$class, $method] = $callable;

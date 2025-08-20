@@ -12,7 +12,7 @@ use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\Source\AttributeBasedAutowiring;
 use Omega\Container\Definition\Source\DefinitionArray;
 use Omega\Container\Definition\Source\DefinitionFile;
-use Omega\Container\Definition\Source\DefinitionSource;
+use Omega\Container\Definition\Source\DefinitionSourceInterface;
 use Omega\Container\Definition\Source\NoAutowiring;
 use Omega\Container\Definition\Source\ReflectionBasedAutowiring;
 use Omega\Container\Definition\Source\SourceCache;
@@ -60,7 +60,7 @@ class ContainerBuilder
     private ?ContainerInterface $wrapperContainer = null;
 
     /**
-     * @var DefinitionSource[]|string[]|array[]
+     * @var DefinitionSourceInterface[]|string[]|array[]
      */
     private array $definitionSources = [];
 
@@ -272,12 +272,12 @@ class ContainerBuilder
     /**
      * Add definitions to the container.
      *
-     * @param string|array|DefinitionSource ...$definitions Can be an array of definitions, the
+     * @param string|array|DefinitionSourceInterface ...$definitions Can be an array of definitions, the
      *                                                      name of a file containing definitions
      *                                                      or a DefinitionSource object.
      * @return $this
      */
-    public function addDefinitions(string|array|DefinitionSource ...$definitions) : self
+    public function addDefinitions(string|array|DefinitionSourceInterface ...$definitions) : self
     {
         $this->ensureNotLocked();
 

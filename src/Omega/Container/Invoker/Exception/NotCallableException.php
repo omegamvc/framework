@@ -2,13 +2,22 @@
 
 namespace Omega\Container\Invoker\Exception;
 
+use function get_class;
+use function is_array;
+use function is_object;
+use function method_exists;
+use function sprintf;
+use function var_export;
+
 /**
  * The given callable is not actually callable.
  */
 class NotCallableException extends InvocationException
 {
     /**
-     * @param mixed $value
+     * @param $value
+     * @param bool $containerEntry
+     * @return self
      */
     public static function fromInvalidCallable($value, bool $containerEntry = false): self
     {

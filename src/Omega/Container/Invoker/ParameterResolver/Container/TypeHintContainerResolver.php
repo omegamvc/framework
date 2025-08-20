@@ -3,17 +3,20 @@
 namespace Omega\Container\Invoker\ParameterResolver\Container;
 
 use Omega\Container\ContainerInterface;
-use Omega\Container\Invoker\ParameterResolver\ParameterResolver;
+use Omega\Container\Exceptions\ContainerExceptionInterface;
+use Omega\Container\Exceptions\NotFoundExceptionInterface;
+use Omega\Container\Invoker\ParameterResolver\ParameterResolverInterface;
 use ReflectionFunctionAbstract;
 use ReflectionNamedType;
+use function array_diff_key;
 
 /**
  * Inject entries from a DI container using the type-hints.
  */
-class TypeHintContainerResolver implements ParameterResolver
+class TypeHintContainerResolver implements ParameterResolverInterface
 {
     /** @var ContainerInterface */
-    private $container;
+    private ContainerInterface $container;
 
     /**
      * @param ContainerInterface $container The container to get entries from.
@@ -23,6 +26,14 @@ class TypeHintContainerResolver implements ParameterResolver
         $this->container = $container;
     }
 
+    /**
+     * @param ReflectionFunctionAbstract $reflection
+     * @param array $providedParameters
+     * @param array $resolvedParameters
+     * @return array
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function getParameters(
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,

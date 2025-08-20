@@ -8,18 +8,22 @@ use Omega\Container\ContainerInterface;
 
 /**
  * Describes a definition that can resolve itself.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-interface SelfResolvingDefinition
+interface SelfResolvingDefinitionInterface
 {
     /**
      * Resolve the definition and return the resulting value.
+     *
+     * @param ContainerInterface $container
+     * @return mixed
      */
     public function resolve(ContainerInterface $container) : mixed;
 
     /**
      * Check if a definition can be resolved.
+     *
+     * @param ContainerInterface $container
+     * @return bool
      */
     public function isResolvable(ContainerInterface $container) : bool;
 }
