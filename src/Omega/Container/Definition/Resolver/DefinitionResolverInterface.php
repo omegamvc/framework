@@ -20,7 +20,6 @@ interface DefinitionResolverInterface
      * Resolve a definition to a value.
      *
      * @param DefinitionInterface $definition Object that defines how the value should be obtained.
-     * @psalm-param T    $definition
      * @param array      $parameters Optional parameters to use to build the entry.
      * @return mixed Value obtained from the definition.
      * @throws DependencyException
@@ -32,7 +31,6 @@ interface DefinitionResolverInterface
      * Check if a definition can be resolved.
      *
      * @param DefinitionInterface $definition Object that defines how the value should be obtained.
-     * @psalm-param T    $definition
      * @param array      $parameters Optional parameters to use to build the entry.
      */
     public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool;

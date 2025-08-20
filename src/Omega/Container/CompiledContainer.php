@@ -50,7 +50,6 @@ abstract class CompiledContainer extends Container
             return $this->resolvedEntries[$id];
         }
 
-        /** @psalm-suppress UndefinedConstant */
         $method = static::METHOD_MAPPING[$id] ?? null;
 
         // If it's a compiled entry, then there is a method in this class
@@ -86,7 +85,6 @@ abstract class CompiledContainer extends Container
     public function has(string $id) : bool
     {
         // The parent method is overridden to check in our array, it avoids resolving definitions
-        /** @psalm-suppress UndefinedConstant */
         if (isset(static::METHOD_MAPPING[$id])) {
             return true;
         }

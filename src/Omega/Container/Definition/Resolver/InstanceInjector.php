@@ -34,7 +34,6 @@ class InstanceInjector extends ObjectCreator implements DefinitionResolverInterf
      */
     public function resolve(DefinitionInterface $definition, array $parameters = []) : ?object
     {
-        /** @psalm-suppress InvalidCatch */
         try {
             /** @noinspection PhpPossiblePolymorphicInvocationInspection */
             $this->injectMethodsAndProperties($definition->getInstance(), $definition->objectDefinition);

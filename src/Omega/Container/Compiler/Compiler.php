@@ -435,7 +435,6 @@ class Compiler
         if ($value instanceof Closure) {
             return true;
         }
-        /** @psalm-suppress UndefinedClass */
         if ((PHP_VERSION_ID >= 80100) && ($value instanceof UnitEnum)) {
             return true;
         }

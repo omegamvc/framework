@@ -119,13 +119,11 @@ class ObjectCreator implements DefinitionResolverInterface
             ));
         }
 
-        /** @psalm-var class-string $classname */
         $classname = $definition->getClassName();
         $classReflection = new ReflectionClass($classname);
 
         $constructorInjection = $definition->getConstructorInjection();
 
-        /** @psalm-suppress InvalidCatch */
         try {
             $args = $this->parameterResolver->resolveParameters(
                 $constructorInjection,

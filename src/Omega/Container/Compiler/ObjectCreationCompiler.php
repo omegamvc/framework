@@ -165,11 +165,6 @@ readonly class ObjectCreationCompiler
         $subDefinition->setLazy(false);
         $subDefinition = $this->compiler->compileValue($subDefinition);
 
-        /** @var class-string $className At this point we have checked the class is valid */
-        $className = $definition->getClassName();
-
-        $this->compiler->getProxyFactory()->generateProxyClass($className);
-
         return <<<STR
                     \$object = \$this->proxyFactory->createProxy(
                         '{$definition->getClassName()}',

@@ -18,13 +18,12 @@ use Omega\Container\Definition\Source\ReflectionBasedAutowiring;
 use Omega\Container\Definition\Source\SourceCache;
 use Omega\Container\Definition\Source\SourceChain;
 use Omega\Container\Proxy\NativeProxyFactory;
-use Omega\Container\Proxy\ProxyFactory;
+
 use function array_map;
 use function array_reverse;
 use function class_exists;
 use function is_array;
 use function is_string;
-use const PHP_VERSION_ID;
 
 /**
  * Helper to create and configure a Container.
@@ -36,8 +35,6 @@ use const PHP_VERSION_ID;
  *     $builder = new ContainerBuilder();
  *     $container = $builder->build();
  * ```
- *
- * @psalm-template ContainerClass of Container
  */
 class ContainerBuilder
 {
@@ -78,7 +75,6 @@ class ContainerBuilder
 
     /**
      * @param class-string<Container> $containerClass Name of the container class, used to create the container.
-     * @psalm-param class-string<ContainerClass> $containerClass
      */
     public function __construct(string $containerClass = Container::class)
     {
@@ -89,7 +85,6 @@ class ContainerBuilder
      * Build and return a container.
      *
      * @return Container
-     * @psalm-return ContainerClass
      * @throws InvalidDefinitionException
      * @throws Exception
      */
@@ -125,15 +120,13 @@ class ContainerBuilder
 
         if ($this->sourceCache) {
             if (!SourceCache::isSupported()) {
-                throw new Exception('APCu is not enabled, PHP-DI cannot use it as a cache');
+                throw new Exception('APCu is not enabled, Omega\Container cannot use it as a cache');
             }
             // Wrap the source with the cache decorator
             $source = new SourceCache($source, $this->sourceCacheNamespace);
         }
 
-        $proxyFactory = (PHP_VERSION_ID >= 80400)
-            ? new NativeProxyFactory()
-            : new ProxyFactory($this->proxyDirectory);
+		$proxyFactory = new NativeProxyFactory();
 
         $this->locked = true;
 
@@ -168,15 +161,9 @@ class ContainerBuilder
      * - in production you should clear that directory every time you deploy
      * - in development you should not compile the container
      *
-     * @see https://php-di.org/doc/performances.html
-     *
-     * @psalm-template T of CompiledContainer
-     *
      * @param string $directory Directory in which to put the compiled container.
      * @param string $containerClass Name of the compiled class. Customize only if necessary.
      * @param class-string<Container> $containerParentClass Name of the compiled container parent class. Customize only if necessary.
-     * @psalm-param class-string<T> $containerParentClass
-     * @psalm-return self<T>
      */
     public function enableCompilation(
         string $directory,
