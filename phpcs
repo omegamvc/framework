@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<ruleset 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    name="PHP_CodeSniffer" 
+<ruleset
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    name="PHP_CodeSniffer"
     xsi:noNamespaceSchemaLocation="phpcs.xsd"
     >
     <description>The Omega coding standard. PSR12 + Types</description>
@@ -20,7 +20,4 @@
             <property name="ignoreComments" value="false"/>
         </properties>
     </rule>
-
-    <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/css/*</exclude-pattern>
-    <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/js/*</exclude-pattern>
 </ruleset>

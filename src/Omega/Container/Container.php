@@ -30,7 +30,6 @@ class Container extends AbstractContainer implements ArrayAccess
         array|MutableDefinitionSourceInterface $definitions = [],
         ?ContainerInterface $wrapperContainer = null
     ) {
-        // Qui puoi fare logica custom (ContainerBuilder, cache, ecc)
         parent::__construct($definitions, $wrapperContainer);
     }
 

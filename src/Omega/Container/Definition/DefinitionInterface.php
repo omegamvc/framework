@@ -7,21 +7,12 @@ namespace Omega\Container\Definition;
 use Omega\Container\Factory\RequestedEntryInterface;
 
 /**
- * Definition.
+ * Definition of a container entry.
  *
- * @internal This interface is internal to PHP-DI and may change between minor versions.
- *
- * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ * Extends RequestedEntryInterface: every Definition must implement getName(): string.
  */
 interface DefinitionInterface extends RequestedEntryInterface, \Stringable
 {
-    /**
-     * Returns the name of the entry in the container.
-     *
-     * @return string
-     */
-    public function getName() : string;
-
     /**
      * Set the name of the entry in the container.
      *

@@ -7,9 +7,11 @@ namespace Omega\Container\Attribute;
 use Attribute;
 use JsonException;
 use Omega\Container\Definition\Exceptions\InvalidAttributeException;
+
 use function is_array;
 use function is_string;
 use function json_encode;
+
 use const JSON_THROW_ON_ERROR;
 
 /**

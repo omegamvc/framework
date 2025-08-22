@@ -22,7 +22,7 @@ class RequestFactory
      */
     public static function capture(): Request
     {
-        return (new self())->getFromGlobal();
+        return new self()->getFromGlobal();
     }
 
     public function getFromGlobal(): Request
