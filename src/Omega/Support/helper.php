@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-use DI\DependencyException;
-use DI\NotFoundException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Collection\CollectionImmutable;
+use Omega\Support\Env;
 use Omega\Http\RedirectResponse;
 use Omega\Http\Response;
 use Omega\Application\Application;
@@ -405,5 +406,48 @@ if (!function_exists('abort')) {
     function abort(int $code, string $message = '', array $headers = []): void
     {
         app()->abort($code, $message, $headers);
+    }
+}
+
+if (!function_exists('env')) {
+    function env(string $key, mixed $default = null): mixed
+    {
+        return Env::get($key, $default);
+    }
+}
+
+if (!function_exists('set_path')) {
+    /**
+     * Restituisce il path completo associato a una chiave tipo "app.middlewares",
+     * con slash iniziale e finale corretti.
+     *
+     * @param string $key Chiave da esplodere in path
+     * @return string Path completo
+     * @throws InvalidArgumentException se la chiave è vuota
+     */
+    function set_path(string $key): string
+    {
+        if ($key === '') {
+            throw new InvalidArgumentException('La chiave non può essere vuota.');
+        }
+
+        // Sostituisce i punti con DIRECTORY_SEPARATOR
+        $path = DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $key) . DIRECTORY_SEPARATOR;
+
+        return $path;
+    }
+}
+
+if (!function_exists('get_path')) {
+    /**
+     * Get application config path, base on config file.
+     *
+     * @param string $id
+     * @param string $suffix_path Add string end of path.
+     * @return string Config path folder.
+     */
+    function get_path(string $id, string $suffix_path = ''): string
+    {
+        return app()->get($id) . $suffix_path;
     }
 }

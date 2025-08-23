@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace Omega\Container\Definition;
 
-use Omega\Container\Factory\RequestedEntryInterface;
-
 /**
  * Definition of a container entry.
  *
  * Extends RequestedEntryInterface: every Definition must implement getName(): string.
  */
-interface DefinitionInterface extends RequestedEntryInterface, \Stringable
+interface DefinitionInterface extends \Stringable
 {
+    /**
+     * Returns the name of the entry that was requested by the container.
+     *
+     * @return string
+     */
+    public function getName() : string;
+
     /**
      * Set the name of the entry in the container.
      *

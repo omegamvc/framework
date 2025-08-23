@@ -6,24 +6,33 @@ namespace Omega\Container\Definition;
 
 abstract class AbstractDefinition implements DefinitionInterface
 {
-    protected string $name = '';
+    private string $definitionName = '';
+
+    public string $name {
+        get {
+            return $this->definitionName;
+        }
+        set {
+            $this->definitionName = $value;
+        }
+    }
 
     public function __construct(?string $name = null)
     {
-        if ($name !== null) {
-            $this->name = $name;
+        if ($name !==  null) {
+            $this->setName($name);
         }
     }
 
     public function getName(): string
     {
-        return $this->name;
+        return $this->definitionName;
     }
 
     public function setName(?string $name = null): void
     {
         if ($name !== null) {
-            $this->name = $name;
+            $this->definitionName = $name;
         }
     }
 }

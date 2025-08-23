@@ -17,8 +17,6 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 
-use const PHP_VERSION_ID;
-
 /**
  * Create objects based on an object definition.
  *
@@ -219,11 +217,7 @@ class ObjectCreator implements DefinitionResolverInterface
     public static function setPrivatePropertyValue(?string $className, $object, string $propertyName, mixed $propertyValue) : void
     {
         $className = $className ?: $object::class;
-
         $property = new ReflectionProperty($className, $propertyName);
-        if (! $property->isPublic() && PHP_VERSION_ID < 80100) {
-            $property->setAccessible(true);
-        }
         $property->setValue($object, $propertyValue);
     }
 }

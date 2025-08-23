@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Omega\Container;
 
 use Exception;
-use InvalidArgumentException;
 use LogicException;
-use Omega\Container\Compiler\Compiler;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\Source\AttributeBasedAutowiring;
 use Omega\Container\Definition\Source\DefinitionArray;
@@ -21,7 +19,6 @@ use Omega\Container\Proxy\NativeProxyFactory;
 
 use function array_map;
 use function array_reverse;
-use function class_exists;
 use function is_array;
 use function is_string;
 
@@ -41,31 +38,20 @@ class ContainerBuilder
     /** @var class-string<Container> Name of the container class, used to create the container. */
     private string $containerClass;
 
-    /** @var class-string<Container> Name of the container parent class, used on compiled container. */
-    private string $containerParentClass;
-
     /** @var bool */
     private bool $useAutowiring = true;
 
     /** @var bool */
     private bool $useAttributes = false;
 
-    /** @var string|null If set, write the proxies to disk in this directory to improve performances. */
-    private ?string $proxyDirectory = null;
-
     /** @var ContainerInterface|null If PHP-DI is wrapped in another container, this references the wrapper. */
     private ?ContainerInterface $wrapperContainer = null;
 
-    /**
-     * @var DefinitionSourceInterface[]|string[]|array[]
-     */
+    /** @var DefinitionSourceInterface[]|string[]|array[] */
     private array $definitionSources = [];
 
     /** @var bool Whether the container has already been built. */
     private bool $locked = false;
-
-    /** @var string|null  */
-    private ?string $compileToDirectory = null;
 
     /** @var bool  */
     private bool $sourceCache = false;
@@ -132,51 +118,7 @@ class ContainerBuilder
 
         $containerClass = $this->containerClass;
 
-        if ($this->compileToDirectory) {
-            $compiler = new Compiler($proxyFactory);
-            $compiledContainerFile = $compiler->compile(
-                $source,
-                $this->compileToDirectory,
-                $containerClass,
-                $this->containerParentClass,
-                $this->useAutowiring
-            );
-            // Only load the file if it hasn't been already loaded
-            // (the container can be created multiple times in the same process)
-            if (!class_exists($containerClass, false)) {
-                require $compiledContainerFile;
-            }
-        }
-
         return new $containerClass($source, $proxyFactory, $this->wrapperContainer);
-    }
-
-    /**
-     * Compile the container for optimum performances.
-     *
-     * Be aware that the container is compiled once and never updated!
-     *
-     * Therefore:
-     *
-     * - in production you should clear that directory every time you deploy
-     * - in development you should not compile the container
-     *
-     * @param string $directory Directory in which to put the compiled container.
-     * @param string $containerClass Name of the compiled class. Customize only if necessary.
-     * @param class-string<Container> $containerParentClass Name of the compiled container parent class. Customize only if necessary.
-     */
-    public function enableCompilation(
-        string $directory,
-        string $containerClass = 'CompiledContainer',
-        string $containerParentClass = CompiledContainer::class,
-    ) : self {
-        $this->ensureNotLocked();
-
-        $this->compileToDirectory = $directory;
-        $this->containerClass = $containerClass;
-        $this->containerParentClass = $containerParentClass;
-
-        return $this;
     }
 
     /**
@@ -209,33 +151,6 @@ class ContainerBuilder
         $this->ensureNotLocked();
 
         $this->useAttributes = $bool;
-
-        return $this;
-    }
-
-    /**
-     * Configure the proxy generation.
-     *
-     * For dev environment, use `writeProxiesToFile(false)` (default configuration)
-     * For production environment, use `writeProxiesToFile(true, 'tmp/proxies')`
-     *
-     * @see https://php-di.org/doc/lazy-injection.html
-     *
-     * @param bool $writeToFile If true, write the proxies to disk to improve performances
-     * @param string|null $proxyDirectory Directory where to write the proxies
-     * @return $this
-     * @throws InvalidArgumentException when writeToFile is set to true and the proxy directory is null
-     */
-    public function writeProxiesToFile(bool $writeToFile, ?string $proxyDirectory = null) : self
-    {
-        $this->ensureNotLocked();
-
-        if ($writeToFile && $proxyDirectory === null) {
-            throw new InvalidArgumentException(
-                'The proxy directory must be specified if you want to write proxies on disk'
-            );
-        }
-        $this->proxyDirectory = $writeToFile ? $proxyDirectory : null;
 
         return $this;
     }
@@ -281,7 +196,7 @@ class ContainerBuilder
      * You must have APCu enabled to use it.
      *
      * Before using this feature, you should try these steps first:
-     * - enable compilation if not already done (see `enableCompilation()`)
+
      * - if you use autowiring or attributes, add all the classes you are using into your configuration so that
      *   PHP-DI knows about them and compiles them
      * Once this is done, you can try to optimize performances further with APCu. It can also be useful if you use
@@ -302,16 +217,6 @@ class ContainerBuilder
         $this->sourceCacheNamespace = $cacheNamespace;
 
         return $this;
-    }
-
-    /**
-     * Are we building a compiled container?
-     *
-     * @return bool
-     */
-    public function isCompilationEnabled() : bool
-    {
-        return (bool) $this->compileToDirectory;
     }
 
     /**

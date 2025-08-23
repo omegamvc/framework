@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Omega\Application;
 
-use DI\DependencyException;
-use DI\NotFoundException;
 use Exception;
 use Omega\Config\ConfigRepository;
 use Omega\Container\Container;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Http\Request;
 use Omega\Http\Exceptions\HttpException;

@@ -64,9 +64,6 @@ readonly class FactoryParameterResolver implements ParameterResolverInterface
 
             if ($parameterClass === 'Omega\Container\ContainerInterface') {
                 $resolvedParameters[$index] = $this->container;
-            } elseif ($parameterClass === 'Omega\Container\Factory\RequestedEntry') {
-                // By convention the second parameter is the definition
-                $resolvedParameters[$index] = $providedParameters[1];
             } elseif ($this->container->has($parameterClass)) {
                 $resolvedParameters[$index] = $this->container->get($parameterClass);
             }

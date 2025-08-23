@@ -35,6 +35,7 @@ use Omega\Container\Invoker\ParameterResolver\NumericArrayResolver;
 use Omega\Container\Invoker\ParameterResolver\ResolverChain;
 use Omega\Container\Proxy\NativeProxyFactory;
 
+use ReflectionClass;
 use function array_key_exists;
 use function array_keys;
 use function array_merge;
@@ -49,7 +50,6 @@ use function is_string;
 use function preg_replace;
 use function sort;
 use function sprintf;
-use function str_contains;
 use function ucfirst;
 use function var_export;
 
@@ -235,13 +235,12 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      */
     public function injectOn(object $instance) : object
     {
-        $className = $instance::class;
-
         // If the class is anonymous, don't cache its definition
         // Checking for anonymous classes is cleaner via Reflection, but also slower
-        $objectDefinition = str_contains($className, '@anonymous')
-            ? $this->definitionSource->getDefinition($className)
-            : $this->getDefinition($className);
+        $reflection = new ReflectionClass($instance);
+        $objectDefinition = $reflection->isAnonymous()
+            ? $this->definitionSource->getDefinition($reflection->getName())
+            : $this->getDefinition($reflection->getName());
 
         if (! $objectDefinition instanceof ObjectDefinition) {
             return $instance;
