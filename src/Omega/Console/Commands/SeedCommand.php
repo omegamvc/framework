@@ -134,7 +134,7 @@ class SeedCommand extends Command
             return 1;
         }
 
-        if (file_exists(seeder_path() . $class . '.php') && !$this->force) {
+        if (file_exists(get_path('path.seeder', $class . '.php')) && !$this->force) {
             warn("Class '{$class}::class' already exist.")->out(false);
 
             return 1;
@@ -152,7 +152,7 @@ class SeedCommand extends Command
             ->setReturnType('void')
             ->body('// run some insert db');
 
-        if (file_put_contents(seeder_path() . $class . '.php', $make->__toString())) {
+        if (file_put_contents(get_path('path.seeder', $class . '.php'), $make->__toString())) {
             ok('Success create seeder')->out();
 
             return 0;

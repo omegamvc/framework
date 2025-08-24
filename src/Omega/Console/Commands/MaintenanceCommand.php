@@ -63,11 +63,11 @@ class MaintenanceCommand extends Command
             return 1;
         }
 
-        if (false === file_exists($down = storage_path() . 'app' . DIRECTORY_SEPARATOR . 'down')) {
+        if (false === file_exists($down = get_path('path.storage') . 'app' . DIRECTORY_SEPARATOR . 'down')) {
             file_put_contents($down, file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'down'));
         }
 
-        file_put_contents(storage_path() . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'maintenance'));
+        file_put_contents(get_path('path.storage') . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'maintenance'));
         ok('Successfully, your application now in under maintenance.')->out();
 
         return 0;
@@ -86,7 +86,7 @@ class MaintenanceCommand extends Command
             return 1;
         }
 
-        if (false === unlink($up = storage_path() . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php')) {
+        if (false === unlink($up = get_path('path.storage') . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php')) {
             warn('Application stil maintenance mode.')->out(false);
             info("Remove manually maintenance file in `$up`.")->out();
 

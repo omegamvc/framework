@@ -6,22 +6,29 @@ namespace Omega\Support\Bootstrap;
 
 use Omega\Application\Application;
 use Omega\Config\ConfigRepository;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 
-use function array_merge;
 use function date_default_timezone_set;
 use function file_exists;
 use function glob;
 
 class ConfigProviders
 {
+    /**
+     * @throws NotFoundException
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     */
     public function bootstrap(Application $app): void
     {
-        $configPath = $app->getConfigPath();
-        $config     =  $app->defaultConfigs();
+        $configPath = get_path('path.config');
+        $config     = [];
         $hasCache   = false;
 
         if (file_exists($file = $app->getApplicationCachePath() . 'config.php')) {
-            $config    = array_merge($config, require $file);
+            $config   = require $file;
             $hasCache = true;
         }
 
@@ -35,6 +42,6 @@ class ConfigProviders
 
         $app->loadConfig(new ConfigRepository($config));
 
-        date_default_timezone_set($config['time_zone'] ?? 'UTC');
+        date_default_timezone_set(env('APP_TIMEZONE'));
     }
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
 use Omega\Collection\CollectionImmutable;
@@ -13,224 +14,18 @@ use Omega\Exceptions\ApplicationNotAvailableException;
 use Omega\Support\Vite;
 use Omega\Router\Router;
 
-if (!function_exists('app_path')) {
-    /**
-     * Get full application path, base on config file.
-     *
-     * @param string $folder_name Special path name.
-     * @return string Application path folder.
-     */
-    function app_path(string $folder_name): string
-    {
-        $path = app()->getAppPath();
-
-        return $path . DIRECTORY_SEPARATOR . $folder_name;
-    }
-}
-
-if (!function_exists('model_path')) {
-    /**
-     * Get application model path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Model path folder.
-     */
-    function model_path(string $suffix_path = ''): string
-    {
-        return app()->getModelPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('view_path')) {
-    /**
-     * Get application base view path, use for get located view framework.
-     * Remember since 0.32 view path is not single string (array of string).
-     * This also include in `view_paths()`.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string View path folder.
-     */
-    function view_path(string $suffix_path = ''): string
-    {
-        return app()->getViewPath() . $suffix_path;
-    }
-}
-
 if (!function_exists('view_paths')) {
     /**
      * Get application view paths, base on config file.
      *
      * @return string[] View path folder.
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
     function view_paths(): array
     {
         return app()->getViewPaths();
-    }
-}
-
-if (!function_exists('controllers_path')) {
-    /**
-     * Get application controllers path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Controller path folder.
-     */
-    function controllers_path(string $suffix_path = ''): string
-    {
-        return app()->getControllerPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('services_path')) {
-    /**
-     * Get application services path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Service path folder.
-     */
-    function services_path(string $suffix_path = ''): string
-    {
-        return app()->getServicesPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('component_path')) {
-    /**
-     * Get application component path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Component path folder.
-     */
-    function component_path(string $suffix_path = ''): string
-    {
-        return app()->getComponentPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('commands_path')) {
-    /**
-     * Get application commands path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Command path folder.
-     */
-    function commands_path(string $suffix_path = ''): string
-    {
-        return app()->getCommandPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('storage_path')) {
-    /**
-     * Get application storage path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string storage path folder.
-     */
-    function storage_path(string $suffix_path = ''): string
-    {
-        return app()->getStoragePath() . $suffix_path;
-    }
-}
-
-if (!function_exists('cache_path')) {
-    /**
-     * Get application cache path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Cache path folder.
-     */
-    function cache_path(string $suffix_path = ''): string
-    {
-        return app()->getCachePath() . $suffix_path;
-    }
-}
-
-if (!function_exists('compiled_view_path')) {
-    /**
-     * Get application compiled path., base on config file.
-     */
-    function compiled_view_path(): string
-    {
-        return app()->getCompiledViewPath();
-    }
-}
-
-if (!function_exists('config_path')) {
-    /**
-     * Get application config path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Config path folder.
-     */
-    function config_path(string $suffix_path = ''): string
-    {
-        return app()->getConfigPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('middleware_path')) {
-    /**
-     * Get application middleware path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Middleware path folder.
-     */
-    function middleware_path(string $suffix_path = ''): string
-    {
-        return app()->getMiddlewarePath() . $suffix_path;
-    }
-}
-
-if (!function_exists('provider_path')) {
-    /**
-     * Get application provider path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Provider path folder.
-     */
-    function provider_path(string $suffix_path = ''): string
-    {
-        return app()->getProviderPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('migration_path')) {
-    /**
-     * Get application migration path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Migration path folder.
-     */
-    function migration_path(string $suffix_path = ''): string
-    {
-        return app()->getMigrationPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('seeder_path')) {
-    /**
-     * Get application seeder path, base on config file.
-     *
-     * @param string $suffix_path Add string end of path.
-     * @return string Seeder path folder.
-     */
-    function seeder_path(string $suffix_path = ''): string
-    {
-        return app()->getSeederPath() . $suffix_path;
-    }
-}
-
-if (!function_exists('base_path')) {
-    /**
-     * Get base path.
-     *
-     * @param string $insert_path Insert string in end of path.
-     * @return string Base path folder.
-     */
-    function base_path(string $insert_path = ''): string
-    {
-        return app()->getBasePath() . $insert_path;
     }
 }
 
@@ -239,10 +34,13 @@ if (!function_exists('app_env')) {
      * Check application environment mode.
      *
      * @return string Application environment mode.
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
     function app_env(): string
     {
-        return app()->environment();
+        return app()->getEnvironment();
     }
 }
 
@@ -251,6 +49,9 @@ if (!function_exists('is_production')) {
      * Check application production mode.
      *
      * @return bool True if in production mode.
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
     function is_production(): bool
     {
@@ -263,6 +64,9 @@ if (!function_exists('is_dev')) {
      * Check application development mode.
      *
      * @return bool True if in dev mode.
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
     function is_dev(): bool
     {
@@ -294,6 +98,7 @@ if (!function_exists('config')) {
      *
      * @return CollectionImmutable<string, mixed>
      * @throws DependencyException
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     function config(): CollectionImmutable
@@ -311,6 +116,7 @@ if (!function_exists('view')) {
      * @param array<string, mixed> $option
      * @return Response
      * @throws DependencyException
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     function view(string $view_path, array $data = [], array $option = []): Response
@@ -428,13 +234,10 @@ if (!function_exists('set_path')) {
     function set_path(string $key): string
     {
         if ($key === '') {
-            throw new InvalidArgumentException('La chiave non può essere vuota.');
+            throw new InvalidArgumentException('The path key cannot be an empty string.');
         }
 
-        // Sostituisce i punti con DIRECTORY_SEPARATOR
-        $path = DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $key) . DIRECTORY_SEPARATOR;
-
-        return $path;
+        return DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $key) . DIRECTORY_SEPARATOR;
     }
 }
 
@@ -442,12 +245,21 @@ if (!function_exists('get_path')) {
     /**
      * Get application config path, base on config file.
      *
-     * @param string $id
+     * @param string|array $id
      * @param string $suffix_path Add string end of path.
-     * @return string Config path folder.
+     * @return string|array Config path folder or an array of config path folder.
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
-    function get_path(string $id, string $suffix_path = ''): string
+    function get_path(string|array $id, string $suffix_path = ''): string|array
     {
-        return app()->get($id) . $suffix_path;
+        $value = app()->get($id);
+
+        if (is_array($value)) {
+            return array_map(fn ($v) => $v . $suffix_path, $value);
+        }
+
+        return $value . $suffix_path;
     }
 }

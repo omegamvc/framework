@@ -175,7 +175,7 @@ class MigrationCommand extends Command
             : 0;
         $batch = false === $batch ? $hights : $batch;
 
-        $paths   = [migration_path(), ...static::$vendor_paths];
+        $paths   = [get_path('path.migration'), ...static::$vendor_paths];
         $migrate = new Collection([]);
         foreach ($paths as $dir) {
             foreach (new \DirectoryIterator($dir) as $file) {

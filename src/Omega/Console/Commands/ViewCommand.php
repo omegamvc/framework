@@ -108,21 +108,21 @@ class ViewCommand extends Command
      */
     public function cache(Templator $templator): int
     {
-        $files = $this->findFiles(view_path(), $this->prefix);
+        $files = $this->findFiles(get_path('path.view'), $this->prefix);
         if ([] === $files) {
             return 1;
         }
         info('build compiler cache')->out(false);
         $count     = 0;
         $progress = new ProgressBar(':progress :percent - :current', [
-            ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], view_path(), '') : '',
+            ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], get_path('path.view'), '') : '',
         ]);
 
         $progress->mask = count($files);
         $watch_start    = microtime(true);
         foreach ($files as $file) {
             if (is_file($file)) {
-                $filename = Str::replace($file, view_path(), '');
+                $filename = Str::replace($file, get_path('path.view'), '');
                 $templator->compile($filename);
                 $count++;
             }
@@ -137,8 +137,8 @@ class ViewCommand extends Command
 
     public function clear(): int
     {
-        warn('Clear cache file in ' . cache_path())->out(false);
-        $files = $this->findFiles(cache_path() . DIRECTORY_SEPARATOR, $this->prefix);
+        warn('Clear cache file in ' . get_path('path.cache'))->out(false);
+        $files = $this->findFiles(get_path('path.cache') . DIRECTORY_SEPARATOR, $this->prefix);
 
         if (0 === count($files)) {
             warn('No file cache clear.')->out();
@@ -148,7 +148,7 @@ class ViewCommand extends Command
 
         $count     = 0;
         $progress = new ProgressBar(':progress :percent - :current', [
-            ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], view_path(), '') : '',
+            ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], get_path('path.view'), '') : '',
         ]);
 
         $progress->mask = count($files);
@@ -168,7 +168,7 @@ class ViewCommand extends Command
 
     public function watch(Templator $templator): int
     {
-        warn('Clear cache file in ' . view_path() . $this->prefix)->out(false);
+        warn('Clear cache file in ' . get_path('path.view') . $this->prefix)->out(false);
 
         $compiled    = [];
         $width       = $this->getWidth(40, 80);
@@ -235,7 +235,7 @@ class ViewCommand extends Command
      */
     private function getIndexFiles(): array
     {
-        $files = $this->findFiles(view_path(), $this->prefix);
+        $files = $this->findFiles(get_path('path.view'), $this->prefix);
 
         if (empty($files)) {
             warn('Error finding view file(s).')->out();
@@ -266,7 +266,7 @@ class ViewCommand extends Command
     private function compile(Templator $templator, string $file_path, int $width): array
     {
         $watch_start     = microtime(true);
-        $filename        = Str::replace($file_path, view_path(), '');
+        $filename        = Str::replace($file_path, get_path('path.view'), '');
         $templator->compile($filename);
         $length            = strlen($filename);
         $executeTime       = round(microtime(true) - $watch_start, 3) * 1000;
@@ -292,7 +292,7 @@ class ViewCommand extends Command
         $compiled        = [];
         $watch_start     = microtime(true);
         foreach ($get_indexes as $file => $time) {
-            $filename        = Str::replace($file, view_path(), '');
+            $filename        = Str::replace($file, get_path('path.view'), '');
             $templator->compile($filename);
             foreach ($templator->getDependency($file) as $compile => $time) {
                 $compile                   = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $compile);

@@ -87,9 +87,9 @@ class MakeCommand extends Command
 
         $success = $this->makeTemplate($this->option[0], [
             'template_location' => __DIR__ . '/stubs/controller',
-            'save_location'     => controllers_path(),
+            'save_location'     => get_path('path.controller'),
             'pattern'           => '__controller__',
-            'surfix'            => 'Controller.php',
+            'suffix'            => 'Controller.php',
         ]);
 
         if ($success) {
@@ -109,9 +109,9 @@ class MakeCommand extends Command
 
         $success = $this->makeTemplate($this->option[0], [
             'template_location' => __DIR__ . '/stubs/view',
-            'save_location'     => view_path(),
+            'save_location'     => get_path('path.view'),
             'pattern'           => '__view__',
-            'surfix'            => '.template.php',
+            'suffix'            => '.template.php',
         ]);
 
         if ($success) {
@@ -131,9 +131,9 @@ class MakeCommand extends Command
 
         $success = $this->makeTemplate($this->option[0], [
             'template_location' => __DIR__ . '/stubs/service',
-            'save_location'     => services_path(),
+            'save_location'     => get_path('path.services'),
             'pattern'           => '__service__',
-            'surfix'            => 'Service.php',
+            'suffix'            => 'Service.php',
         ]);
 
         if ($success) {
@@ -151,7 +151,7 @@ class MakeCommand extends Command
     {
         info('Making model file...')->out(false);
         $name           = ucfirst($this->option[0]);
-        $model_location = model_path() . $name . '.php';
+        $model_location = get_path('path.model') . $name . '.php';
 
         if (file_exists($model_location) && false === $this->option('force', false)) {
             warn('File already exist')->out(false);
@@ -214,7 +214,7 @@ class MakeCommand extends Command
     private function makeTemplate(string $argument, array $make_option, string $folder = ''): bool
     {
         $folder = ucfirst($folder);
-        if (file_exists($file_name = $make_option['save_location'] . $folder . $argument . $make_option['surfix'])) {
+        if (file_exists($file_name = $make_option['save_location'] . $folder . $argument . $make_option['suffix'])) {
             warn('File already exist')->out(false);
 
             return false;
@@ -238,20 +238,20 @@ class MakeCommand extends Command
         $name    = $this->option[0];
         $success = $this->makeTemplate($name, [
             'template_location' => __DIR__ . '/stubs/command',
-            'save_location'     => commands_path(),
+            'save_location'     => get_path('path.command'),
             'pattern'           => '__command__',
-            'surfix'            => 'Command.php',
+            'suffix'            => 'Command.php',
         ]);
 
         if ($success) {
-            $geContent = file_get_contents(config_path() . 'command.config.php');
-            $geContent = str_replace(
+            $getContent = file_get_contents(get_path('path.config') . 'command.php');
+            $getContent = str_replace(
                 '// more command here',
                 "// {$name} \n\t" . 'App\\Commands\\' . $name . 'Command::$' . "command\n\t// more command here",
-                $geContent
+                $getContent
             );
 
-            file_put_contents(config_path() . 'command.config.php', $geContent);
+            file_put_contents(get_path('path.config') . 'command.php', $getContent);
 
             ok('Finish created command file')->out();
 
@@ -276,7 +276,7 @@ class MakeCommand extends Command
         }
 
         $name         = strtolower($name);
-        $path_to_file = migration_path();
+        $path_to_file = get_path('path.migration');
         $bath         = now()->format('Y_m_d_His');
         $file_name    = "{$path_to_file}{$bath}_{$name}.php";
 

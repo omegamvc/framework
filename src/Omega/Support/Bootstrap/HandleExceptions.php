@@ -46,7 +46,7 @@ class HandleExceptions
 
         register_shutdown_function([$this, 'handleShutdown']);
 
-        if ('testing' !== $app->environment()) {
+        if ('testing' !== $app->getEnvironment()) {
             ini_set('display_errors', 'Off');
         }
     }
