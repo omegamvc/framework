@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Style\ProgressBar;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Container\Provider\AbstractServiceProvider;
@@ -19,7 +19,7 @@ use function Omega\Console\ok;
  * @property bool   $force Whether to force the import, overwriting existing files.
  * @property string $tag   The tag to identify specific commands to run.
  */
-class VendorImportCommand extends Command
+class VendorImportCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 

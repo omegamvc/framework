@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 namespace Omega\Console\Style;
 
-use Omega\Console\Interfaces\OutputStream;
-use Omega\Console\Interfaces\RuleInterface;
+use Omega\Console\IO\OutputStreamInterface;
+use Omega\Console\Style\Color\RuleInterface;
 use Omega\Console\Style\Color\BackgroundColor;
 use Omega\Console\Style\Color\ForegroundColor;
 use Omega\Console\Traits\CommandTrait;
 use Omega\Text\Str;
 
+use function max;
+use function method_exists;
 use function Omega\Text\text;
+use function preg_replace;
+use function str_repeat;
+use function strlen;
+use function strtolower;
+
+use const PHP_EOL;
 
 /**
  * @method self textRed()
@@ -48,91 +56,55 @@ class Style
 {
     use CommandTrait;
 
-    /**
-     * Array of command rule.
-     *
-     * @var array<int, int>
-     */
-    private $rules = [];
+    /** @var array<int, int> Array of command rule. */
+    private array $rules = [];
+
+    /** @var array<int, array<int, string|int>> Array of command rule. */
+    private array $rawRules = [];
+
+    /** @var array<int, int> Array of command rule. */
+    private array $resetRules = [Decorate::RESET];
+
+    /** @var array<int, int> Rule of text color. */
+    private array $textColorRule = [Decorate::TEXT_DEFAULT];
+
+    /** @var array<int, int> Rule of background color. */
+    private array $bgColorRule = [Decorate::BG_DEFAULT];
+
+    /** @var array<int, int> Rule of text decorate. */
+    private array $decorateRules = [];
+
+    /**  @var int|string String to style. */
+    private string|int $text;
+
+    /** @var int Length of text. */
+    private int $length = 0;
+
+    /** @var string Reference from preview text (like prefix). */
+    private string $ref = '';
+
+    /** @var OutputStreamInterface|null */
+    private ?OutputStreamInterface $outputStream = null;
 
     /**
-     * Array of command rule.
-     *
-     * @var array<int, array<int, string|int>>
+     * @param int|string $text set text to decorate
      */
-    private $raw_rules = [];
-
-    /**
-     * Array of command rule.
-     *
-     * @var array<int, int>
-     */
-    private $reset_rules = [Decorate::RESET];
-
-    /**
-     * Rule of text color.
-     *
-     * @var array<int, int>
-     */
-    private $text_color_rule = [Decorate::TEXT_DEFAULT];
-
-    /**
-     * Rule of background color.
-     *
-     * @var array<int, int>
-     */
-    private $bg_color_rule = [Decorate::BG_DEFAULT];
-
-    /**
-     * Rule of text decorate.
-     *
-     * @var array<int, int>
-     */
-    private $decorate_rules = [];
-
-    /**
-     * String to style.
-     *
-     * @var string
-     */
-    private $text;
-
-    /**
-     * Lenght of text.
-     *
-     * @var int
-     */
-    private $length = 0;
-
-    /**
-     * Reference from preview text (like prefix).
-     *
-     * @var string
-     */
-    private $ref = '';
-
-    private ?OutputStream $output_stream = null;
-
-    /**
-     * @param string|int $text set text to decorate
-     */
-    public function __construct($text = '')
+    public function __construct(int|string $text = '')
     {
         $this->text   = $text;
-        $this->length = \strlen((string) $text);
+        $this->length = strlen((string) $text);
     }
 
     /**
      * Invoke new Rule class.
      *
      * @param string|int $text set text to decorate
-     *
      * @return self
      */
-    public function __invoke($text)
+    public function __invoke(string|int $text): self
     {
         $this->text   = $text;
-        $this->length = \strlen((string) $text);
+        $this->length = strlen((string) $text);
 
         return $this->flush();
     }
@@ -142,7 +114,7 @@ class Style
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toString($this->text, $this->ref);
     }
@@ -152,22 +124,21 @@ class Style
      *
      * @param string            $name
      * @param array<int, mixed> $arguments
-     *
      * @return self
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments): self
     {
         if (method_exists($this, $name)) {
             $constant = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
 
             if (Str::startsWith($name, 'text')) {
                 $constant              = 'TEXT' . text($constant)->upper()->slice(4);
-                $this->text_color_rule = [Decorate::getConst($constant)];
+                $this->textColorRule = [Decorate::getConstant($constant)];
             }
 
             if (Str::startsWith($name, 'bg')) {
                 $constant            =  'BG' . text($constant)->upper()->slice(2);
-                $this->bg_color_rule = [Decorate::getConst($constant)];
+                $this->bgColorRule = [Decorate::getConstant($constant)];
             }
 
             return $this;
@@ -176,12 +147,12 @@ class Style
         $constant = text($name)->upper();
         if ($constant->startsWith('TEXT_')) {
             $constant->slice(5);
-            $this->textColor(Colors::hexText(ColorVariant::getConst($constant->__toString())));
+            $this->textColor(Colors::hexText(ColorVariant::getConstant($constant->__toString())));
         }
 
         if ($constant->startsWith('BG_')) {
             $constant->slice(3);
-            $this->bgColor(Colors::hexBg(ColorVariant::getConst($constant->__toString())));
+            $this->bgColor(Colors::hexBg(ColorVariant::getConstant($constant->__toString())));
         }
 
         return $this;
@@ -191,11 +162,10 @@ class Style
      * Render text, reference with current rule.
      *
      * @param string $text Text tobe render with rule (this)
-     * @param string $ref  Text reference to be add begain text
-     *
+     * @param string $ref  Text reference to be added begin text
      * @return string
      */
-    public function toString($text, $ref = '')
+    public function toString(string $text, string $ref = ''): string
     {
         // make sure not push empty text
         if ($text == '' && $ref == '') {
@@ -206,28 +176,28 @@ class Style
         $this->rules = [];
 
         // font color
-        foreach ($this->text_color_rule as $text_color) {
+        foreach ($this->textColorRule as $text_color) {
             $this->rules[] = $text_color;
         }
 
         // bg color
-        foreach ($this->bg_color_rule as $bg_color) {
+        foreach ($this->bgColorRule as $bg_color) {
             $this->rules[] = $bg_color;
         }
 
         // decorate
-        foreach ($this->decorate_rules as $decorate) {
+        foreach ($this->decorateRules as $decorate) {
             $this->rules[] = $decorate;
         }
 
         // raw
-        foreach ($this->raw_rules as $raws) {
+        foreach ($this->rawRules as $raws) {
             foreach ($raws as $raw) {
                 $this->rules[] = $raw;
             }
         }
 
-        return $ref . $this->rules($this->rules, $text, true, $this->reset_rules);
+        return $ref . $this->rules($this->rules, $text, true, $this->resetRules);
     }
 
     /**
@@ -235,14 +205,14 @@ class Style
      *
      * @return self
      */
-    public function flush()
+    public function flush(): self
     {
-        $this->text_color_rule = [Decorate::TEXT_DEFAULT];
-        $this->bg_color_rule   = [Decorate::BG_DEFAULT];
-        $this->decorate_rules  = [];
-        $this->reset_rules     = [Decorate::RESET];
-        $this->raw_rules       = [];
-        $this->ref             = '';
+        $this->textColorRule = [Decorate::TEXT_DEFAULT];
+        $this->bgColorRule   = [Decorate::BG_DEFAULT];
+        $this->decorateRules = [];
+        $this->resetRules    = [Decorate::RESET];
+        $this->rawRules      = [];
+        $this->ref           = '';
 
         return $this;
     }
@@ -250,13 +220,12 @@ class Style
     /**
      * Set reference (add before main text).
      *
-     * @param string $text_reference
-     *
+     * @param string $textReference
      * @return self
      */
-    private function ref($text_reference)
+    private function ref(string $textReference): self
     {
-        $this->ref = $text_reference;
+        $this->ref = $textReference;
 
         return $this;
     }
@@ -264,15 +233,14 @@ class Style
     /**
      * Chain code (continue with other text).
      *
-     * @param string|int $text text
-     *
+     * @param string $text text
      * @return self
      */
-    public function push($text)
+    public function push(string $text): self
     {
         $ref        = $this->toString($this->text, $this->ref);
         $this->text = $text;
-        $this->length += \strlen((string) $text);
+        $this->length += strlen($text);
 
         return $this->flush()->ref($ref);
     }
@@ -281,18 +249,17 @@ class Style
      * Push Style.
      *
      * @param Style $style Style to push
-     *
      * @return self
      */
-    public function tap($style)
+    public function tap(Style $style): self
     {
-        $this->ref             = $this->toString($this->text, $this->ref) . $style->toString($style->ref);
-        $this->text            = $style->text;
-        $this->text_color_rule = $style->text_color_rule;
-        $this->bg_color_rule   = $style->bg_color_rule;
-        $this->decorate_rules  = $style->decorate_rules;
-        $this->reset_rules     = $style->reset_rules;
-        $this->raw_rules       = $style->raw_rules;
+        $this->ref           = $this->toString($this->text, $this->ref) . $style->toString($style->ref);
+        $this->text          = $style->text;
+        $this->textColorRule = $style->textColorRule;
+        $this->bgColorRule   = $style->bgColorRule;
+        $this->decorateRules = $style->decorateRules;
+        $this->resetRules    = $style->resetRules;
+        $this->rawRules      = $style->rawRules;
 
         $this->length += $style->length;
 
@@ -300,27 +267,24 @@ class Style
     }
 
     /**
-     * Get text length witout rule counted.
+     * Get text length without rule counted.
      *
      * @return int
      */
-    public function length()
+    public function length(): int
     {
         return $this->length;
     }
 
-    // method ------------------------------------------------
-
     /**
      * Print terminal style.
      *
-     * @param bool $new_line True if print with new line in end line
-     *
+     * @param bool $newLine True if print with new line in end line
      * @return void
      */
-    public function out($new_line = true)
+    public function out(bool $newLine = true): void
     {
-        $out = $this . ($new_line ? PHP_EOL : null);
+        $out = $this . ($newLine ? PHP_EOL : null);
 
         echo $out;
     }
@@ -329,14 +293,13 @@ class Style
      * Print terminal style if condition true.
      *
      * @param bool $condition If true will echo out
-     * @param bool $new_line  True if print with new line in end line
-     *
+     * @param bool $newLine  True if print with new line in end line
      * @return void
      */
-    public function outIf($condition, $new_line = true)
+    public function outIf(bool $condition, bool $newLine = true): void
     {
         if ($condition) {
-            $out = $this . ($new_line ? PHP_EOL : null);
+            $out = $this . ($newLine ? PHP_EOL : null);
 
             echo $out;
         }
@@ -347,7 +310,7 @@ class Style
      *
      * @return self
      */
-    public function yield()
+    public function yield(): self
     {
         echo $this;
         $this->text   = '';
@@ -360,21 +323,21 @@ class Style
     /**
      * Write stream out.
      *
-     * @param bool $new_line True if print with new line in end line
-     *
+     * @param bool $newLine True if print with new line in end line
      * @return void
      */
-    public function write($new_line = true)
+    public function write(bool $newLine = true): void
     {
-        $out = $this . ($new_line ? PHP_EOL : null);
+        $out = $this . ($newLine ? PHP_EOL : null);
 
-        if ($this->output_stream) {
-            $this->output_stream->write($out);
-        }
+        $this->outputStream?->write($out);
     }
 
     /**
-     * Clear curent line (original text is keep).
+     * Clear current line (original text is keep).
+     *
+     * @param int $line
+     * @return void
      */
     public function clear(int $line = -1): void
     {
@@ -383,29 +346,35 @@ class Style
 
     /**
      * Replace current line (original text is keep).
+     *
+     * @param string $text
+     * @param int $line
+     * @return void
      */
     public function replace(string $text, int $line = -1): void
     {
         $this->replaceLine($text, $line);
     }
 
-    public function setOutputStream(OutputStream $resourceOutputStream): self
+    /**
+     * @param OutputStreamInterface $resourceOutputStream
+     * @return $this
+     */
+    public function setOutputStream(OutputStreamInterface $resourceOutputStream): self
     {
-        $this->output_stream = $resourceOutputStream;
+        $this->outputStream = $resourceOutputStream;
 
         return $this;
     }
-
-    // style ------------------------------------------
 
     /**
      * Reset all attributes (set reset decorate to be 0).
      *
      * @return self
      */
-    public function resetDecorate()
+    public function resetDecorate(): self
     {
-        $this->reset_rules = [Decorate::RESET];
+        $this->resetRules = [Decorate::RESET];
 
         return $this;
     }
@@ -415,10 +384,10 @@ class Style
      *
      * @return self
      */
-    public function bold()
+    public function bold(): self
     {
-        $this->decorate_rules[] = Decorate::BOLD;
-        $this->reset_rules[]    = Decorate::RESET_BOLD;
+        $this->decorateRules[] = Decorate::BOLD;
+        $this->resetRules[]    = Decorate::RESET_BOLD;
 
         return $this;
     }
@@ -428,10 +397,10 @@ class Style
      *
      * @return self
      */
-    public function underline()
+    public function underline(): self
     {
-        $this->decorate_rules[] = Decorate::UNDERLINE;
-        $this->reset_rules[]    = Decorate::RESET_UNDERLINE;
+        $this->decorateRules[] = Decorate::UNDERLINE;
+        $this->resetRules[]    = Decorate::RESET_UNDERLINE;
 
         return $this;
     }
@@ -441,10 +410,10 @@ class Style
      *
      * @return self
      */
-    public function blink()
+    public function blink(): self
     {
-        $this->decorate_rules[] = Decorate::BLINK;
-        $this->reset_rules[]    = Decorate::RESET_BLINK;
+        $this->decorateRules[] = Decorate::BLINK;
+        $this->resetRules[]    = Decorate::RESET_BLINK;
 
         return $this;
     }
@@ -454,10 +423,10 @@ class Style
      *
      * @return self
      */
-    public function reverse()
+    public function reverse(): self
     {
-        $this->decorate_rules[] = Decorate::REVERSE;
-        $this->decorate_rules[] = Decorate::RESET_REVERSE;
+        $this->decorateRules[] = Decorate::REVERSE;
+        $this->decorateRules[] = Decorate::RESET_REVERSE;
 
         return $this;
     }
@@ -467,10 +436,10 @@ class Style
      *
      * @return self
      */
-    public function hidden()
+    public function hidden(): self
     {
-        $this->decorate_rules[] = Decorate::HIDDEN;
-        $this->reset_rules[]    = Decorate::RESET_HIDDEN;
+        $this->decorateRules[] = Decorate::HIDDEN;
+        $this->resetRules[]    = Decorate::RESET_HIDDEN;
 
         return $this;
     }
@@ -478,37 +447,35 @@ class Style
     /**
      * Add raw terminal code.
      *
-     * @param RuleInterface|string $raw Raw terminal code
-     *
+     * @param string|RuleInterface $raw Raw terminal code
      * @return self
      */
-    public function raw($raw)
+    public function raw(string|RuleInterface $raw): self
     {
         if ($raw instanceof ForegroundColor) {
-            $this->text_color_rule = $raw->get();
+            $this->textColorRule = $raw->getRule();
 
             return $this;
         }
 
         if ($raw instanceof BackgroundColor) {
-            $this->bg_color_rule = $raw->get();
+            $this->bgColorRule = $raw->getRule();
 
             return $this;
         }
 
-        $this->raw_rules[] = [$raw];
+        $this->rawRules[] = [$raw];
 
         return $this;
     }
 
     /**
      * @param int[] $reset rules reset
-     *
      * @return self
      */
-    public function rawReset($reset)
+    public function rawReset(array $reset): self
     {
-        $this->reset_rules = $reset;
+        $this->resetRules = $reset;
 
         return $this;
     }
@@ -517,14 +484,13 @@ class Style
      * Set text color.
      *
      * @param ForegroundColor|string $color
-     *
      * @return self
      */
-    public function textColor($color)
+    public function textColor(ForegroundColor|string $color): self
     {
-        $this->text_color_rule = $color instanceof ForegroundColor
-            ? $color->get()
-            : Colors::hexText($color)->get()
+        $this->textColorRule = $color instanceof ForegroundColor
+            ? $color->getRule()
+            : Colors::hexText($color)->getRule()
         ;
 
         return $this;
@@ -534,14 +500,13 @@ class Style
      * Set Background color.
      *
      * @param BackgroundColor|string $color
-     *
      * @return self
      */
-    public function bgColor($color)
+    public function bgColor(BackgroundColor|string $color): self
     {
-        $this->bg_color_rule = $color instanceof BackgroundColor
-            ? $color->get()
-            : Colors::hexBg($color)->get();
+        $this->bgColorRule = $color instanceof BackgroundColor
+            ? $color->getRule()
+            : Colors::hexBg($color)->getRule();
 
         return $this;
     }
@@ -550,13 +515,12 @@ class Style
      * Push/insert repeat character.
      *
      * @param string $content
-     * @param int    $repeat
-     *
+     * @param int $repeat
      * @return self
      */
-    public function repeat($content, $repeat = 1)
+    public function repeat(string $content, int $repeat = 1): self
     {
-        $repeat = $repeat < 0 ? 0 : $repeat;
+        $repeat = max($repeat, 0);
 
         return $this->push(
             str_repeat($content, $repeat)
@@ -566,25 +530,10 @@ class Style
     /**
      * Push/insert new lines.
      *
-     * @deprecated
-     *
      * @param int $repeat
-     *
      * @return self
      */
-    public function new_lines($repeat = 1)
-    {
-        return $this->repeat("\n", $repeat);
-    }
-
-    /**
-     * Push/insert new lines.
-     *
-     * @param int $repeat
-     *
-     * @return self
-     */
-    public function newLines($repeat = 1)
+    public function newLines(int $repeat = 1): self
     {
         return $this->repeat("\n", $repeat);
     }
@@ -592,12 +541,11 @@ class Style
     /**
      * Push/insert tabs.
      *
-     * @param int $repeat
-     *
+     * @param int $count
      * @return self
      */
-    public function tabs($repeat = 1)
+    public function tabs(int $count = 1): self
     {
-        return $this->repeat("\t", $repeat);
+        return $this->repeat("\t", $count);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\CommandTrait;
 use Omega\Support\Facades\DB;
 use Omega\Template\Generate;
@@ -20,7 +20,7 @@ use function Omega\Console\warn;
  * @property bool $update
  * @property bool $force
  */
-class MakeCommand extends Command
+class MakeCommand extends AbstractCommand
 {
     use CommandTrait;
 

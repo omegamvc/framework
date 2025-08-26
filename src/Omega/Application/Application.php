@@ -99,12 +99,12 @@ final class Application extends Container
 
         $this->registerAlias();
 
-        foreach ($this->pathDefinitions() as $key => $value) {
+        foreach ($this->definitions() as $key => $value) {
             $this->set($key, $value);
         }
     }
 
-    protected function pathDefinitions(): array
+    protected function definitions(): array
     {
         return [
             'path.app'                => $this->basePath . set_path('app'),
@@ -342,17 +342,6 @@ final class Application extends Container
     }
 
     /**
-     * Add booting call back, call before boot is calling.
-     *
-     * @param callable $callback
-     * @return void
-     */
-    public function bootingCallback(callable $callback): void
-    {
-        $this->bootingCallbacks[] = $callback;
-    }
-
-    /**
      * Add booted call back, call after boot is called.
      *
      * @param callable $callback
@@ -409,19 +398,6 @@ final class Application extends Container
         $this->providers[] = $providerClassName;
 
         return $provider;
-    }
-
-    /**
-     * Register terminating callbacks.
-     *
-     * @param callable $terminateCallback
-     * @return self
-     */
-    public function registerTerminate(callable $terminateCallback): self
-    {
-        $this->terminateCallback[] = $terminateCallback;
-
-        return $this;
     }
 
     /**

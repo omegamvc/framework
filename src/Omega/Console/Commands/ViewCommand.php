@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Decorate;
 use Omega\Console\Style\ProgressBar;
 use Omega\Console\Traits\PrintHelpTrait;
@@ -28,7 +28,7 @@ use function round;
 /**
  * @property string|null $prefix
  */
-class ViewCommand extends Command
+class ViewCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 

@@ -18,6 +18,9 @@
         "ext-iconv": "*",
         "ext-mbstring": "*",
         "ext-openssl": "*",
+        "ext-pcntl": "*",
+        "ext-posix": "*",
+        "ext-readline": "*",
         "omegamvc/serializable-closure":  "^2.0.0",
         "omegamvc/validator": "^2.0.0"
     },

@@ -13,9 +13,9 @@ class Alert
     /**
      * New instance.
      *
-     * @return self
+     * @return static Return static instance for method chaining.
      */
-    public static function render()
+    public static function render(): static
     {
         return new self();
     }

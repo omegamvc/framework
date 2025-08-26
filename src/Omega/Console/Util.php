@@ -16,13 +16,13 @@ final class Util
      */
     public static function loadCommandFromConfig(Application $app): array
     {
-        $command_map = [];
+        $commandMap = [];
         foreach ($app[ConfigRepository::class]->get('commands', []) as $commands) {
             foreach ($commands as $command) {
-                $command_map[] = new CommandMap($command);
+                $commandMap[] = new CommandMap($command);
             }
         }
 
-        return $command_map;
+        return $commandMap;
     }
 }

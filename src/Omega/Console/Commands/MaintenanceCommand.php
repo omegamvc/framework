@@ -6,7 +6,7 @@ namespace Omega\Console\Commands;
 
 use DI\DependencyException;
 use DI\NotFoundException;
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\PrintHelpTrait;
 
 use function file_exists;
@@ -16,7 +16,7 @@ use function Omega\Console\info;
 use function Omega\Console\ok;
 use function Omega\Console\warn;
 
-class MaintenanceCommand extends Command
+class MaintenanceCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 

@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Alert;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
-use function shell_exec;
 
+use function shell_exec;
+use function Omega\Console\fail;
 /**
- * @property string $port
- * @property bool   $expose
+ * @property string  $port
+ * @property bool $expose
  */
-class ServeCommand extends Command
+class ServeCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 
@@ -53,18 +54,28 @@ class ServeCommand extends Command
         ];
     }
 
-    public function main(): void
+    public function main(): int
     {
-        $port    = $this->port;
+        $port = $this->port;
+        if (!is_numeric($port)) {
+            fail("Port must be numeric");
+            return 0;
+        }
+
+        $this->launchServer((int)$port, $this->expose);
+        return 1;
+    }
+
+    private function launchServer(int $port, bool $expose): void
+    {
         $localIP = gethostbyname(gethostname());
 
-        $print = new Style('Server running add:');
-
+        $print = new Style('Server running at:');
         $print
             ->newLines()
             ->push('Local')->tabs()->push("http://localhost:$port")->textBlue();
 
-        if ($this->expose) {
+        if ($expose) {
             $print->newLines()->push('Network')->tabs()->push("http://$localIP:$port")->textBlue();
         }
 
@@ -75,8 +86,7 @@ class ServeCommand extends Command
             ->tap(Alert::render()->info('server running...'))
             ->out(false);
 
-        $address = $this->expose ? '0.0.0.0' : '127.0.0.1';
-
+        $address = $expose ? '0.0.0.0' : '127.0.0.1';
         shell_exec("php -S {$address}:{$port} -t public/");
     }
 }

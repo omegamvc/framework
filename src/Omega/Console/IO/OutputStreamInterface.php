@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Omega\Console\Interfaces;
+namespace Omega\Console\IO;
 
 /**
  * inspire by Aydin Hassan <aydin@hotmail.co.uk>.
  *
  * @source https://github.com/php-school/terminal/blob/master/src/IO/OutputStream.php
  */
-interface OutputStream
+interface OutputStreamInterface
 {
     public function write(string $buffer): void;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Style;
 use Omega\Cron\InterpolateInterface;
 use Omega\Cron\Schedule;
@@ -17,7 +17,7 @@ use function Omega\Console\info;
 use function round;
 use function strlen;
 
-class CronCommand extends Command
+class CronCommand extends AbstractCommand
 {
     protected InterpolateInterface $log;
 

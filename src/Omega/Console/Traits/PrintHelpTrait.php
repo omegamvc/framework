@@ -6,15 +6,14 @@ namespace Omega\Console\Traits;
 
 use Omega\Console\Style\Style;
 use Omega\Text\Str;
+use function array_keys;
+use function implode;
+use function strlen;
 
 trait PrintHelpTrait
 {
-    /**
-     * Print helper style option.
-     *
-     * @var array<string, string|int>
-     */
-    protected $printHelp = [
+    /** @var array<string, string|int> Print helper style option. */
+    protected array $printHelp = [
         'margin-left'         => 12,
         'column-1-min-length' => 24,
     ];
@@ -22,23 +21,24 @@ trait PrintHelpTrait
     /**
      * Print argument describe using style console.
      *
+     * @param Style $style
      * @return Style
      */
-    public function printCommands(Style $style)
+    public function printCommands(Style $style): Style
     {
-        $option_names =  array_keys($this->commandDescribes);
+        $optionNames =  array_keys($this->commandDescribes);
 
-        $min_length = $this->printHelp['column-1-min-length'];
-        foreach ($option_names as $name) {
-            $arguments_lenght = 0;
+        $minLength = $this->printHelp['column-1-min-length'];
+        foreach ($optionNames as $name) {
+            $argumentsLength = 0;
             if (isset($this->commandRelation[$name])) {
-                $arguments        = implode(' ', $this->commandRelation[$name]);
-                $arguments_lenght = \strlen($arguments);
+                $arguments       = implode(' ', $this->commandRelation[$name]);
+                $argumentsLength = strlen($arguments);
             }
 
-            $lenght = \strlen($name) + $arguments_lenght;
-            if ($lenght > $min_length) {
-                $min_length = $lenght;
+            $length = strlen($name) + $argumentsLength;
+            if ($length > $minLength) {
+                $minLength = $length;
             }
         }
 
@@ -54,7 +54,7 @@ trait PrintHelpTrait
             $style->push($option)->textGreen();
             $style->push($arguments)->textDim();
 
-            $range = $min_length - (\strlen($option) + \strlen($arguments));
+            $range = $minLength - (strlen($option) + strlen($arguments));
             $style->repeat(' ', $range + 8);
 
             $style->push($describe);
@@ -67,25 +67,26 @@ trait PrintHelpTrait
     /**
      * Print option describe using style console.
      *
+     * @param Style $style
      * @return Style
      */
-    public function printOptions(Style $style)
+    public function printOptions(Style $style): Style
     {
-        $option_names =  array_keys($this->optionDescribes);
+        $optionNames =  array_keys($this->optionDescribes);
 
-        $min_length = $this->printHelp['column-1-min-length'];
-        foreach ($option_names as $name) {
-            $lenght = \strlen($name);
-            if ($lenght > $min_length) {
-                $min_length = $lenght;
+        $minLength = $this->printHelp['column-1-min-length'];
+        foreach ($optionNames as $name) {
+            $length = strlen($name);
+            if ($length > $minLength) {
+                $minLength = $length;
             }
         }
 
         foreach ($this->optionDescribes as $option => $describe) {
             $style->repeat(' ', $this->printHelp['margin-left']);
 
-            $option_name = Str::fillEnd($option, ' ', $min_length + 8);
-            $style->push($option_name)->textDim();
+            $optionName = Str::fillEnd($option, ' ', $minLength + 8);
+            $style->push($optionName)->textDim();
 
             $style->push($describe);
             $style->newLines();

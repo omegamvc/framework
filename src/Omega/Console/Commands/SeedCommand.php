@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Prompt;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Template\Generate;
@@ -20,7 +20,7 @@ use function Omega\Console\warn;
  * @property string|null $class
  * @property bool|null   $force
  */
-class SeedCommand extends Command
+class SeedCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 

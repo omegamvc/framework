@@ -6,7 +6,7 @@ namespace Omega\Console\Commands;
 
 use DI\DependencyException;
 use DI\NotFoundException;
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Application\Application;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Config\ConfigRepository;
@@ -19,7 +19,7 @@ use function unlink;
 
 use const PHP_EOL;
 
-class ConfigCommand extends Command
+class ConfigCommand extends AbstractCommand
 {
     /**
      * Register command.

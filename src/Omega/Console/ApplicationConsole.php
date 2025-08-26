@@ -6,24 +6,28 @@ namespace Omega\Console;
 
 use Omega\Console\Style\Style;
 use Omega\Application\Application;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Invoker\Exception\InvocationException;
+use Omega\Container\Invoker\Exception\NotCallableException;
+use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Support\Bootstrap\BootProviders;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\RegisterFacades;
 use Omega\Support\Bootstrap\RegisterProviders;
-use Omega\Console\Util;
-use Omega\Console\CommandMap;
 
-class ConsoleKernel
+class ApplicationConsole
 {
     /**
      * Application Container.
      */
     protected Application $app;
 
-    /** @var int concole exit status */
-    protected $exit_code;
+    /** @var int console exit status */
+    protected int $exitCode;
 
-    /** @var array<int, class-string> Apllication bootstrap register. */
+    /** @var array<int, class-string> Application bootstrap register. */
     protected array $bootstrappers = [
         ConfigProviders::class,
         RegisterFacades::class,
@@ -40,13 +44,18 @@ class ConsoleKernel
     }
 
     /**
-     * Handle input (arguments) karnel.
+     * Handle input (arguments) kernel.
      *
      * @param string|array<int, string> $arguments
-     *
      * @return int Exit code
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws InvocationException
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
+     * @throws NotFoundException
      */
-    public function handle($arguments)
+    public function handle(array|string $arguments): int
     {
         // handle command empty
         $baseArgs = $arguments[1] ?? '--help';
@@ -63,13 +72,13 @@ class ConsoleKernel
 
                 $call = $this->app->call($cmd->call());
 
-                return $this->exit_code = (is_int($call) ? $call : 0);
+                return $this->exitCode = (is_int($call) ? $call : 0);
             }
         }
 
         // did you mean
         $count   = 0;
-        $similar = (new Style('Did you mean?'))->textLightYellow()->newLines();
+        $similar = new Style('Did you mean?')->textLightYellow()->newLines();
         foreach ($this->getSimilarity($baseArgs, $commands, 0.8) as $term => $score) {
             $similar->push('    > ')->push($term)->textYellow()->newLines();
             $count++;
@@ -77,8 +86,8 @@ class ConsoleKernel
 
         // if command not register
         if (0 === $count) {
-            (new Style())
-                ->push('Command Not Found, run help command')->textRed()->newLines(2)
+            new Style()
+                ->push('Command not found, run help command')->textRed()->newLines(2)
                 ->push('> ')->textDim()
                 ->push('php ')->textYellow()
                 ->push('cli ')
@@ -87,16 +96,21 @@ class ConsoleKernel
                 ->out()
             ;
 
-            return $this->exit_code = 1;
+            return $this->exitCode = 1;
         }
 
         $similar->out();
 
-        return $this->exit_code = 1;
+        return $this->exitCode = 1;
     }
 
     /**
-     * Register bootstraper application.
+     * Register bootstrapper application.
+     *
+     * @return void
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function bootstrap(): void
     {
@@ -105,12 +119,18 @@ class ConsoleKernel
 
     /**
      * Call command using know signature.
-     * The signature doset require php as prefix.
-     * For better parse use `handle` method istead.
+     * The signature not require php as prefix.
+     * For better parse use `handle` method instead.
      *
+     * @param string $signature
      * @param array<string, string|bool|int|null> $parameter
-     *
-     * @since v0.33
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws InvocationException
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
+     * @throws NotFoundException
      */
     public function call(string $signature, array $parameter = []): int
     {
@@ -138,7 +158,7 @@ class ConsoleKernel
      *
      * @param string[] $commands
      *
-     * @return array<string, float> Sorted from simalar
+     * @return array<string, float> Sorted from similar
      */
     private function getSimilarity(string $find, array $commands, float $threshold = 0.8): array
     {
@@ -244,13 +264,13 @@ class ConsoleKernel
     }
 
     /**
-     * Get karne exit status code.
+     * Get kernel exit status code.
      *
      * @return int Exit status code
      */
-    public function exit_code()
+    public function exitCode(): int
     {
-        return $this->exit_code;
+        return $this->exitCode;
     }
 
     /**

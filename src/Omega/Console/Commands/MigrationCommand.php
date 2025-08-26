@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Omega\Console\Commands;
 
 use Omega\Collection\Collection;
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Prompt;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
@@ -28,7 +28,7 @@ use function Omega\Console\warn;
  * @property bool        $force
  * @property string|bool $seed
  */
-class MigrationCommand extends Command
+class MigrationCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 

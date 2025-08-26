@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Omega\Console\Traits;
 
-use Omega\Console\Style\Color;
 use Omega\Console\Style\Color\BackgroundColor;
 use Omega\Console\Style\Color\ForegroundColor;
 use Omega\Console\Style\Decorate;
@@ -208,7 +207,7 @@ trait CommandTrait
      */
     protected function textColor(ForegroundColor $color, string $text): string
     {
-        return $this->rules($color->get(), $text);
+        return $this->rules($color->getRule(), $text);
     }
 
     /**
@@ -218,7 +217,7 @@ trait CommandTrait
      */
     protected function bgColor(BackgroundColor $color, string $text): string
     {
-        return $this->rules($color->get(), $text);
+        return $this->rules($color->getRule(), $text);
     }
 
     protected function textBold(string $text): string

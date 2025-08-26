@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Alert;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
@@ -15,7 +15,7 @@ use function count;
 use function is_array;
 use function Omega\Console\style;
 
-class RouteCommand extends Command
+class RouteCommand extends AbstractCommand
 {
     // use CommandTrait;
     use PrintHelpTrait;

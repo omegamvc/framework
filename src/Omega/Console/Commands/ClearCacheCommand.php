@@ -6,7 +6,7 @@ namespace Omega\Console\Commands;
 
 use Omega\Cache\CacheManager;
 use Omega\Cache\Exceptions\UnknownStorageDriverException;
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\CommandTrait;
 use Omega\Application\Application;
 
@@ -20,7 +20,7 @@ use function Omega\Console\ok;
  * @property bool $update
  * @property bool $force
  */
-class ClearCacheCommand extends Command
+class ClearCacheCommand extends AbstractCommand
 {
     use CommandTrait;
 

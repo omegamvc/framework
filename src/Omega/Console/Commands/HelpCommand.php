@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use Omega\Console\Command;
+use Omega\Console\AbstractCommand;
 use Omega\Console\CommandMap;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Application\Application;
 use Omega\Console\Util;
+use Omega\Container\Invoker\Exception\InvocationException;
+use Omega\Container\Invoker\Exception\NotCallableException;
+use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Text\Str;
 
 use function array_merge;
@@ -22,7 +25,7 @@ use function Omega\Console\style;
 use function Omega\Console\warn;
 use function ucfirst;
 
-class HelpCommand extends Command
+class HelpCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 
@@ -74,6 +77,12 @@ class HelpCommand extends Command
 
     /**
      * Use for print --help.
+     */
+    /**
+     * @return int
+     * @throws InvocationException
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
      */
     public function main(): int
     {
@@ -193,6 +202,12 @@ class HelpCommand extends Command
         return 0;
     }
 
+    /**
+     * @return int
+     * @throws InvocationException
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
+     */
     public function commandHelp(): int
     {
         if (!isset($this->option[0])) {
