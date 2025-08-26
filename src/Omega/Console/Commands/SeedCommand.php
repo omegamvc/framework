@@ -1,15 +1,23 @@
-<?php
+<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use Exception;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Prompt;
 use Omega\Console\Traits\PrintHelpTrait;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Template\Generate;
 use Omega\Template\Method;
+use Throwable;
 
+use function class_exists;
+use function file_exists;
+use function file_put_contents;
 use function Omega\Console\fail;
 use function Omega\Console\info;
 use function Omega\Console\ok;
@@ -31,8 +39,8 @@ class SeedCommand extends AbstractCommand
      */
     public static array $command = [
         [
-            'pattern'=> 'db:seed',
-            'fn'     => [self::class, 'main'],
+            'pattern' => 'db:seed',
+            'fn'      => [self::class, 'main'],
         ], [
             'pattern' => 'make:seed',
             'fn'      => [self::class, 'make'],
@@ -46,19 +54,25 @@ class SeedCommand extends AbstractCommand
     {
         return [
             'commands'  => [
-                'db:seed'   => 'Run seeding',
-                'make:seed' => 'Create new seeder class',
+                'db:seed'      => 'Run seeding',
+                'make:seed'    => 'Create new seeder class',
             ],
             'options'   => [
                 '--class'      => 'Target class (will add `Database\\Seeders\\`)',
                 '--name-space' => 'Target class with full namespace',
             ],
             'relation'  => [
-                'db:seed' => ['--class', '--name-space'],
+                'db:seed'      => ['--class', '--name-space'],
             ],
         ];
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     private function runInDev(): bool
     {
         if (app()->isDev() || $this->force) {
@@ -66,10 +80,10 @@ class SeedCommand extends AbstractCommand
         }
 
         /* @var bool */
-        return (new Prompt(style('Running seeder in production?')->textRed(), [
+        return new Prompt(style('Running seeder in production?')->textRed(), [
             'yes' => fn () => true,
             'no'  => fn () => false,
-        ], 'no'))
+        ], 'no')
             ->selection([
                 style('yes')->textDim(),
                 ' no',
@@ -77,6 +91,11 @@ class SeedCommand extends AbstractCommand
             ->option();
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function main(): int
     {
         $class     = $this->class;
@@ -116,7 +135,7 @@ class SeedCommand extends AbstractCommand
             app()->call([$class, 'run']);
 
             ok('Success run seeder ' . $class)->out(false);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             warn($th->getMessage())->out(false);
             $exit = 1;
         }
@@ -124,6 +143,11 @@ class SeedCommand extends AbstractCommand
         return $exit;
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     * @throws DependencyException
+     */
     public function make(): int
     {
         $class = $this->option[0] ?? null;
@@ -147,6 +171,7 @@ class SeedCommand extends AbstractCommand
         $make->use('Omega\Database\Seeder\Seeder');
         $make->extend('Seeder');
         $make->setEndWithNewLine();
+        /** @noinspection PhpRedundantOptionalArgumentInspection */
         $make->addMethod('run')
             ->visibility(Method::PUBLIC_)
             ->setReturnType('void')

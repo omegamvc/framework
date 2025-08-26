@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use Omega\Application\Application;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Style;
-use Omega\Application\Application;
 use Omega\Support\PackageManifest;
-
 use Throwable;
+
 use function array_keys;
 use function Omega\Console\fail;
 use function Omega\Console\info;

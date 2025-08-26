@@ -90,7 +90,7 @@ class ApplicationConsole
                 ->push('Command not found, run help command')->textRed()->newLines(2)
                 ->push('> ')->textDim()
                 ->push('php ')->textYellow()
-                ->push('cli ')
+                ->push('omega ')
                 ->push('--help')->textDim()
                 ->newLines()
                 ->out()

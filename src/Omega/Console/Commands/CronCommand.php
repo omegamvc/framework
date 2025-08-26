@@ -115,7 +115,6 @@ class CronCommand extends AbstractCommand
 
         $terminalWidth = $this->getWidth(34, 50);
 
-        /* @phpstan-ignore-next-line */
         while (true) {
             $clock = new Now();
             $print = new Style();

@@ -106,7 +106,7 @@ class VendorImportCommand extends AbstractCommand
         }
 
         if ($current > 0) {
-            ok('Done ')->push($added)->textYellow()->push(' file/folder has been added.')->out(false);
+            ok('Done ')->push((string)$added)->textYellow()->push(' file/folder has been added.')->out(false);
         }
     }
 
@@ -121,7 +121,7 @@ class VendorImportCommand extends AbstractCommand
 
         $this->status->current = $current;
         $this->status->tickWith(':progress :percent :status', [
-            'status' => fn (int $current, int $max): string => "Copying file/directory from '{$from}' to '{$to}'.",
+            'status' => fn (int $current, int $max): string => "Copying file/directory from '$from' to '$to'.",
         ]);
     }
 }

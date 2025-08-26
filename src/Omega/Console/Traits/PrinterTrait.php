@@ -42,7 +42,7 @@ trait PrinterTrait
      */
     protected function rule(
         int|string $rule,
-        string $text,
+        int|string $text,
         bool $reset = true,
         int|string $resetRule = Decorate::RESET
     ): string{

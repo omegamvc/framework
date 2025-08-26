@@ -1,26 +1,33 @@
-<?php
+<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use DirectoryIterator;
+use Exception;
 use Omega\Collection\Collection;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Prompt;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Database\MyQuery;
 use Omega\Database\MySchema\Table\Create;
-use Omega\Console\Commands\SeedCommand;
 use Omega\Support\Facades\DB;
 use Omega\Support\Facades\PDO;
 use Omega\Support\Facades\Schema;
+use Throwable;
 
 use function Omega\Console\fail;
 use function Omega\Console\info;
 use function Omega\Console\ok;
 use function Omega\Console\style;
 use function Omega\Console\warn;
+
+use const PATHINFO_FILENAME;
 
 /**
  * @property ?int        $take
@@ -37,7 +44,7 @@ class MigrationCommand extends AbstractCommand
      *
      * @var string[]
      */
-    public static array $vendor_paths = [];
+    public static array $vendorPaths = [];
 
     /**
      * Register command.
@@ -81,7 +88,7 @@ class MigrationCommand extends AbstractCommand
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
@@ -90,17 +97,17 @@ class MigrationCommand extends AbstractCommand
                 'migrate:reset'            => 'Rolling back all migrations (down)',
                 'migrate:refresh'          => 'Rolling back and run migration all',
                 'migrate:rollback'         => 'Rolling back last migrations (down)',
-                'migrate:init'             => 'Initialize migartion table',
-                'migrate:status'           => 'Show migartion status.',
+                'migrate:init'             => 'Initialize migration table',
+                'migrate:status'           => 'Show migration status.',
                 'database:create'          => 'Create database',
                 'database:drop'            => 'Drop database',
                 'database:show'            => 'Show database table',
             ],
             'options'   => [
                 '--take'              => 'Limit of migrations to be run.',
-                '--batch'             => 'Batch migration excution.',
-                '--dry-run'           => 'Excute migration but olny get query output.',
-                '--force'             => 'Force runing migration/database query in production.',
+                '--batch'             => 'Batch migration execution.',
+                '--dry-run'           => 'Execute migration but only get query output.',
+                '--force'             => 'Force running migration/database query in production.',
                 '--seed'              => 'Run seeder after migration.',
                 '--seed-namespace'    => 'Run seeder after migration using class namespace.',
                 '--yes'               => 'Accept it without having it ask any questions',
@@ -116,11 +123,23 @@ class MigrationCommand extends AbstractCommand
         ];
     }
 
+    /**
+     * @return string
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     private function DbName(): string
     {
         return app()->get('dsn.sql')['database_name'];
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     private function runInDev(): bool
     {
         if (app()->isDev() || $this->force) {
@@ -128,10 +147,10 @@ class MigrationCommand extends AbstractCommand
         }
 
         /* @var bool */
-        return (new Prompt(style('Runing migration/database in production?')->textRed(), [
+        return new Prompt(style('Running migration/database in production?')->textRed(), [
             'yes' => fn () => true,
             'no'  => fn () => false,
-        ], 'no'))
+        ], 'no')
             ->selection([
                 style('yes')->textDim(),
                 ' no',
@@ -141,18 +160,20 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * @param string|Style $message
+     * @return bool
+     * @throws Exception
      */
-    private function confirmation($message): bool
+    private function confirmation(Style|string $message): bool
     {
         if ($this->option('yes', false)) {
             return true;
         }
 
         /* @var bool */
-        return (new Prompt($message, [
+        return new Prompt($message, [
             'yes' => fn () => true,
             'no'  => fn () => false,
-        ], 'no'))
+        ], 'no')
         ->selection([
             style('yes')->textDim(),
             ' no',
@@ -163,57 +184,58 @@ class MigrationCommand extends AbstractCommand
     /**
      * Get migration list.
      *
-     * @param int|false $batch
-     *
+     * @param false|int $batch
      * @return Collection<string, array<string, string>>
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
-    public function baseMigrate(&$batch = false): Collection
+    public function baseMigrate(false|int &$batch = false): Collection
     {
-        $migartion_batch = $this->getMigrationTable();
-        $hights          = $migartion_batch->length() > 0
-            ? $migartion_batch->max() + 1
+        $migrationBatch = $this->getMigrationTable();
+        $higher         = $migrationBatch->length() > 0
+            ? $migrationBatch->max() + 1
             : 0;
-        $batch = false === $batch ? $hights : $batch;
+        $batch = false === $batch ? $higher : $batch;
 
-        $paths   = [get_path('path.migration'), ...static::$vendor_paths];
+        $paths   = [get_path('path.migration'), ...static::$vendorPaths];
         $migrate = new Collection([]);
         foreach ($paths as $dir) {
-            foreach (new \DirectoryIterator($dir) as $file) {
+            foreach (new DirectoryIterator($dir) as $file) {
                 if ($file->isDot() | $file->isDir()) {
                     continue;
                 }
 
-                $migration_name = pathinfo($file->getBasename(), PATHINFO_FILENAME);
-                $hasMigration   = $migartion_batch->has($migration_name);
+                $migrationName = pathinfo($file->getBasename(), PATHINFO_FILENAME);
+                $hasMigration  = $migrationBatch->has($migrationName);
 
-                if (false == $batch && $hasMigration) {
-                    if ($migartion_batch->get($migration_name) <= $hights - 1) {
-                        $migrate->set($migration_name, [
+                if (!$batch && $hasMigration) {
+                    if ($migrationBatch->get($migrationName) <= $higher - 1) {
+                        $migrate->set($migrationName, [
                             'file_name' => $dir . $file->getFilename(),
-                            'batch'     => $migartion_batch->get($migration_name),
+                            'batch'     => $migrationBatch->get($migrationName),
                         ]);
                         continue;
                     }
                 }
 
                 if (false === $hasMigration) {
-                    $migrate->set($migration_name, [
+                    $migrate->set($migrationName, [
                         'file_name' => $dir . $file->getFilename(),
-                        'batch'     => $hights,
+                        'batch'     => $higher,
                     ]);
                     $this->insertMigrationTable([
-                        'migration' => $migration_name,
-                        'batch'     => $hights,
+                        'migration' => $migrationName,
+                        'batch'     => $higher,
                     ]);
                     continue;
                 }
 
-                if ($migartion_batch->get($migration_name) <= $batch) {
-                    $migrate->set($migration_name, [
+                if ($migrationBatch->get($migrationName) <= $batch) {
+                    $migrate->set($migrationName, [
                         'file_name' => $dir . $file->getFilename(),
-                        'batch'     => $migartion_batch->get($migration_name),
+                        'batch'     => $migrationBatch->get($migrationName),
                     ]);
-                    continue;
                 }
             }
         }
@@ -221,11 +243,24 @@ class MigrationCommand extends AbstractCommand
         return $migrate;
     }
 
+    /**
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     public function main(): int
     {
         return $this->migration();
     }
 
+    /**
+     * @param bool $silent
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     public function migration(bool $silent = false): int
     {
         if (false === $this->runInDev() && false === $silent) {
@@ -260,7 +295,7 @@ class MigrationCommand extends AbstractCommand
 
             try {
                 $success = $up->every(fn ($item) => $item->execute());
-            } catch (\Throwable $th) {
+            } catch (Throwable $th) {
                 $success = false;
                 fail($th->getMessage())->out(false);
             }
@@ -278,6 +313,11 @@ class MigrationCommand extends AbstractCommand
         return $this->seed();
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     * @throws DependencyException
+     */
     public function fresh(bool $silent = false): int
     {
         // drop and recreate database
@@ -314,7 +354,7 @@ class MigrationCommand extends AbstractCommand
 
             try {
                 $success = $up->every(fn ($item) => $item->execute());
-            } catch (\Throwable $th) {
+            } catch (Throwable $th) {
                 $success = false;
                 fail($th->getMessage())->out(false);
             }
@@ -332,17 +372,27 @@ class MigrationCommand extends AbstractCommand
         return $this->seed();
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     * @throws DependencyException
+     */
     public function reset(bool $silent = false): int
     {
         if (false === $this->runInDev() && false === $silent) {
             return 2;
         }
-        info('Rolling back all migrations')->out(false);
-        $rollback = $this->rollbacks(false, 0);
 
-        return $rollback;
+        info('Rolling back all migrations')->out(false);
+
+        return $this->rollbacks(false, 0);
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     * @throws DependencyException
+     */
     public function refresh(): int
     {
         if (false === $this->runInDev()) {
@@ -359,6 +409,11 @@ class MigrationCommand extends AbstractCommand
         return 0;
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function rollback(): int
     {
         if (false === ($batch = $this->option('batch', false))) {
@@ -378,11 +433,16 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Rolling backs migartion.
+     * Rolling backs migration.
      *
-     * @param int|false $batch
+     * @param false|int $batch
+     * @param int $take
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
-    public function rollbacks($batch, int $take): int
+    public function rollbacks(false|int $batch, int $take): int
     {
         $print   = new Style();
         $width   = $this->getWidth(40, 60);
@@ -409,7 +469,7 @@ class MigrationCommand extends AbstractCommand
 
             try {
                 $success = $down->every(fn ($item) => $item->execute());
-            } catch (\Throwable $th) {
+            } catch (Throwable $th) {
                 $success = false;
                 fail($th->getMessage())->out(false);
             }
@@ -427,64 +487,85 @@ class MigrationCommand extends AbstractCommand
         return 0;
     }
 
+    /**
+     * @param bool $silent
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function databaseCreate(bool $silent=false): int
     {
-        $db_name = $this->DbName();
-        $message = style("Do you want to create database `{$db_name}`?")->textBlue();
+        $dbName  = $this->DbName();
+        $message = style("Do you want to create database `{$dbName}`?")->textBlue();
 
         if (false === $silent && (!$this->runInDev() || !$this->confirmation($message))) {
             return 2;
         }
 
-        info("creating database `{$db_name}`")->out(false);
+        info("creating database `{$dbName}`")->out(false);
 
-        $success = Schema::create()->database($db_name)->ifNotExists()->execute();
+        $success = Schema::create()->database($dbName)->ifNotExists()->execute();
 
         if ($success) {
-            ok("success create database `{$db_name}`")->out(false);
+            ok("success create database `{$dbName}`")->out(false);
 
             $this->initializeMigration();
 
             return 0;
         }
 
-        fail("cant created database `{$db_name}`")->out(false);
+        fail("cant created database `{$dbName}`")->out(false);
 
         return 1;
     }
 
+    /**
+     * @param bool $silent
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function databaseDrop(bool $silent = false): int
     {
-        $db_name = $this->DbName();
-        $message = style("Do you want to drop database `{$db_name}`?")->textRed();
+        $dbName  = $this->DbName();
+        $message = style("Do you want to drop database `{$dbName}`?")->textRed();
 
         if (false === $silent && (!$this->runInDev() || !$this->confirmation($message))) {
             return 2;
         }
 
-        info("try to drop database `{$db_name}`")->out(false);
+        info("try to drop database `{$dbName}`")->out(false);
 
-        $success = Schema::drop()->database($db_name)->ifExists(true)->execute();
+        $success = Schema::drop()->database($dbName)->ifExists(true)->execute();
 
         if ($success) {
-            ok("success drop database `{$db_name}`")->out(false);
+            ok("success drop database `{$dbName}`")->out(false);
 
             return 0;
         }
 
-        fail("cant drop database `{$db_name}`")->out(false);
+        fail("cant drop database `{$dbName}`")->out(false);
 
         return 1;
     }
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function databaseShow(): int
     {
         if ($this->option('table-name')) {
             return $this->tableShow($this->option('table-name', null));
         }
 
-        $db_name = $this->DbName();
-        $width   = $this->getWidth(40, 60);
+        $dbName = $this->DbName();
+        $width  = $this->getWidth(40, 60);
         info('showing database')->out(false);
 
         $tables = PDO::instance()
@@ -493,7 +574,7 @@ class MigrationCommand extends AbstractCommand
                 SELECT table_name, create_time, ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024) AS `size`
                 FROM information_schema.tables
                 WHERE table_schema = :db_name')
-            ->bind(':db_name', $db_name)
+            ->bind(':db_name', $dbName)
             ->resultset();
 
         if (0 === count($tables)) {
@@ -507,11 +588,11 @@ class MigrationCommand extends AbstractCommand
             $name   = $table['table_name'];
             $time   = $table['create_time'];
             $size   = $table['size'];
-            $lenght = strlen($name) + strlen($time) + strlen($size);
+            $length = strlen($name) + strlen($time) + strlen($size);
 
             style($name)
                 ->push(' ' . $size . ' Mb ')->textDim()
-                ->repeat('.', $width - $lenght)->textDim()
+                ->repeat('.', $width - $length)->textDim()
                 ->push(' ' . $time)
                 ->out();
         }
@@ -521,27 +602,27 @@ class MigrationCommand extends AbstractCommand
 
     public function tableShow(string $table): int
     {
-        $table = (new MyQuery(PDO::instance()))->table($table)->info();
+        $table = new MyQuery(PDO::instance())->table($table)->info();
         $print = new Style("\n");
         $width = $this->getWidth(40, 60);
 
         $print->push('column')->textYellow()->bold()->resetDecorate()->newLines();
         foreach ($table as $column) {
-            $will_print = [];
+            $willPrint = [];
 
             if ($column['IS_NULLABLE'] === 'YES') {
-                $will_print[] = 'nullable';
+                $willPrint[] = 'nullable';
             }
             if ($column['COLUMN_KEY'] === 'PRI') {
-                $will_print[] = 'primary';
+                $willPrint[] = 'primary';
             }
 
-            $info   = implode(', ', $will_print);
-            $lenght = strlen($column['COLUMN_NAME']) + strlen($column['COLUMN_TYPE']) + strlen($info);
+            $info   = implode(', ', $willPrint);
+            $length = strlen($column['COLUMN_NAME']) + strlen($column['COLUMN_TYPE']) + strlen($info);
 
             $print->push($column['COLUMN_NAME'])->bold()->resetDecorate();
             $print->push(' ' . $info . ' ')->textDim();
-            $print->repeat('.', $width - $lenght)->textDim();
+            $print->repeat('.', $width - $length)->textDim();
             $print->push(' ' . $column['COLUMN_TYPE']);
             $print->newLines();
         }
@@ -557,11 +638,11 @@ class MigrationCommand extends AbstractCommand
         $print->tap(info('show migration status'));
         $width = $this->getWidth(40, 60);
         foreach ($this->getMigrationTable() as $migration_name => $batch) {
-            $lenght = strlen($migration_name) + strlen((string) $batch);
+            $length = strlen($migration_name) + strlen((string) $batch);
             $print
                 ->push($migration_name)
                 ->push(' ')
-                ->repeat('.', $width - $lenght)->textDim()
+                ->repeat('.', $width - $length)->textDim()
                 ->push(' ')
                 ->push($batch)
                 ->newLines();
@@ -574,6 +655,11 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * Integrate seeder during run migration.
+     *
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
     private function seed(): int
     {
@@ -583,14 +669,14 @@ class MigrationCommand extends AbstractCommand
         if ($this->seed) {
             $seed = true === $this->seed ? null : $this->seed;
 
-            return (new SeedCommand([], ['class' => $seed]))->main();
+            return new SeedCommand([], ['class' => $seed])->main();
         }
 
         $namespace = $this->option('seed-namespace', false);
         if ($namespace) {
             $namespace = true === $namespace ? null : $namespace;
 
-            return (new SeedCommand([], ['name-space' => $namespace]))->main();
+            return new SeedCommand([], ['name-space' => $namespace])->main();
         }
 
         return 0;
@@ -598,6 +684,11 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * Check for migration table exist or not in this current database.
+     *
+     * @return bool
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
      */
     private function hasMigrationTable(): bool
     {
@@ -617,7 +708,7 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Create migarion table schema.
+     * Create migration table schema.
      */
     private function createMigrationTable(): bool
     {
@@ -630,13 +721,13 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Get migration batch file in migation table.
+     * Get migration batch file in migration table.
      *
      * @return Collection<string, int>
      */
     private function getMigrationTable(): Collection
     {
-        /** @var Collection<string, int> */
+        /** @var Collection<string, int> $pair */
         $pair = DB::table('migration')
             ->select()
             ->get()
@@ -649,8 +740,9 @@ class MigrationCommand extends AbstractCommand
      * Save insert migration file with batch to migration table.
      *
      * @param array<string, string|int> $migration
+     * @return bool
      */
-    private function insertMigrationTable($migration): bool
+    private function insertMigrationTable(array $migration): bool
     {
         return DB::table('migration')
             ->insert()
@@ -659,12 +751,16 @@ class MigrationCommand extends AbstractCommand
         ;
     }
 
+    /**
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     public function initializeMigration(): int
     {
-        $has_migration_table = $this->hasMigrationTable();
-
-        if ($has_migration_table) {
-            info('Migration table alredy exist on your database table.')->out(false);
+        if ($this->hasMigrationTable()) {
+            info('Migration table already exist on your database table.')->out(false);
 
             return 0;
         }
@@ -685,14 +781,14 @@ class MigrationCommand extends AbstractCommand
      */
     public static function addVendorMigrationPath(string $path): void
     {
-        static::$vendor_paths[] = $path;
+        static::$vendorPaths[] = $path;
     }
 
     /**
-     * Flush migration vendor ptahs.
+     * Flush migration vendor paths.
      */
     public static function flushVendorMigrationPaths(): void
     {
-        static::$vendor_paths = [];
+        static::$vendorPaths = [];
     }
 }

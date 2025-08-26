@@ -165,7 +165,7 @@ class Style
      * @param string $ref  Text reference to be added begin text
      * @return string
      */
-    public function toString(string $text, string $ref = ''): string
+    public function toString(string|int $text, string $ref = ''): string
     {
         // make sure not push empty text
         if ($text == '' && $ref == '') {
@@ -236,11 +236,11 @@ class Style
      * @param string $text text
      * @return self
      */
-    public function push(string $text): self
+    public function push(string|int $text): self
     {
         $ref        = $this->toString($this->text, $this->ref);
         $this->text = $text;
-        $this->length += strlen($text);
+        $this->length += strlen((string)$text);
 
         return $this->flush()->ref($ref);
     }

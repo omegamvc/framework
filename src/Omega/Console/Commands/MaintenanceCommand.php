@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use DI\DependencyException;
-use DI\NotFoundException;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\PrintHelpTrait;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 
 use function file_exists;
 use function file_get_contents;
@@ -53,6 +54,7 @@ class MaintenanceCommand extends AbstractCommand
     /**
      * @return int
      * @throws DependencyException
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     public function down(): int
@@ -76,6 +78,7 @@ class MaintenanceCommand extends AbstractCommand
     /**
      * @return int
      * @throws DependencyException
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     public function up(): int
@@ -93,7 +96,7 @@ class MaintenanceCommand extends AbstractCommand
             return 1;
         }
 
-        ok('Successfully, your apllication now live.')->out();
+        ok('Successfully, your application now live.')->out();
 
         return 0;
     }

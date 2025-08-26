@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
-use DI\DependencyException;
-use DI\NotFoundException;
-use Omega\Console\AbstractCommand;
 use Omega\Application\Application;
-use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Config\ConfigRepository;
+use Omega\Console\AbstractCommand;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
+use Omega\Support\Bootstrap\ConfigProviders;
 
 use function file_exists;
 use function file_put_contents;
@@ -52,13 +53,15 @@ class ConfigCommand extends AbstractCommand
     }
 
     /**
+     * @return int
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws InvalidDefinitionException
      */
     public function main(): int
     {
         $app = Application::getInstance();
-        (new ConfigProviders())->bootstrap($app);
+        new ConfigProviders()->bootstrap($app);
 
         $this->clear();
         $config       = $app->get(ConfigRepository::class)->getAll();
@@ -74,7 +77,9 @@ class ConfigCommand extends AbstractCommand
     }
 
     /**
+     * @return int
      * @throws DependencyException
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     public function clear(): int

@@ -50,6 +50,7 @@ class RouteCommand extends AbstractCommand
     {
         $print = new Style();
         $print->tap(Alert::render()->ok('route list'));
+        /** @noinspection PhpUnusedLocalVariableInspection */
         foreach (Router::getRoutes() as $key => $route) {
             $method = $this->methodToStyle($route['method']);
             $name   = style($route['name'])->textWhite();
@@ -96,17 +97,17 @@ class RouteCommand extends AbstractCommand
         $method = strtoupper($method);
 
         if ($method === 'GET') {
-            return (new Style($method))->textBlue();
+            return new Style($method)->textBlue();
         }
 
         if ($method === 'POST' || $method === 'PUT') {
-            return (new Style($method))->textYellow();
+            return new Style($method)->textYellow();
         }
 
         if ($method === 'DELETE') {
-            return (new Style($method))->textRed();
+            return new Style($method)->textRed();
         }
 
-        return (new Style($method))->textDim();
+        return new Style($method)->textDim();
     }
 }

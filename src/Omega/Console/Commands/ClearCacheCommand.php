@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use Omega\Application\Application;
 use Omega\Cache\CacheManager;
 use Omega\Cache\Exceptions\UnknownStorageDriverException;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\CommandTrait;
-use Omega\Application\Application;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 
 use function array_keys;
 use function is_array;
@@ -56,7 +57,11 @@ class ClearCacheCommand extends AbstractCommand
     }
 
     /**
+     * @param Application $app
+     * @return int
+     * @throws InvalidDefinitionException
      * @throws UnknownStorageDriverException
+     * @noinspection PhpIncompatibleReturnTypeInspection
      */
     public function clear(Application $app): int
     {

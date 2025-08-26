@@ -1,20 +1,37 @@
-<?php
+<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use DateInvalidTimeZoneException;
+use DateMalformedStringException;
+use Exception;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\CommandTrait;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Support\Facades\DB;
 use Omega\Template\Generate;
 use Omega\Template\Property;
+use Throwable;
 
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function is_dir;
+use function mkdir;
+use function now;
 use function Omega\Console\fail;
 use function Omega\Console\info;
 use function Omega\Console\ok;
 use function Omega\Console\text;
 use function Omega\Console\warn;
+use function preg_replace;
+use function str_replace;
+use function strtolower;
+use function ucfirst;
 
 /**
  * @property bool $update
@@ -54,7 +71,7 @@ class MakeCommand extends AbstractCommand
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
     {
         return [
             'commands'  => [
@@ -81,6 +98,12 @@ class MakeCommand extends AbstractCommand
         ];
     }
 
+    /**
+     * @return int
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function make_controller(): int
     {
         info('Making controller file...')->out(false);
@@ -103,6 +126,12 @@ class MakeCommand extends AbstractCommand
         return 1;
     }
 
+    /**
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     public function make_view(): int
     {
         info('Making view file...')->out(false);
@@ -125,6 +154,12 @@ class MakeCommand extends AbstractCommand
         return 1;
     }
 
+    /**
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     public function make_services(): int
     {
         info('Making service file...')->out(false);
@@ -147,20 +182,26 @@ class MakeCommand extends AbstractCommand
         return 1;
     }
 
+    /**
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     public function make_model(): int
     {
         info('Making model file...')->out(false);
-        $name           = ucfirst($this->option[0]);
-        $model_location = get_path('path.model') . $name . '.php';
+        $name          = ucfirst($this->option[0]);
+        $modelLocation = get_path('path.model') . $name . '.php';
 
-        if (file_exists($model_location) && false === $this->option('force', false)) {
+        if (file_exists($modelLocation) && false === $this->option('force', false)) {
             warn('File already exist')->out(false);
             fail('Failed Create model file')->out();
 
             return 1;
         }
 
-        info('Creating Model class in ' . $model_location)->out(false);
+        info('Creating Model class in ' . $modelLocation)->out(false);
 
         $class = new Generate($name);
         $class->customizeTemplate("<?php\n\ndeclare(strict_types=1);\n{{before}}{{comment}}\n{{rule}}class\40{{head}}\n{\n{{body}}}{{end}}");
@@ -171,27 +212,27 @@ class MakeCommand extends AbstractCommand
         $class->uses(['Omega\Database\MyModel\Model']);
         $class->extend('Model');
 
-        $primery_key = 'id';
-        $table_name  = $this->option[0];
+        $primaryKey = 'id';
+        $tableName  = $this->option[0];
         if ($this->option('table-name', false)) {
-            $table_name = $this->option('table-name');
-            info("Getting Information from table {$table_name}.")->out(false);
+            $tableName = $this->option('table-name');
+            info("Getting Information from table {$tableName}.")->out(false);
             try {
-                foreach (DB::table($table_name)->info() as $column) {
+                foreach (DB::table($tableName)->info() as $column) {
                     $class->addComment('@property mixed $' . $column['COLUMN_NAME']);
                     if ('PRI' === $column['COLUMN_KEY']) {
-                        $primery_key = $column['COLUMN_NAME'];
+                        $primaryKey = $column['COLUMN_NAME'];
                     }
                 }
-            } catch (\Throwable $th) {
+            } catch (Throwable $th) {
                 warn($th->getMessage())->out(false);
             }
         }
 
-        $class->addProperty('table_name')->visibility(Property::PROTECTED_)->dataType('string')->expecting(" = '{$table_name}'");
-        $class->addProperty('primery_key')->visibility(Property::PROTECTED_)->dataType('string')->expecting("= '{$primery_key}'");
+        $class->addProperty('tableName')->visibility(Property::PROTECTED_)->dataType('string')->expecting(" = '{$tableName}'");
+        $class->addProperty('primaryKey')->visibility(Property::PROTECTED_)->dataType('string')->expecting("= '{$primaryKey}'");
 
-        if (false === file_put_contents($model_location, $class->generate())) {
+        if (false === file_put_contents($modelLocation, $class->generate())) {
             fail('Failed Create model file')->out();
 
             return 1;
@@ -203,35 +244,41 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * Replece template to new class/resoure.
+     * Replace template to new class/resource.
      *
-     * @param string                $argument    Name of Class/file
-     * @param array<string, string> $make_option Configuration to replace template
-     * @param string                $folder      Create folder for save location
+     * @param string                $argument   Name of Class/file
+     * @param array<string, string> $makeOption Configuration to replace template
+     * @param string                $folder     Create folder for save location
      *
-     * @return bool True if templete success copie
+     * @return bool True if template success copie
      */
-    private function makeTemplate(string $argument, array $make_option, string $folder = ''): bool
+    private function makeTemplate(string $argument, array $makeOption, string $folder = ''): bool
     {
         $folder = ucfirst($folder);
-        if (file_exists($file_name = $make_option['save_location'] . $folder . $argument . $make_option['suffix'])) {
+        if (file_exists($fileName = $makeOption['save_location'] . $folder . $argument . $makeOption['suffix'])) {
             warn('File already exist')->out(false);
 
             return false;
         }
 
-        if ('' !== $folder && !is_dir($make_option['save_location'] . $folder)) {
-            mkdir($make_option['save_location'] . $folder);
+        if ('' !== $folder && !is_dir($makeOption['save_location'] . $folder)) {
+            mkdir($makeOption['save_location'] . $folder);
         }
 
-        $get_template = file_get_contents($make_option['template_location']);
-        $get_template = str_replace($make_option['pattern'], ucfirst($argument), $get_template);
-        $get_template = preg_replace('/^.+\n/', '', $get_template);
-        $isCopied     = file_put_contents($file_name, $get_template);
+        $getTemplate = file_get_contents($makeOption['template_location']);
+        $getTemplate = str_replace($makeOption['pattern'], ucfirst($argument), $getTemplate);
+        $getTemplate = preg_replace('/^.+\n/', '', $getTemplate);
+        $isCopied    = file_put_contents($fileName, $getTemplate);
 
-        return $isCopied === false ? false : true;
+        return !($isCopied === false);
     }
 
+    /**
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     */
     public function make_command(): int
     {
         info('Making command file...')->out(false);
@@ -263,6 +310,15 @@ class MakeCommand extends AbstractCommand
         return 1;
     }
 
+    /**
+     * @return int
+     * @throws DependencyException
+     * @throws InvalidDefinitionException
+     * @throws NotFoundException
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
+     * @throws Exception
+     */
     public function make_migration(): int
     {
         info('Making migration')->out(false);
@@ -275,16 +331,16 @@ class MakeCommand extends AbstractCommand
             } while ($name === '' || $name === false);
         }
 
-        $name         = strtolower($name);
-        $path_to_file = get_path('path.migration');
-        $bath         = now()->format('Y_m_d_His');
-        $file_name    = "{$path_to_file}{$bath}_{$name}.php";
+        $name       = strtolower($name);
+        $pathToFile = get_path('path.migration');
+        $bath       = now()->format('Y_m_d_His');
+        $fileName   = "{$pathToFile}{$bath}_{$name}.php";
 
         $use      = $this->update ? 'migration_update' : 'migration';
         $template = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . $use);
         $template = str_replace('__table__', $name, $template);
 
-        if (false === file_exists($path_to_file) || false === file_put_contents($file_name, $template)) {
+        if (false === file_exists($pathToFile) || false === file_put_contents($fileName, $template)) {
             fail('Can\'t create migration file.')->out();
 
             return 1;

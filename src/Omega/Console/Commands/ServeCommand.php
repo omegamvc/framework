@@ -9,8 +9,9 @@ use Omega\Console\Style\Alert;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
 
-use function shell_exec;
 use function Omega\Console\fail;
+use function shell_exec;
+
 /**
  * @property string  $port
  * @property bool $expose
@@ -87,6 +88,7 @@ class ServeCommand extends AbstractCommand
             ->out(false);
 
         $address = $expose ? '0.0.0.0' : '127.0.0.1';
+        /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
         shell_exec("php -S {$address}:{$port} -t public/");
     }
 }
