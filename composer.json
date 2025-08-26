@@ -21,6 +21,7 @@
         "ext-pcntl": "*",
         "ext-posix": "*",
         "ext-readline": "*",
+        "ext-simplexml": "*",
         "omegamvc/serializable-closure":  "^2.0.0",
         "omegamvc/validator": "^2.0.0"
     },

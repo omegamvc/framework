@@ -1,91 +1,100 @@
 <?php
 
+/**
+ * Part of Omega - Config Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Config;
 
 use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use Exception;
+use IteratorAggregate;
+use Traversable;
 
-use function array_key_exists;
+use function count;
+use function is_array;
+use function is_null;
 
 /**
- * @implements ArrayAccess<string, mixed>
+ * Configuration repository with advanced access and merging capabilities.
+ *
+ * This class extends `AbstractConfigRepository` and implements `ArrayAccess`, `Countable`,
+ * and `IteratorAggregate` to provide a flexible interface for managing configuration settings.
+ *
+ * - Supports direct array access for retrieving and setting configuration values.
+ * - Allows merging configurations using different strategies.
+ * - Enables iteration over stored configuration values.
+ * - Implements a countable mechanism for determining the number of stored settings.
+ *
+ * @category  Omega
+ * @package   Config
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
-class ConfigRepository implements ArrayAccess
+class ConfigRepository extends AbstractConfigRepository implements ArrayAccess, Countable, IteratorAggregate
 {
+    use ConfigTrait;
+
     /**
-     * Create new config using array.
+     * Creates a new configuration repository from an array.
      *
-     * @param array<string, mixed> $config
+     * @param array<string, mixed> $config The initial configuration values.
      */
-    public function __construct(protected array $config = [])
+    public function __construct(array $config = [])
     {
+        parent::__construct($config);
     }
 
     /**
-     * Checks if the given key or index exists in the config.
-     *
-     * @param string $key
-     * @return bool
+     * {@inheritdoc}
      */
-    public function has(string $key): bool
+    public function merge(
+        ConfigRepositoryInterface $configuration,
+        ?string  $key = null,
+        MergeStrategy|string|null $strategy = null
+    ): void
     {
-        return array_key_exists($key, $this->config);
+        $config = !is_null($key) ? $this->get($key) : $this->all();
+
+        if (!is_array($config)) {
+            $config = [];
+        }
+
+        if (!$strategy instanceof MergeStrategy) {
+            $strategy = MergeStrategy::from($strategy ?? MergeStrategy::REPLACE_INDEXED);
+        }
+
+        $mergedStore = $this->mergeArrays($config, $configuration->all(), $strategy);
+
+        if (!is_null($key)) {
+            $this->set($key, $mergedStore);
+
+            return;
+        }
+
+        $this->config = $mergedStore;
     }
 
     /**
-     * Get config.
+     * Checks whether a given offset exists in the configuration.
      *
-     * @param string     $key
-     * @param mixed|null $default
-     * @return mixed
-     */
-    public function get(string $key, mixed $default = null): mixed
-    {
-        return $this->config[$key] ?? $default;
-    }
-
-    /**
-     * Set new or create config.
+     * This method enables the usage of `isset($config[$key])`.
      *
-     * @param string $key
-     * @param mixed  $value
-     * @return void
-     */
-    public function set(string $key, mixed $value): void
-    {
-        $this->config[$key] = $value;
-    }
-
-    /**
-     * Push value in an array items.
-     *
-     * @param string $key
-     * @param mixed  $value
-     * @return void
-     */
-    public function push(string $key, mixed $value): void
-    {
-        $array   = $this->get($key, []);
-        $array[] = $value;
-        $this->set($key, $array);
-    }
-
-    /**
-     * Convert back to array.
-     *
-     * @return array<string, mixed>
-     */
-    public function getAll(): array
-    {
-        return $this->config;
-    }
-
-    /**
-     * Checks if the given key or index exists in the config.
-     *
-     * @param mixed $offset
-     * @return bool
+     * @param mixed $offset The configuration key.
+     * @return bool True if the key exists, false otherwise.
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -93,10 +102,12 @@ class ConfigRepository implements ArrayAccess
     }
 
     /**
-     * Get config.
+     * Retrieves a configuration value using array access.
      *
-     * @param mixed $offset
-     * @return mixed
+     * This method enables the usage of `$value = $config[$key]`.
+     *
+     * @param mixed $offset The configuration key.
+     * @return mixed The configuration value.
      */
     public function offsetGet(mixed $offset): mixed
     {
@@ -104,10 +115,12 @@ class ConfigRepository implements ArrayAccess
     }
 
     /**
-     * Set new or create config.
+     * Sets a configuration value using array access.
      *
-     * @param mixed $offset
-     * @param mixed $value
+     * This method enables the usage of `$config[$key] = $value`.
+     *
+     * @param mixed $offset The configuration key.
+     * @param mixed $value  The value to set.
      * @return void
      */
     public function offsetSet(mixed $offset, mixed $value): void
@@ -116,13 +129,40 @@ class ConfigRepository implements ArrayAccess
     }
 
     /**
-     * Unset or set to null.
+     * Removes a configuration key using array access.
      *
-     * @param mixed $offset
+     * This method enables the usage of `unset($config[$key])`.
+     *
+     * @param mixed $offset The configuration key.
      * @return void
      */
     public function offsetUnset(mixed $offset): void
     {
-        $this->set($offset, null);
+        $this->remove($offset);
+    }
+
+    /**
+     * Retrieves an iterator for iterating over the configuration values.
+     *
+     * This method allows the configuration object to be used in `foreach` loops.
+     *
+     * @return Traversable An iterator for the configuration values.
+     * @throws Exception If an iterator cannot be created.
+     */
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator($this->config);
+    }
+
+    /**
+     * Counts the number of stored configuration items.
+     *
+     * This method enables the usage of `count($config)`.
+     *
+     * @return int The number of configuration items.
+     */
+    public function count(): int
+    {
+        return count($this->config);
     }
 }
