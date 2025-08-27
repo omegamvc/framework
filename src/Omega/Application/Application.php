@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Omega\Application;
 
 use App\Providers\AppServiceProvider;
-use App\Providers\CacheServiceProvider;
-use App\Providers\DatabaseServiceProvider;
-use App\Providers\RouteServiceProvider;
-use App\Providers\ViewServiceProvider;
 use Exception;
+use Omega\Cache\CacheServiceProvider;
 use Omega\Config\ConfigRepository;
 use Omega\Container\Container;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
@@ -19,13 +16,15 @@ use Omega\Container\Invoker\Exception\InvocationException;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Container\Provider\AbstractServiceProvider;
-use Omega\Http\Request;
+use Omega\Database\DatabaseServiceProvider;
 use Omega\Http\Exceptions\HttpException;
+use Omega\Http\Request;
+use Omega\Router\RouteServiceProvider;
 use Omega\Support\AddonServiceProvider;
 use Omega\Support\PackageManifest;
 use Omega\Support\Vite;
 use Omega\View\Templator;
-
+use Omega\View\ViewServiceProvider;
 use function array_map;
 use function count;
 use function file_exists;
@@ -108,12 +107,12 @@ final class Application extends Container
     {
         return [
             'path.app'                => $this->basePath . set_path('app'),
-            'path.command'            => $this->basePath . set_path('app.Commands'),
-            'path.controller'         => $this->basePath . set_path('app.Controllers'),
+            'path.exception'          => $this->basePath . set_path('app.Exceptions'),
+            'path.command'            => $this->basePath . set_path('app.Console.Commands'),
+            'path.controller'         => $this->basePath . set_path('app.Http.Controllers'),
             'path.model'              => $this->basePath . set_path('app.Models'),
-            'path.middleware'         => $this->basePath . set_path('app.Middlewares'),
+            'path.middleware'         => $this->basePath . set_path('app.Http.Middlewares'),
             'path.provider'           => $this->basePath . set_path('app.Providers'),
-            'path.services'           => $this->basePath . set_path('app.Services'),
             'path.view'               => $this->basePath . set_path('resources.views'),
             'path.component'          => $this->basePath . set_path('resources.components'),
             'path.storage'            => $this->basePath . set_path('storage'),

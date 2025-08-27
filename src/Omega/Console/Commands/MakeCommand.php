@@ -48,23 +48,29 @@ class MakeCommand extends AbstractCommand
      */
     public static array $command = [
         [
+            'pattern' => 'make:command',
+            'fn'      => [MakeCommand::class, 'make_command'],
+        ], [
             'pattern' => 'make:controller',
             'fn'      => [MakeCommand::class, 'make_controller'],
         ], [
-            'pattern' => 'make:view',
-            'fn'      => [MakeCommand::class, 'make_view'],
+            'pattern' => 'make:exception',
+            'fn'      => [MakeCommand::class, 'make_exception'],
         ], [
-            'pattern' => 'make:services',
-            'fn'      => [MakeCommand::class, 'make_services'],
+            'pattern' => 'make:middleware',
+            'fn'      => [MakeCommand::class, 'make_middleware'],
+        ], [
+            'pattern' => 'make:migration',
+            'fn'      => [MakeCommand::class, 'make_migration'],
         ], [
             'pattern' => 'make:model',
             'fn'      => [MakeCommand::class, 'make_model'],
         ], [
-            'pattern' => 'make:command',
-            'fn'      => [MakeCommand::class, 'make_command'],
+            'pattern' => 'make:provider',
+            'fn'      => [MakeCommand::class, 'make_provider'],
         ], [
-            'pattern' => 'make:migration',
-            'fn'      => [MakeCommand::class, 'make_migration'],
+            'pattern' => 'make:view',
+            'fn'      => [MakeCommand::class, 'make_view'],
         ],
     ];
 
@@ -75,12 +81,14 @@ class MakeCommand extends AbstractCommand
     {
         return [
             'commands'  => [
-                'make:controller' => 'Generate new controller',
-                'make:view'       => 'Generate new view',
-                'make:service'    => 'Generate new service',
-                'make:model'      => 'Generate new model',
-                'make:command'    => 'Generate new command',
+                'make:command'    => 'Generate new command class',
+                'make:controller' => 'Generate new controller class',
+                'make:exception'  => 'Generate new exception class',
+                'make:middleware' => 'Generate new middleware class',
                 'make:migration'  => 'Generate new migration file',
+                'make:model'      => 'Generate new model class',
+                'make:provider'   => 'Generate new service provider class',
+                'make:view'       => 'Generate new view template',
             ],
             'options'   => [
                 '--table-name' => 'Set table column when creating model.',
@@ -88,12 +96,14 @@ class MakeCommand extends AbstractCommand
                 '--force'      => 'Force to creating template.',
             ],
             'relation'  => [
-                'make:controller' => ['[controller_name]'],
-                'make:view'       => ['[view_name]'],
-                'make:service'    => ['[service_name]'],
-                'make:model'      => ['[model_name]', '--table-name', '--force'],
                 'make:command'    => ['[command_name]'],
+                'make:controller' => ['[controller_name]'],
+                'make:exception'  => ['[exception_name]'],
+                'make:middleware' => ['[middleware_name]'],
                 'make:migration'  => ['[table_name]', '--update'],
+                'make:model'      => ['[model_name]', '--table-name', '--force'],
+                'make:provider'   => ['[provider_name]'],
+                'make:view'       => ['[view_name]'],
             ],
         ];
     }
@@ -108,6 +118,8 @@ class MakeCommand extends AbstractCommand
     {
         info('Making controller file...')->out(false);
 
+        $this->isPath('path.controller');
+
         $success = $this->makeTemplate($this->option[0], [
             'template_location' => __DIR__ . '/stubs/controller',
             'save_location'     => get_path('path.controller'),
@@ -115,8 +127,74 @@ class MakeCommand extends AbstractCommand
             'suffix'            => 'Controller.php',
         ]);
 
+        $filePath = path('app.Http.Controllers') . $this->option[0] . 'Controller.php';
+
         if ($success) {
-            ok('Finish created controller')->out();
+            ok('Controller [' . $filePath . '] created successfully.')->out();
+
+            return 0;
+        }
+
+        fail('Failed Create controller')->out();
+
+        return 1;
+    }
+
+    /**
+     * @return int
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function make_middleware(): int
+    {
+        info('Making middleware file...')->out(false);
+
+        $this->isPath('path.middleware');
+
+        $success = $this->makeTemplate($this->option[0], [
+            'template_location' => __DIR__ . '/stubs/middleware',
+            'save_location'     => get_path('path.middleware'),
+            'pattern'           => '__middleware__',
+            'suffix'            => 'Middleware.php',
+        ]);
+
+        $filePath = path('app.Http.Middlewares') . $this->option[0] . 'Middleware.php';
+
+        if ($success) {
+            ok('Middleware [' . $filePath . '] created successfully.')->out();
+
+            return 0;
+        }
+
+        fail('Failed create middleware.')->out();
+
+        return 1;
+    }
+
+    /**
+     * @return int
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function make_exception(): int
+    {
+        info('Making exception file...')->out(false);
+
+        $this->isPath('path.exception');
+
+        $success = $this->makeTemplate($this->option[0], [
+            'template_location' => __DIR__ . '/stubs/exception',
+            'save_location'     => get_path('path.exception'),
+            'pattern'           => '__exception__',
+            'suffix'            => '.php',
+        ]);
+
+        $filePath = path('app.Exceptions') . $this->option[0] . '.php';
+
+        if ($success) {
+            ok('Exception [' . $filePath . '] created successfully.')->out();
 
             return 0;
         }
@@ -160,19 +238,23 @@ class MakeCommand extends AbstractCommand
      * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
-    public function make_services(): int
+    public function make_provider(): int
     {
-        info('Making service file...')->out(false);
+        info('Making service provider file...')->out(false);
+
+        $this->isPath('path.provider');
 
         $success = $this->makeTemplate($this->option[0], [
-            'template_location' => __DIR__ . '/stubs/service',
-            'save_location'     => get_path('path.services'),
-            'pattern'           => '__service__',
-            'suffix'            => 'Service.php',
+            'template_location' => __DIR__ . '/stubs/provider',
+            'save_location'     => get_path('path.provider'),
+            'pattern'           => '__provider__',
+            'suffix'            => 'ServiceProvider.php',
         ]);
 
+        $filePath = path('app.Providers') . $this->option[0] . 'ServiceProvider.php';
+
         if ($success) {
-            ok('Finish created services file')->out();
+            ok('Provider [' . $filePath . '] created successfully.')->out();
 
             return 0;
         }
@@ -191,6 +273,9 @@ class MakeCommand extends AbstractCommand
     public function make_model(): int
     {
         info('Making model file...')->out(false);
+
+        $this->isPath('path.model');
+
         $name          = ucfirst($this->option[0]);
         $modelLocation = get_path('path.model') . $name . '.php';
 
@@ -238,7 +323,9 @@ class MakeCommand extends AbstractCommand
             return 1;
         }
 
-        ok("Finish created model file `App\\Models\\{$name}`")->out();
+        $filePath = path('app.Models') . $name;
+
+        ok('Model [' . $filePath . '] create successfully.')->out();
 
         return 0;
     }
@@ -282,6 +369,9 @@ class MakeCommand extends AbstractCommand
     public function make_command(): int
     {
         info('Making command file...')->out(false);
+
+        $this->isPath('path.command');
+
         $name    = $this->option[0];
         $success = $this->makeTemplate($name, [
             'template_location' => __DIR__ . '/stubs/command',
@@ -300,7 +390,9 @@ class MakeCommand extends AbstractCommand
 
             file_put_contents(get_path('path.config') . 'command.php', $getContent);
 
-            ok('Finish created command file')->out();
+            $filePath = path('app.Console.Commands') . $name . 'Command.php';
+
+            ok('Command [' . $filePath . '] create successfully.')->out();
 
             return 0;
         }

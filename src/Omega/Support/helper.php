@@ -14,21 +14,6 @@ use Omega\Exceptions\ApplicationNotAvailableException;
 use Omega\Support\Vite;
 use Omega\Router\Router;
 
-if (!function_exists('view_paths')) {
-    /**
-     * Get application view paths, base on config file.
-     *
-     * @return string[] View path folder.
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     */
-    function view_paths(): array
-    {
-        return app()->getViewPaths();
-    }
-}
-
 if (!function_exists('app_env')) {
     /**
      * Check application environment mode.
@@ -261,5 +246,27 @@ if (!function_exists('get_path')) {
         }
 
         return $value . $suffix_path;
+    }
+}
+
+if (!function_exists('path')) {
+    /**
+     * Converte un binding logico come "app.Services" in un percorso relativo al progetto,
+     * usando gli slash corretti per il sistema operativo.
+     *
+     * @param string $binding
+     * @return string
+     */
+    function path(string $binding): string
+    {
+        // Sostituisce i punti con DIRECTORY_SEPARATOR e aggiunge uno slash finale
+        $relativePath = str_replace('.', DIRECTORY_SEPARATOR, $binding);
+
+        // Assicura lo slash finale
+        if (!str_ends_with($relativePath, DIRECTORY_SEPARATOR)) {
+            $relativePath .= DIRECTORY_SEPARATOR;
+        }
+
+        return $relativePath;
     }
 }

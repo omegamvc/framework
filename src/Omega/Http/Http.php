@@ -23,7 +23,7 @@ use function is_array;
 use function is_string;
 use function method_exists;
 
-class HttpKernel
+class Http
 {
     /**
      * Application Container.

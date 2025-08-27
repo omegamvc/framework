@@ -17,7 +17,7 @@ use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\RegisterFacades;
 use Omega\Support\Bootstrap\RegisterProviders;
 
-class ApplicationConsole
+class Console
 {
     /**
      * Application Container.

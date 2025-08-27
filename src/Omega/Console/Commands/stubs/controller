@@ -3,16 +3,24 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace App\Http\Controllers;
 
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Http\Response;
 
-class __controller__Controller extends Controller
+class __controller__Controller extends AbstractController
 {
-    public function index(): Response
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function handle(): Response
     {
         return view('__controller__', [
-            "title" => "Documnet Title",
+            "title" => "Document Title",
         ]);
     }
 }

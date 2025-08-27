@@ -31,7 +31,7 @@ class __command__Command extends AbstractCommand
     /**
      * @return array<string, array<string, string|string[]>>
      */
-    public function printHelp()
+    public function printHelp(): array
       {
           return [
               'commands' => [],

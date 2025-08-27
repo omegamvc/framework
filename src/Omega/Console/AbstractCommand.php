@@ -7,6 +7,9 @@ namespace Omega\Console;
 use ArrayAccess;
 use Exception;
 use Omega\Console\Traits\TerminalTrait;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Text\Str;
 use ReturnTypeWillChange;
 
@@ -178,6 +181,35 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
         }
 
         return $option;
+    }
+
+    /**
+     * Garantisce che la directory esista.
+     *
+     * @param string $binding Il binding nel container (es: "app.Http.Middlewares").
+     * @return string Il path assoluto creato/verificato.
+     */
+    /**
+     * @param string $binding
+     * @return string
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    protected function isPath(string $binding): string
+    {
+        // Recupera il path logico dal container
+        $logicalPath = get_path($binding);
+
+        // Normalizza in un path di filesystem
+        $realPath = str_replace(['.', '/','\\'], DIRECTORY_SEPARATOR, $logicalPath);
+
+        // Se non esiste, crea ricorsivamente
+        if (!is_dir($realPath)) {
+            mkdir($realPath, 0755, true);
+        }
+
+        return $realPath;
     }
 
     /**

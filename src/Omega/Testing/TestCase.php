@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Application\Application;
-use Omega\Http\HttpKernel;
+use Omega\Http\Http;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Support\Facades\AbstractFacade;
 use Throwable;
@@ -22,7 +22,7 @@ class TestCase extends PhpUnitTestCase
 {
     protected Application $app;
 
-    protected HttpKernel $kernel;
+    protected Http $kernel;
 
     protected string $class;
 
@@ -82,8 +82,8 @@ class TestCase extends PhpUnitTestCase
         string $remoteAddress = '::1',
         ?string $rawBody = null,
     ): TestResponse {
-        /** @var HttpKernel $kernel */
-        $kernel  = $this->app->make(HttpKernel::class);
+        /** @var Http $kernel */
+        $kernel  = $this->app->make(Http::class);
         $request = new Request(
             $url,
             $query,
