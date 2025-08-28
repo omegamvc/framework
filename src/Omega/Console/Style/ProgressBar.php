@@ -1,11 +1,20 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Style;
 
 use Omega\Console\Traits\CommandTrait;
-
 use function array_key_exists;
 use function array_keys;
 use function array_map;
@@ -15,37 +24,63 @@ use function ceil;
 use function str_pad;
 use function str_repeat;
 use function str_replace;
-
 use const PHP_EOL;
 
+/**
+ * Class ProgressBar
+ *
+ * A simple terminal progress bar implementation with customizable templates and bindings.
+ * It supports automatic updates in the console and allows for custom callbacks when tasks complete.
+ *
+ * Example usage:
+ * ```php
+ * $bar = new ProgressBar();
+ * $bar->mask = 100;
+ * for ($i = 0; $i < 100; $i++) {
+ *     $bar->current = $i + 1;
+ *     $bar->tick();
+ * }
+ * ```
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Style
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class ProgressBar
 {
     use CommandTrait;
 
-    /** @var string  */
+    /** @var string Template for rendering the progress bar (e.g. ':progress :percent'). */
     private string $template;
 
-    /** @var int  */
+    /** @var int Current progress value. */
     public int $current = 0;
 
-    /** @var int  */
-    public int $mask    = 1;
+    /** @var int Maximum value of progress. */
+    public int $mask = 1;
 
-    /** @var string  */
+    /** @var string Current rendered progress string. */
     private string $progress;
 
-    /** @var callable(): string Callback when task was complete. */
+    /** @var callable(): string Callback executed when the task completes. */
     public $complete;
 
-    /** @var array<callable(int, int): string> Bind template. */
+    /** @var array<callable(int, int): string> Bindings for template placeholders. */
     private array $binds;
 
-    /** @var array<callable(int, int): string> Bind custom template. */
+    /** @var array<callable(int, int): string> Global custom bindings available for all instances. */
     public static array $customBinds = [];
 
     /**
-     * @param string $template
-     * @param array<callable(int, int): string> $binds
+     * ProgressBar constructor.
+     *
+     * @param string $template Template string with placeholders (default ':progress :percent')
+     * @param array<callable(int, int): string> $binds Optional custom bindings for template placeholders
      */
     public function __construct(string $template = ':progress :percent', array $binds = [])
     {
@@ -57,7 +92,9 @@ class ProgressBar
     }
 
     /**
-     * @return string
+     * Convert progress bar object to string representation.
+     *
+     * @return string Rendered progress bar with applied bindings
      */
     public function __toString(): string
     {
@@ -70,6 +107,8 @@ class ProgressBar
     }
 
     /**
+     * Increment the progress bar by one tick and update console output.
+     *
      * @return void
      */
     public function tick(): void
@@ -85,10 +124,10 @@ class ProgressBar
     }
 
     /**
-     * Customize tick in progressbar.
+     * Update the progress bar with a custom template and bindings.
      *
-     * @param string $template
-     * @param array<callable(int, int): string> $binds
+     * @param string $template Template string for rendering progress bar
+     * @param array<callable(int, int): string> $binds Custom bindings for placeholders
      * @return void
      */
     public function tickWith(string $template = ':progress :percent', array $binds = []): void
@@ -106,9 +145,11 @@ class ProgressBar
     }
 
     /**
-     * @param int $current
-     * @param int $maks
-     * @return string
+     * Generate a textual representation of the progress bar.
+     *
+     * @param int $current Current progress
+     * @param int $maks Maximum progress
+     * @return string Textual progress bar (e.g. '[=====----]')
      */
     private function progress(int $current, int $maks): string
     {
@@ -122,9 +163,9 @@ class ProgressBar
     }
 
     /**
-     * Binding.
+     * Bind template placeholders to their respective callbacks.
      *
-     * @param array<callable(int, int): string> $binds
+     * @param array<callable(int, int): string> $binds Custom bindings to merge with default ones
      * @return void
      */
     public function binding(array $binds): void
@@ -137,11 +178,13 @@ class ProgressBar
         if (false === array_key_exists(':percent', $binds)) {
             $binds[':percent'] =  fn ($current, $maks): string => ceil(($current / $maks) * 100) . '%';
         }
-        $this->binds    = $binds;
+        $this->binds = $binds;
     }
 
     /**
-     * @return string
+     * Return the final completed progress string.
+     *
+     * @return string Rendered progress bar at completion
      */
     private function complete(): string
     {

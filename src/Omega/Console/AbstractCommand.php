@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Omega\Console;
 
 use ArrayAccess;
-use Exception;
+use Omega\Console\Exceptions\ImmutableOptionException;
 use Omega\Console\Traits\TerminalTrait;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
@@ -163,7 +163,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * Check whether a string represents a command parameter (starts with '-' or '--').
+     * Check whether a string represents a command parameter (starts with '-' or '--')
      *
      * @param string $command Command string to check
      * @return bool True if it is a command parameter, false otherwise
@@ -268,22 +268,22 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      *
      * @param mixed $offset Option name
      * @param mixed $value  Value
-     * @throws Exception Always throws because options cannot be modified
+     * @throws ImmutableOptionException Always throws because options cannot be modified
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        throw new Exception('Command cant be modify');
+        throw new ImmutableOptionException('Command cant be modify');
     }
 
     /**
      * ArrayAccess: Prevent unsetting of options.
      *
      * @param mixed $offset Option name
-     * @throws Exception Always throws because options cannot be modified
+     * @throws ImmutableOptionException Always throws because options cannot be modified
      */
     public function offsetUnset(mixed $offset): void
     {
-        throw new Exception('Command cant be modify');
+        throw new ImmutableOptionException('Command cant be modify');
     }
 
     /**

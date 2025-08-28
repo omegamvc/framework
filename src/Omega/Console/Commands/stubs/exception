@@ -7,6 +7,6 @@ namespace App\Exceptions;
 
 use Omega\Exceptions\ExceptionHandler;
 
-class __exception__ extends ExceptionHandler
+class __exception__Exception extends ExceptionHandler
 {
 }

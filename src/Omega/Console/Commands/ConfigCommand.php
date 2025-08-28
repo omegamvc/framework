@@ -14,8 +14,8 @@ use Omega\Support\Bootstrap\ConfigProviders;
 
 use function file_exists;
 use function file_put_contents;
-use function Omega\Console\fail;
-use function Omega\Console\ok;
+use function Omega\Console\error;
+use function Omega\Console\info;
 use function unlink;
 
 use const PHP_EOL;
@@ -67,11 +67,11 @@ class ConfigCommand extends AbstractCommand
         $config       = $app->get(ConfigRepository::class)->getAll();
         $cachedConfig = '<?php return ' . var_export($config, true) . ';' . PHP_EOL;
         if (file_put_contents($app->getApplicationCachePath() . 'config.php', $cachedConfig)) {
-            ok('Config file has successfully created.')->out();
+            info('Configuration cached successfully.')->out();
 
             return 0;
         }
-        fail('Cant build config cache.')->out();
+        error('Cant build config cache.')->out();
 
         return 1;
     }
@@ -86,7 +86,7 @@ class ConfigCommand extends AbstractCommand
     {
         if (file_exists($file = Application::getInstance()->getApplicationCachePath() . 'config.php')) {
             @unlink($file);
-            ok('Clear config file has successfully.')->out();
+            info('Configuration cache cleared successfully.')->out();
 
             return 0;
         }

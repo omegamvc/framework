@@ -36,7 +36,7 @@ use const PHP_WINDOWS_EVENT_CTRL_C;
  * This file provides a collection of global helper functions to simplify
  * interaction with the Omega console environment. They cover tasks such as:
  *
- * - Rendering styled output in the terminal (info, warn, fail, ok, style).
+ * - Rendering styled output in the terminal (info, warn, error, success, style).
  * - Prompting the user for input (option, select, text, password, any_key).
  * - Managing terminal width detection (width).
  * - Handling exit signals such as Ctrl+C (exit_prompt, remove_exit_prompt).
@@ -93,29 +93,29 @@ if (!function_exists('warn')) {
     }
 }
 
-if (!function_exists('fail')) {
+if (!function_exists('error')) {
     /**
      * Render a "failure" alert in the terminal.
      *
      * @param string $text The message text.
      * @return Style The styled alert output.
      */
-    function fail(string $text): Style
+    function error(string $text): Style
     {
-        return Alert::render()->fail($text);
+        return Alert::render()->error($text);
     }
 }
 
-if (!function_exists('ok')) {
+if (!function_exists('success')) {
     /**
      * Render a "success" alert in the terminal.
      *
      * @param string $text The message text.
      * @return Style The styled alert output.
      */
-    function ok(string $text): Style
+    function success(string $text): Style
     {
-        return Alert::render()->ok($text);
+        return Alert::render()->success($text);
     }
 }
 

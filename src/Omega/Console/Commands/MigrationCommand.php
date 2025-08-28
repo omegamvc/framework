@@ -20,13 +20,11 @@ use Omega\Support\Facades\DB;
 use Omega\Support\Facades\PDO;
 use Omega\Support\Facades\Schema;
 use Throwable;
-
-use function Omega\Console\fail;
+use function Omega\Console\error;
 use function Omega\Console\info;
-use function Omega\Console\ok;
 use function Omega\Console\style;
+use function Omega\Console\success;
 use function Omega\Console\warn;
-
 use const PATHINFO_FILENAME;
 
 /**
@@ -297,7 +295,7 @@ class MigrationCommand extends AbstractCommand
                 $success = $up->every(fn ($item) => $item->execute());
             } catch (Throwable $th) {
                 $success = false;
-                fail($th->getMessage())->out(false);
+                error($th->getMessage())->out(false);
             }
 
             if ($success) {
@@ -356,7 +354,7 @@ class MigrationCommand extends AbstractCommand
                 $success = $up->every(fn ($item) => $item->execute());
             } catch (Throwable $th) {
                 $success = false;
-                fail($th->getMessage())->out(false);
+                error($th->getMessage())->out(false);
             }
 
             if ($success) {
@@ -417,7 +415,7 @@ class MigrationCommand extends AbstractCommand
     public function rollback(): int
     {
         if (false === ($batch = $this->option('batch', false))) {
-            fail('batch is required.')->out();
+            error('batch is required.')->out();
 
             return 1;
         }
@@ -471,7 +469,7 @@ class MigrationCommand extends AbstractCommand
                 $success = $down->every(fn ($item) => $item->execute());
             } catch (Throwable $th) {
                 $success = false;
-                fail($th->getMessage())->out(false);
+                error($th->getMessage())->out(false);
             }
 
             if ($success) {
@@ -509,14 +507,14 @@ class MigrationCommand extends AbstractCommand
         $success = Schema::create()->database($dbName)->ifNotExists()->execute();
 
         if ($success) {
-            ok("success create database `{$dbName}`")->out(false);
+            success("success create database `{$dbName}`")->out(false);
 
             $this->initializeMigration();
 
             return 0;
         }
 
-        fail("cant created database `{$dbName}`")->out(false);
+        error("cant created database `{$dbName}`")->out(false);
 
         return 1;
     }
@@ -543,12 +541,12 @@ class MigrationCommand extends AbstractCommand
         $success = Schema::drop()->database($dbName)->ifExists(true)->execute();
 
         if ($success) {
-            ok("success drop database `{$dbName}`")->out(false);
+            success("success drop database `{$dbName}`")->out(false);
 
             return 0;
         }
 
-        fail("cant drop database `{$dbName}`")->out(false);
+        error("cant drop database `{$dbName}`")->out(false);
 
         return 1;
     }
@@ -766,12 +764,12 @@ class MigrationCommand extends AbstractCommand
         }
 
         if ($this->createMigrationTable()) {
-            ok('Success create migration table.')->out(false);
+            success('Success create migration table.')->out(false);
 
             return 0;
         }
 
-        fail('Migration table cant be create.')->out(false);
+        error('Migration table cant be create.')->out(false);
 
         return 1;
     }

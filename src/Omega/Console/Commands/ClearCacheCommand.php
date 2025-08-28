@@ -13,9 +13,9 @@ use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 
 use function array_keys;
 use function is_array;
-use function Omega\Console\fail;
+use function Omega\Console\error;
 use function Omega\Console\info;
-use function Omega\Console\ok;
+use function Omega\Console\success;
 
 /**
  * @property bool $update
@@ -66,7 +66,7 @@ class ClearCacheCommand extends AbstractCommand
     public function clear(Application $app): int
     {
         if (false === $app->has('cache')) {
-            fail('Cache is not set yet.')->out();
+            error('Cache is not set yet.')->out();
 
             return 1;
         }
@@ -92,14 +92,14 @@ class ClearCacheCommand extends AbstractCommand
 
         if (null === $drivers) {
             $cache->driver()->clear();
-            ok('Done default cache driver has been clear.')->out(false);
+            success('Done default cache driver has been clear.')->out(false);
 
             return 0;
         }
 
         foreach ($drivers as $driver) {
             $cache->driver($driver)->clear();
-            info("clear '$driver' driver.")->out(false);
+            info("Clear '$driver' driver.")->out(false);
         }
 
         return 0;

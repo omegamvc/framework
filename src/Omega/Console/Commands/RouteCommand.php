@@ -10,7 +10,6 @@ use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Router\Router;
 use Omega\Text\Str;
-
 use function count;
 use function is_array;
 use function Omega\Console\style;
@@ -49,7 +48,7 @@ class RouteCommand extends AbstractCommand
     public function main(): int
     {
         $print = new Style();
-        $print->tap(Alert::render()->ok('route list'));
+        $print->tap(Alert::render()->success('Route List'));
         /** @noinspection PhpUnusedLocalVariableInspection */
         foreach (Router::getRoutes() as $key => $route) {
             $method = $this->methodToStyle($route['method']);

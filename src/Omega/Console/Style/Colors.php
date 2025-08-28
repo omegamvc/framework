@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Style;
@@ -9,17 +19,36 @@ use Omega\Console\Exceptions\InvalidHexCodeException;
 use Omega\Console\Style\Color\BackgroundColor;
 use Omega\Console\Style\Color\ForegroundColor;
 use Omega\Text\Str;
-
 use function sscanf;
 
+/**
+ * Class Colors
+ *
+ * Provides utilities to convert hexadecimal or RGB colors to terminal color codes.
+ * Supports both foreground (text) and background colors.
+ *
+ * Example usage:
+ * ```php
+ * echo (string) Colors::hexText('#ff0000'); // red text
+ * echo (string) Colors::rgbBg(0, 255, 0);  // green background
+ * ```
+ * @category   Omega
+ * @package    Console
+ * @subpackage Style
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class Colors
 {
     /**
-     * Convert hex color to terminal color raw (text).
+     * Convert a hex color code to a terminal foreground (text) color.
      *
-     * @param string $hexCode Hex code (start with #)
-     * @return ForegroundColor Terminal color
-     * @throws InvalidHexCodeException if hex code is not found.
+     * @param string $hexCode Hexadecimal color code starting with '#'
+     * @return ForegroundColor Terminal foreground color representation
+     * @throws InvalidHexCodeException if the hex code is invalid
      */
     public static function hexText(string $hexCode): ForegroundColor
     {
@@ -33,11 +62,11 @@ class Colors
     }
 
     /**
-     * Convert hex color to terminal color raw (background).
+     * Convert a hex color code to a terminal background color.
      *
-     * @param string $hexCode Hex code (start with #)
-     * @return BackgroundColor Terminal color
-     * @throws InvalidHexCodeException if hex code is not found.
+     * @param string $hexCode Hexadecimal color code starting with '#'
+     * @return BackgroundColor Terminal background color representation
+     * @throws InvalidHexCodeException if the hex code is invalid
      */
     public static function hexBg(string $hexCode): BackgroundColor
     {
@@ -51,12 +80,12 @@ class Colors
     }
 
     /**
-     * Convert rgb color (true color) to terminal color raw (text).
+     * Convert RGB color to a terminal foreground (text) color.
      *
-     * @param int $r Red (0-255)
-     * @param int $g Green (0-255)
-     * @param int $b Blue (0-255)
-     * @return ForegroundColor Terminal code
+     * @param int $r Red channel (0–255)
+     * @param int $g Green channel (0–255)
+     * @param int $b Blue channel (0–255)
+     * @return ForegroundColor Terminal foreground color
      */
     public static function rgbText(int $r, int $g, int $b): ForegroundColor
     {
@@ -64,12 +93,12 @@ class Colors
     }
 
     /**
-     * Convert rgb color to terminal color raw (background).
+     * Convert RGB color to a terminal background color.
      *
-     * @param int $r Red (0-255)
-     * @param int $g Green (0-255)
-     * @param int $b Blue (0-255)
-     * @return BackgroundColor Terminal code
+     * @param int $r Red channel (0–255)
+     * @param int $g Green channel (0–255)
+     * @param int $b Blue channel (0–255)
+     * @return BackgroundColor Terminal background color
      */
     public static function rgbBg(int $r, int $g, int $b): BackgroundColor
     {
@@ -77,25 +106,15 @@ class Colors
     }
 
     /**
-     * Build a normalized RGB array for terminal color codes.
+     * Build a normalized RGB array suitable for terminal color codes.
      *
-     * This method normalizes RGB values to the range 0–255 and
-     * returns an array formatted for terminal color construction.
-     *
-     * @param int $prefix Terminal color prefix code (38 for foreground, 48 for background)
+     * @param int $prefix Terminal color prefix (38 for foreground, 48 for background)
      * @param int $r Red channel (0–255)
      * @param int $g Green channel (0–255)
      * @param int $b Blue channel (0–255)
-     * @return int[] Returns an array with the following structure:
-     *   [
-     *     0 => int $prefix,  // terminal color type code (38 or 48)
-     *     1 => int 2,        // mode for true-color
-     *     2 => int $r,       // normalized red channel
-     *     3 => int $g,       // normalized green channel
-     *     4 => int $b        // normalized blue channel
-     *   ]
-     * @throws InvalidHexCodeException if the terminal color prefix is not 38 (foreground) or 48 (background).
- */
+     * @return int[] Array representing terminal color [prefix, mode, r, g, b]
+     * @throws InvalidHexCodeException if prefix is not 38 or 48
+     */
     private static function buildRgbArray(int $prefix, int $r, int $g, int $b): array
     {
         if ($prefix !== 38 && $prefix !== 48) {

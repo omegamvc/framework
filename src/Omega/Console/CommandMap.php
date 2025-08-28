@@ -15,8 +15,8 @@ declare(strict_types=1);
 namespace Omega\Console;
 
 use ArrayAccess;
-use Exception;
 use InvalidArgumentException;
+use Omega\Console\Exceptions\ImmutableCommandMapException;
 use Omega\Text\Str;
 use ReturnTypeWillChange;
 
@@ -42,10 +42,6 @@ use function is_array;
  *   'default'  => ['force' => false, 'name' => null], // Default options
  *   'match'    => fn(string $given): bool => ...      // Custom matcher (optional)
  * ]
- *
- * Implements ArrayAccess for read-only access to the underlying command definition.
- *
- * @implements ArrayAccess<string, string|string[]|array<string, string|bool|int|null>|callable(string):bool>
  *
  * @category  Omega
  * @package   Console
@@ -305,21 +301,21 @@ class CommandMap implements ArrayAccess
      *
      * @param mixed $offset
      * @param mixed $value
-     * @throws Exception Always, as reassignment is not allowed.
+     * @throws ImmutableCommandMapException Always, as reassignment is not allowed.
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        throw new Exception('CommandMap cant be reassignment');
+        throw new ImmutableCommandMapException('CommandMap cant be reassignment');
     }
 
     /**
      * Prevent unsetting of definition keys.
      *
      * @param mixed $offset
-     * @throws Exception Always, as unsetting is not allowed.
+     * @throws ImmutableCommandMapException Always, as unsetting is not allowed.
      */
     public function offsetUnset(mixed $offset): void
     {
-        throw new Exception('CommandMap cant be reassignment');
+        throw new ImmutableCommandMapException('CommandMap cant be reassignment');
     }
 }

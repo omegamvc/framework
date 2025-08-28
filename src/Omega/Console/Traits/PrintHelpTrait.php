@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Traits;
@@ -10,25 +20,47 @@ use function array_keys;
 use function implode;
 use function strlen;
 
+/**
+ * PrintHelpTrait provides helper methods to render command and option
+ * descriptions in a styled console output using the Style class.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackges Traits
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 trait PrintHelpTrait
 {
-    /** @var array<string, string|int> Print helper style option. */
+    /**
+     * Style options for printing help.
+     *
+     * @var array<string, string|int> Array of styling options:
+     *  - 'margin-left': Number of spaces before printing the line.
+     *  - 'column-1-min-length': Minimum width of the first column.
+     */
     protected array $printHelp = [
         'margin-left'         => 2,
         'column-1-min-length' => 24,
     ];
 
     /**
-     * Print argument describe using style console.
+     * Render and style command descriptions in console output.
      *
-     * @param Style $style
-     * @return Style
+     * Each command is printed with its name, arguments (dimmed),
+     * and description aligned in columns.
+     *
+     * @param Style $style Instance of Style to apply formatting
+     * @return Style Returns the modified Style instance for chaining
      */
     public function printCommands(Style $style): Style
     {
-        $optionNames =  array_keys($this->commandDescribes);
-
+        $optionNames = array_keys($this->commandDescribes);
         $minLength = $this->printHelp['column-1-min-length'];
+
         foreach ($optionNames as $name) {
             $argumentsLength = 0;
             if (isset($this->commandRelation[$name])) {
@@ -50,7 +82,6 @@ trait PrintHelpTrait
             }
 
             $style->repeat(' ', $this->printHelp['margin-left']);
-
             $style->push($option)->textGreen();
             $style->push($arguments)->textDim();
 
@@ -65,16 +96,19 @@ trait PrintHelpTrait
     }
 
     /**
-     * Print option describe using style console.
+     * Render and style option descriptions in console output.
      *
-     * @param Style $style
-     * @return Style
+     * Each option is printed with a padded name (dimmed) and
+     * aligned description in the second column.
+     *
+     * @param Style $style Instance of Style to apply formatting
+     * @return Style Returns the modified Style instance for chaining
      */
     public function printOptions(Style $style): Style
     {
-        $optionNames =  array_keys($this->optionDescribes);
-
+        $optionNames = array_keys($this->optionDescribes);
         $minLength = $this->printHelp['column-1-min-length'];
+
         foreach ($optionNames as $name) {
             $length = strlen($name);
             if ($length > $minLength) {

@@ -14,8 +14,8 @@ declare(strict_types=1);
 
 namespace Omega\Console;
 
-use Omega\Console\Style\Style;
 use Omega\Application\Application;
+use Omega\Console\Style\Style;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
@@ -35,7 +35,6 @@ use function floor;
 use function is_int;
 use function max;
 use function min;
-use function Omega\Console\fail;
 use function strlen;
 use function strtolower;
 
@@ -138,7 +137,8 @@ class Console
 
         // did you mean
         $count   = 0;
-        $similar = new Style('Did you mean?')->textLightYellow()->newLines();
+        $similar =  new Style();
+        $similar->tap(error(sprintf('Command "%s" is ambiguous. Did you mean one of these?', $baseArgs)));
         foreach ($this->getSimilarity($baseArgs, $commands, 0.8) as $term => $score) {
             $similar->push('    > ')->push($term)->textDim()->newLines();
             $count++;
@@ -147,14 +147,11 @@ class Console
         // if command not register
         if (0 === $count) {
             new Style()
-                ->push('Command not found, run help command')->textRed()->newLines(2)
-                ->push('> ')->textDim()
-                ->push('php ')->textYellow()
-                ->push('omega ')
-                ->push('--help')->textDim()
+                ->tap(error(sprintf('Command "%s" is not defined.', $baseArgs)))
+                ->tap(info('Run help command.'))
+                ->push('> php omega --help')->textDim()
                 ->newLines()
-                ->out()
-            ;
+                ->out(false);
 
             return $this->exitCode = 1;
         }

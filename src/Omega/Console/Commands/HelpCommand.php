@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace Omega\Console\Commands;
 
+use Omega\Application\Application;
 use Omega\Console\AbstractCommand;
 use Omega\Console\CommandMap;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
-use Omega\Application\Application;
 use Omega\Console\Util;
 use Omega\Container\Invoker\Exception\InvocationException;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Text\Str;
-
 use function array_merge;
 use function class_exists;
 use function implode;

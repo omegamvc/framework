@@ -8,8 +8,7 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Alert;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
-
-use function Omega\Console\fail;
+use function Omega\Console\error;
 use function shell_exec;
 
 /**
@@ -59,7 +58,7 @@ class ServeCommand extends AbstractCommand
     {
         $port = $this->port;
         if (!is_numeric($port)) {
-            fail("Port must be numeric");
+            error("Port must be numeric");
             return 0;
         }
 

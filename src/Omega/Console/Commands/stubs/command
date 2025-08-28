@@ -7,7 +7,6 @@ namespace App\Commands;
 
 use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\PrinterTrait;
-
 use function Omega\Console\style;
 
 class __command__Command extends AbstractCommand

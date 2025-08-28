@@ -9,9 +9,8 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Style;
 use Omega\Support\PackageManifest;
 use Throwable;
-
 use function array_keys;
-use function Omega\Console\fail;
+use function Omega\Console\error;
 use function Omega\Console\info;
 
 class PackageDiscoveryCommand extends AbstractCommand
@@ -57,8 +56,8 @@ class PackageDiscoveryCommand extends AbstractCommand
             }
             $style->out(false);
         } catch (Throwable $th) {
-            fail($th->getMessage())->out(false);
-            fail('Can\'t create package manifest cache file.')->out();
+            error($th->getMessage())->out(false);
+            error('Can\'t create package manifest cache file.')->out();
 
             return 1;
         }

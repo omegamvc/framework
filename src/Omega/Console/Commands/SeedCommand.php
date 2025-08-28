@@ -14,14 +14,13 @@ use Omega\Container\Exceptions\NotFoundException;
 use Omega\Template\Generate;
 use Omega\Template\Method;
 use Throwable;
-
 use function class_exists;
 use function file_exists;
 use function file_put_contents;
-use function Omega\Console\fail;
+use function Omega\Console\error;
 use function Omega\Console\info;
-use function Omega\Console\ok;
 use function Omega\Console\style;
+use function Omega\Console\success;
 use function Omega\Console\warn;
 
 /**
@@ -134,7 +133,7 @@ class SeedCommand extends AbstractCommand
         try {
             app()->call([$class, 'run']);
 
-            ok('Success run seeder ' . $class)->out(false);
+            success('Success run seeder ' . $class)->out(false);
         } catch (Throwable $th) {
             warn($th->getMessage())->out(false);
             $exit = 1;
@@ -178,12 +177,12 @@ class SeedCommand extends AbstractCommand
             ->body('// run some insert db');
 
         if (file_put_contents(get_path('path.seeder', $class . '.php'), $make->__toString())) {
-            ok('Success create seeder')->out();
+            success('Success create seeder')->out();
 
             return 0;
         }
 
-        fail('Fail to create seeder')->out();
+        error('Fail to create seeder')->out();
 
         return 1;
     }

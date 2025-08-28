@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Traits;
@@ -8,16 +18,31 @@ use Omega\Console\Style\Alert;
 use Omega\Console\Style\Decorate;
 use Omega\Console\Style\Style;
 
+/**
+ * Trait AlertTrait
+ *
+ * Provides reusable alert rendering methods for terminal output.
+ * Supports info, warning, error, and success messages with configurable left margin.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackges Traits
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 trait AlertTrait
 {
-    /** @var int margin left */
+    /** @var int Left margin for alert rendering (number of spaces). */
     protected int $marginLeft = 0;
 
     /**
-     * Set margin left.
+     * Set the left margin for alert messages.
      *
-     * @param int $marginLeft
-     * @return AlertTrait|Alert
+     * @param int $marginLeft Number of spaces to indent the alert
+     * @return AlertTrait|Alert Returns the instance for method chaining
      */
     public function marginLeft(int $marginLeft): self
     {
@@ -27,17 +52,17 @@ trait AlertTrait
     }
 
     /**
-     * Render alert info.
+     * Render an informational alert message.
      *
-     * @param string $info
-     * @return Style
+     * @param string $info The message to display
+     * @return Style Returns a Style instance representing the formatted message
      */
     public function info(string $info): Style
     {
         return new Style()
             ->newLines()
             ->repeat(' ', $this->marginLeft)
-            ->push(' info ')
+            ->push(' INFO ')
             ->bold()
             ->rawReset([Decorate::RESET_BOLD_DIM])
             ->bgBlue()
@@ -47,17 +72,17 @@ trait AlertTrait
     }
 
     /**
-     * Render alert warning.
+     * Render a warning alert message.
      *
-     * @param string $warn
-     * @return Style
+     * @param string $warn The warning message to display
+     * @return Style Returns a Style instance representing the formatted message
      */
     public function warn(string $warn): Style
     {
         return new Style()
             ->newLines()
             ->repeat(' ', $this->marginLeft)
-            ->push(' warn ')
+            ->push(' WARNING ')
             ->bold()
             ->rawReset([Decorate::RESET_BOLD_DIM])
             ->bgYellow()
@@ -67,42 +92,42 @@ trait AlertTrait
     }
 
     /**
-     * Render alert fail.
+     * Render a failure alert message.
      *
-     * @param string $fail
-     * @return Style
+     * @param string $error The failure message to display
+     * @return Style Returns a Style instance representing the formatted message
      */
-    public function fail(string $fail): Style
+    public function error(string $error): Style
     {
         return new Style()
             ->newLines()
             ->repeat(' ', $this->marginLeft)
-            ->push(' fail ')
+            ->push(' ERROR ')
             ->bold()
             ->rawReset([Decorate::RESET_BOLD_DIM])
             ->bgRed()
             ->push(' ')
-            ->push($fail)
-            ->newLines(2);
+            ->push($error)
+            ->newLines();
     }
 
     /**
-     * Render alert ok (similar with success).
+     * Render a success or "ok" alert message.
      *
-     * @param string $ok
-     * @return Style
+     * @param string $success The success message to display
+     * @return Style Returns a Style instance representing the formatted message
      */
-    public function ok(string $ok): Style
+    public function success(string $success): Style
     {
         return new Style()
             ->newLines()
             ->repeat(' ', $this->marginLeft)
-            ->push(' ok ')
+            ->push(' SUCCESS ')
             ->bold()
             ->rawReset([Decorate::RESET_BOLD_DIM])
             ->bgGreen()
             ->push(' ')
-            ->push($ok)
+            ->push($success)
             ->newLines(2);
     }
 }

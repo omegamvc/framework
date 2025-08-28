@@ -8,6 +8,7 @@ use DateInvalidTimeZoneException;
 use DateMalformedStringException;
 use Exception;
 use Omega\Console\AbstractCommand;
+use Omega\Console\Style\Style;
 use Omega\Console\Traits\CommandTrait;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
@@ -16,16 +17,15 @@ use Omega\Support\Facades\DB;
 use Omega\Template\Generate;
 use Omega\Template\Property;
 use Throwable;
-
 use function file_exists;
 use function file_get_contents;
 use function file_put_contents;
 use function is_dir;
 use function mkdir;
 use function now;
-use function Omega\Console\fail;
+use function Omega\Console\error;
 use function Omega\Console\info;
-use function Omega\Console\ok;
+use function Omega\Console\success;
 use function Omega\Console\text;
 use function Omega\Console\warn;
 use function preg_replace;
@@ -127,15 +127,15 @@ class MakeCommand extends AbstractCommand
             'suffix'            => 'Controller.php',
         ]);
 
-        $filePath = path('app.Http.Controllers') . $this->option[0] . 'Controller.php';
+        $path = path('app.Http.Controllers') . $this->option[0] . 'Controller.php';
 
         if ($success) {
-            ok('Controller [' . $filePath . '] created successfully.')->out();
+            success('Controller [' . new Style($path)->bold() . '] created successfully.')->out();
 
             return 0;
         }
 
-        fail('Failed Create controller')->out();
+        error('Failed Create controller')->out();
 
         return 1;
     }
@@ -159,15 +159,15 @@ class MakeCommand extends AbstractCommand
             'suffix'            => 'Middleware.php',
         ]);
 
-        $filePath = path('app.Http.Middlewares') . $this->option[0] . 'Middleware.php';
+        $path = path('app.Http.Middlewares') . $this->option[0] . 'Middleware.php';
 
         if ($success) {
-            ok('Middleware [' . $filePath . '] created successfully.')->out();
+            success('Middleware [' . new Style($path)->bold() . '] created successfully.')->out();
 
             return 0;
         }
 
-        fail('Failed create middleware.')->out();
+        error('Failed create middleware.')->out();
 
         return 1;
     }
@@ -188,18 +188,18 @@ class MakeCommand extends AbstractCommand
             'template_location' => __DIR__ . '/stubs/exception',
             'save_location'     => get_path('path.exception'),
             'pattern'           => '__exception__',
-            'suffix'            => '.php',
+            'suffix'            => 'Exception.php',
         ]);
 
-        $filePath = path('app.Exceptions') . $this->option[0] . '.php';
+        $path = path('app.Exceptions') . $this->option[0] . 'Exception.php';
 
         if ($success) {
-            ok('Exception [' . $filePath . '] created successfully.')->out();
+            success('Exception [' . new Style($path)->bold() . '] created successfully.')->out();
 
             return 0;
         }
 
-        fail('Failed Create controller')->out();
+        error('Failed Create controller')->out();
 
         return 1;
     }
@@ -222,12 +222,12 @@ class MakeCommand extends AbstractCommand
         ]);
 
         if ($success) {
-            ok('Finish created view file')->out();
+            success('Finish created view file')->out();
 
             return 0;
         }
 
-        fail('Failed Create view file')->out();
+        error('Failed Create view file')->out();
 
         return 1;
     }
@@ -251,15 +251,15 @@ class MakeCommand extends AbstractCommand
             'suffix'            => 'ServiceProvider.php',
         ]);
 
-        $filePath = path('app.Providers') . $this->option[0] . 'ServiceProvider.php';
+        $path = path('app.Http.Providers') . $this->option[0] . 'Provider.php';
 
         if ($success) {
-            ok('Provider [' . $filePath . '] created successfully.')->out();
+            success('Provider [' . new Style($path)->bold() . '] created successfully.')->out();
 
             return 0;
         }
 
-        fail('Failed Create services file')->out();
+        error('Failed Create services file')->out();
 
         return 1;
     }
@@ -281,7 +281,7 @@ class MakeCommand extends AbstractCommand
 
         if (file_exists($modelLocation) && false === $this->option('force', false)) {
             warn('File already exist')->out(false);
-            fail('Failed Create model file')->out();
+            error('Failed Create model file')->out();
 
             return 1;
         }
@@ -318,14 +318,14 @@ class MakeCommand extends AbstractCommand
         $class->addProperty('primaryKey')->visibility(Property::PROTECTED_)->dataType('string')->expecting("= '{$primaryKey}'");
 
         if (false === file_put_contents($modelLocation, $class->generate())) {
-            fail('Failed Create model file')->out();
+            error('Failed Create model file')->out();
 
             return 1;
         }
 
-        $filePath = path('app.Models') . $name;
+        $path = path('app.Models') . $name;
 
-        ok('Model [' . $filePath . '] create successfully.')->out();
+        success('Model [' . new Style($path)->bold() . '] create successfully.')->out();
 
         return 0;
     }
@@ -390,14 +390,14 @@ class MakeCommand extends AbstractCommand
 
             file_put_contents(get_path('path.config') . 'command.php', $getContent);
 
-            $filePath = path('app.Console.Commands') . $name . 'Command.php';
+            $path = path('app.Console.Commands') . $name . 'Command.php';
 
-            ok('Command [' . $filePath . '] create successfully.')->out();
+            success('Command [' . new Style($path)->bold() . '] create successfully.')->out();
 
             return 0;
         }
 
-        fail("\nFailed Create command file")->out();
+        error("\nFailed Create command file")->out();
 
         return 1;
     }
@@ -433,11 +433,11 @@ class MakeCommand extends AbstractCommand
         $template = str_replace('__table__', $name, $template);
 
         if (false === file_exists($pathToFile) || false === file_put_contents($fileName, $template)) {
-            fail('Can\'t create migration file.')->out();
+            error('Can\'t create migration file.')->out();
 
             return 1;
         }
-        ok('Success create migration file.')->out();
+        success('Success create migration file.')->out();
 
         return 0;
     }

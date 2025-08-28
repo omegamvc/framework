@@ -16,7 +16,6 @@ use Omega\Text\Str;
 use Omega\View\Templator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-
 use function array_key_exists;
 use function arsort;
 use function count;
@@ -26,8 +25,8 @@ use function is_file;
 use function microtime;
 use function Omega\Console\exit_prompt;
 use function Omega\Console\info;
-use function Omega\Console\ok;
 use function Omega\Console\style;
+use function Omega\Console\success;
 use function Omega\Console\warn;
 use function pcntl_signal_dispatch;
 use function round;
@@ -35,7 +34,6 @@ use function str_replace;
 use function strlen;
 use function unlink;
 use function usleep;
-
 use const DIRECTORY_SEPARATOR;
 
 /**
@@ -148,7 +146,7 @@ class ViewCommand extends AbstractCommand
             }
             $progress->current++;
             $time               = round(microtime(true) - $watchStart, 3) * 1000;
-            $progress->complete = static fn (): string => (string) ok("Success, $count file compiled ($time ms).");
+            $progress->complete = static fn (): string => (string) success("Success, $count file compiled ($time ms).");
             $progress->tick();
         }
 
@@ -185,7 +183,7 @@ class ViewCommand extends AbstractCommand
             }
             $progress->current++;
             $time                = round(microtime(true) - $watchStart, 3) * 1000;
-            $progress->complete = static fn (): string => (string) ok("Success, $count cache clear ($time ms).");
+            $progress->complete = static fn (): string => (string) success("Success, $count cache clear ($time ms).");
             $progress->tick();
         }
 

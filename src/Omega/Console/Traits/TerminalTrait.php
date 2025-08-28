@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Traits;
@@ -11,13 +21,37 @@ use function function_exists;
 use function preg_match;
 use function shell_exec;
 use function trim;
-
 use const PHP_OS_FAMILY;
 
+/**
+ * TerminalTrait provides helper methods to retrieve terminal dimensions,
+ * ensuring values remain within a specified min/max range.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackges Traits
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 trait TerminalTrait
 {
     /**
-     * Get terminal width.
+     * Get the terminal width (number of columns).
+     *
+     * The method first checks for a custom environment variable `TERMINAL_COLUMNS`,
+     * then `$_ENV['COLUMNS']`. If not available, it tries OS-specific commands:
+     * - On Windows: `mode con`
+     * - On Unix-like: `stty size`
+     * If all else fails, it returns the specified minimum width.
+     *
+     * The returned width is always clamped between `$min` and `$max`.
+     *
+     * @param int $min Minimum allowed terminal width (default 80)
+     * @param int $max Maximum allowed terminal width (default 160)
+     * @return int The terminal width, constrained between `$min` and `$max`
      */
     protected function getWidth(int $min = 80, int $max = 160): int
     {
@@ -55,7 +89,12 @@ trait TerminalTrait
     }
 
     /**
-     * Helper to get between min-max value.
+     * Ensure a value is within a specified minimum and maximum range.
+     *
+     * @param int $value Value to clamp
+     * @param int $min Minimum allowed value
+     * @param int $max Maximum allowed value
+     * @return int The clamped value
      */
     private function minMax(int $value, int $min, int $max): int
     {

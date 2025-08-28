@@ -1,35 +1,64 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\IO;
 
 use Omega\Console\Exceptions\InvalidStreamException;
-
 use function fwrite;
 use function get_resource_type;
 use function is_resource;
 use function str_contains;
 use function stream_get_meta_data;
 use function stream_isatty;
-
 use const STDOUT;
 
 /**
+ * OutputStream
+ *
+ * This class implements the OutputStreamInterface and provides a concrete
+ * implementation for writing to a stream resource in console applications.
+ * It ensures the stream is valid and writable, and provides a method to check
+ * whether the stream is interactive (i.e., connected to a terminal).
+ *
+ * Typical usage includes writing output to STDOUT, a file, or a custom stream.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage IO
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  */
 class OutputStream implements OutputStreamInterface
 {
     /**
-     * @var resource
+     * The underlying stream resource used for output.
+     *
+     * @var resource The stream must be writable (e.g., STDOUT or a writable file handle)
      */
     private mixed $stream;
 
     /**
-     * ResourceOutputStream constructor.
+     * Constructor.
      *
-     * @param false|resource $stream
-     * @return void
-     * @throws InvalidStreamException if the stream is not a valid or writable resource
+     * Initializes the OutputStream with a given resource and validates that
+     * it is a writable stream.
+     *
+     * @param resource|false|null $stream The stream resource to write to. Defaults to STDOUT.
+     * @throws InvalidStreamException If the stream is not a valid resource or not writable
      */
     public function __construct(mixed $stream = STDOUT)
     {
@@ -46,11 +75,7 @@ class OutputStream implements OutputStreamInterface
     }
 
     /**
-     * Writes the buffer to the stream.
-     *
-     * @param string $buffer
-     * @return void
-     * @throws InvalidStreamException if writing to the stream fails
+     * {@inheritdoc}
      */
     public function write(string $buffer): void
     {
@@ -60,9 +85,7 @@ class OutputStream implements OutputStreamInterface
     }
 
     /**
-     * Checks whether the stream is interactive (connected to a terminal).
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isInteractive(): bool
     {

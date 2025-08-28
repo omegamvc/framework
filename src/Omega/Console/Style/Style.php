@@ -1,16 +1,25 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Style;
 
 use Omega\Console\IO\OutputStreamInterface;
-use Omega\Console\Style\Color\RuleInterface;
 use Omega\Console\Style\Color\BackgroundColor;
 use Omega\Console\Style\Color\ForegroundColor;
+use Omega\Console\Style\Color\RuleInterface;
 use Omega\Console\Traits\CommandTrait;
 use Omega\Text\Str;
-
 use function max;
 use function method_exists;
 use function Omega\Text\text;
@@ -18,10 +27,29 @@ use function preg_replace;
 use function str_repeat;
 use function strlen;
 use function strtolower;
-
 use const PHP_EOL;
 
 /**
+ * Class Style
+ *
+ * Provides a fluent interface for styling terminal text with colors,
+ * background colors, and text decorations (bold, underline, blink, etc.).
+ * Supports chaining, conditional printing, raw codes, and output streams.
+ *
+ * Dynamic method calls (`__call`) allow you to apply colors or backgrounds by name,
+ * for example: `$style->textRed()->bgBlue()->bold()`.
+ *
+ * Dynamic invocation (`__invoke`) allows setting the text to style: `$style('Hello World')`.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Style
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @method self textRed()
  * @method self textYellow()
  * @method self textBlue()
@@ -56,38 +84,41 @@ class Style
 {
     use CommandTrait;
 
-    /** @var array<int, int> Array of command rule. */
+    /** @var array<int, int> Array of terminal style rules. */
     private array $rules = [];
 
-    /** @var array<int, array<int, string|int>> Array of command rule. */
+    /** @var array<int, array<int, string|int>> Raw terminal codes. */
     private array $rawRules = [];
 
-    /** @var array<int, int> Array of command rule. */
+    /** @var array<int, int> Reset rules applied after printing. */
     private array $resetRules = [Decorate::RESET];
 
-    /** @var array<int, int> Rule of text color. */
+    /** @var array<int, int> Foreground color rules. */
     private array $textColorRule = [Decorate::TEXT_DEFAULT];
 
-    /** @var array<int, int> Rule of background color. */
+    /** @var array<int, int> Background color rules. */
     private array $bgColorRule = [Decorate::BG_DEFAULT];
 
-    /** @var array<int, int> Rule of text decorate. */
+    /** @var array<int, int> Text decoration rules (bold, underline, etc.). */
     private array $decorateRules = [];
 
-    /**  @var int|string String to style. */
+    /** @var int|string Text content to style. */
     private string|int $text;
 
-    /** @var int Length of text. */
+    /** @var int Length of the current text (without ANSI codes). */
     private int $length;
 
-    /** @var string Reference from preview text (like prefix). */
+    /** @var string Prefix or reference text appended before main text. */
     private string $ref = '';
 
-    /** @var OutputStreamInterface|null */
+    /** @var OutputStreamInterface|null Optional output stream for writing. */
     private ?OutputStreamInterface $outputStream = null;
 
     /**
-     * @param int|string $text set text to decorate
+     * Constructor.
+     *
+     * @param int|string $text Optional initial text.
+     * @return void
      */
     public function __construct(int|string $text = '')
     {
@@ -96,9 +127,9 @@ class Style
     }
 
     /**
-     * Invoke new Rule class.
+     * Invoke the Style instance to set the text dynamically.
      *
-     * @param string|int $text set text to decorate
+     * @param string|int $text Text to style
      * @return self
      */
     public function __invoke(string|int $text): self
@@ -110,7 +141,7 @@ class Style
     }
 
     /**
-     * Get string of terminal formatted style.
+     * Return the fully styled text as string with ANSI codes.
      *
      * @return string
      */
@@ -120,10 +151,10 @@ class Style
     }
 
     /**
-     * Call exist method from trait.
+     * Dynamic method call to apply colors or backgrounds by method name.
      *
-     * @param string            $name
-     * @param array<int, mixed> $arguments
+     * @param string $name Method name
+     * @param array<int, mixed> $arguments Optional arguments (ignored)
      * @return self
      */
     public function __call(string $name, array $arguments): self
@@ -159,10 +190,10 @@ class Style
     }
 
     /**
-     * Render text, reference with current rule.
+     * Return the fully composed text with all rules applied.
      *
-     * @param string|int $text Text tobe render with rule (this)
-     * @param string $ref Text reference to be added begin text
+     * @param string|int $text Text to style
+     * @param string $ref Optional prefix reference
      * @return string
      */
     public function toString(string|int $text, string $ref = ''): string
@@ -201,7 +232,7 @@ class Style
     }
 
     /**
-     * Flush class.
+     * Reset all rules and flush state.
      *
      * @return self
      */
@@ -231,9 +262,9 @@ class Style
     }
 
     /**
-     * Chain code (continue with other text).
+     * Append text for chaining styles.
      *
-     * @param string|int $text text
+     * @param string|int $text Text to append
      * @return self
      */
     public function push(string|int $text): self
@@ -246,9 +277,9 @@ class Style
     }
 
     /**
-     * Push Style.
+     * Append another Style instance.
      *
-     * @param Style $style Style to push
+     * @param Style $style Style instance to append
      * @return self
      */
     public function tap(Style $style): self
@@ -267,7 +298,7 @@ class Style
     }
 
     /**
-     * Get text length without rule counted.
+     * Get the length of text (without ANSI codes).
      *
      * @return int
      */
@@ -277,9 +308,9 @@ class Style
     }
 
     /**
-     * Print terminal style.
+     * Print the styled text to terminal.
      *
-     * @param bool $newLine True if print with new line in end line
+     * @param bool $newLine Append newline if true
      * @return void
      */
     public function out(bool $newLine = true): void
@@ -290,10 +321,10 @@ class Style
     }
 
     /**
-     * Print terminal style if condition true.
+     * Print styled text conditionally.
      *
-     * @param bool $condition If true will echo out
-     * @param bool $newLine  True if print with new line in end line
+     * @param bool $condition Print if true
+     * @param bool $newLine Append newline if true
      * @return void
      */
     public function outIf(bool $condition, bool $newLine = true): void
@@ -306,7 +337,7 @@ class Style
     }
 
     /**
-     * Print to terminal and continue.
+     * Print text and clear internal buffer.
      *
      * @return self
      */
@@ -321,9 +352,9 @@ class Style
     }
 
     /**
-     * Write stream out.
+     * Write to optional output stream.
      *
-     * @param bool $newLine True if print with new line in end line
+     * @param bool $newLine Append newline if true
      * @return void
      */
     public function write(bool $newLine = true): void
@@ -334,9 +365,9 @@ class Style
     }
 
     /**
-     * Clear current line (original text is keep).
+     * Clear current terminal line.
      *
-     * @param int $line
+     * @param int $line Optional line offset
      * @return void
      */
     public function clear(int $line = -1): void
@@ -345,10 +376,10 @@ class Style
     }
 
     /**
-     * Replace current line (original text is keep).
+     * Replace current terminal line content.
      *
-     * @param string $text
-     * @param int $line
+     * @param string $text Replacement text
+     * @param int $line Optional line offset
      * @return void
      */
     public function replace(string $text, int $line = -1): void
@@ -357,8 +388,10 @@ class Style
     }
 
     /**
+     * Set an output stream.
+     *
      * @param OutputStreamInterface $resourceOutputStream
-     * @return $this
+     * @return self
      */
     public function setOutputStream(OutputStreamInterface $resourceOutputStream): self
     {
@@ -380,7 +413,7 @@ class Style
     }
 
     /**
-     * Text decorate bold.
+     * Apply bold decoration.
      *
      * @return self
      */
@@ -393,7 +426,7 @@ class Style
     }
 
     /**
-     * Text decorate underline.
+     * Apply underline decoration.
      *
      * @return self
      */
@@ -406,7 +439,7 @@ class Style
     }
 
     /**
-     * Text decorate blink.
+     * Apply blink decoration.
      *
      * @return self
      */
@@ -419,7 +452,7 @@ class Style
     }
 
     /**
-     * Text decorate reverse/invert.
+     * Apply reverse (invert) decoration.
      *
      * @return self
      */
@@ -432,7 +465,7 @@ class Style
     }
 
     /**
-     * Text decorate hidden.
+     * Apply hidden text decoration.
      *
      * @return self
      */
@@ -445,9 +478,9 @@ class Style
     }
 
     /**
-     * Add raw terminal code.
+     * Add raw terminal code or color.
      *
-     * @param string|RuleInterface $raw Raw terminal code
+     * @param string|RuleInterface $raw Raw code or color instance
      * @return self
      */
     public function raw(string|RuleInterface $raw): self
@@ -470,7 +503,9 @@ class Style
     }
 
     /**
-     * @param int[] $reset rules reset
+     * Reset specific ANSI codes.
+     *
+     * @param int[] $reset Array of reset codes
      * @return self
      */
     public function rawReset(array $reset): self
@@ -481,7 +516,7 @@ class Style
     }
 
     /**
-     * Set text color.
+     * Set foreground color.
      *
      * @param ForegroundColor|string $color
      * @return self
@@ -495,9 +530,8 @@ class Style
 
         return $this;
     }
-
     /**
-     * Set Background color.
+     * Set background color.
      *
      * @param BackgroundColor|string $color
      * @return self
@@ -512,10 +546,10 @@ class Style
     }
 
     /**
-     * Push/insert repeat character.
+     * Repeat and push string content.
      *
-     * @param string $content
-     * @param int $repeat
+     * @param string $content Content to repeat
+     * @param int $repeat Number of times to repeat
      * @return self
      */
     public function repeat(string $content, int $repeat = 1): self
@@ -528,9 +562,9 @@ class Style
     }
 
     /**
-     * Push/insert new lines.
+     * Append new lines.
      *
-     * @param int $repeat
+     * @param int $repeat Number of lines
      * @return self
      */
     public function newLines(int $repeat = 1): self
@@ -539,9 +573,9 @@ class Style
     }
 
     /**
-     * Push/insert tabs.
+     * Append tabs.
      *
-     * @param int $count
+     * @param int $count Number of tabs
      * @return self
      */
     public function tabs(int $count = 1): self

@@ -8,10 +8,9 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\Style\ProgressBar;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Container\Provider\AbstractServiceProvider;
-
 use function count;
 use function is_dir;
-use function Omega\Console\ok;
+use function Omega\Console\success;
 
 /**
  * Command to import files or directories from vendor packages.
@@ -106,7 +105,7 @@ class VendorImportCommand extends AbstractCommand
         }
 
         if ($current > 0) {
-            ok('Done ')->push((string)$added)->textYellow()->push(' file/folder has been added.')->out(false);
+            success('Done ')->push((string)$added)->textYellow()->push(' file/folder has been added.')->out(false);
         }
     }
 
