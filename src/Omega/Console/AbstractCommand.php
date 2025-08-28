@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console;
@@ -25,10 +35,22 @@ use function preg_replace;
 use function str_split;
 
 /**
- * Add customize terminal style by adding traits:
- * - TraitCommand (optional).
+ * AbstractCommand
  *
- * @property string $_ Get argument name
+ * This abstract class provides a base implementation for console commands,
+ * handling parsing of command line arguments, options, and their mappings.
+ * It implements ArrayAccess to allow array-like access to options and
+ * implements CommandInterface to define a standard `main` method.
+ *
+ * It also uses TerminalTrait for console output utilities.
+ *
+ * @category  Omega
+ * @package   Console
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  *
  * @implements ArrayAccess<string, string|bool|int|null>
  */
@@ -36,30 +58,29 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
 {
     use TerminalTrait;
 
-    /** @var string|array<int, string> Commandline input. */
+    /** @var string|array<int, string> Commandline line input from $argv. */
     protected string|array $cmd;
 
-    /** @var array<int, string> Command line input. */
+    /** @var array<int, string> Parsed command line options. */
     protected array $option;
 
-    /** @var array<string, string|string[]|bool|int|null> Option object mapper. */
+    /** @var array<string, string|string[]|bool|int|null> Option mapper associating option names to values */
     protected array $optionMapper;
 
-    /** @var array<string, string> Option describe for input. */
+    /** @var array<string, string> Descriptions of command options for input. */
     protected array $commandDescribes = [];
 
-    /** @var array<string, string> Option describe for print. */
+    /** @var array<string, string> Descriptions of command options for printing. */
     protected array $optionDescribes = [];
 
-    /** @var array<string, array<int, string>> Relation between Option and Argument. */
+    /** @var array<string, array<int, string>> Relations between options and arguments. */
     protected array $commandRelation = [];
 
     /**
-     * Parse commandline.
+     * Parse command line arguments and initialize options.
      *
-     * @param array<int, string>                  $argv
-     * @param array<string, string|bool|int|null> $defaultOption
-     * @return void
+     * @param array<int, string>                  $argv          Array of command line arguments.
+     * @param array<string, string|bool|int|null> $defaultOption Default option values to merge.
      */
     public function __construct(array $argv, array $defaultOption = [])
     {
@@ -75,10 +96,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * parse option to readable array option.
+     * Convert raw command line arguments into an associative array.
      *
-     * @param array<int, string|bool|int|null> $argv Option to parse
-     * @return array<string, string|bool|int|null>
+     * @param array<int, string|bool|int|null> $argv Arguments to parse
+     * @return array<string, string|bool|int|null> Parsed options
      */
     private function optionMapper(array $argv): array
     {
@@ -142,10 +163,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * Detect string is command or value.
+     * Check whether a string represents a command parameter (starts with '-' or '--').
      *
-     * @param string $command
-     * @return bool
+     * @param string $command Command string to check
+     * @return bool True if it is a command parameter, false otherwise
      */
     private function isCommandParam(string $command): bool
     {
@@ -153,10 +174,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * Remove quote single or double.
+     * Remove surrounding quotes (single or double) from a string.
      *
-     * @param string $value
-     * @return string
+     * @param string $value Value to strip quotes from
+     * @return string Unquoted value
      */
     private function removeQuote(string $value): string
     {
@@ -164,11 +185,11 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * Get parse commandline parameters (name, value).
+     * Get the value of a parsed command option by name.
      *
-     * @param string $name
-     * @param bool|int|string|string[]|null $default Default if parameter not found
-     * @return string|string[]|bool|int|null
+     * @param string $name    Option name
+     * @param string|int|bool|array|null $default Default value if option is not present
+     * @return string|int|bool|array|null Option value or default
      */
     protected function option(string $name, array|bool|int|string|null $default = null): array|bool|int|string|null
     {
@@ -184,14 +205,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * Garantisce che la directory esista.
+     * Ensure that the given directory exists. Creates it recursively if missing.
      *
-     * @param string $binding Il binding nel container (es: "app.Http.Middlewares").
-     * @return string Il path assoluto creato/verificato.
-     */
-    /**
-     * @param string $binding
-     * @return string
+     * @param string $binding Logical path or container binding (e.g., "app.Http.Middlewares")
+     * @return string Absolute filesystem path
      * @throws InvalidDefinitionException
      * @throws DependencyException
      * @throws NotFoundException
@@ -213,10 +230,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * Get parse commandline parameters (name, value).
+     * Magic getter to access option values as properties.
      *
-     * @param string $name
-     * @return string|bool|int|null
+     * @param string $name Option name
+     * @return string|bool|int|null Option value or null if not set
      */
     public function __get(string $name): string|bool|int|null
     {
@@ -224,8 +241,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * @param mixed $offset — Check parse commandline parameters
-     * @return bool
+     * ArrayAccess: Check if an option exists.
+     *
+     * @param mixed $offset Option name
+     * @return bool True if option exists
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -233,7 +252,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * @param mixed $offset — Check parse commandline parameters
+     * ArrayAccess: Get the value of an option.
+     *
+     * @param mixed $offset Option name
+     * @return string|int|bool|array|null Option value
      */
     #[ReturnTypeWillChange]
     public function offsetGet(mixed $offset): string|int|bool|array|null
@@ -242,10 +264,11 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * @param mixed $offset
-     * @param mixed $value
-     * @return void
-     * @throws Exception
+     * ArrayAccess: Prevent modification of options.
+     *
+     * @param mixed $offset Option name
+     * @param mixed $value  Value
+     * @throws Exception Always throws because options cannot be modified
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -253,15 +276,19 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * @param mixed $offset
-     * @return void
-     * @throws Exception
+     * ArrayAccess: Prevent unsetting of options.
+     *
+     * @param mixed $offset Option name
+     * @throws Exception Always throws because options cannot be modified
      */
     public function offsetUnset(mixed $offset): void
     {
         throw new Exception('Command cant be modify');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function main(): int
     {
         return 0;

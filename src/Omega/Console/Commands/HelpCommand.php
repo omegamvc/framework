@@ -87,8 +87,9 @@ class HelpCommand extends AbstractCommand
     public function main(): int
     {
         $hasVisited      = [];
+
         $this->printHelp = [
-            'margin-left'         => 8,
+            'margin-left'         => 2,
             'column-1-min-length' => 16,
         ];
 
@@ -128,32 +129,35 @@ class HelpCommand extends AbstractCommand
         }
 
         $printer = new Style();
-        $printer->push($this->banner)->textGreen();
+        $printer->push($this->banner)->textYellow();
         $printer
             ->newLines(2)
-            ->push('Usage:')
-            ->newLines(2)->tabs()
+            ->push('Usage:')->textYellow()
+            ->newLines()
+            ->repeat(' ', $this->printHelp['margin-left'])
             ->push('php')->textGreen()
             ->push(' omega [flag]')
-            ->newLines()->tabs()
+            ->newLines()
+            ->repeat(' ', $this->printHelp['margin-left'])
             ->push('php')->textGreen()
             ->push(' omega [command] ')
             ->push('[option]')->textDim()
             ->newLines(2)
 
-            ->push('Available flag:')
-            ->newLines(2)->tabs()
-            ->push('--help')->textDim()
+            ->push('Options:')->textYellow()
+            ->newLines(1)
+            ->repeat(' ', $this->printHelp['margin-left'])
+            ->push('-h, --help')->textDim()->textGreen()
             ->tabs(3)
             ->push('Get all help commands')
-            ->newLines()->tabs()
-            ->push('--list')->textDim()
+            ->newLines()
+            ->repeat(' ', $this->printHelp['margin-left'])
+            ->push('    --list')->textDim()->textGreen()
             ->tabs(3)
             ->push('Get list of commands registered (class & function)')
-            ->newLines(2)
-        ;
+            ->newLines(2);
 
-        $printer->push('Available command:')->newLines(2);
+        $printer->push('Available commands:')->textYellow()->newLines();
         $printer = $this->printCommands($printer)->newLines();
 
         $printer->push('Available options:')->newLines();

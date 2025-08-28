@@ -14,7 +14,7 @@ trait PrintHelpTrait
 {
     /** @var array<string, string|int> Print helper style option. */
     protected array $printHelp = [
-        'margin-left'         => 12,
+        'margin-left'         => 2,
         'column-1-min-length' => 24,
     ];
 

@@ -78,7 +78,7 @@ class Style
     private string|int $text;
 
     /** @var int Length of text. */
-    private int $length = 0;
+    private int $length;
 
     /** @var string Reference from preview text (like prefix). */
     private string $ref = '';
@@ -161,8 +161,8 @@ class Style
     /**
      * Render text, reference with current rule.
      *
-     * @param string $text Text tobe render with rule (this)
-     * @param string $ref  Text reference to be added begin text
+     * @param string|int $text Text tobe render with rule (this)
+     * @param string $ref Text reference to be added begin text
      * @return string
      */
     public function toString(string|int $text, string $ref = ''): string
@@ -233,7 +233,7 @@ class Style
     /**
      * Chain code (continue with other text).
      *
-     * @param string $text text
+     * @param string|int $text text
      * @return self
      */
     public function push(string|int $text): self

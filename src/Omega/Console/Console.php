@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console;
@@ -17,17 +27,57 @@ use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\RegisterFacades;
 use Omega\Support\Bootstrap\RegisterProviders;
 
+use function array_fill;
+use function array_merge;
+use function arsort;
+use function explode;
+use function floor;
+use function is_int;
+use function max;
+use function min;
+use function Omega\Console\fail;
+use function strlen;
+use function strtolower;
+
+/**
+ * The Console kernel orchestrates the execution of console commands.
+ *
+ * It is responsible for:
+ * - Bootstrapping the application (configuration, facades, providers).
+ * - Handling input arguments passed via the CLI.
+ * - Resolving and executing registered command classes.
+ * - Providing suggestions for mistyped commands using Jaro-Winkler similarity.
+ * - Managing the application exit status.
+ *
+ * This class acts as the entry point for the Omega console runtime.
+ *
+ * @category  Omega
+ * @package   Console
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class Console
 {
     /**
-     * Application Container.
+     * The application container instance.
+     *
+     * Provides dependency injection, configuration, and service resolution.
      */
     protected Application $app;
 
-    /** @var int console exit status */
+    /**
+     * The last exit status code returned by a command execution.
+     *
+     * Typically:
+     * - 0 for success
+     * - 1 for failure or unknown command
+     */
     protected int $exitCode;
 
-    /** @var array<int, class-string> Application bootstrap register. */
+    /** @var array<int, class-string> The list of bootstrapper classes to run during initialization. */
     protected array $bootstrappers = [
         ConfigProviders::class,
         RegisterFacades::class,
@@ -36,7 +86,10 @@ class Console
     ];
 
     /**
-     * Set instance.
+     * Create a new Console instance.
+     *
+     * @param Application $app The application container.
+     * @return void
      */
     public function __construct(Application $app)
     {
@@ -44,10 +97,17 @@ class Console
     }
 
     /**
-     * Handle input (arguments) kernel.
+     * Handle a console request using raw CLI arguments.
      *
-     * @param string|array<int, string> $arguments
+     * Steps:
+     * - Bootstrap the application.
+     * - Search for a matching registered command.
+     * - Execute the command if found.
+     * - Suggest similar commands if no match exists.
+     *
+     * @param string|array<int, string> $arguments CLI arguments
      * @return int Exit code
+     *
      * @throws DependencyException
      * @throws InvalidDefinitionException
      * @throws InvocationException
@@ -80,7 +140,7 @@ class Console
         $count   = 0;
         $similar = new Style('Did you mean?')->textLightYellow()->newLines();
         foreach ($this->getSimilarity($baseArgs, $commands, 0.8) as $term => $score) {
-            $similar->push('    > ')->push($term)->textYellow()->newLines();
+            $similar->push('    > ')->push($term)->textDim()->newLines();
             $count++;
         }
 
@@ -105,11 +165,14 @@ class Console
     }
 
     /**
-     * Register bootstrapper application.
+     * Run all configured bootstrappers.
+     *
+     * This prepares the application before executing a command
+     * (e.g., registering config, facades, and service providers).
      *
      * @return void
-     * @throws InvalidDefinitionException
      * @throws DependencyException
+     * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
     public function bootstrap(): void
@@ -118,13 +181,15 @@ class Console
     }
 
     /**
-     * Call command using know signature.
-     * The signature not require php as prefix.
-     * For better parse use `handle` method instead.
+     * Execute a console command by its signature string.
      *
-     * @param string $signature
-     * @param array<string, string|bool|int|null> $parameter
-     * @return int
+     * Unlike {@see handle}, this method accepts a signature directly,
+     * without requiring the "php" prefix. Parameters may be passed
+     * programmatically.
+     *
+     * @param string $signature Command signature (e.g., "make:model User")
+     * @param array<string, string|bool|int|null> $parameter Named parameters
+     * @return int Exit code
      * @throws DependencyException
      * @throws InvalidDefinitionException
      * @throws InvocationException
@@ -154,11 +219,13 @@ class Console
     }
 
     /**
-     * Return similar from given array, compare with key.
+     * Find the closest matches to a given command string using
+     * Jaro-Winkler similarity.
      *
-     * @param string[] $commands
-     *
-     * @return array<string, float> Sorted from similar
+     * @param string $find The input string to compare
+     * @param string[] $commands The list of registered command names
+     * @param float $threshold Minimum similarity required (default 0.8)
+     * @return array<string, float> Commands sorted by similarity
      */
     private function getSimilarity(string $find, array $commands, float $threshold = 0.8): array
     {
@@ -180,9 +247,14 @@ class Console
     }
 
     /**
-     * Calculate the similarity between two strings.
+     * Compute the Jaro-Winkler similarity between two strings.
      *
-     * @return float Similarity score (between 0 and 1)
+     * Produces a score between 0 (no similarity) and 1 (identical).
+     * Enhances Jaro similarity by giving extra weight to common prefixes.
+     *
+     * @param string $find
+     * @param string $command
+     * @return float
      */
     private function jaroWinkler(string $find, string $command): float
     {
@@ -202,9 +274,14 @@ class Console
     }
 
     /**
-     * Calculate the Jaro similarity between two strings.
+     * Compute the Jaro similarity between two strings.
      *
-     * @return float the Jaro similarity score (between 0 and 1)
+     * Produces a score between 0 (no similarity) and 1 (identical).
+     * Accounts for character transpositions within a match window.
+     *
+     * @param string $find
+     * @param string $command
+     * @return float
      */
     private function jaro(string $find, string $command): float
     {
@@ -264,7 +341,7 @@ class Console
     }
 
     /**
-     * Get kernel exit status code.
+     * Get the last exit status code.
      *
      * @return int Exit status code
      */
@@ -274,9 +351,9 @@ class Console
     }
 
     /**
-     * Command route.
+     * Load and return all registered console commands.
      *
-     * @return CommandMap[]
+     * @return CommandMap[] The list of command route definitions
      */
     protected function commands(): array
     {

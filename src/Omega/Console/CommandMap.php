@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console;
@@ -14,15 +24,52 @@ use function array_key_exists;
 use function is_array;
 
 /**
+ * Class CommandMap
+ *
+ * Represents a single console command definition, including its name(s),
+ * matching patterns, execution target (class and method), and default options.
+ *
+ * The CommandMap acts as a wrapper around an associative array describing
+ * how a console command should be registered, matched, and executed.
+ *
+ * Example structure of a command definition:
+ * [
+ *   'cmd'      => ['make:model', 'make:migration'],   // Command names
+ *   'pattern'  => ['make', 'create'],                 // Optional pattern(s)
+ *   'class'    => App\Console\MakeCommand::class,     // Target class
+ *   'fn'       => 'handle',                           // Method or [class, method]
+ *   'mode'     => 'full',                             // Match mode: "full" or prefix
+ *   'default'  => ['force' => false, 'name' => null], // Default options
+ *   'match'    => fn(string $given): bool => ...      // Custom matcher (optional)
+ * ]
+ *
+ * Implements ArrayAccess for read-only access to the underlying command definition.
+ *
+ * @implements ArrayAccess<string, string|string[]|array<string, string|bool|int|null>|callable(string):bool>
+ *
+ * @category  Omega
+ * @package   Console
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ *
  * @implements ArrayAccess<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)>
  */
 class CommandMap implements ArrayAccess
 {
-    /** @var array<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)> */
+    /**
+     * The raw command definition array.
+     *
+     * @var array<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)>
+     */
     private array $command;
 
     /**
-     * @param array<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)> $command
+     * Create a new CommandMap instance.
+     *
+     * @param array<string, string|string[]|array<string, string|bool|int|null>|callable(string):bool> $command
      */
     public function __construct(array $command)
     {
@@ -30,7 +77,10 @@ class CommandMap implements ArrayAccess
     }
 
     /**
-     * Command rule wrap to array.
+     * Get the command name(s).
+     *
+     * Returns the "cmd" key as an array, even if a single command string
+     * was defined.
      *
      * @return string[]
      */
@@ -45,6 +95,15 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Get the matching mode for this command.
+     *
+     * The mode determines how the input is compared to command names.
+     * Supported modes:
+     *  - "full": requires an exact match
+     *  - "prefix": allows partial matches by prefix
+     *
+     * Defaults to "full".
+     *
      * @return string
      */
     public function mode(): string
@@ -53,7 +112,10 @@ class CommandMap implements ArrayAccess
     }
 
     /**
-     * Pattern rule wrap to array.
+     * Get the pattern(s) defined for this command.
+     *
+     * Patterns are alternative identifiers for the command.
+     * Always returned as an array.
      *
      * @return string[]
      */
@@ -69,7 +131,15 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Resolve the target class for the command execution.
+     *
+     * Uses either:
+     *  - The first element of the "fn" array (if fn is [class, method]), or
+     *  - The "class" key in the definition.
+     *
      * @return string
+     *
+     * @throws InvalidArgumentException If no class can be resolved.
      */
     public function class(): string
     {
@@ -85,6 +155,14 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Get the execution target ("fn") for this command.
+     *
+     * Can be either:
+     *  - A string method name, or
+     *  - An array [class, method].
+     *
+     * Defaults to "main".
+     *
      * @return string|string[]
      */
     public function fn(): string|array
@@ -93,14 +171,22 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Get the target method name to invoke.
+     *
+     * If "fn" is an array, returns its second element.
+     * If "fn" is a string, returns that string.
+     *
      * @return string
      */
     public function method(): string
     {
         return is_array($this->fn()) ? $this->fn()[1] : $this->fn();
     }
-
     /**
+     * Get the default options for this command.
+     *
+     * Options are defined under the "default" key in the definition.
+     *
      * @return array<string, string|bool|int|null>
      */
     public function defaultOption(): array
@@ -109,6 +195,16 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Build and return a callable matcher for this command.
+     *
+     * The matcher is responsible for determining whether a given
+     * command string matches this definition.
+     *
+     * Priority:
+     *  1. Use "pattern" key if defined
+     *  2. Use "match" callback if defined
+     *  3. Fallback to comparing against "cmd" values
+     *
      * @return callable(string): bool
      */
     public function match(): callable
@@ -154,8 +250,12 @@ class CommandMap implements ArrayAccess
     }
 
     /**
-     * @param string $given
-     * @return bool
+     * Test whether a given input matches this command.
+     *
+     * Internally executes the matcher returned by {@see match()}.
+     *
+     * @param string $given The user-provided command string.
+     * @return bool True if the input matches this command.
      */
     public function isMatch(string $given): bool
     {
@@ -163,7 +263,9 @@ class CommandMap implements ArrayAccess
     }
 
     /**
-     * Call user using class and method.
+     * Get the callable array for execution.
+     *
+     * Returns a [class, method] pair suitable for use with call_user_func().
      *
      * @return string[]
      */
@@ -175,8 +277,11 @@ class CommandMap implements ArrayAccess
     }
 
     /**
-     * @param mixed $offset
-     * @return bool
+     * Get the callable array for execution.
+     *
+     * Returns a [class, method] pair suitable for use with call_user_func().
+     *
+     * @return string[]
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -184,8 +289,10 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Retrieve a value from the command definition by key.
+     *
      * @param mixed $offset
-     * @return string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)
+     * @return string|string[]|array<string, string|bool|int|null>|callable(string):bool
      */
     #[ReturnTypeWillChange]
     public function offsetGet(mixed $offset): mixed
@@ -194,10 +301,11 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Prevent reassignment of definition keys.
+     *
      * @param mixed $offset
      * @param mixed $value
-     * @return void
-     * @throws Exception
+     * @throws Exception Always, as reassignment is not allowed.
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -205,9 +313,10 @@ class CommandMap implements ArrayAccess
     }
 
     /**
+     * Prevent unsetting of definition keys.
+     *
      * @param mixed $offset
-     * @return void
-     * @throws Exception
+     * @throws Exception Always, as unsetting is not allowed.
      */
     public function offsetUnset(mixed $offset): void
     {
