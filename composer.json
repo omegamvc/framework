@@ -13,7 +13,6 @@
     ],
     "require": {
         "php": "^8.4",
-        "ext-apache": "*",
         "ext-apcu": "*",
         "ext-http": "*",
         "ext-iconv": "*",
@@ -50,6 +49,9 @@
     },
     "scripts": {
 
+    },
+    "suggest": {
+		"ext-apache": "If you wanto to use apache extension"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
