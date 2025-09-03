@@ -29,7 +29,7 @@ class ServeCommand extends AbstractCommand
             'pattern' => 'serve',
             'fn'      => [ServeCommand::class, 'main'],
             'default' => [
-                'port'   => 8080,
+                'port'   => 8000,
                 'expose' => false,
             ],
         ],
@@ -42,7 +42,7 @@ class ServeCommand extends AbstractCommand
     {
         return [
             'commands'  => [
-                'serve' => 'Serve server with port number (default 8080)',
+                'serve' => 'Serve server with port number (default 8000)',
             ],
             'options'   => [
                 '--port'   => 'Serve with custom port',

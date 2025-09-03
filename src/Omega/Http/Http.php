@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Omega\Http;
 
-use DI\DependencyException;
-use DI\NotFoundException;
+use Closure;
+use InvalidArgumentException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Exception;
 use Omega\Application\Application;
+use Omega\Container\Invoker\Exception\InvocationException;
+use Omega\Container\Invoker\Exception\NotCallableException;
+use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Support\Bootstrap\BootProviders;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\HandleExceptions;
@@ -30,15 +35,15 @@ class Http
      */
     protected Application $app;
 
-    /** @var array<int, class-string> Global middleware */
+    /** @var array<int, class-string|string> Global middleware */
     protected array $middleware = [
         MaintenanceMiddleware::class,
     ];
 
-    /** @var array<int, class-string> Middleware has register */
+    /** @var array<int, class-string|string> Middleware has register */
     protected array $middlewareUsed = [];
 
-    /** @var array<int, class-string> Application bootstrap register. */
+    /** @var array<int, class-string|string> Application bootstrap register. */
     protected array $bootstrappers = [
         ConfigProviders::class,
         HandleExceptions::class,
@@ -58,10 +63,6 @@ class Http
     /**
      * Handle http request.
      *
-     * @param Request $request Incoming request
-     * @return Response Response handle
-     */
-    /**
      * @param Request $request
      * @return Response
      * @throws DependencyException
@@ -76,14 +77,11 @@ class Http
             $this->bootstrap();
 
             $dispatcher = $this->dispatcher($request);
+            $request->with($dispatcher['parameters']);
 
-            $pipeline = array_reduce(
-                array_merge($this->middleware, $dispatcher['middleware']),
-                fn ($next, $middleware) => fn ($req) => $this->app->call([$middleware, 'handle'], ['request' => $req, 'next' => $next]),
-                fn ()                   => $this->responseType($dispatcher['callable'], $dispatcher['parameters'])
-            );
-
-            $response = $pipeline($request);
+            $middleware = array_merge($this->middleware, $dispatcher['middleware']);
+            $pipeline   = $this->middlewarePipeline($middleware, $dispatcher);
+            $response   = $pipeline($request);
         } catch (Throwable $th) {
             $handler = $this->app->get(ExceptionHandler::class);
 
@@ -157,10 +155,48 @@ class Http
      * Dispatch to get request middleware.
      *
      * @param Request $request
-     * @return array<int, class-string>|null
+     * @return array<int, class-string|string>|null
      */
     protected function dispatcherMiddleware(Request $request): ?array
     {
         return Router::getCurrent()['middleware'] ?? [];
+    }
+
+    /**
+     * @param array<int, class-string|string|object>                      $middleware
+     * @param array{callable: callable, parameters: array<string, mixed>} $dispatcher
+     * @return Closure(Request): Response
+     * @throws Exception
+     */
+    protected function middlewarePipeline(array $middleware, array $dispatcher): Closure
+    {
+        return array_reduce(
+            array_reverse($middleware),
+            fn ($next, $middleware): Closure => fn (Request $request): Response => $this->executeMiddleware($middleware, $request, $next),
+            fn (): Response                  => $this->responseType($dispatcher['callable'], $dispatcher['parameters'])
+        );
+    }
+
+    /**
+     * Execute a middleware.
+     *
+     * @param class-string|string $middleware Middleware instance, class name, or callable
+     * @param Request $request
+     * @param callable $next
+     * @return Response
+     * @throws InvocationException
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
+     */
+    protected function executeMiddleware(string $middleware, Request $request, callable $next): Response
+    {
+        if (false === method_exists($middleware, 'handle')) {
+            throw new InvalidArgumentException('Middleware must be a class with handle method');
+        }
+
+        return $this->app->call(
+            [$middleware, 'handle'],
+            ['request' => $request, 'next' => $next]
+        );
     }
 }

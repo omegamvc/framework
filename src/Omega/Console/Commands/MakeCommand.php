@@ -17,6 +17,7 @@ use Omega\Support\Facades\DB;
 use Omega\Template\Generate;
 use Omega\Template\Property;
 use Throwable;
+
 use function file_exists;
 use function file_get_contents;
 use function file_put_contents;

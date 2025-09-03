@@ -26,8 +26,10 @@ class Route implements ArrayAccess
     public function __construct(array $route)
     {
         $this->prefixName = Router::$group['as'] ?? '';
-        $route['name']    = $this->prefixName;
-        $this->route       = $route;
+
+        $route['name'] ??= '';
+        $route['name'] = $this->prefixName . $route['name'];
+        $this->route   = $route;
     }
 
     /**
@@ -69,6 +71,19 @@ class Route implements ArrayAccess
         foreach ($middlewares as $middleware) {
             $this->route['middleware'][] = $middleware;
         }
+
+        return $this;
+    }
+
+    /**
+     * Costume url match pattern for this route.
+     *
+     * @param array<string, string> $patterns
+     * @return self
+     */
+    public function where(array $patterns): self
+    {
+        $this->route['patterns'] = $patterns;
 
         return $this;
     }

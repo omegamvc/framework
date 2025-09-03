@@ -5,24 +5,39 @@ declare(strict_types=1);
 namespace Omega\Support;
 
 use Exception;
-use Omega\Collection\Collection;
-use Omega\Text\Str;
 
+use function array_combine;
+use function array_diff_key;
+use function array_fill;
+use function array_fill_keys;
+use function array_filter;
 use function array_key_exists;
-use function array_key_first;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function array_values;
 use function count;
 use function file_exists;
 use function file_get_contents;
+use function htmlspecialchars;
+use function implode;
+use function is_bool;
+use function is_int;
 use function is_null;
 use function json_decode;
+use function json_last_error;
+use function json_last_error_msg;
+use function preg_match;
 use function rtrim;
+use function str_ends_with;
+
+use const ARRAY_FILTER_USE_BOTH;
+use const ENT_QUOTES;
+use const JSON_ERROR_NONE;
 
 class Vite
 {
-    private string $publicPath;
-
-    private string $buildPath;
-
     private string $manifestName;
 
     private int $cacheTime = 0;
@@ -32,28 +47,65 @@ class Vite
 
     public static ?string $hot = null;
 
-    public function __construct(string $publicPath, string $buildPath)
-    {
-        $this->publicPath          = $publicPath;
-        $this->buildPath           = $buildPath;
-        $this->manifestName        = 'manifest.json';
+    public function __construct(
+        private readonly string $publicPath,
+        private readonly string $buildPath,
+    ) {
+        $this->manifestName = 'manifest.json';
     }
 
     /**
-     * Get resource using entri point(s).
+     * Get/render resource using entri point(s).
      *
      * @param string ...$entryPoints
-     * @return array<string, string>|string
-     *                                      If entry point is string will return string,
-     *                                      otherwise if entry point is array return as array
+     * @return string
      * @throws Exception
      */
-    public function __invoke(string ...$entryPoints): array|string
+    public function __invoke(string ...$entryPoints): string
     {
-        $resource = $this->gets($entryPoints);
-        $first    = array_key_first($resource);
+        if (empty($entryPoints)) {
+            return '';
+        }
 
-        return 1 === count($resource) ? $resource[$first] : $resource;
+        if ($this->isRunningHRM()) {
+            $tags   = [];
+            $tags[] = $this->getHmrScript();
+            $hmrUrl = $this->getHmrUrl();
+
+            foreach ($entryPoints as $entryPoint) {
+                $url    = $hmrUrl . $entryPoint;
+                $tags[] = $this->createTag($url, $entryPoint);
+            }
+
+            return implode("\n", $tags);
+        }
+
+        $imports = $this->getManifestImports($entryPoints);
+        $preload = [];
+        foreach ($imports['imports'] as $entryPoint) {
+            $url       = $this->getManifest($entryPoint);
+            $preload[] = $this->createPreloadTag($url);
+        }
+
+        foreach ($imports['css'] as $entryPoint) {
+            $preload[] = $this->createStyleTag($this->buildPath . $entryPoint);
+        }
+
+        $assets    = $this->gets($entryPoints);
+        $cssAssets = array_filter(
+            $assets,
+            fn ($file, $url) => $this->isCssFile($file),
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        $jsAssets = array_diff_key($assets, $cssAssets);
+        $tags     = array_merge(
+            $preload,
+            array_map(fn ($url) => $this->createStyleTag($url), $cssAssets),
+            array_map(fn ($url) => $this->createScriptTag($url), $jsAssets)
+        );
+
+        return implode("\n", $tags);
     }
 
     /**
@@ -94,23 +146,30 @@ class Vite
     }
 
     /**
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, string|string[]>>
      * @throws Exception
      */
     public function loader(): array
     {
-        $fileName = $this->manifest();
+        $fileName    = $this->manifest();
+        $currentTime = $this->manifestTime();
 
-        if (array_key_exists($fileName, static::$cache)) {
+        if (array_key_exists($fileName, static::$cache)
+            && $this->cacheTime === $currentTime) {
             return static::$cache[$fileName];
         }
 
-        $this->cacheTime = $this->manifestTime();
+        $this->cacheTime = $currentTime;
         $load            = file_get_contents($fileName);
-        $json            = json_decode($load, true);
 
-        if (false === $json) {
-            throw new Exception('Manifest doest support');
+        if ($load === false) {
+            throw new Exception("Failed to read manifest file: {$fileName}");
+        }
+
+        $json = json_decode($load, true);
+
+        if ($json === null && json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Manifest JSON decode error: ' . json_last_error_msg());
         }
 
         return static::$cache[$fileName] = $json;
@@ -136,6 +195,8 @@ class Vite
      * @param string[] $resourceNames
      * @return array<string, string>
      * @throws Exception
+     *
+     * @deprecated Since v0.40
      */
     public function getsManifest(array $resourceNames): array
     {
@@ -152,8 +213,59 @@ class Vite
     }
 
     /**
+     * @param string[] $resources
+     * @return array{imports: string[], css: string[]}
+     * @throws Exception
+     */
+    public function getManifestImports(array $resources): array
+    {
+        $assets      = $this->loader();
+        $resourceSet = array_fill_keys($resources, true);
+
+        $preload = ['imports' => [], 'css' => []];
+
+        foreach ($assets as $name => $asset) {
+            if (isset($resourceSet[$name])) {
+                $this->collectImports($assets, $asset, $preload);
+            }
+        }
+
+        $preload['imports'] = array_values(array_unique($preload['imports']));
+        $preload['css']     = array_values(array_unique($preload['css']));
+
+        return $preload;
+    }
+
+    /**
+     * @param array<string, array<string, string|string[]>> $assets
+     * @param array<string, string|string[]>                $asset
+     * @param array{imports: string[], css: string[]}       $preload
+     */
+    private function collectImports(array $assets, array $asset, array &$preload): void
+    {
+        if (false === empty($asset['css'])) {
+            $preload['css'] = array_merge($preload['css'], $asset['css']);
+        }
+
+        if (false === empty($asset['imports'])) {
+            foreach ($asset['imports'] as $import) {
+                $preload['imports'][] = $import;
+
+                if (isset($assets[$import])) {
+                    $this->collectImports($assets, $assets[$import], $preload);
+                }
+            }
+        }
+    }
+
+    /**
      * Get hot url (if hot not found will return with manifest).
      *
+     * @param string $resourceName
+     * @return string
+     * @throws Exception
+     */
+    /**
      * @param string $resourceName
      * @return string
      * @throws Exception
@@ -178,16 +290,25 @@ class Vite
      */
     public function gets(array $resourceNames): array
     {
-        if (!$this->isRunningHRM()) {
-            return $this->getsManifest($resourceNames);
+        if (false === $this->isRunningHRM()) {
+            $asset     = $this->loader();
+            $resources = [];
+
+            foreach ($resourceNames as $resource) {
+                if (array_key_exists($resource, $asset)) {
+                    $resources[$resource] = $this->buildPath . $asset[$resource]['file'];
+                }
+            }
+
+            return $resources;
         }
 
         $hot  = $this->getHmrUrl();
 
-        return (new Collection($resourceNames))
-            ->assocBy(fn ($asset) => [$asset => $hot . $asset])
-            ->toArray()
-        ;
+        return array_combine(
+            $resourceNames,
+            array_map(fn ($asset) => $hot . $asset, $resourceNames)
+        );
     }
 
     /**
@@ -204,6 +325,7 @@ class Vite
      * Get hot url.
      *
      * @return string
+     * @throws Exception
      */
     public function getHmrUrl(): string
     {
@@ -211,15 +333,22 @@ class Vite
             return static::$hot;
         }
 
-        $hot  = file_get_contents("{$this->publicPath}/hot");
+        $hotFile = "{$this->publicPath}/hot";
+        $hot     = file_get_contents($hotFile);
+
+        if ($hot === false) {
+            throw new Exception("Failed to read hot file: {$hotFile}");
+        }
+
         $hot  = rtrim($hot);
-        $dash = Str::endsWith($hot, '/') ? '' : '/';
+        $dash = str_ends_with($hot, '/') ? '' : '/';
 
         return static::$hot = $hot . $dash;
     }
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getHmrScript(): string
     {
@@ -241,5 +370,204 @@ class Vite
     public function manifestTime(): int
     {
         return filemtime($this->manifest());
+    }
+
+    /**
+     * @param string[] $entryPoints
+     * @return string
+     * @throws Exception
+     */
+    public function getPreloadTags(array $entryPoints): string
+    {
+        if ($this->isRunningHRM()) {
+            return '';
+        }
+
+        $tags    = [];
+        $imports = $this->getManifestImports($entryPoints);
+
+        foreach ($imports['imports'] as $entryPoint) {
+            $url    = $this->getManifest($entryPoint);
+            $tags[] = $this->createPreloadTag($url);
+        }
+
+        foreach ($imports['css'] as $entryPoint) {
+            $tags[] = $this->createStyleTag($this->buildPath . $entryPoint);
+        }
+
+        return implode("\n", $tags);
+    }
+
+    /**
+     * @param string[]                                $entryPoints
+     * @param array<string|int, string|bool|int|null> $attributes
+     * @return string
+     * @throws Exception
+     */
+    public function getTags(array $entryPoints, ?array $attributes = null): string
+    {
+        return $this->getCustomTags(
+            array_combine($entryPoints, array_fill(0, count($entryPoints), $attributes ?? []))
+        );
+    }
+
+    /**
+     * @param array<string, array<string|int, string|bool|int|null>> $entryPoints
+     * @param array<string|int, string|bool|int|null>                $defaultAttributes
+     * @return string
+     * @throws Exception
+     */
+    public function getCustomTags(array $entryPoints, array $defaultAttributes = []): string
+    {
+        $tags = [];
+
+        if ($this->isRunningHRM()) {
+            $tags[] = $this->getHmrScript();
+        }
+
+        $assets    = $this->gets(array_keys($entryPoints));
+        $cssAssets = array_filter(
+            $assets,
+            fn ($file, $url) => $this->isCssFile($file),
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        $jsAssets = array_diff_key($assets, $cssAssets);
+        $tags     = array_merge(
+            array_map(
+                fn ($url, $file) => $this->createStyleTag($url, $entryPoints[$file] ?? $defaultAttributes),
+                array_values($cssAssets),
+                array_keys($cssAssets)
+            ),
+            array_map(
+                fn ($url, $file) => $this->createScriptTag($url, $entryPoints[$file] ?? $defaultAttributes),
+                array_values($jsAssets),
+                array_keys($jsAssets)
+            )
+        );
+
+        return implode("\n", $tags);
+    }
+
+    /**
+     * @param string                                       $url
+     * @param string                                       $entryPoint
+     * @param array<string|int, string|bool|int|null>|null $attributes
+     * @return string
+     */
+    private function createTag(string $url, string $entryPoint, ?array $attributes = null): string
+    {
+        if ($this->isCssFile($entryPoint)) {
+            return $this->createStyleTag($url);
+        }
+
+        return $this->createScriptTag($url, $attributes);
+    }
+
+    /**
+     * @param string                                       $url
+     * @param array<string|int, string|bool|int|null>|null $attributes
+     * @return string
+     */
+    private function createScriptTag(string $url, ?array $attributes = null): string
+    {
+        $attributes ??= [];
+
+        if (false === isset($attributes['type'])) {
+            $attributes = array_merge(['type' => 'module'], $attributes);
+        }
+
+        $attributes['src'] = $this->escapeUrl($url);
+        $attributes        = $this->buildAttributeString($attributes);
+
+        return "<script {$attributes}></script>";
+    }
+
+    /**
+     * @param string                                       $url
+     * @param array<string|int, string|bool|int|null>|null $attributes
+     * @return string
+     */
+    private function createStyleTag(string $url, ?array $attributes = null): string
+    {
+        if ($this->isRunningHRM()) {
+            return $this->createScriptTag($url, $attributes);
+        }
+
+        $attributes ??= [];
+        $attributes['rel']  = 'stylesheet';
+        $attributes['href'] = $this->escapeUrl($url);
+        $attributes         = $this->buildAttributeString($attributes);
+
+        return "<link {$attributes}>";
+    }
+
+    /**
+     * @param string $url
+     * @return string
+     */
+    private function createPreloadTag(string $url): string
+    {
+        $attributes = $this->buildAttributeString([
+            'rel'  => 'modulepreload',
+            'href' => $this->escapeUrl($url),
+        ]);
+
+        return "<link {$attributes}>";
+    }
+
+    // helper functions
+
+    /**
+     * @param string $filename
+     * @return bool
+     */
+    private function isCssFile(string $filename): bool
+    {
+        return preg_match('/\.(css|less|sass|scss|styl|stylus|pcss|postcss)$/', $filename) === 1;
+    }
+
+    /**
+     * @param string $url
+     * @return string
+     */
+    private function escapeUrl(string $url): string
+    {
+        return htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+    }
+
+    /**
+     * Build attribute string from array.
+     *
+     * @param array<string|int, string|bool|int|null> $attributes
+     * @return string
+     */
+    private function buildAttributeString(array $attributes): string
+    {
+        if (empty($attributes)) {
+            return '';
+        }
+
+        $parts = [];
+        foreach ($attributes as $key => $value) {
+            if (is_int($key)) {
+                $parts[] = htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+                continue;
+            }
+
+            $key = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
+
+            $part = match (true) {
+                is_bool($value) => $value ? $key : null,
+                $value === null => null,
+                default         => $key . '="' . htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . '"',
+            };
+
+            if ($part !== null) {
+                $parts[] = $part;
+            }
+        }
+
+        return implode(' ', $parts);
     }
 }

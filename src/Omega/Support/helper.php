@@ -6,6 +6,7 @@ use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
 use Omega\Collection\CollectionImmutable;
+use Omega\Router\RouteUrlBuilder;
 use Omega\Support\Env;
 use Omega\Http\RedirectResponse;
 use Omega\Http\Response;
@@ -131,7 +132,10 @@ if (!function_exists('vite')) {
         /** @var Vite $vite */
         $vite = app()->get('vite.gets');
 
-        return $vite(...$entry_points);
+        $resource = $vite->gets($entry_points);
+        $first    = array_key_first($resource);
+
+        return 1 === count($resource) ? $resource[$first] : $resource;
     }
 }
 
@@ -140,34 +144,16 @@ if (!function_exists('redirect_route')) {
      * Redirect to another route.
      *
      * @param string   $route_name The name of the route.
-     * @param string[] $parameter  Dynamic parameter to fill with url expression.
+     * @param array<string|int, string|int|bool> $parameter Dinamic parameter to fill with url exprestion
      * @return RedirectResponse
      * @throws Exception
      */
     function redirect_route(string $route_name, array $parameter = []): RedirectResponse
     {
-        $route      = Router::redirect($route_name);
-        $valueIndex = 0;
-        $url        = preg_replace_callback(
-            "/\(:\w+\)/",
-            function ($matches) use ($parameter, &$valueIndex) {
-                if (!array_key_exists($matches[0], Router::$patterns)) {
-                    throw new Exception('parameter not matches with any pattern.');
-                }
+        $route   = Router::redirect($route_name);
+        $builder = new RouteUrlBuilder(Router::$patterns);
 
-                if ($valueIndex < count($parameter)) {
-                    $value = $parameter[$valueIndex];
-                    $valueIndex++;
-
-                    return $value;
-                }
-
-                return '';
-            },
-            $route['uri']
-        );
-
-        return new RedirectResponse($url);
+        return new RedirectResponse($builder->buildUrl($route, $parameter));
     }
 }
 

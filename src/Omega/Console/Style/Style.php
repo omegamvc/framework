@@ -20,6 +20,7 @@ use Omega\Console\Style\Color\ForegroundColor;
 use Omega\Console\Style\Color\RuleInterface;
 use Omega\Console\Traits\CommandTrait;
 use Omega\Text\Str;
+
 use function max;
 use function method_exists;
 use function Omega\Text\text;
@@ -27,6 +28,7 @@ use function preg_replace;
 use function str_repeat;
 use function strlen;
 use function strtolower;
+
 use const PHP_EOL;
 
 /**
@@ -102,9 +104,6 @@ class Style
     /** @var array<int, int> Text decoration rules (bold, underline, etc.). */
     private array $decorateRules = [];
 
-    /** @var int|string Text content to style. */
-    private string|int $text;
-
     /** @var int Length of the current text (without ANSI codes). */
     private int $length;
 
@@ -114,16 +113,29 @@ class Style
     /** @var OutputStreamInterface|null Optional output stream for writing. */
     private ?OutputStreamInterface $outputStream = null;
 
+    /** @var bool|mixed  */
+    private bool $colorize = true;
+
+    /** @var bool Indicate decorate is allowed. */
+    private bool $decorate = true;
+
     /**
-     * Constructor.
-     *
-     * @param int|string $text Optional initial text.
-     * @return void
+     * @param string|int $text Text to decorate
+     * @param array{
+     *  colorize?: bool,
+     *  decorate?: bool
+     * }                 $options
+     *                            Options for style:
+     *                            - colorize: bool, default true, if false will not colorize text
+     *                            - decorate: bool, default true, if false will not decorate text
      */
-    public function __construct(int|string $text = '')
-    {
-        $this->text   = $text;
-        $this->length = strlen((string) $text);
+    public function __construct(
+        private string|int $text = '',
+        array $options = [],
+    ) {
+        $this->length   = strlen((string) $text);
+        $this->colorize = $options['colorize'] ?? true;
+        $this->decorate = $options['decorate'] ?? true;
     }
 
     /**
@@ -206,29 +218,41 @@ class Style
         // flush
         $this->rules = [];
 
-        // font color
-        foreach ($this->textColorRule as $text_color) {
-            $this->rules[] = $text_color;
-        }
+        if ($this->colorize) {
+            // font color
+            foreach ($this->textColorRule as $textColor) {
+                $this->rules[] = $textColor;
+            }
 
-        // bg color
-        foreach ($this->bgColorRule as $bg_color) {
-            $this->rules[] = $bg_color;
-        }
-
-        // decorate
-        foreach ($this->decorateRules as $decorate) {
-            $this->rules[] = $decorate;
-        }
-
-        // raw
-        foreach ($this->rawRules as $raws) {
-            foreach ($raws as $raw) {
-                $this->rules[] = $raw;
+            // bg color
+            foreach ($this->bgColorRule as $bgColor) {
+                $this->rules[] = $bgColor;
             }
         }
 
-        return $ref . $this->rules($this->rules, $text, true, $this->resetRules);
+        if ($this->decorate) {
+            // decorate
+            foreach ($this->decorateRules as $decorate) {
+                $this->rules[] = $decorate;
+            }
+
+            // raw
+            foreach ($this->rawRules as $raws) {
+                foreach ($raws as $raw) {
+                    $this->rules[] = $raw;
+                }
+            }
+        }
+
+        $resetRule = false === $this->decorate && false === $this->colorize
+            ? []
+            : $this->resetRules;
+
+        return $ref . $this->rules(
+                rule: $this->rules,
+                text: $text,
+                resetRule: $resetRule
+            );
     }
 
     /**
@@ -271,6 +295,7 @@ class Style
     {
         $ref        = $this->toString($this->text, $this->ref);
         $this->text = $text;
+
         $this->length += strlen((string)$text);
 
         return $this->flush()->ref($ref);

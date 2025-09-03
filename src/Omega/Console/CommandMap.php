@@ -33,6 +33,7 @@ use function is_array;
  * how a console command should be registered, matched, and executed.
  *
  * Example structure of a command definition:
+ * ```php
  * [
  *   'cmd'      => ['make:model', 'make:migration'],   // Command names
  *   'pattern'  => ['make', 'create'],                 // Optional pattern(s)
@@ -42,6 +43,7 @@ use function is_array;
  *   'default'  => ['force' => false, 'name' => null], // Default options
  *   'match'    => fn(string $given): bool => ...      // Custom matcher (optional)
  * ]
+ * ```
  *
  * @category  Omega
  * @package   Console
@@ -53,23 +55,16 @@ use function is_array;
  *
  * @implements ArrayAccess<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)>
  */
-class CommandMap implements ArrayAccess
+readonly class CommandMap implements ArrayAccess
 {
-    /**
-     * The raw command definition array.
-     *
-     * @var array<string, string|string[]|(array<string, string|bool|int|null>)|(callable(string): bool)>
-     */
-    private array $command;
-
     /**
      * Create a new CommandMap instance.
      *
      * @param array<string, string|string[]|array<string, string|bool|int|null>|callable(string):bool> $command
      */
-    public function __construct(array $command)
-    {
-        $this->command = $command;
+    public function __construct(
+        private array $command
+    ) {
     }
 
     /**
@@ -277,7 +272,8 @@ class CommandMap implements ArrayAccess
      *
      * Returns a [class, method] pair suitable for use with call_user_func().
      *
-     * @return string[]
+     * @param mixed $offset
+     * @return bool
      */
     public function offsetExists(mixed $offset): bool
     {

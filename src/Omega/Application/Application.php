@@ -25,6 +25,7 @@ use Omega\Support\PackageManifest;
 use Omega\Support\Vite;
 use Omega\View\Templator;
 use Omega\View\ViewServiceProvider;
+
 use function array_map;
 use function count;
 use function file_exists;
@@ -88,7 +89,7 @@ final class Application extends Container
 
         $this->basePath = $basePath;
 
-        $this->set('path.base', $this->basePath);
+        $this->set('path.base', $this->basePath . DIRECTORY_SEPARATOR);
 
         $this->set('path.config', $this->basePath . set_path('config'));
 
@@ -106,21 +107,23 @@ final class Application extends Container
     protected function definitions(): array
     {
         return [
+            'boot.cache'              => $this->basePath . set_path('bootstrap.cache'),
             'path.app'                => $this->basePath . set_path('app'),
-            'path.exception'          => $this->basePath . set_path('app.Exceptions'),
+            'path.cache'              => $this->basePath . set_path('storage.app.cache'),
             'path.command'            => $this->basePath . set_path('app.Console.Commands'),
+            'path.component'          => $this->basePath . set_path('resources.components'),
             'path.controller'         => $this->basePath . set_path('app.Http.Controllers'),
+            'path.exception'          => $this->basePath . set_path('app.Exceptions'),
             'path.model'              => $this->basePath . set_path('app.Models'),
             'path.middleware'         => $this->basePath . set_path('app.Http.Middlewares'),
             'path.provider'           => $this->basePath . set_path('app.Providers'),
             'path.view'               => $this->basePath . set_path('resources.views'),
-            'path.component'          => $this->basePath . set_path('resources.components'),
             'path.storage'            => $this->basePath . set_path('storage'),
-            'path.cache'              => $this->basePath . set_path('storage.app.cache'),
             'path.public'             => $this->basePath . set_path('public'),
             'path.migration'          => $this->basePath . set_path('database.migration'),
             'path.seeder'             => $this->basePath . set_path('database.seeders'),
             'path.compiled_view_path' => $this->basePath . set_path('storage.app.view'),
+            'path.database'           => $this->basePath . set_path('database'),
             'paths.view'              => array_map(
                 fn ($p) => $this->basePath . $p,
                 [set_path('resources.views')]

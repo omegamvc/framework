@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Omega\Console\Traits;
 
 use Omega\Console\Style\Decorate;
+
 use function chr;
 use function implode;
 use function str_repeat;
@@ -49,6 +50,10 @@ trait PrinterTrait
         bool $reset = true,
         array $resetRule = [Decorate::RESET]
     ): string {
+        if ([] === $rule && [] === $resetRule) {
+            return (string) $text;
+        }
+
         $stringRules      = implode(';', $rule);
         $stringResetRules = implode(';', $resetRule);
 

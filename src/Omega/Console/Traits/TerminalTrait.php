@@ -18,10 +18,18 @@ use function array_key_exists;
 use function count;
 use function explode;
 use function function_exists;
+use function getenv;
+use function in_array;
 use function preg_match;
+use function sapi_windows_vt100_support;
 use function shell_exec;
+use function stream_isatty;
+use function strtoupper;
 use function trim;
+
+use const DIRECTORY_SEPARATOR;
 use const PHP_OS_FAMILY;
+use const STDOUT;
 
 /**
  * TerminalTrait provides helper methods to retrieve terminal dimensions,
@@ -99,5 +107,41 @@ trait TerminalTrait
     private function minMax(int $value, int $min, int $max): int
     {
         return $value < $min ? $min : (min($value, $max));
+    }
+
+
+    /**
+     * @param resource $stream
+     */
+    protected function hasColorSupport(mixed $stream = STDOUT): bool
+    {
+        if ('' !== (($_SERVER['NO_COLOR'] ?? getenv('NO_COLOR'))[0] ?? '')) {
+            return false;
+        }
+
+        if (!@stream_isatty($stream) && !in_array(strtoupper((string) getenv('MSYSTEM')), ['MINGW32', 'MINGW64'], true)) {
+            return false;
+        }
+
+        if ('\\' === DIRECTORY_SEPARATOR && @sapi_windows_vt100_support($stream)) {
+            return true;
+        }
+
+        if ('Hyper' === getenv('TERM_PROGRAM')
+            || false !== getenv('COLORTERM')
+            || false !== getenv('ANSICON')
+            || 'ON' === getenv('ConEmuANSI')
+        ) {
+            return true;
+        }
+
+        if ('dumb' === $term = (string) getenv('TERM')) {
+            return false;
+        }
+
+        return 1 === preg_match(
+            '/^((screen|xterm|vt100|vt220|putty|rxvt|ansi|cygwin|linux).*)|(.*-256(color)?(-bce)?)$/',
+            $term
+            );
     }
 }

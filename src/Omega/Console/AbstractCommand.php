@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Omega\Console;
 
 use ArrayAccess;
+use InvalidArgumentException;
 use Omega\Console\Exceptions\ImmutableOptionException;
 use Omega\Console\Traits\TerminalTrait;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
@@ -58,6 +59,16 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
 {
     use TerminalTrait;
 
+    public const int VERBOSITY_SILENT       = 0;
+    public const int VERBOSITY_QUIET        = 1;
+    public const int VERBOSITY_NORMAL       = 2;
+    public const int VERBOSITY_VERBOSE      = 3;
+    public const int VERBOSITY_VERY_VERBOSE = 4;
+    public const int VERBOSITY_DEBUG        = 5;
+
+    /** @var int Default verbosity level. */
+    protected int $verbosity = self::VERBOSITY_NORMAL;
+
     /** @var string|array<int, string> Commandline line input from $argv. */
     protected string|array $cmd;
 
@@ -93,6 +104,8 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
         foreach ($this->optionMapper($argv) as $key => $value) {
             $this->optionMapper[$key] = $value;
         }
+
+        $this->verbosity    = $this->getDefaultVerbosity();
     }
 
     /**
@@ -227,6 +240,99 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
         }
 
         return $realPath;
+    }
+
+    /**
+     * Get exist option status.
+     */
+    protected function hasOption(string $name): bool
+    {
+        return array_key_exists($name, $this->optionMapper);
+    }
+
+    /**
+     * Get all option array positional.
+     *
+     * @return string[]
+     */
+    protected function optionPosition(): array
+    {
+        return $this->optionMapper[''];
+    }
+
+
+    /**
+     * Inject default options without overwriting
+     * 1. quiet with flag --quite
+     * 2. verbose with flag -v,-vv or -vvv
+     * 3. debug with flag --debug
+     * if there is no default option set,
+     * then set default verbosity to normal,.
+     */
+    protected function getDefaultVerbosity(): int
+    {
+        if ($this->hasOption('silent')) {
+            return self::VERBOSITY_SILENT;
+        }
+
+        if ($this->hasOption('quiet')) {
+            return self::VERBOSITY_QUIET;
+        }
+
+        if ($this->hasOption('debug') || $this->hasOption('vvv')) {
+            return self::VERBOSITY_DEBUG;
+        }
+
+        if ($this->hasOption('very-verbose') || $this->hasOption('vv')) {
+            return self::VERBOSITY_VERY_VERBOSE;
+        }
+
+        if ($this->hasOption('verbose') || $this->hasOption('v')) {
+            return self::VERBOSITY_VERBOSE;
+        }
+
+        return self::VERBOSITY_NORMAL;
+    }
+
+    public function setVerbosity(int $verbosity): void
+    {
+        if ($verbosity < self::VERBOSITY_SILENT || $verbosity > self::VERBOSITY_DEBUG) {
+            throw new InvalidArgumentException(
+                'Verbosity level must be between ' . self::VERBOSITY_SILENT . ' and ' . self::VERBOSITY_DEBUG
+            );
+        }
+
+        $this->verbosity = $verbosity;
+    }
+
+    public function getVerbosity(): int
+    {
+        return $this->verbosity;
+    }
+
+    public function isSilent(): bool
+    {
+        return $this->verbosity === self::VERBOSITY_SILENT;
+    }
+
+    public function isQuiet(): bool
+    {
+        return $this->verbosity === self::VERBOSITY_QUIET;
+    }
+
+    public function isVerbose(): bool
+    {
+        return $this->verbosity >= self::VERBOSITY_VERBOSE;
+    }
+
+    public function isVeryVerbose(): bool
+    {
+        return $this->verbosity >= self::VERBOSITY_VERY_VERBOSE;
+    }
+
+    public function isDebug(): bool
+    {
+        return $this->verbosity >= self::VERBOSITY_DEBUG;
     }
 
     /**

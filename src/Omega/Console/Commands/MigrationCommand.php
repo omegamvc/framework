@@ -15,16 +15,19 @@ use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
 use Omega\Database\MyQuery;
+use Omega\Database\MySchema\MyPDO;
 use Omega\Database\MySchema\Table\Create;
 use Omega\Support\Facades\DB;
 use Omega\Support\Facades\PDO;
 use Omega\Support\Facades\Schema;
 use Throwable;
+
 use function Omega\Console\error;
 use function Omega\Console\info;
 use function Omega\Console\style;
 use function Omega\Console\success;
 use function Omega\Console\warn;
+
 use const PATHINFO_FILENAME;
 
 /**
@@ -109,6 +112,7 @@ class MigrationCommand extends AbstractCommand
                 '--seed'              => 'Run seeder after migration.',
                 '--seed-namespace'    => 'Run seeder after migration using class namespace.',
                 '--yes'               => 'Accept it without having it ask any questions',
+                '--database'          => 'Target database to use.',
             ],
             'relation'  => [
                 'migrate'                   => ['--seed', '--dry-run', '--force'],
@@ -116,8 +120,10 @@ class MigrationCommand extends AbstractCommand
                 'migrate:reset'             => ['--dry-run', '--force'],
                 'migrate:refresh'           => ['--seed', '--dry-run', '--force'],
                 'migrate:rollback'          => ['--batch', '--take', '--dry-run', '--force'],
-                'database:create'           => ['--force'],
-                'database:drop'             => ['--force'], ],
+                'database:create'           => ['--database', '--force'],
+                'database:drop'             => ['--database', '--force'],
+                'database:show'             => ['--database', '--force'],
+            ],
         ];
     }
 
@@ -129,7 +135,7 @@ class MigrationCommand extends AbstractCommand
      */
     private function DbName(): string
     {
-        return app()->get('dsn.sql')['database_name'];
+        return $this->option('database', app()->get(MyPDO::class)->getDatabase());
     }
 
     /**
@@ -467,6 +473,10 @@ class MigrationCommand extends AbstractCommand
 
             try {
                 $success = $down->every(fn ($item) => $item->execute());
+
+                if ($success) {
+                    $success = $this->deleteMigrationTable((int) $val['batch']);
+                }
             } catch (Throwable $th) {
                 $success = false;
                 error($th->getMessage())->out(false);
@@ -693,10 +703,9 @@ class MigrationCommand extends AbstractCommand
         $result = PDO::instance()->query(
             "SELECT COUNT(table_name) as total
             FROM information_schema.tables
-            WHERE table_schema = :dbname
+            WHERE table_schema = DATABASE()
             AND table_name = 'migration'"
-        )->bind(':dbname', $this->DbName())
-        ->single();
+        )->single();
 
         if ($result) {
             return $result['total'] > 0;
@@ -747,6 +756,21 @@ class MigrationCommand extends AbstractCommand
             ->values($migration)
             ->execute()
         ;
+    }
+
+    /**
+     * Save insert migration file with batch to migration table.
+     *
+     * @param int $batchNumber
+     * @return bool
+     */
+    private function deleteMigrationTable(int $batchNumber): bool
+    {
+        return DB::table('migration')
+            ->delete()
+            ->equal('batch', $batchNumber)
+            ->execute()
+            ;
     }
 
     /**

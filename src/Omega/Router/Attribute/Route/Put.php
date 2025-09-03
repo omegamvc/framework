@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Omega\Router\Attribute\Route;
+
+use Attribute;
+
+#[Attribute(Attribute::TARGET_METHOD)]
+final class Put extends Route
+{
+    public function __construct(string $expression)
+    {
+        parent::__construct(['PUT'], $expression);
+    }
+}
