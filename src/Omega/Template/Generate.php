@@ -6,6 +6,7 @@ namespace Omega\Template;
 
 use Omega\Template\Traits\CommentTrait;
 use Omega\Template\Traits\FormatterTrait;
+
 use function array_filter;
 use function call_user_func_array;
 use function count;
@@ -33,7 +34,10 @@ class Generate
 
     private bool $endWithNewline = false;
 
-    private ?string $name;
+    private ?string $name = null;
+
+    /** @var string[] */
+    private array $declare = [];
 
     private ?string $namespace = null;
 
@@ -108,8 +112,14 @@ class Generate
 
         // scope: before
         $before = [];
-        if ($this->namespace !== null || count($this->uses) > 0) {
+        if ($this->namespace !== null || count($this->uses) > 0 || count($this->declare) > 0) {
             $before[] = '';
+        }
+
+        if (count($this->declare) > 0) {
+            foreach ($this->declare as $declare => $value) {
+                $before[] = "declare({$declare}={$value});\n";
+            }
         }
 
         // generate namespace
@@ -123,10 +133,13 @@ class Generate
             $before[] = '';
         }
 
-        $before = implode("\n", $before);
-
         // scope comment, generate comment
-        $comment = $this->generateComment(0, $this->tabIndent);
+        if ('' !== ($comment = $this->generateComment(0, $this->tabIndent))) {
+            $before[] = '';
+        }
+
+        // built before
+        $before = implode("\n", $before);
 
         // generate class rule
         $rule = $this->rule == 0
@@ -275,6 +288,26 @@ class Generate
         $this->endWithNewline = $enable;
 
         return $this;
+    }
+
+    /**
+     * Generates PHP declare directives.
+     *
+     * Supported directives:
+     * - ticks
+     * - encoding
+     * - strict_types
+     */
+    public function addDeclare(string $directive, string|int $value): self
+    {
+        $this->declare[$directive] = $value;
+
+        return $this;
+    }
+
+    public function setDeclareStrictTypes(int $level = 1): self
+    {
+        return $this->addDeclare('strict_types', $level);
     }
 
     // setter

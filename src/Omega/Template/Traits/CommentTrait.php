@@ -20,7 +20,7 @@ trait CommentTrait
 
     public function addComment(?string $comment): self
     {
-        $this->comments[] = $comment ?? '';
+        $this->comments[] = null !== $comment ? " {$comment}" : '';
 
         return $this;
     }
@@ -35,7 +35,7 @@ trait CommentTrait
         $name        = $name == '' ? $name : ' ' . $name;
         $description = $description == '' ? $description : ' ' . $description;
 
-        $this->comments[] = "@param $datatype$name$description";
+        $this->addComment("@param {$datatype}{$name}{$description}");
 
         return $this;
     }
@@ -44,7 +44,7 @@ trait CommentTrait
     {
         $name = $name == '' ? $name : ' ' . $name;
 
-        $this->comments[] = "@var $datatype$name";
+        $this->addComment("@var {$datatype}{$name}");
 
         return $this;
     }
@@ -54,14 +54,14 @@ trait CommentTrait
         $name        = $name == '' ? $name : ' ' . $name;
         $description = $description == '' ? $description : ' ' . $description;
 
-        $this->comments[] = "@return $datatype$name$description";
+        $this->addComment("@return {$datatype}{$name}{$description}");
 
         return $this;
     }
 
     public function commentTemplate(): string
     {
-        return '/** {{body}} */';
+        return '/**{{body}} */';
     }
 
     public function generateComment(int $tabSize = 0, string $tabIndent = "\t"): string
@@ -77,7 +77,7 @@ trait CommentTrait
                 $endLine = "\n$tabDept";
             }
 
-            $comment = implode("\n$tabDept * ", $this->comments) . $endLine;
+            $comment = implode("\n$tabDept *", $this->comments) . $endLine;
 
             return str_replace('{{body}}', $comment, $template);
         }

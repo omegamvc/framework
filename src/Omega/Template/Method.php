@@ -78,9 +78,6 @@ class Method
         // final
         $pre[] = $this->isFinal ? 'final' : '';
 
-        // static
-        $pre[] = $this->isStatic ? 'static' : '';
-
         // visibility
         $pre[] = match ($this->visibility) {
             self::PUBLIC_    => 'public',
@@ -88,6 +85,9 @@ class Method
             self::PROTECTED_ => 'protected',
             default          => '',
         };
+
+        // static
+        $pre[] = $this->isStatic ? 'static' : '';
 
         // {{final}}{{visibility}}{{static}}
         $pre    = array_filter($pre);
@@ -129,14 +129,14 @@ class Method
         return $this;
     }
 
-    public function isFinal(bool $is_final = true): self
+    public function setFinal(bool $is_final = true): self
     {
         $this->isFinal = $is_final;
 
         return $this;
     }
 
-    public function isStatic(bool $is_static = true): self
+    public function setStatic(bool $is_static = true): self
     {
         $this->isStatic = $is_static;
 
