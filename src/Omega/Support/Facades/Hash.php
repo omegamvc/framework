@@ -8,13 +8,15 @@ use Omega\Security\Hashing\HashInterface;
 use Omega\Security\Hashing\HashManager;
 
 /**
- * @method static self setDefaultDriver(HashInterface $driver)
- * @method static self setDriver(string $driver_name, HashInterface $driver)
+ * @method static HashManager   setDefaultDriver(HashInterface $driver)
+ * @method static HashManager   setDriver(string $driver_name, HashInterface $driver)
  * @method static HashInterface driver(?string $driver = null)
- * @method static array info(string $hashed_value)
- * @method static string make(string $value, array $options = [])
- * @method static bool verify(string $value, string $hashed_value, array $options = [])
- * @method static bool isValidAlgorithm(string $hash)
+ * @method static array         info(string $hashed_value)
+ * @method static string        make(string $value, array $options = [])
+ * @method static bool          verify(string $value, string $hashed_value, array $options = [])
+ * @method static bool          isValidAlgorithm(string $hash)
+ *
+ * @see HashManager
  */
 final class Hash extends AbstractFacade
 {

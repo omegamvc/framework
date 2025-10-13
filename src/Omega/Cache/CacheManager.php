@@ -210,7 +210,7 @@ class CacheManager implements CacheInterface
      * @return mixed
      * @throws UnknownStorageDriverException
      */
-    public function remember(string $key, Closure $callback, int|DateInterval|null $ttl = null): mixed
+    public function remember(string $key, Closure $callback, int|DateInterval|null $ttl): mixed
     {
         return $this->driver()->remember($key, $callback, $ttl);
     }

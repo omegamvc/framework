@@ -81,7 +81,7 @@ abstract class AbstractStorage implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function remember(string $key, Closure $callback, int|DateInterval|null $ttl = null): mixed
+    public function remember(string $key, Closure $callback, int|DateInterval|null $ttl): mixed
     {
         $value = $this->get($key);
 

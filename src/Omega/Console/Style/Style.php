@@ -30,6 +30,7 @@ use function strlen;
 use function strtolower;
 
 use const PHP_EOL;
+use const STR_PAD_RIGHT;
 
 /**
  * Class Style
@@ -390,6 +391,21 @@ class Style
     }
 
     /**
+     * Write stream out.
+     *
+     * @param bool $condition
+     * @param bool $newLine
+     * @return void
+     */
+    public function writeIf(bool $condition, bool $newLine = true): void
+    {
+        if ($this->outputStream && true === $condition) {
+            $out = $this . ($newLine ? PHP_EOL : null);
+            $this->outputStream->write($out);
+        }
+    }
+
+    /**
      * Clear current terminal line.
      *
      * @param int $line Optional line offset
@@ -606,5 +622,10 @@ class Style
     public function tabs(int $count = 1): self
     {
         return $this->repeat("\t", $count);
+    }
+
+    public function pad(string $text, int $length, string $padString = '', int $padType = STR_PAD_RIGHT): self
+    {
+        return $this->push(str_pad($text, $length, $padString, $padType));
     }
 }

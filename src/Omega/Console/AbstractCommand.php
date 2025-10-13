@@ -17,11 +17,12 @@ namespace Omega\Console;
 use ArrayAccess;
 use InvalidArgumentException;
 use Omega\Console\Exceptions\ImmutableOptionException;
+use Omega\Console\IO\OutputStream;
+use Omega\Console\Style\Style;
 use Omega\Console\Traits\TerminalTrait;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
-use Omega\Text\Str;
 use ReturnTypeWillChange;
 
 use function array_key_exists;
@@ -59,12 +60,23 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
 {
     use TerminalTrait;
 
-    public const int VERBOSITY_SILENT       = 0;
-    public const int VERBOSITY_QUIET        = 1;
-    public const int VERBOSITY_NORMAL       = 2;
-    public const int VERBOSITY_VERBOSE      = 3;
+    public const int SUCCESS = 0;
+
+    public const int FAILURE = 1;
+
+    public const int INVALID = 2;
+
+    public const int VERBOSITY_SILENT = 0;
+
+    public const int VERBOSITY_QUIET = 1;
+
+    public const int VERBOSITY_NORMAL = 2;
+
+    public const int VERBOSITY_VERBOSE = 3;
+
     public const int VERBOSITY_VERY_VERBOSE = 4;
-    public const int VERBOSITY_DEBUG        = 5;
+
+    public const int VERBOSITY_DEBUG = 5;
 
     /** @var int Default verbosity level. */
     protected int $verbosity = self::VERBOSITY_NORMAL;
@@ -87,6 +99,9 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     /** @var array<string, array<int, string>> Relations between options and arguments. */
     protected array $commandRelation = [];
 
+    /** @var OutputStream Holds the output stream object. */
+    protected OutputStream $outputStream;
+
     /**
      * Parse command line arguments and initialize options.
      *
@@ -105,7 +120,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
             $this->optionMapper[$key] = $value;
         }
 
-        $this->verbosity    = $this->getDefaultVerbosity();
+        $this->verbosity = $this->getDefaultVerbosity();
     }
 
     /**
@@ -156,7 +171,21 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
                 continue;
             }
 
-            $options[$lastOption][] = $this->removeQuote($option);
+            if (null !== $lastOption) {
+                if (false === isset($options[$lastOption])) {
+                    $options[$lastOption] = [];
+                } elseif (false === is_array($options[$lastOption])) {
+                    $options[$lastOption] = [$options[$lastOption]];
+                }
+
+                $options[$lastOption][] = $this->removeQuote($option);
+            } else {
+                if (false === isset($options[''])) {
+                    $options[''] = [];
+                }
+
+                $options[''][] = $this->removeQuote($option);
+            }
         }
 
         // re-group alias
@@ -183,7 +212,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      */
     private function isCommandParam(string $command): bool
     {
-        return Str::startsWith($command, '-') || Str::startsWith($command, '--');
+        return str_starts_with($command, '-');
     }
 
     /**
@@ -194,7 +223,21 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      */
     private function removeQuote(string $value): string
     {
-        return Str::match($value, '/(["\'])(.*?)\1/')[2] ?? $value;
+        $len = strlen($value);
+
+        if ($len < 2) {
+            return $value;
+        }
+
+        $first = $value[0];
+        $last  = $value[$len - 1];
+
+        // Only remove matching quotes at both ends
+        if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+            return substr($value, 1, -1);
+        }
+
+        return $value;
     }
 
     /**
@@ -228,13 +271,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      */
     protected function isPath(string $binding): string
     {
-        // Recupera il path logico dal container
         $logicalPath = get_path($binding);
 
-        // Normalizza in un path di filesystem
         $realPath = str_replace(['.', '/','\\'], DIRECTORY_SEPARATOR, $logicalPath);
 
-        // Se non esiste, crea ricorsivamente
         if (!is_dir($realPath)) {
             mkdir($realPath, 0755, true);
         }
@@ -260,14 +300,31 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
         return $this->optionMapper[''];
     }
 
+    /**
+     * @param array{
+     *  colorize?: bool,
+     *  decorate?: bool
+     * } $options
+     */
+    protected function output(OutputStream $output_stream, array $options = []): Style
+    {
+        $output = new Style(options: [
+            'colorize' => $options['colorize'] ?? $this->hasColorSupport(),
+            'decorate' => $options['decorate'] ?? null,
+        ]);
+        $output->setOutputStream($output_stream);
+
+        return $output;
+    }
 
     /**
      * Inject default options without overwriting
+     *
      * 1. quiet with flag --quite
      * 2. verbose with flag -v,-vv or -vvv
      * 3. debug with flag --debug
-     * if there is no default option set,
-     * then set default verbosity to normal,.
+     *
+     * if there is no default option set, then set default verbosity to normal.
      */
     protected function getDefaultVerbosity(): int
     {

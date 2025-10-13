@@ -35,42 +35,32 @@ $command = new class($argv) extends AbstractCommand
                 && file_exists(dirname(__DIR__) . $file)
             ) {
                 $facades = require_once dirname(__DIR__) . $file;
-                foreach ($facades as $facade => $accessor) {
-                    if (1 === $this->updater($facade, $accessor)) {
-                        return 1;
+                $fail    = 0;
+                foreach ($facades as $facade => $options) {
+                    $options = is_string($options) ? ['accessor' => $options] : $options;
+                    if ($this->updater($facade, $options) > 0) {
+                        $fail++;
                     }
                 }
-                $count = count($facades);
-                success("Done {$count} `Facade` class has successfully updated.")->outIf($this->canWrite());
 
-                return 0;
+                $count = count($facades);
+                if ($fail > 0) {
+                    error("{$fail} of {$count} facades " . ($this->hasOption('dry-run') ? 'failed validation' : 'could not be updated'))->outIf($this->canWrite());
+
+                    return AbstractCommand::FAILURE;
+                }
+
+                success('Successfully ' . ($this->hasOption('dry-run') ? 'validated' : 'updated') . " {$count} " . ($count === 1 ? 'facade' : 'facades'))->outIf($this->canWrite());
+
+                return AbstractCommand::SUCCESS;
             }
 
             return $this->update();
         }
 
-        if ('facade:validate' === $this->cmd) {
-            if (false !== ($file = $this->option('from-file', false))
-                && file_exists(dirname(__DIR__) . $file)
-            ) {
-                $facades = require_once dirname(__DIR__) . $file;
-                foreach ($facades as $facade => $accessor) {
-                    if (1 === $this->validator($facade, $accessor)) {
-                        return 1;
-                    }
-                }
-                $count = count($facades);
-                success("Done {$count} `Facade` class has successfully validated.")->outIf($this->canWrite());
-
-                return 0;
-            }
-
-            return $this->validate();
-        }
-
         warn('The command argument is required: facade:generate --accessor')->outIf($this->canWrite());
 
-        return 1;
+        return AbstractCommand::INVALID;
     }
 
     public function generate(): int
@@ -78,7 +68,7 @@ $command = new class($argv) extends AbstractCommand
         if (false === ($className = $this->option('facade', false))) {
             error('The command argument is required: facade:generate --facade')->outIf($this->canWrite());
 
-            return 1;
+            return AbstractCommand::INVALID;
         }
 
         $accessor  = $this->option('accessor', $className);
@@ -91,12 +81,12 @@ $command = new class($argv) extends AbstractCommand
             $methods    = $this->getMethodReflection($reflection);
         }
 
-        $facade_class = $this->generator($className, $accessor, $methods);
-        $filename     = dirname(__DIR__) . "{$this->facadeFileLocation}{$className}.php";
+        $facadeClass = $this->generator($className, $accessor, $methods);
+        $filename    = dirname(__DIR__) . "{$this->facadeFileLocation}{$className}.php";
 
         info("Generating new facade {$className}")->outIf($this->canWrite());
 
-        return false === file_put_contents($filename, $facade_class) ? 1 : 0;
+        return false === file_put_contents($filename, $facadeClass) ? 1 : 0;
     }
 
     public function update(): int
@@ -106,98 +96,66 @@ $command = new class($argv) extends AbstractCommand
         ) {
             error('The command argument is required: facade:update --facade --accessor')->outIf($this->canWrite());
 
-            return 1;
+            return AbstractCommand::INVALID;
         }
 
-        return $this->updater($facade, $accessor);
+        return $this->updater($facade, ['accessor' => $accessor]);
     }
 
-    public function updater(string $facade, string $accessor): int
+    /**
+     * @param array{accessor?: string, excludes?: array<string, bool>, replaces?: array<string, string>, with?: array<string, array{param?: string[], return?: string}>} $options
+     */
+    public function updater(string $facade, array $options = []): int
     {
+        $accessor        = $options['accessor'];
         $facadeNamespace = "{$this->facadeNamespace}\\{$facade}";
         $methods         = [];
+
         if (false === class_exists($facadeNamespace)) {
             error("Facade class `{$facade}` is not exists, try generate new facade.")->outIf($this->canWrite(), false);
 
-            return 1;
+            return AbstractCommand::INVALID;
         }
 
         if (false === class_exists($accessor)) {
             error("Facade accessor `{$accessor}` is not found.")->outIf($this->canWrite(), false);
 
-            return 1;
+            return AbstractCommand::FAILURE;
         }
 
-        $reflection        = new ReflectionClass($accessor);
-        $methods           = $this->getMethodReflection($reflection);
-        $reflection_facade = new ReflectionClass($facadeNamespace);
+        $reflection       = new ReflectionClass($accessor);
+        $methods          = $this->getMethodReflection($reflection, $options);
+        $reflectionFacade = new ReflectionClass($facadeNamespace);
 
         $filename = dirname(__DIR__) . "{$this->facadeFileLocation}{$facade}.php";
         $file     = file_get_contents($filename);
 
-        info("Generating update facade {$facade}")->outIf($this->canWrite());
+        $oldDocblock = $reflectionFacade->getDocComment();
+        $newDocblock = ltrim($this->generatorDocBlock($accessor, $methods));
 
-        $old_docblock = $reflection_facade->getDocComment();
-        $new_docblock = ltrim($this->generatorDocBlock($accessor, $methods));
+        info("Updating facade `{$facade}`...")
+            ->outIf(false === $this->hasOption('dry-run') && $this->canWrite(), false);
 
         $this
-            ->diff($new_docblock, $old_docblock)
-            ->outIf($this->isVeryVerbose(), false);
+            ->diff($newDocblock, $oldDocblock)
+            ->outIf($this->isVeryVerbose());
+
+        if ($this->hasOption('dry-run')) {
+            if ($oldDocblock === $newDocblock) {
+                success("Facade `{$facade}` is up to date")->outIf($this->canWrite(), false);
+
+                return AbstractCommand::SUCCESS;
+            }
+
+            error("Facade `{$facade}` needs to be updated")->outIf($this->canWrite(), false);
+
+            return AbstractCommand::FAILURE;
+        }
 
         return false === file_put_contents(
             $filename,
-            str_replace(search: $old_docblock, replace: $new_docblock, subject: $file)
+            str_replace(search: $oldDocblock, replace: $newDocblock, subject: $file)
         ) ? 1 : 0;
-    }
-
-    public function validate(): int
-    {
-        if (false === ($facade  = $this->option('facade', false))
-            || false === ($accessor = $this->option('accessor', false))
-        ) {
-            error('The command argument is required: facade:validate --facade --accessor')->outIf($this->canWrite());
-
-            return 1;
-        }
-
-        return $this->validator($facade, $accessor);
-    }
-
-    public function validator(string $facade, string $accessor): int
-    {
-        $facadeNamespace = "{$this->facadeNamespace}\\{$facade}";
-        $methods         = [];
-        if (false === class_exists($facadeNamespace)) {
-            error("Facade class `{$facade}` is not exists, try generate new facade.")->outIf($this->canWrite(), false);
-
-            return 1;
-        }
-
-        if (false === class_exists($accessor)) {
-            error("Facade accessor `{$accessor}` is not found.")->outIf($this->canWrite(), false);
-
-            return 1;
-        }
-
-        $reflection        = new ReflectionClass($accessor);
-        $methods           = $this->getMethodReflection($reflection);
-        $reflection_facade = new ReflectionClass($facadeNamespace);
-        $old_docblock      = $reflection_facade->getDocComment();
-        $new_docblock      = ltrim($this->generatorDocBlock($accessor, $methods));
-
-        $this
-            ->diff($new_docblock, $old_docblock)
-            ->outIf($this->isVeryVerbose(), false);
-
-        if ($old_docblock === $new_docblock) {
-            success("Docblock is updated `{$facade}`.")->outIf($this->canWrite(), false);
-
-            return 0;
-        }
-
-        error("Docblock not updated `{$facade}`.")->outIf($this->canWrite(), false);
-
-        return 1;
     }
 
     /**
@@ -250,27 +208,33 @@ $command = new class($argv) extends AbstractCommand
      * Get all public method signatures of a class.
      *
      * @param ReflectionClass<object> $class
-     *
+     * @param array{accessor?: string, excludes?: array<string, bool>, replaces?: array<string, string>, with?: array<string, array{param?: string[], return?: string}>} $options
      * @return string[] list of method signatures
      */
-    private function getMethodReflection(ReflectionClass $class): array
+    private function getMethodReflection(ReflectionClass $class, array $options = []): array
     {
         $buffer              = [];
         $methods             = [];
         $maxReturnTypeLength = 0;
-        $ignore_method       = [
+        $fullClassName       = '\\' . $class->getName();
+        $ignoreMethod        = [
             'offsetExists' => true,
             'offsetGet'    => true,
             'offsetSet'    => true,
             'offsetUnset'  => true,
         ];
+        // options
+        $optExcludes = $options['excludes'] ?? [];
+        $optReplaces = $options['replaces'] ?? [];
+        $optWith     = $options['with'] ?? [];
 
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             if ($method->isConstructor()
                 || $method->isDestructor()
-                || str_starts_with($method->getName(), '__')
-                || array_key_exists($method->getName(), $ignore_method)
                 || $method->isDeprecated()
+                || str_starts_with($method->getName(), '__')
+                || array_key_exists($method->getName(), $ignoreMethod)
+                || array_key_exists($method->getName(), $optExcludes) // exclude from options
             ) {
                 continue;
             }
@@ -286,13 +250,14 @@ $command = new class($argv) extends AbstractCommand
 
                 foreach ($blocks as $line) {
                     if (null !== ($param = parseParamLine($line))) {
-                        $params[$param['name']] = "{$param['type']} {$param['name']}";
+                        $type                   = replaceUnionTypes($param['type'], $optReplaces);
+                        $params[$param['name']] = "{$type} {$param['name']}";
 
                         continue;
                     }
 
                     if (null !== ($returnResult = parseReturnLine($line))) {
-                        $returnType = $returnResult;
+                        $returnType = replaceUnionTypes($returnResult, $optReplaces);
                     }
                 }
             }
@@ -302,6 +267,10 @@ $command = new class($argv) extends AbstractCommand
                 ? $this->getTypeFromReflection($method->getReturnType())
                 : 'mixed';
 
+            if ('self' === $returnType) {
+                $returnType = $fullClassName;
+            }
+
             if (strlen($returnType) > $maxReturnTypeLength) {
                 $maxReturnTypeLength = strlen($returnType);
             }
@@ -310,12 +279,22 @@ $command = new class($argv) extends AbstractCommand
             foreach ($method->getParameters() as $param) {
                 $paramName = '$' . $param->getName();
                 if (isset($params[$paramName])) {
-                    $params[$paramName] = $params[$paramName] . $this->getParameterDefaultValueString($param);
+                    $defaultValue       = $this->getParameterDefaultValueString($param);
+                    $params[$paramName] = $params[$paramName] . $defaultValue;
+
+                    if (isset($optWith[$method->getName()]['param'][$param->getName()])) {
+                        $params[$paramName] = $optWith[$method->getName()]['param'][$param->getName()] . $defaultValue;
+                    }
 
                     continue;
                 }
 
                 $params[$paramName] = $this->getParameterString($param);
+            }
+
+            // always offeriding parameter and return
+            if (isset($optWith[$method->getName()]['return'])) {
+                $returnType = $optWith[$method->getName()]['return'];
             }
 
             $buffer[] = [
@@ -676,4 +655,57 @@ function parseReturnLine(string $line): ?string
     }
 
     return trim($type);
+}
+
+/**
+ * Replace types in a union type string.
+ * This not part of parse doc, its helper for
+ * replace types.
+ *
+ * @param array<string, string> $replaces
+ */
+function replaceUnionTypes(string $typeString, array $replaces): string
+{
+    if (isset($replaces[$typeString])) {
+        return $replaces[$typeString];
+    }
+
+    $result       = '';
+    $currentToken = '';
+    $bracketDepth = 0;
+    $braceDepth   = 0;
+
+    for ($i = 0; $i < strlen($typeString); $i++) {
+        $char = $typeString[$i];
+
+        if (in_array($char, ['<', '>', '{', '}', ',', ' ', ':', '|', '[', ']'])) {
+            if (false === empty($currentToken) && isset($replaces[$currentToken])) {
+                $result .= $replaces[$currentToken];
+            } else {
+                $result .= $currentToken;
+            }
+            $currentToken = '';
+
+            match ($char) {
+                '<'     => $bracketDepth++,
+                '>'     => $bracketDepth--,
+                '{'     => $braceDepth++,
+                '}'     => $braceDepth--,
+                default => null,
+            };
+
+            $result .= $char;
+        } else {
+            $currentToken .= $char;
+        }
+    }
+
+    // Last token
+    if (false === empty($currentToken) && isset($replaces[$currentToken])) {
+        $result .= $replaces[$currentToken];
+    } else {
+        $result .= $currentToken;
+    }
+
+    return $result;
 }

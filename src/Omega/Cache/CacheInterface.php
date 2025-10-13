@@ -97,5 +97,5 @@ interface CacheInterface
      * @param int|DateInterval|null $ttl
      * @return mixed
      */
-    public function remember(string $key, Closure $callback, int|DateInterval|null $ttl = null): mixed;
+    public function remember(string $key, Closure $callback, int|DateInterval|null $ttl): mixed;
 }

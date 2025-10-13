@@ -12,12 +12,14 @@ use Omega\Database\MySchema\Table\Raw;
 use Omega\Database\MySchema\Table\Truncate;
 
 /**
- * @method static Create create()
- * @method static Drop drop()
- * @method static Truncate refresh(string $table_name)
+ * @method static Create      create()
+ * @method static Drop        drop()
+ * @method static Truncate    refresh(string $table_name)
  * @method static TableCreate table(string $table_name, callable $blueprint)
- * @method static Alter alter(string $table_name, callable $blueprint)
- * @method static Raw raw(string $raw)
+ * @method static Alter       alter(string $table_name, callable $blueprint)
+ * @method static Raw         raw(string $raw)
+ *
+ * @see MySchema
  */
 final class Schema extends AbstractFacade
 {

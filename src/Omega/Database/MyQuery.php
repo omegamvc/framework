@@ -12,19 +12,16 @@ use Omega\Database\MyQuery\Table;
  */
 class MyQuery
 {
-    public const ORDER_ASC   = 0;
-    public const ORDER_DESC  = 1;
-    /** @var MyPDO */
-    protected $PDO;
+    public const int ORDER_ASC   = 0;
+    public const int ORDER_DESC  = 1;
 
     /**
      * Create new Builder.
      *
      * @param MyPDO $PDO the PDO connection
      */
-    public function __construct(MyPDO $PDO)
+    public function __construct(protected MyPDO $PDO)
     {
-        $this->PDO = $PDO;
     }
 
     /**
@@ -34,7 +31,7 @@ class MyQuery
      *
      * @return Table
      */
-    public function __invoke(string $table_name)
+    public function __invoke(string $table_name): Table
     {
         return $this->table($table_name);
     }
@@ -46,7 +43,7 @@ class MyQuery
      *
      * @return Table
      */
-    public function table($table_name)
+    public function table(string|InnerQuery $table_name): Table
     {
         return new Table($table_name, $this->PDO);
     }
@@ -59,7 +56,7 @@ class MyQuery
      *
      * @return Table
      */
-    public static function from($table_name, MyPDO $PDO)
+    public static function from(string|InnerQuery $table_name, MyPDO $PDO): Table
     {
         $conn = new MyQuery($PDO);
 

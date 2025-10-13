@@ -22,6 +22,7 @@ use Omega\Exceptions\ExceptionHandler;
 use Omega\Middleware\MaintenanceMiddleware;
 use Omega\Router\Router;
 use Throwable;
+
 use function array_merge;
 use function array_reduce;
 use function is_array;
@@ -190,6 +191,9 @@ class Http
      */
     protected function executeMiddleware(string $middleware, Request $request, callable $next): Response
     {
+        if (!class_exists($middleware)) {
+            throw new \Exception('Lo classe ' . $middleware . ' non esiste');
+        }
         if (false === method_exists($middleware, 'handle')) {
             throw new InvalidArgumentException('Middleware must be a class with handle method');
         }

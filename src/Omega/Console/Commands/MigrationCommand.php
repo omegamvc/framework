@@ -14,7 +14,6 @@ use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
-use Omega\Database\MyQuery;
 use Omega\Database\MySchema\MyPDO;
 use Omega\Database\MySchema\Table\Create;
 use Omega\Support\Facades\DB;
@@ -576,8 +575,7 @@ class MigrationCommand extends AbstractCommand
         $width  = $this->getWidth(40, 60);
         info('showing database')->out(false);
 
-        $tables = PDO::instance()
-            ->query('SHOW DATABASES')
+        $tables = PDO::query('SHOW DATABASES')
             ->query('
                 SELECT table_name, create_time, ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024) AS `size`
                 FROM information_schema.tables
@@ -610,7 +608,7 @@ class MigrationCommand extends AbstractCommand
 
     public function tableShow(string $table): int
     {
-        $table = new MyQuery(PDO::instance())->table($table)->info();
+        $table = DB::table($table)->info();
         $print = new Style("\n");
         $width = $this->getWidth(40, 60);
 
@@ -694,13 +692,10 @@ class MigrationCommand extends AbstractCommand
      * Check for migration table exist or not in this current database.
      *
      * @return bool
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
      */
     private function hasMigrationTable(): bool
     {
-        $result = PDO::instance()->query(
+        $result = PDO::query(
             "SELECT COUNT(table_name) as total
             FROM information_schema.tables
             WHERE table_schema = DATABASE()
@@ -775,9 +770,6 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
      */
     public function initializeMigration(): int
     {

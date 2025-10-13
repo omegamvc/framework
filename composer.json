@@ -50,15 +50,15 @@
     "scripts": {
         "lint": "php-cs-fixer fix -v",
         "test:lint": "php-cs-fixer fix -v --dry-run --diff",
+        "test:facade": "php ./bin/facade.php facade:update --from-file /resources/facades.php --debug --dry-run",
         "test:facade:update": "php ./bin/facade.php facade:update --from-file /resources/facades.php --debug",
-        "test:facade:validate": "php ./bin/facade.php facade:validate --from-file /resources/facades.php --debug",
         "test:dev": [
             "@test:lint",
-            "@test:facade:validate"
+            "@test:facade"
         ],
         "test": [
             "php-cs-fixer fix -v --dry-run",
-            "php ./bin/facade.php facade:validate --from-file /resources/facades.php"
+            "php ./bin/facade.php facade:update --from-file /resources/facades.php --dry-run"
         ]
     },
     "suggest": {

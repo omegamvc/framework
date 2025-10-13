@@ -13,6 +13,7 @@ use Omega\Container\Exceptions\NotFoundException;
 use function date_default_timezone_set;
 use function file_exists;
 use function glob;
+use function basename;
 
 class ConfigProviders
 {
@@ -27,21 +28,40 @@ class ConfigProviders
         $config     = [];
         $hasCache   = false;
 
+        // Se esiste la cache, la carichiamo
         if (file_exists($file = $app->getApplicationCachePath() . 'config.php')) {
-            $config   = require $file;
+            $cachedConfig = require $file;
+
+            if (!is_array($cachedConfig)) {
+                throw new \RuntimeException(
+                    "Invalid config cache file: expected array, got " . gettype($cachedConfig)
+                );
+            }
+
+            $config   = $cachedConfig;
             $hasCache = true;
         }
 
-        if (false === $hasCache) {
+        // Altrimenti leggiamo tutti i file di config
+        if (!$hasCache) {
             foreach (glob($configPath . "*.php") as $path) {
-                foreach (include $path as $key => $value) {
-                    $config[$key] = $value;
+                $key = basename($path, '.php'); // nome file come chiave principale
+                $value = require $path;
+
+                if (!is_array($value)) {
+                    throw new \RuntimeException(
+                        "Invalid config file [$path]: expected array, got " . gettype($value)
+                    );
                 }
+
+                $config[$key] = $value;
             }
         }
 
+        // Carichiamo il repository nel container/app
         $app->loadConfig(new ConfigRepository($config));
 
+        // Impostiamo il timezone
         date_default_timezone_set(env('APP_TIMEZONE'));
     }
 }
