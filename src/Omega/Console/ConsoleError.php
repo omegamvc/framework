@@ -18,7 +18,6 @@ use Omega\Application\Application;
 use Omega\Container\Invoker\Exception\InvocationException;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
-use Whoops\Handler\Handler;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Run;
 
@@ -35,34 +34,26 @@ use Whoops\Run;
  */
 class ConsoleError extends Console
 {
-    /** @var Run The Whoops run instance responsible for error handling. */
-    private Run $run;
-
-    /** @var Handler The Whoops plain text handler for rendering errors. */
-    private Handler $handler;
-
     /**
-     * Create a new ConsoleError instance and register Whoops error handling.
-     *
-     * @param Application $app The application container instance.
-     * @return void
-     * @throws InvocationException If a callable cannot be invoked.
-     * @throws NotCallableException If a handler is not callable.
-     * @throws NotEnoughParametersException If insufficient parameters are provided to a callable.
+     * @throws NotCallableException
+     * @throws InvocationException
+     * @throws NotEnoughParametersException
      */
     public function __construct(Application $app)
     {
         parent::__construct($app);
 
         $this->app->bootedCallback(function () {
-            /* @var PlainTextHandler $handler */
-            $this->handler = $this->app->make('error.PlainTextHandler');
+            if ($this->app->isDebugMode() && class_exists(Run::class)) {
+                /* @var PlainTextHandler $handler */
+                $handler = $this->app->make('error.PlainTextHandler');
 
-            /* @var Run $run */
-            $this->run = $this->app->make('error.handle');
-            $this->run
-                ->pushHandler($this->handler)
-                ->register();
+                /* @var Run $run */
+                $run = $this->app->make('error.handle');
+                $run
+                    ->pushHandler($handler)
+                    ->register();
+            }
         });
     }
 }

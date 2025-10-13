@@ -10,18 +10,11 @@ use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Router\RouteDispatcher;
 use Omega\Router\Router;
-use Whoops\Handler\Handler;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 
 class HttpError extends Http
 {
-    /** @var Run */
-    private Run $run;
-
-    /** @var Handler */
-    private Handler $handler;
-
     /**
      * @throws NotCallableException
      * @throws InvocationException
@@ -32,16 +25,16 @@ class HttpError extends Http
         parent::__construct($app);
 
         $this->app->bootedCallback(function () {
-            if ($this->app->isDebugMode()) {
-                /* @var PrettyPageHandler $handler */
-                $this->handler = $this->app->make('error.PrettyPageHandler');
-                $this->handler->setPageTitle('Omega MVC');
+            if ($this->app->isDebugMode() && class_exists(Run::class)) {
+                /* @var PrettyPageHandler $hanlder */
+                $handler = $this->app->make('error.PrettyPageHandler');
+                $handler->setPageTitle('php mvc');
 
                 /* @var Run $run */
-                $this->run = $this->app->make('error.handle');
-                $this->run
-                  ->pushHandler($this->handler)
-                  ->register();
+                $run = $this->app->make('error.handle');
+                $run
+                    ->pushHandler($handler)
+                    ->register();
             }
         });
     }
@@ -51,15 +44,15 @@ class HttpError extends Http
         $dispatcher = new RouteDispatcher($request, Router::getRoutesRaw());
 
         $content = $dispatcher->run(
-            // found
-            fn ($callable, $param) => $this->app->call($callable, $param),
+        // found
+            fn($callable, $param) => $this->app->call($callable, $param),
             // not found
-            fn ($path) => view('pages/404', [
+            fn($path) => view('pages/404', [
                 'path'    => $path,
                 'headers' => ['status' => 404],
             ]),
             // method not allowed
-            fn ($path, $method) => view('pages/405', [
+            fn($path, $method) => view('pages/405', [
                 'path'    => $path,
                 'method'  => $method,
                 'headers' => ['status' => 405],

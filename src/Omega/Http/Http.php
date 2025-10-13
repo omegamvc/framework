@@ -191,9 +191,6 @@ class Http
      */
     protected function executeMiddleware(string $middleware, Request $request, callable $next): Response
     {
-        if (!class_exists($middleware)) {
-            throw new \Exception('Lo classe ' . $middleware . ' non esiste');
-        }
         if (false === method_exists($middleware, 'handle')) {
             throw new InvalidArgumentException('Middleware must be a class with handle method');
         }

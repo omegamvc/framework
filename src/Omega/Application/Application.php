@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Omega\Application;
 
 use App\Providers\AppServiceProvider;
+use App\Providers\CacheServiceProvider;
+use App\Providers\DatabaseServiceProvider;
+use App\Providers\RateLimiterServiceProvider;
+use App\Providers\RouteServiceProvider;
+use App\Providers\ViewServiceProvider;
 use Exception;
-use Omega\Cache\CacheServiceProvider;
 use Omega\Config\ConfigRepository;
 use Omega\Container\Container;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
@@ -16,15 +20,12 @@ use Omega\Container\Invoker\Exception\InvocationException;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Container\Provider\AbstractServiceProvider;
-use Omega\Database\DatabaseServiceProvider;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Request;
-use Omega\Router\RouteServiceProvider;
 use Omega\Support\AddonServiceProvider;
 use Omega\Support\PackageManifest;
 use Omega\Support\Vite;
 use Omega\View\Templator;
-use Omega\View\ViewServiceProvider;
 
 use function array_map;
 use function count;
@@ -46,6 +47,7 @@ final class Application extends Container
         DatabaseServiceProvider::class,
         ViewServiceProvider::class,
         CacheServiceProvider::class,
+        RateLimiterServiceProvider::class,
     ];
 
     /** @var AbstractServiceProvider[] Booted service provider. */
