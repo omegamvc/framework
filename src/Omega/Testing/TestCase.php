@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Omega\Testing;
 
-use DI\DependencyException;
-use DI\NotFoundException;
 use Exception;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 use Omega\Http\Request;
 use Omega\Http\Response;
