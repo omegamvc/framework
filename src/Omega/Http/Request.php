@@ -17,6 +17,7 @@ use Omega\Text\Str;
 use Omega\Validator\Validator;
 use ReturnTypeWillChange;
 use Traversable;
+
 use function array_merge;
 use function func_num_args;
 use function get_debug_type;
@@ -27,6 +28,7 @@ use function sprintf;
 use function strcasecmp;
 use function strtoupper;
 use function substr;
+
 use const JSON_BIGINT_AS_STRING;
 use const JSON_THROW_ON_ERROR;
 
@@ -254,10 +256,10 @@ class Request implements ArrayAccess, IteratorAggregate
         $this->query      = clone $this->query;
         $this->post       = clone $this->post;
         // cloning as array
-        $this->attributes = (new Collection($this->attributes))->all();
-        $this->cookies    = (new Collection($this->cookies))->all();
-        $this->files      = (new Collection($this->files))->all();
-        $this->headers    = (new Collection($this->headers))->all();
+        $this->attributes = new Collection($this->attributes)->all();
+        $this->cookies    = new Collection($this->cookies)->all();
+        $this->files      = new Collection($this->files)->all();
+        $this->headers    = new Collection($this->headers)->all();
     }
 
     /**

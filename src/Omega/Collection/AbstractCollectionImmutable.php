@@ -392,7 +392,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
      * @param int|string|null $key
      * @return int
      */
-    public function max(int|string $key = null): int
+    public function max(int|string|null $key = null): int
     {
         return max(array_column($this->collection, $key));
     }
@@ -403,7 +403,7 @@ abstract class AbstractCollectionImmutable implements CollectionInterface
      * @param int|string|null $key
      * @return int
      */
-    public function min(int|string $key = null): int
+    public function min(int|string|null $key = null): int
     {
         return min(array_column($this->collection, $key));
     }

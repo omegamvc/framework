@@ -6,6 +6,9 @@ namespace Omega\Support\Bootstrap;
 
 use ErrorException;
 use Omega\Application\Application;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Exceptions\ExceptionHandler;
 use Throwable;
 
@@ -31,6 +34,11 @@ class HandleExceptions
     private Application $app;
     public static ?string $reserveMemory = null;
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function bootstrap(Application $app): void
     {
         self::$reserveMemory = str_repeat('x', 32_768);
@@ -39,11 +47,13 @@ class HandleExceptions
 
         error_reporting(E_ALL);
 
-        /* @phpstan-ignore-next-line */
-        set_error_handler([$this, 'handleError']);
+        /** @phpstan-ignore-next-line */
+        if ('testing' !== $app->getEnvironment()) {
+	        set_error_handler([$this, 'handleError']);
 
-        set_exception_handler([$this, 'handleException']);
-
+	        set_exception_handler([$this, 'handleException']);
+		}
+		
         register_shutdown_function([$this, 'handleShutdown']);
 
         if ('testing' !== $app->getEnvironment()) {

@@ -20,7 +20,7 @@ class Env
         self::$values = $dotenv->load();
     }
 
-    public static function get(string $key, mixed $default = null): mixed
+/**    public static function get(string $key, mixed $default = null): mixed
     {
         if (!array_key_exists($key, self::$values)) {
             return $default;
@@ -29,6 +29,19 @@ class Env
         $value = self::$values[$key];
 
         return match (strtolower($value)) {
+            'true', '(true)'   => true,
+            'false', '(false)' => false,
+            'empty', '(empty)' => '',
+            'null', '(null)'   => null,
+            default            => is_numeric($value) ? $value + 0 : $value,
+        };
+    }*/
+
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        $value = self::$values[$key] ?? getenv($key) ?? $default;
+
+        return match (strtolower((string) $value)) {
             'true', '(true)'   => true,
             'false', '(false)' => false,
             'empty', '(empty)' => '',

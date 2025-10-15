@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Omega\Exceptions;
 
-use DI\DependencyException;
-use DI\NotFoundException;
 use Omega\Container\Container;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Exceptions\HttpResponseException;
 use Omega\Http\Request;
@@ -94,13 +95,14 @@ class ExceptionHandler
      */
     protected function dontReport(Throwable $th): bool
     {
-        foreach (array_merge($this->dontReport, $this->dontReportInternal) as $report) {
-            if ($th instanceof $report) {
-                return true;
-            }
-        }
+        return array_any(
+            array_merge(
+                $this->dontReport,
+                $this->dontReportInternal
+            ),
+            fn($report) => $th instanceof $report
+        );
 
-        return false;
     }
 
     /**
@@ -108,6 +110,7 @@ class ExceptionHandler
      * @return Response
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws InvalidDefinitionException
      */
     protected function handleJsonResponse(Throwable $th): Response
     {
@@ -142,6 +145,7 @@ class ExceptionHandler
      * @return Response
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws InvalidDefinitionException
      */
     protected function handleResponse(Throwable $th): Response
     {
@@ -155,6 +159,7 @@ class ExceptionHandler
      * @return Response
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws InvalidDefinitionException
      */
     protected function handleHttpException(HttpException $e): Response
     {
@@ -178,6 +183,7 @@ class ExceptionHandler
      * @return Templator
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws InvalidDefinitionException
      */
     public function registerViewPath(): Templator
     {
@@ -198,6 +204,7 @@ class ExceptionHandler
      * @return bool
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws InvalidDefinitionException
      */
     private function isDebug(): bool
     {
@@ -208,6 +215,7 @@ class ExceptionHandler
      * @return bool
      * @throws DependencyException
      * @throws NotFoundException
+     * @throws InvalidDefinitionException
      */
     private function isProduction(): bool
     {

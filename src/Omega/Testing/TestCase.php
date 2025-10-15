@@ -7,13 +7,13 @@ namespace Omega\Testing;
 use Exception;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
-use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Application\Application;
 use Omega\Http\Http;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Support\Facades\AbstractFacade;
+use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 use Throwable;
 
 use function array_key_exists;
@@ -28,7 +28,7 @@ class TestCase extends PhpUnitTestCase
 
     protected function tearDown(): void
     {
-        $this->app->flush();
+        $this->app?->flush();
         AbstractFacade::flushInstance();
         AbstractServiceProvider::flushModule();
         unset($this->app);
