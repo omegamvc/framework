@@ -18,9 +18,9 @@ class MyQuery
     /**
      * Create new Builder.
      *
-     * @param MyPDO $PDO the PDO connection
+     * @param ConnectionInterface $PDO the PDO connection
      */
-    public function __construct(protected MyPDO $PDO)
+    public function __construct(protected ConnectionInterface $PDO)
     {
     }
 
@@ -56,7 +56,7 @@ class MyQuery
      *
      * @return Table
      */
-    public static function from(string|InnerQuery $table_name, MyPDO $PDO): Table
+    public static function from(string|InnerQuery $table_name, ConnectionInterface $PDO): Table
     {
         $conn = new MyQuery($PDO);
 

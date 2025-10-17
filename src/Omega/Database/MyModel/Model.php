@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Database\MyModel;
 
-use Omega\Database\MyPDO;
+use Omega\Database\ConnectionInterface;
 use Omega\Database\MyQuery;
 use Omega\Database\MyQuery\Bind;
 use Omega\Database\MyQuery\Join\InnerJoin;
@@ -18,7 +18,7 @@ use Omega\Database\MyQuery\Where;
  */
 class Model implements \ArrayAccess, \IteratorAggregate
 {
-    protected MyPDO $pdo;
+    protected ConnectionInterface $pdo;
 
     protected string $tableName;
 
@@ -61,7 +61,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      * @final
      */
     public function __construct(
-        MyPDO $pdo,
+        ConnectionInterface $pdo,
         array $column,
     ) {
         $this->pdo        = $pdo;
@@ -89,7 +89,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
     public function setUp(
         string $table,
         array $column,
-        MyPDO $pdo,
+        ConnectionInterface $pdo,
         Where $where,
         string $primery_key,
         array $stash,
@@ -601,8 +601,9 @@ class Model implements \ArrayAccess, \IteratorAggregate
      * Find model using defined primery key.
      *
      * @param int|string $id
+     * @aram ConnectionInterface $pdo
      */
-    public static function find($id, MyPDO $pdo): static
+    public static function find(int|string $id, ConnectionInterface $pdo): static
     {
         $model          = new static($pdo, []);
         $model->where   = (new Where($model->tableName))
@@ -621,7 +622,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @throws \Exception cant inset data
      */
-    public static function findOrCreate($id, array $column, MyPDO $pdo): static
+    public static function findOrCreate(mixed $id, array $column, ConnectionInterface $pdo): static
     {
         $model          = new static($pdo, [$column]);
         $model->where   = (new Where($model->tableName))
@@ -645,7 +646,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @param array<string|int> $binder
      */
-    public static function where(string $where_condition, array $binder, MyPDO $pdo): static
+    public static function where(string $where_condition, array $binder, ConnectionInterface $pdo): static
     {
         $model = new static($pdo, []);
         $map   = [];
@@ -666,7 +667,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      * @param array-key $column_name
      * @param mixed     $value
      */
-    public static function equal($column_name, $value, MyPDO $pdo): static
+    public static function equal($column_name, $value, ConnectionInterface $pdo): static
     {
         $model = new static($pdo, []);
 
@@ -681,7 +682,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @return ModelCollection<array-key, static>
      */
-    public static function all(MyPDO $pdo): ModelCollection
+    public static function all(ConnectionInterface $pdo): ModelCollection
     {
         $model = new static($pdo, []);
         $model->read();

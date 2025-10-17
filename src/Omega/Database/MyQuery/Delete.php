@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Database\MyQuery;
 
-use Omega\Database\MyPDO;
+use Omega\Database\ConnectionInterface;
 use Omega\Database\MyQuery\Join\AbstractJoin;
 use Omega\Database\MyQuery\Traits\ConditionTrait;
 use Omega\Database\MyQuery\Traits\SubQueryTrait;
@@ -16,7 +16,7 @@ class Delete extends Execute
 
     protected ?string $alias = null;
 
-    public function __construct(string $table_name, MyPDO $PDO)
+    public function __construct(string $table_name, ConnectionInterface $PDO)
     {
         $this->_table = $table_name;
         $this->PDO    = $PDO;

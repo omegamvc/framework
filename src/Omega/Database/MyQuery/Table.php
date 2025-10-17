@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Omega\Database\MyQuery;
 
-use Omega\Database\MyPDO;
+use Omega\Database\ConnectionInterface;
 
 class Table
 {
     /**
      * MyPDO instance.
      *
-     * @var MyPDO
+     * @var ConnectionInterface
      */
-    protected $PDO;
+    protected ConnectionInterface $PDO;
 
     /**
      * Table name.
@@ -25,7 +25,7 @@ class Table
     /**
      * @param string|InnerQuery $table_name Table name
      */
-    public function __construct($table_name, MyPDO $PDO)
+    public function __construct(string|InnerQuery $table_name, ConnectionInterface $PDO)
     {
         $this->table_name = $table_name;
         $this->PDO        = $PDO;

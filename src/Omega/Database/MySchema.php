@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\Database;
 
+use Omega\Database\MySchema\SchemaConnectionInterface;
+
 class MySchema
 {
     public function __construct(
-        private MySchema\MyPDO $pdo,
+        private SchemaConnectionInterface $pdo,
         private ?string $database_name = null,
     ) {
         $this->database_name ??= $this->pdo->getDatabase();

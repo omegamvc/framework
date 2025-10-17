@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Database\MyQuery;
 
-use Omega\Database\MyPDO;
+use Omega\Database\ConnectionInterface;
 use Omega\Database\MyQuery;
 use Omega\Database\MyQuery\Join\AbstractJoin;
 use Omega\Database\MyQuery\Traits\ConditionTrait;
@@ -16,14 +16,14 @@ final class Select extends Fetch
     use SubQueryTrait;
 
     /**
-     * @param string|InnerQuery $table_name   Table name
-     * @param string[]          $columns_name Selected cloumn
-     * @param MyPDO             $PDO          MyPDO class
-     * @param string[]          $options      Add custom option (eg: query)
+     * @param string|InnerQuery   $table_name   Table name
+     * @param string[]            $columns_name Selected cloumn
+     * @param ConnectionInterface $PDO          MyPDO class
+     * @param string[]            $options      Add custom option (eg: query)
      *
      * @return void
      */
-    public function __construct($table_name, array $columns_name, MyPDO $PDO, ?array $options = null)
+    public function __construct($table_name, array $columns_name, ConnectionInterface $PDO, ?array $options = null)
     {
         $this->_sub_query = $table_name instanceof InnerQuery ? $table_name : new InnerQuery(table: $table_name);
         $this->_column    = $columns_name;
@@ -46,13 +46,13 @@ final class Select extends Fetch
     /**
      * Instance of `Select::class`.
      *
-     * @param string   $table_name  Table name
-     * @param string[] $column_name Selected column
-     * @param MyPDO    $PDO         MyPdo
+     * @param string              $table_name  Table name
+     * @param string[]            $column_name Selected column
+     * @param ConnectionInterface $PDO         MyPdo
      *
      * @return Select
      */
-    public static function from(string $table_name, array $column_name, MyPDO $PDO)
+    public static function from(string $table_name, array $column_name, ConnectionInterface $PDO)
     {
         return new static($table_name, $column_name, $PDO);
     }

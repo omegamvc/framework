@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Omega\Database\MySchema\Table;
 
-use Omega\Database\MySchema\MyPDO;
 use Omega\Database\MySchema\Query;
+use Omega\Database\MySchema\SchemaConnectionInterface;
 
 class Raw extends Query
 {
     private string $raw;
 
-    public function __construct(string $raw, MyPDO $pdo)
+    public function __construct(string $raw, SchemaConnectionInterface $pdo)
     {
         $this->raw   = $raw;
         $this->pdo   = $pdo;

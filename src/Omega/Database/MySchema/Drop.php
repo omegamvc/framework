@@ -8,7 +8,7 @@ namespace Omega\Database\MySchema;
 class Drop
 {
     public function __construct(
-        private MyPDO $pdo,
+        private SchemaConnectionInterface $pdo,
         private ?string $database_name = null,
     ) {
     }

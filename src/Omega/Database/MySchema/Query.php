@@ -6,8 +6,8 @@ namespace Omega\Database\MySchema;
 
 abstract class Query
 {
-    /** @var MyPDO PDO property */
-    protected $pdo;
+    /** @var SchemaConnectionInterface PDO property */
+    protected SchemaConnectionInterface $pdo;
 
     public function __toString()
     {

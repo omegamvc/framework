@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\Database\MyQuery;
 
-use Omega\Database\MyPDO;
+use Omega\Database\ConnectionInterface;
 
 abstract class Query
 {
-    /** @var MyPDO PDO property */
-    protected $PDO;
+    /** @var ConnectionInterface PDO property */
+    protected ConnectionInterface $PDO;
 
     /** @var string Main query */
     protected $_query;
