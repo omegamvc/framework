@@ -18,5 +18,5 @@ interface ProxyFactoryInterface
      * @param class-string $className name of the class to be proxied
      * @param Closure $createFunction initializer to be passed to the proxy initializer to be passed to the proxy
      */
-    public function createProxy(string $className, Closure $createFunction) : object;
+    public function createProxy(string $className, Closure $createFunction): object;
 }

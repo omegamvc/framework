@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnused */
+<?php
+
+/** @noinspection PhpUnused */
 
 declare(strict_types=1);
 
@@ -8,7 +10,6 @@ use DateInvalidTimeZoneException;
 use DateMalformedStringException;
 use DateTime;
 use DateTimeZone;
-
 use Omega\Time\Exceptions\PropertyNotExistException;
 use Omega\Time\Exceptions\PropertyNotSettableException;
 use Omega\Time\Traits\DateTimeFormatTrait;

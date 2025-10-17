@@ -35,7 +35,7 @@ class ResolverDispatcher implements DefinitionResolverInterface
     private ?EnvironmentVariableResolver $envVariableResolver = null;
 
     public function __construct(
-        private readonly ContainerInterface    $container,
+        private readonly ContainerInterface $container,
         private readonly ProxyFactoryInterface $proxyFactory,
     ) {
     }
@@ -49,7 +49,7 @@ class ResolverDispatcher implements DefinitionResolverInterface
      * @throws InvalidDefinitionException If the definition cannot be resolved.
      * @throws DependencyException
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []): mixed
     {
         // Special case, tested early for speed
         if ($definition instanceof SelfResolvingDefinitionInterface) {
@@ -61,7 +61,7 @@ class ResolverDispatcher implements DefinitionResolverInterface
         return $definitionResolver->resolve($definition, $parameters);
     }
 
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
         // Special case, tested early for speed
         if ($definition instanceof SelfResolvingDefinitionInterface) {
@@ -78,7 +78,7 @@ class ResolverDispatcher implements DefinitionResolverInterface
      *
      * @throws RuntimeException No definition resolver was found for this type of definition.
      */
-    private function getDefinitionResolver(DefinitionInterface $definition) : DefinitionResolverInterface
+    private function getDefinitionResolver(DefinitionInterface $definition): DefinitionResolverInterface
     {
         switch (true) {
             case $definition instanceof ObjectDefinition:

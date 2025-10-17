@@ -1,10 +1,13 @@
-<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+<?php
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
 namespace Omega\Router;
 
 use Omega\Text\Str;
+
 use function array_diff_key;
 use function array_filter;
 use function in_array;

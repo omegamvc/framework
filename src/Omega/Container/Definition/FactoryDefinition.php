@@ -45,7 +45,7 @@ class FactoryDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -54,7 +54,7 @@ class FactoryDefinition implements DefinitionInterface
      * @param string $name
      * @return void
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -62,7 +62,7 @@ class FactoryDefinition implements DefinitionInterface
     /**
      * @return callable|array|string Callable that returns the value associated to the entry name.
      */
-    public function getCallable() : callable|array|string
+    public function getCallable(): callable|array|string
     {
         return $this->factory;
     }
@@ -70,7 +70,7 @@ class FactoryDefinition implements DefinitionInterface
     /**
      * @return array Array containing the parameters to be passed to the callable, indexed by name.
      */
-    public function getParameters() : array
+    public function getParameters(): array
     {
         return $this->parameters;
     }
@@ -79,7 +79,7 @@ class FactoryDefinition implements DefinitionInterface
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         $this->parameters = array_map($replacer, $this->parameters);
     }
@@ -87,7 +87,7 @@ class FactoryDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return 'Factory';
     }

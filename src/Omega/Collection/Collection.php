@@ -455,7 +455,7 @@ class Collection extends AbstractCollectionImmutable
     public function diffAssoc(array $collection): self
     {
         return $this->replace(
-                array_diff_assoc($this->collection, $collection)
+            array_diff_assoc($this->collection, $collection)
         );
     }
 
@@ -550,6 +550,8 @@ class Collection extends AbstractCollectionImmutable
      */
     public function whereNotIn($key, array $range): self
     {
-        return $this->filter(fn ($TValue) => array_key_exists($key, $TValue) && false === in_array($TValue[$key], $range));
+        return $this->filter(
+            fn ($TValue) => array_key_exists($key, $TValue) && false === in_array($TValue[$key], $range)
+        );
     }
 }

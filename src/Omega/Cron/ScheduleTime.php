@@ -240,10 +240,12 @@ class ScheduleTime
         foreach ($events as $event) {
             $eventDayLetter = $event['D'] ?? $dayLetter; // default day letter every event
 
-            if ($eventDayLetter == $dayLetter
-            && $event['d'] == $day
-            && $event['h'] == $hour
-            && $event['m'] == $minute) {
+            if (
+                $eventDayLetter == $dayLetter
+                && $event['d'] == $day
+                && $event['h'] == $hour
+                && $event['m'] == $minute
+            ) {
                 return true;
             }
         }

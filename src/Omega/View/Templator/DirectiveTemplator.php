@@ -8,6 +8,7 @@ use Closure;
 use Omega\View\AbstractTemplatorParse;
 use Omega\View\Exceptions\DirectiveCanNotBeRegisterException;
 use Omega\View\Exceptions\DirectiveNotRegisterException;
+
 use function array_key_exists;
 use function array_map;
 use function explode;
@@ -29,7 +30,7 @@ class DirectiveTemplator extends AbstractTemplatorParse
      */
     public static array $excludeList = [
         'break'    => BreakTemplator::class,
-        'component'=> ComponentTemplator::class,
+        'component' => ComponentTemplator::class,
         'continue' => ContinueTemplator::class,
         'else'     => IfTemplator::class,
         'extend'   => SectionTemplator::class,
@@ -96,7 +97,9 @@ class DirectiveTemplator extends AbstractTemplatorParse
 
                 return array_key_exists($name, self::$excludeList)
                     ? $matches[0]
-                    : '<?php echo Omega\View\Templator\DirectiveTemplator::call(\'' . $name . '\', ' . implode(', ', $params) . '); ?>'
+                    : '<?php echo Omega\View\Templator\DirectiveTemplator::call(\''
+                    . $name . '\', '
+                    . implode(', ', $params) . '); ?>'
                 ;
             },
             $template

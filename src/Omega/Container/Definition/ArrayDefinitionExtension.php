@@ -18,7 +18,7 @@ class ArrayDefinitionExtension extends ArrayDefinition implements ExtendsPreviou
     /**
      * @return array
      */
-    public function getValues() : array
+    public function getValues(): array
     {
         if (! $this->subDefinition) {
             return parent::getValues();
@@ -32,7 +32,7 @@ class ArrayDefinitionExtension extends ArrayDefinition implements ExtendsPreviou
      * @return void
      * @throws InvalidDefinitionException
      */
-    public function setExtendedDefinition(DefinitionInterface $definition) : void
+    public function setExtendedDefinition(DefinitionInterface $definition): void
     {
         if (!$definition instanceof ArrayDefinition) {
             throw new InvalidDefinitionException(sprintf(

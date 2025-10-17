@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+<?php
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
@@ -14,6 +16,7 @@ use Omega\Container\Exceptions\NotFoundException;
 use Omega\Template\Generate;
 use Omega\Template\Method;
 use Throwable;
+
 use function class_exists;
 use function file_exists;
 use function file_put_contents;
@@ -167,7 +170,7 @@ class SeedCommand extends AbstractCommand
         $make->tabIndent(' ');
         $make->tabSize(4);
         $make->namespace('Database\Seeders');
-        $make->use('Omega\Database\Seeder\Seeder');
+        $make->use('Omega\Database\Seeder\AbstractSeeder');
         $make->extend('Seeder');
         $make->setEndWithNewLine();
         /** @noinspection PhpRedundantOptionalArgumentInspection */

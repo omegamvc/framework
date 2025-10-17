@@ -31,7 +31,7 @@ class ThrottleMiddleware
 
         $this->limiter->consume($key, $decayMinutes);
 
-        /** @var Response */
+        /** @var Response $response */
         $respone = $next($request);
 
         $respone->headers->add(
@@ -55,9 +55,21 @@ class ThrottleMiddleware
         return sha1($key);
     }
 
-    protected function rateLimitedRespose(string $key, int $maxAttempts, int $remaingAfter, ?int $retryAfter = null): Response
-    {
-        return new Response('Too Many Requests', 429, $this->rateLimitedHeader($maxAttempts, $remaingAfter, $remaingAfter));
+    protected function rateLimitedRespose(
+        string $key,
+        int $maxAttempts,
+        int $remaingAfter,
+        ?int $retryAfter = null
+    ): Response {
+        return new Response(
+            'Too Many Requests',
+            429,
+            $this->rateLimitedHeader(
+                $maxAttempts,
+                $remaingAfter,
+                $remaingAfter
+            )
+        );
     }
 
     /**

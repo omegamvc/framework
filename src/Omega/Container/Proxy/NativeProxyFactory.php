@@ -21,7 +21,7 @@ class NativeProxyFactory implements ProxyFactoryInterface
      *
      * @throws ReflectionException
      */
-    public function createProxy(string $className, Closure $createFunction) : object
+    public function createProxy(string $className, Closure $createFunction): object
     {
         $reflector = new ReflectionClass($className);
 

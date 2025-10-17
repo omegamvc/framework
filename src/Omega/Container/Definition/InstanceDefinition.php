@@ -15,9 +15,9 @@ class InstanceDefinition implements DefinitionInterface
     public function __construct(
         private readonly object $instance,
         public ObjectDefinition $objectDefinition {
-            get {
-                return $this->objectDefinition;
-            }
+        get {
+        return $this->objectDefinition;
+        }
         },
     ) {
     }
@@ -25,13 +25,13 @@ class InstanceDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         // Name are superfluous for instance definitions
         return '';
     }
 
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         // Name are superfluous for instance definitions
     }
@@ -39,7 +39,7 @@ class InstanceDefinition implements DefinitionInterface
     /**
      * @return object
      */
-    public function getInstance() : object
+    public function getInstance(): object
     {
         return $this->instance;
     }
@@ -48,7 +48,7 @@ class InstanceDefinition implements DefinitionInterface
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         $this->objectDefinition->replaceNestedDefinitions($replacer);
     }
@@ -56,7 +56,7 @@ class InstanceDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return 'Instance';
     }

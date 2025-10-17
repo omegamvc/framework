@@ -7,6 +7,7 @@ namespace Omega\Container\Definition\Source;
 use Exception;
 use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+
 use function is_array;
 use function sprintf;
 
@@ -25,7 +26,7 @@ class DefinitionFile extends DefinitionArray
      */
     public function __construct(
         private readonly string $file,
-        ?AutowiringInterface    $autowiring = null,
+        ?AutowiringInterface $autowiring = null,
     ) {
         // Lazy-loading to improve performances
         parent::__construct([], $autowiring);
@@ -37,7 +38,7 @@ class DefinitionFile extends DefinitionArray
      * @throws InvalidDefinitionException
      * @throws Exception
      */
-    public function getDefinition(string $name) : ?DefinitionInterface
+    public function getDefinition(string $name): ?DefinitionInterface
     {
         $this->initialize();
 
@@ -48,7 +49,7 @@ class DefinitionFile extends DefinitionArray
      * @return array|DefinitionInterface[]
      * @throws Exception
      */
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         $this->initialize();
 
@@ -62,7 +63,7 @@ class DefinitionFile extends DefinitionArray
      * @return void
      * @throws Exception
      */
-    private function initialize() : void
+    private function initialize(): void
     {
         if ($this->initialized === true) {
             return;

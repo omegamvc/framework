@@ -26,7 +26,7 @@ class AutowireDefinitionHelper extends CreateDefinitionHelper
      * @param mixed $value Value to give to this parameter.
      * @return $this
      */
-    public function constructorParameter(string|int $parameter, mixed $value) : self
+    public function constructorParameter(string|int $parameter, mixed $value): self
     {
         $this->constructor[$parameter] = $value;
 
@@ -49,7 +49,7 @@ class AutowireDefinitionHelper extends CreateDefinitionHelper
      * @param mixed $value Value to give to this parameter.
      * @return $this
      */
-    public function methodParameter(string $method, string|int $parameter, mixed $value) : self
+    public function methodParameter(string $method, string|int $parameter, mixed $value): self
     {
         // Special case for the constructor
         if ($method === '__construct') {

@@ -16,6 +16,7 @@ namespace Omega\Config;
 
 use Closure;
 use Omega\Config\Source\SourceInterface;
+
 use function array_reduce;
 use function is_null;
 

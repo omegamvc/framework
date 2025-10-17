@@ -14,6 +14,7 @@ use Omega\Container\Definition\FactoryDefinition;
 use Omega\Container\Definition\Helper\DefinitionHelperInterface;
 use Omega\Container\Definition\ObjectDefinition;
 use Omega\Container\Definition\ValueDefinition;
+
 use function is_array;
 
 /**
@@ -37,8 +38,11 @@ readonly class DefinitionNormalizer
      *
      * @throws InvalidDefinitionException
      */
-    public function normalizeRootDefinition(mixed $definition, string $name, ?array $wildcardsReplacements = null) : DefinitionInterface
-    {
+    public function normalizeRootDefinition(
+        mixed $definition,
+        string $name,
+        ?array $wildcardsReplacements = null
+    ): DefinitionInterface {
         if ($definition instanceof DefinitionHelperInterface) {
             $definition = $definition->getDefinition($name);
         } elseif (is_array($definition)) {
@@ -80,7 +84,7 @@ readonly class DefinitionNormalizer
      *
      * @throws InvalidDefinitionException
      */
-    public function normalizeNestedDefinition(mixed $definition) : mixed
+    public function normalizeNestedDefinition(mixed $definition): mixed
     {
         $name = '<nested definition>';
 

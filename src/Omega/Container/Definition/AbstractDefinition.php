@@ -8,12 +8,12 @@ abstract class AbstractDefinition implements DefinitionInterface
 {
     private string $definitionName = '';
 
-    public string $name {
+    public string $name { // phpcs:ignore
         get {
-            return $this->definitionName;
+            return $this->definitionName; // phpcs:ignore
         }
         set {
-            $this->definitionName = $value;
+            $this->definitionName = $value; // phpcs:ignore
         }
     }
 

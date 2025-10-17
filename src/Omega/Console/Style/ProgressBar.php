@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Omega\Console\Style;
 
 use Omega\Console\Traits\CommandTrait;
+
 use function array_key_exists;
 use function array_keys;
 use function array_map;
@@ -24,6 +25,7 @@ use function ceil;
 use function str_pad;
 use function str_repeat;
 use function str_replace;
+
 use const PHP_EOL;
 
 /**

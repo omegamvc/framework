@@ -406,10 +406,7 @@ class Generate
         // detect if single const
         if ($newConst instanceof Constant) {
             $this->constants[] = $newConst;
-        }
-
-        // detect if multi const with constPool
-        elseif (is_callable($newConst)) {
+        } elseif (is_callable($newConst)) { // detect if multi const with constPool
             $const = new ConstPool();
 
             call_user_func_array($newConst, [$const]);
@@ -419,10 +416,7 @@ class Generate
                     $this->constants[] = $pool;
                 }
             }
-        }
-
-        // detect parameter is instance constPool
-        elseif ($newConst instanceof ConstPool) {
+        } elseif ($newConst instanceof ConstPool) { // detect parameter is instance constPool
             foreach ($newConst->getPools() as $pool) {
                 if ($pool instanceof Constant) {
                     $this->constants[] = $pool;
@@ -447,10 +441,7 @@ class Generate
         // detect if single properties
         if ($newProperty instanceof Property) {
             $this->properties[] = $newProperty;
-        }
-
-        // detect if multi property with propertyPool
-        elseif (is_callable($newProperty)) {
+        } elseif (is_callable($newProperty)) { // detect if multi property with propertyPool
             $property = new PropertyPool();
 
             call_user_func_array($newProperty, [$property]);
@@ -460,10 +451,7 @@ class Generate
                     $this->properties[] = $pool;
                 }
             }
-        }
-
-        // detect parameter is instance methodPool
-        elseif ($newProperty instanceof PropertyPool) {
+        } elseif ($newProperty instanceof PropertyPool) { // detect parameter is instance methodPool
             foreach ($newProperty->getPools() as $pool) {
                 if ($pool instanceof Property) {
                     $this->properties[] = $pool;
@@ -488,10 +476,7 @@ class Generate
         // detect if single properties
         if ($newMethod instanceof Method) {
             $this->methods[] = $newMethod;
-        }
-
-        // detect if multi property with methodsPool
-        elseif (is_callable($newMethod)) {
+        } elseif (is_callable($newMethod)) { // detect if multi property with methodsPool
             $method = new MethodPool();
 
             call_user_func_array($newMethod, [$method]);
@@ -501,9 +486,7 @@ class Generate
                     $this->methods[] = $pool;
                 }
             }
-        }
-        // detect parameter is instance methodPool
-        elseif ($newMethod instanceof MethodPool) {
+        } elseif ($newMethod instanceof MethodPool) { // detect parameter is instance methodPool
             foreach ($newMethod->getPools() as $pool) {
                 if ($pool instanceof Method) {
                     $this->methods[] = $pool;

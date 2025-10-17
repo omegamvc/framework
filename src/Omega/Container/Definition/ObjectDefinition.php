@@ -60,7 +60,7 @@ class ObjectDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -69,7 +69,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param string $name
      * @return void
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -78,7 +78,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param string|null $className
      * @return void
      */
-    public function setClassName(?string $className) : void
+    public function setClassName(?string $className): void
     {
         $this->className = $className;
 
@@ -88,7 +88,7 @@ class ObjectDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function getClassName() : string
+    public function getClassName(): string
     {
         return $this->className ?? $this->name;
     }
@@ -96,7 +96,7 @@ class ObjectDefinition implements DefinitionInterface
     /**
      * @return MethodInjection|null
      */
-    public function getConstructorInjection() : ?MethodInjection
+    public function getConstructorInjection(): ?MethodInjection
     {
         return $this->constructorInjection;
     }
@@ -105,7 +105,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param MethodInjection $constructorInjection
      * @return void
      */
-    public function setConstructorInjection(MethodInjection $constructorInjection) : void
+    public function setConstructorInjection(MethodInjection $constructorInjection): void
     {
         $this->constructorInjection = $constructorInjection;
     }
@@ -114,7 +114,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param MethodInjection $injection
      * @return void
      */
-    public function completeConstructorInjection(MethodInjection $injection) : void
+    public function completeConstructorInjection(MethodInjection $injection): void
     {
         if ($this->constructorInjection !== null) {
             // Merge
@@ -129,7 +129,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param PropertyInjection $propertyInjection
      * @return void
      */
-    public function addPropertyInjection(PropertyInjection $propertyInjection) : void
+    public function addPropertyInjection(PropertyInjection $propertyInjection): void
     {
         $className = $propertyInjection->className;
         if ($className) {
@@ -146,7 +146,7 @@ class ObjectDefinition implements DefinitionInterface
     /**
      * @return MethodInjection[] Method injections
      */
-    public function getMethodInjections() : array
+    public function getMethodInjections(): array
     {
         // Return array leafs
         $injections = [];
@@ -161,7 +161,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param MethodInjection $methodInjection
      * @return void
      */
-    public function addMethodInjection(MethodInjection $methodInjection) : void
+    public function addMethodInjection(MethodInjection $methodInjection): void
     {
         $method = $methodInjection->methodName;
         if (! isset($this->methodInjections[$method])) {
@@ -174,7 +174,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param MethodInjection $injection
      * @return void
      */
-    public function completeFirstMethodInjection(MethodInjection $injection) : void
+    public function completeFirstMethodInjection(MethodInjection $injection): void
     {
         $method = $injection->methodName;
 
@@ -191,7 +191,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param bool|null $lazy
      * @return void
      */
-    public function setLazy(?bool $lazy = null) : void
+    public function setLazy(?bool $lazy = null): void
     {
         $this->lazy = $lazy;
     }
@@ -199,7 +199,7 @@ class ObjectDefinition implements DefinitionInterface
     /**
      * @return bool
      */
-    public function isLazy() : bool
+    public function isLazy(): bool
     {
         if ($this->lazy !== null) {
             return $this->lazy;
@@ -212,7 +212,7 @@ class ObjectDefinition implements DefinitionInterface
     /**
      * @return bool
      */
-    public function classExists() : bool
+    public function classExists(): bool
     {
         return $this->classExists;
     }
@@ -221,7 +221,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         array_walk($this->propertyInjections, function (PropertyInjection $propertyInjection) use ($replacer) {
             $propertyInjection->replaceNestedDefinition($replacer);
@@ -242,7 +242,7 @@ class ObjectDefinition implements DefinitionInterface
      * @param string[] $replacements
      * @return void
      */
-    public function replaceWildcards(array $replacements) : void
+    public function replaceWildcards(array $replacements): void
     {
         $className = $this->getClassName();
 
@@ -260,15 +260,15 @@ class ObjectDefinition implements DefinitionInterface
      * @return string
      * @throws ReflectionException
      */
-    public function __toString() : string
+    public function __toString(): string
     {
-        return (new ObjectDefinitionDumper)->dump($this);
+        return (new ObjectDefinitionDumper())->dump($this);
     }
 
     /**
      * @return void
      */
-    private function updateCache() : void
+    private function updateCache(): void
     {
         $className = $this->getClassName();
 

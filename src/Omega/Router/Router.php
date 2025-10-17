@@ -98,10 +98,12 @@ class Router
         return preg_replace_callback(
             '/\((\w+):(\w+)\)/',
             static function (array $matches) use ($patterns): string {
-            $pattern = $patterns["(:" . $matches[2] . ")"] ?? '[^/]+';
+                $pattern = $patterns["(:" . $matches[2] . ")"] ?? '[^/]+';
 
-            return "(?P<{" . $matches[1] . ">" . $pattern . ")";
-        }, $expression);
+                return "(?P<{" . $matches[1] . ">" . $pattern . ")";
+            },
+            $expression
+        );
     }
 
     /**
@@ -111,9 +113,11 @@ class Router
      */
     public static function addRoutes(array $route): void
     {
-        if (isset($route['expression'])
-        && isset($route['function'])
-        && isset($route['method'])) {
+        if (
+            isset($route['expression'])
+            && isset($route['function'])
+            && isset($route['method'])
+        ) {
             self::$routes[] = new Route($route);
         }
     }
@@ -309,7 +313,6 @@ class Router
     public static function has(string $routeName): bool
     {
         return array_any(self::$routes, fn($route) => $routeName === $route['name']);
-
     }
 
     /**
@@ -371,7 +374,11 @@ class Router
         $classNames = is_string($className) ? [$className] : $className;
         foreach ($classNames as $class) {
             $reflection     = new ReflectionClass($class);
-            $routes         = self::resolveRouteAttribute($class, $reflection->getAttributes(), $reflection->getMethods());
+            $routes         = self::resolveRouteAttribute(
+                $class,
+                $reflection->getAttributes(),
+                $reflection->getMethods()
+            );
             foreach ($routes as $route) {
                 self::$routes[] = new Route($route)->name($route['name'] ?? '');
             }
@@ -384,8 +391,11 @@ class Router
      *
      * @return array<int, array<string, string|array<string, string>>>
      */
-    private static function resolveRouteAttribute(string $className, array $attributes = [], array $attributesMethods = []): array
-    {
+    private static function resolveRouteAttribute(
+        string $className,
+        array $attributes = [],
+        array $attributesMethods = []
+    ): array {
         $prefixUri   = '';
         $prefixName  = '';
         $middlewares = [];

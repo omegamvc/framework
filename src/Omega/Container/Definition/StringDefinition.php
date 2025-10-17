@@ -9,6 +9,7 @@ use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\ContainerInterface;
 use Omega\Container\Exceptions\NotFoundExceptionInterface;
 use RuntimeException;
+
 use function preg_replace_callback;
 use function sprintf;
 
@@ -28,7 +29,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -37,7 +38,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
      * @param string $name
      * @return void
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -45,7 +46,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
     /**
      * @return string
      */
-    public function getExpression() : string
+    public function getExpression(): string
     {
         return $this->expression;
     }
@@ -56,7 +57,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
      * @throws ContainerExceptionInterface
      * @throws DependencyException
      */
-    public function resolve(ContainerInterface $container) : string
+    public function resolve(ContainerInterface $container): string
     {
         return self::resolveExpression($this->name, $this->expression, $container);
     }
@@ -65,7 +66,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
      * @param ContainerInterface $container
      * @return bool
      */
-    public function isResolvable(ContainerInterface $container) : bool
+    public function isResolvable(ContainerInterface $container): bool
     {
         return true;
     }
@@ -74,7 +75,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         // no nested definitions
     }
@@ -82,7 +83,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return $this->expression;
     }
@@ -101,7 +102,7 @@ class StringDefinition implements DefinitionInterface, SelfResolvingDefinitionIn
         string $entryName,
         string $expression,
         ContainerInterface $container,
-    ) : string {
+    ): string {
         $callback = function (array $matches) use ($entryName, $container) {
             try {
                 return $container->get($matches[1]);

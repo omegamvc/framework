@@ -119,7 +119,10 @@ trait TerminalTrait
             return false;
         }
 
-        if (!@stream_isatty($stream) && !in_array(strtoupper((string) getenv('MSYSTEM')), ['MINGW32', 'MINGW64'], true)) {
+        if (
+            !@stream_isatty($stream)
+            && !in_array(strtoupper((string) getenv('MSYSTEM')), ['MINGW32', 'MINGW64'], true)
+        ) {
             return false;
         }
 
@@ -127,7 +130,8 @@ trait TerminalTrait
             return true;
         }
 
-        if ('Hyper' === getenv('TERM_PROGRAM')
+        if (
+            'Hyper' === getenv('TERM_PROGRAM')
             || false !== getenv('COLORTERM')
             || false !== getenv('ANSICON')
             || 'ON' === getenv('ConEmuANSI')
@@ -142,6 +146,6 @@ trait TerminalTrait
         return 1 === preg_match(
             '/^((screen|xterm|vt100|vt220|putty|rxvt|ansi|cygwin|linux).*)|(.*-256(color)?(-bce)?)$/',
             $term
-            );
+        );
     }
 }

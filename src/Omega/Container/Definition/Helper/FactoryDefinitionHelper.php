@@ -31,7 +31,7 @@ class FactoryDefinitionHelper implements DefinitionHelperInterface
         $this->decorate = $decorate;
     }
 
-    public function getDefinition(string $entryName) : FactoryDefinition
+    public function getDefinition(string $entryName): FactoryDefinition
     {
         if ($this->decorate) {
             return new DecoratorDefinition($entryName, $this->factory, $this->parameters);
@@ -53,7 +53,7 @@ class FactoryDefinitionHelper implements DefinitionHelperInterface
      *
      * @return $this
      */
-    public function parameter(string $parameter, mixed $value) : self
+    public function parameter(string $parameter, mixed $value): self
     {
         $this->parameters[$parameter] = $value;
 

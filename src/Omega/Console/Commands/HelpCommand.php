@@ -14,6 +14,7 @@ use Omega\Container\Invoker\Exception\InvocationException;
 use Omega\Container\Invoker\Exception\NotCallableException;
 use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Text\Str;
+
 use function array_merge;
 use function class_exists;
 use function implode;
@@ -67,7 +68,7 @@ class HelpCommand extends AbstractCommand
         ];
     }
 
-    protected string $banner ='
+    protected string $banner = '
      _              _ _
  ___| |_ ___    ___| |_|
 | . |   | . |  |  _| | |

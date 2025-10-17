@@ -16,7 +16,7 @@ class DecoratorDefinition extends FactoryDefinition implements DefinitionInterfa
      * @param DefinitionInterface $definition
      * @return void
      */
-    public function setExtendedDefinition(DefinitionInterface $definition) : void
+    public function setExtendedDefinition(DefinitionInterface $definition): void
     {
         $this->decorated = $definition;
     }
@@ -24,7 +24,7 @@ class DecoratorDefinition extends FactoryDefinition implements DefinitionInterfa
     /**
      * @return DefinitionInterface|null
      */
-    public function getDecoratedDefinition() : ?DefinitionInterface
+    public function getDecoratedDefinition(): ?DefinitionInterface
     {
         return $this->decorated;
     }
@@ -33,7 +33,7 @@ class DecoratorDefinition extends FactoryDefinition implements DefinitionInterfa
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         // no nested definitions
     }
@@ -41,7 +41,7 @@ class DecoratorDefinition extends FactoryDefinition implements DefinitionInterfa
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return 'Decorate(' . $this->getName() . ')';
     }

@@ -32,7 +32,7 @@ class InstanceInjector extends ObjectCreator implements DefinitionResolverInterf
      * @throws InvalidDefinitionException
      * @throws ReflectionException
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : ?object
+    public function resolve(DefinitionInterface $definition, array $parameters = []): ?object
     {
         try {
             /** @noinspection PhpPossiblePolymorphicInvocationInspection */
@@ -56,7 +56,7 @@ class InstanceInjector extends ObjectCreator implements DefinitionResolverInterf
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
         return true;
     }

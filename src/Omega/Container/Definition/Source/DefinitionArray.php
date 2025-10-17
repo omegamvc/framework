@@ -53,7 +53,7 @@ class DefinitionArray implements DefinitionSourceInterface, MutableDefinitionSou
 
         $this->definitions = $definitions;
 
-        $this->normalizer = new DefinitionNormalizer($autowiring ?: new NoAutowiring);
+        $this->normalizer = new DefinitionNormalizer($autowiring ?: new NoAutowiring());
     }
 
     /**
@@ -61,7 +61,7 @@ class DefinitionArray implements DefinitionSourceInterface, MutableDefinitionSou
      * @return void
      * @throws Exception
      */
-    public function addDefinitions(array $definitions) : void
+    public function addDefinitions(array $definitions): void
     {
         if (isset($definitions[0])) {
             throw new Exception(
@@ -81,7 +81,7 @@ class DefinitionArray implements DefinitionSourceInterface, MutableDefinitionSou
      * @param DefinitionInterface $definition
      * @return void
      */
-    public function addDefinition(DefinitionInterface $definition) : void
+    public function addDefinition(DefinitionInterface $definition): void
     {
         $this->definitions[$definition->getName()] = $definition;
 
@@ -94,7 +94,7 @@ class DefinitionArray implements DefinitionSourceInterface, MutableDefinitionSou
      * @return DefinitionInterface|null
      * @throws InvalidDefinitionException
      */
-    public function getDefinition(string $name) : ?DefinitionInterface
+    public function getDefinition(string $name): ?DefinitionInterface
     {
         // Look for the definition by name
         if (array_key_exists($name, $this->definitions)) {
@@ -131,7 +131,7 @@ class DefinitionArray implements DefinitionSourceInterface, MutableDefinitionSou
     /**
      * @return array|DefinitionInterface[]
      */
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         // Return all definitions except wildcard definitions
         return array_filter($this->definitions, function ($key) {

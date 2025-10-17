@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Omega\Container\Invoker\ParameterResolver\Container;
 
@@ -8,6 +10,7 @@ use Omega\Container\Exceptions\NotFoundExceptionInterface;
 use Omega\Container\Invoker\ParameterResolver\ParameterResolverInterface;
 use ReflectionFunctionAbstract;
 use ReflectionNamedType;
+
 use function array_diff_key;
 
 /**

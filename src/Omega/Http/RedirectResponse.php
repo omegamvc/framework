@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Omega\Http;
 
 use Exception;
+
 use function htmlspecialchars;
+
 use const ENT_QUOTES;
 
 class RedirectResponse extends Response
@@ -42,7 +44,8 @@ class RedirectResponse extends Response
                             <body>
                                 Redirecting to <a href="%1$s">%1$s</a>.
                             </body>
-                        </html>', htmlspecialchars($url, ENT_QUOTES, 'UTF-8')
+                        </html>',
+                htmlspecialchars($url, ENT_QUOTES, 'UTF-8')
             )
         );
         $this->setHeaders([

@@ -79,13 +79,13 @@ class ContainerBuilder
         $sources = array_reverse($this->definitionSources);
 
         if ($this->useAttributes) {
-            $autowiring = new AttributeBasedAutowiring;
+            $autowiring = new AttributeBasedAutowiring();
             $sources[] = $autowiring;
         } elseif ($this->useAutowiring) {
-            $autowiring = new ReflectionBasedAutowiring;
+            $autowiring = new ReflectionBasedAutowiring();
             $sources[] = $autowiring;
         } else {
-            $autowiring = new NoAutowiring;
+            $autowiring = new NoAutowiring();
         }
 
         $sources = array_map(function ($definitions) use ($autowiring) {
@@ -112,7 +112,7 @@ class ContainerBuilder
             $source = new SourceCache($source, $this->sourceCacheNamespace);
         }
 
-		$proxyFactory = new NativeProxyFactory();
+        $proxyFactory = new NativeProxyFactory();
 
         $this->locked = true;
 
@@ -129,7 +129,7 @@ class ContainerBuilder
      * @param bool $bool
      * @return $this
      */
-    public function useAutowiring(bool $bool) : self
+    public function useAutowiring(bool $bool): self
     {
         $this->ensureNotLocked();
 
@@ -146,7 +146,7 @@ class ContainerBuilder
      * @param bool $bool
      * @return $this
      */
-    public function useAttributes(bool $bool) : self
+    public function useAttributes(bool $bool): self
     {
         $this->ensureNotLocked();
 
@@ -162,7 +162,7 @@ class ContainerBuilder
      * @param ContainerInterface $otherContainer
      * @return $this
      */
-    public function wrapContainer(ContainerInterface $otherContainer) : self
+    public function wrapContainer(ContainerInterface $otherContainer): self
     {
         $this->ensureNotLocked();
 
@@ -179,7 +179,7 @@ class ContainerBuilder
      *                                                      or a DefinitionSource object.
      * @return $this
      */
-    public function addDefinitions(string|array|DefinitionSourceInterface ...$definitions) : self
+    public function addDefinitions(string|array|DefinitionSourceInterface ...$definitions): self
     {
         $this->ensureNotLocked();
 
@@ -209,7 +209,7 @@ class ContainerBuilder
      *                               to prevent cache collisions
      * @return $this
      */
-    public function enableDefinitionCache(string $cacheNamespace = '') : self
+    public function enableDefinitionCache(string $cacheNamespace = ''): self
     {
         $this->ensureNotLocked();
 
@@ -222,7 +222,7 @@ class ContainerBuilder
     /**
      * @return void
      */
-    private function ensureNotLocked() : void
+    private function ensureNotLocked(): void
     {
         if ($this->locked) {
             throw new LogicException(

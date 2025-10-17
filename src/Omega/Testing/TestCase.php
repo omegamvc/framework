@@ -129,7 +129,7 @@ class TestCase extends PhpUnitTestCase
      * @throws NotFoundException
      * @throws Throwable
      */
-    protected function post(string $url, array $post, array $files =[]): TestResponse
+    protected function post(string $url, array $post, array $files = []): TestResponse
     {
         return $this->call(url: $url, post: $post, files: $files, method: 'POST');
     }

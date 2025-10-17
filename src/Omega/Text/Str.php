@@ -31,6 +31,7 @@ use function substr_compare;
 use function trim;
 use function ucfirst;
 use function ucwords;
+
 use const PHP_INT_MAX;
 use const PREG_SPLIT_NO_EMPTY;
 use const STR_PAD_LEFT;

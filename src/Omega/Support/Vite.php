@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+<?php
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
@@ -154,8 +156,10 @@ class Vite
         $fileName    = $this->manifest();
         $currentTime = $this->manifestTime();
 
-        if (array_key_exists($fileName, static::$cache)
-            && $this->cacheTime === $currentTime) {
+        if (
+            array_key_exists($fileName, static::$cache)
+            && $this->cacheTime === $currentTime
+        ) {
             return static::$cache[$fileName];
         }
 

@@ -4,38 +4,34 @@ declare(strict_types=1);
 
 namespace Omega\Support\Facades;
 
-use Omega\Database\ConnectionInterface;
 use Omega\Database\DatabaseManager;
+use Omega\Database\MyPDO;
 
 /**
- * @method static void                clearConnections()
- * @method static ConnectionInterface connection(string $name)
- * @method static DatabaseManager     setDefaultConnection(ConnectionInterface $connection)
- * @method static DatabaseManager     query(string $query)
- * @method static DatabaseManager     bind(string|int|bool|null $param, mixed $value, string|int|bool|null $type = null)
- * @method static bool                execute()
- * @method static mixed[]|false       resultset()
- * @method static mixed               single()
- * @method static int                 rowCount()
- * @method static bool                transaction(callable $callable)
- * @method static bool                beginTransaction()
- * @method static bool                endTransaction()
- * @method static bool                cancelTransaction()
- * @method static string|false        lastInsertId()
- * @method static void                flushLogs()
- * @method static array               getLogs()
+ * @method static MyPDO        instance()
+ * @method static MyPDO        conn(array<string, string> $configs)
+ * @method static array        configs()
+ * @method static string       getDsn(array $configs)
+ * @method static MyPDO        query(string $query)
+ * @method static MyPDO        bind(string|int|bool|null $param, mixed $value, string|int|bool|null $type = null)
+ * @method static bool         execute()
+ * @method static array|false  resultset()
+ * @method static mixed        single()
+ * @method static int          rowCount()
+ * @method static string|false lastInsertId()
+ * @method static bool         transaction(callable $callable)
+ * @method static bool         beginTransaction()
+ * @method static bool         endTransaction()
+ * @method static bool         cancelTransaction()
+ * @method static void         flushLogs()
+ * @method static array        getLogs()
  *
- * @see DatabaseManager
+ * @see MyPDO
  */
 final class PDO extends AbstractFacade
 {
     public static function getFacadeAccessor(): string
     {
         return DatabaseManager::class;
-    }
-
-    public static function instance(): DatabaseManager
-    {
-        return self::getFacade();
     }
 }

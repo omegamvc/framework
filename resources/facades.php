@@ -13,9 +13,7 @@ declare(strict_types=1);
 return [
     'Cache'    => 'Omega\\Cache\\CacheManager',
     'Config'   => 'Omega\\Config\\ConfigRepository',
-    'DB'       => 'Omega\\Database\\MyQuery',
-    'Hash'     => 'Omega\\Security\\Hashing\\HashManager',
-    'PDO'      => [
+    'DB'       => [
         'accessor' => 'Omega\\Database\\DatabaseManager',
         'with'     => [
             'resultset' => [
@@ -26,6 +24,8 @@ return [
             ],
         ],
     ],
+    'Hash'     => 'Omega\\Security\\Hashing\\HashManager',
+    'PDO'      => 'Omega\\Database\\MyPDO',
     'Schedule' => [
         'accessor' => 'Omega\\Cron\\Schedule',
         'replaces' => [

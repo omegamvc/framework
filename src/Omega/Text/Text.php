@@ -272,7 +272,7 @@ class Text
      *
      * @return self
      */
-    public function pascal():self
+    public function pascal(): self
     {
         $text = Str::toPascalCase($this->current);
         $this->execute($text, __FUNCTION__);

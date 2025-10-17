@@ -48,7 +48,8 @@ interface CacheInterface
      *
      * @param iterable<string> $keys a list of keys that can be obtained in a single operation
      * @param mixed $default
-     * @return iterable<string, mixed> A list of key => value pairs. Cache keys that do not exist or are stale will have $default as value.
+     * @return iterable<string, mixed> Return a list of key => value pairs. Cache keys that do not exist or
+     *                                 are stale will have $default as value.
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable;
 

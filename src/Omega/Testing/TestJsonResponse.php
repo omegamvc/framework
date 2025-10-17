@@ -8,8 +8,8 @@ use ArrayAccess;
 use Exception;
 use PHPUnit\Framework\Assert;
 use Omega\Http\Response;
-
 use ReturnTypeWillChange;
+
 use function array_key_exists;
 use function is_array;
 

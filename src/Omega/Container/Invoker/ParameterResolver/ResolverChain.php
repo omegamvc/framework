@@ -1,8 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Omega\Container\Invoker\ParameterResolver;
 
 use ReflectionFunctionAbstract;
+
 use function array_diff_key;
 use function array_unshift;
 

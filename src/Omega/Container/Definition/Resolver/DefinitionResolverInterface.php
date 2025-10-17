@@ -8,7 +8,6 @@ use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 
-
 /**
  * Resolves a definition to a value.
  *
@@ -25,7 +24,7 @@ interface DefinitionResolverInterface
      * @throws DependencyException
      * @throws InvalidDefinitionException If the definition cannot be resolved.
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed;
+    public function resolve(DefinitionInterface $definition, array $parameters = []): mixed;
 
     /**
      * Check if a definition can be resolved.
@@ -33,5 +32,5 @@ interface DefinitionResolverInterface
      * @param DefinitionInterface $definition Object that defines how the value should be obtained.
      * @param array      $parameters Optional parameters to use to build the entry.
      */
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool;
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool;
 }

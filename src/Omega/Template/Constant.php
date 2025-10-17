@@ -6,6 +6,7 @@ namespace Omega\Template;
 
 use Omega\Template\Traits\CommentTrait;
 use Omega\Template\Traits\FormatterTrait;
+
 use function count;
 use function str_repeat;
 use function str_replace;

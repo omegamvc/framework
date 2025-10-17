@@ -8,6 +8,7 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Alert;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
+
 use function Omega\Console\error;
 use function shell_exec;
 

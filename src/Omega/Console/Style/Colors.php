@@ -14,11 +14,11 @@ declare(strict_types=1);
 
 namespace Omega\Console\Style;
 
-
 use Omega\Console\Exceptions\InvalidHexCodeException;
 use Omega\Console\Style\Color\BackgroundColor;
 use Omega\Console\Style\Color\ForegroundColor;
 use Omega\Text\Str;
+
 use function sscanf;
 
 /**

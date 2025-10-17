@@ -33,7 +33,7 @@ class ObjectCreator implements DefinitionResolverInterface
      */
     public function __construct(
         private readonly DefinitionResolverInterface $definitionResolver,
-        private readonly ProxyFactoryInterface       $proxyFactory,
+        private readonly ProxyFactoryInterface $proxyFactory,
     ) {
         $this->parameterResolver = new ParameterResolver($definitionResolver);
     }
@@ -50,7 +50,7 @@ class ObjectCreator implements DefinitionResolverInterface
      * @throws InvalidDefinitionException
      * @throws ReflectionException
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : ?object
+    public function resolve(DefinitionInterface $definition, array $parameters = []): ?object
     {
         // Lazy?
         if ($definition->isLazy()) {
@@ -68,7 +68,7 @@ class ObjectCreator implements DefinitionResolverInterface
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
         /** @noinspection PhpPossiblePolymorphicInvocationInspection */
         return $definition->isInstantiable;
@@ -77,7 +77,7 @@ class ObjectCreator implements DefinitionResolverInterface
     /**
      * Returns a proxy instance.
      */
-    private function createProxy(ObjectDefinition $definition, array $parameters) : object
+    private function createProxy(ObjectDefinition $definition, array $parameters): object
     {
         /** @var class-string $className */
         $className = $definition->getClassName();
@@ -99,7 +99,7 @@ class ObjectCreator implements DefinitionResolverInterface
      * @throws InvalidDefinitionException
      * @throws ReflectionException;
      */
-    private function createInstance(ObjectDefinition $definition, array $parameters) : object
+    private function createInstance(ObjectDefinition $definition, array $parameters): object
     {
         // Check that the class is instantiable
         if (!$definition->isInstantiable) {
@@ -157,7 +157,7 @@ class ObjectCreator implements DefinitionResolverInterface
      * @throws ReflectionException
      * @throws DependencyException
      */
-    protected function injectMethodsAndProperties(object $object, ObjectDefinition $objectDefinition) : void
+    protected function injectMethodsAndProperties(object $object, ObjectDefinition $objectDefinition): void
     {
         // Property injections
         foreach ($objectDefinition->propertyInjections as $propertyInjection) {
@@ -182,7 +182,7 @@ class ObjectCreator implements DefinitionResolverInterface
      * @throws DependencyException
      * @throws ReflectionException
      */
-    private function injectProperty(object $object, PropertyInjection $propertyInjection) : void
+    private function injectProperty(object $object, PropertyInjection $propertyInjection): void
     {
         $propertyName = $propertyInjection->propertyName;
 
@@ -214,8 +214,12 @@ class ObjectCreator implements DefinitionResolverInterface
      * @return void
      * @throws ReflectionException
      */
-    public static function setPrivatePropertyValue(?string $className, $object, string $propertyName, mixed $propertyValue) : void
-    {
+    public static function setPrivatePropertyValue(
+        ?string $className,
+        $object,
+        string $propertyName,
+        mixed $propertyValue
+    ): void {
         $className = $className ?: $object::class;
         $property = new ReflectionProperty($className, $propertyName);
         $property->setValue($object, $propertyValue);

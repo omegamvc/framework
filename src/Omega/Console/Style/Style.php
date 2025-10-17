@@ -250,10 +250,10 @@ class Style
             : $this->resetRules;
 
         return $ref . $this->rules(
-                rule: $this->rules,
-                text: $text,
-                resetRule: $resetRule
-            );
+            rule: $this->rules,
+            text: $text,
+            resetRule: $resetRule
+        );
     }
 
     /**

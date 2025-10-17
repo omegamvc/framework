@@ -108,7 +108,8 @@ final class PackageManifest
 
         file_put_contents(
             $this->application_cache_path
-            . 'packages.php', '<?php return '
+            . 'packages.php',
+            '<?php return '
             . var_export($provider, true)
             . ';'
             . PHP_EOL

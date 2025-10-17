@@ -103,6 +103,7 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
 
         // yield section
         return preg_replace_callback(
+            /* phpcs:disable Generic.Files.LineLength.TooLong */
             '/{%\s*yield(?:\s*\(\s*[\'"](\w+)[\'"](?:\s*,\s*([\'\"].*?[\'\"]|null))?\s*\))?\s*%}(?:(.*?){%\s*endyield\s*%})?/s',
             /** @param string[] $matches */
             function (array $matches) use ($matchesLayout): string {

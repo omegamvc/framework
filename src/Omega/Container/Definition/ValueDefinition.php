@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Omega\Container\Definition;
 
 use Omega\Container\ContainerInterface;
+
 use function sprintf;
 use function var_export;
 
@@ -28,7 +29,7 @@ class ValueDefinition implements DefinitionInterface, SelfResolvingDefinitionInt
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -37,7 +38,7 @@ class ValueDefinition implements DefinitionInterface, SelfResolvingDefinitionInt
      * @param string $name
      * @return void
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -45,7 +46,7 @@ class ValueDefinition implements DefinitionInterface, SelfResolvingDefinitionInt
     /**
      * @return mixed
      */
-    public function getValue() : mixed
+    public function getValue(): mixed
     {
         return $this->value;
     }
@@ -54,7 +55,7 @@ class ValueDefinition implements DefinitionInterface, SelfResolvingDefinitionInt
      * @param ContainerInterface $container
      * @return mixed
      */
-    public function resolve(ContainerInterface $container) : mixed
+    public function resolve(ContainerInterface $container): mixed
     {
         return $this->getValue();
     }
@@ -63,7 +64,7 @@ class ValueDefinition implements DefinitionInterface, SelfResolvingDefinitionInt
      * @param ContainerInterface $container
      * @return bool
      */
-    public function isResolvable(ContainerInterface $container) : bool
+    public function isResolvable(ContainerInterface $container): bool
     {
         return true;
     }
@@ -72,7 +73,7 @@ class ValueDefinition implements DefinitionInterface, SelfResolvingDefinitionInt
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         // no nested definitions
     }
@@ -80,7 +81,7 @@ class ValueDefinition implements DefinitionInterface, SelfResolvingDefinitionInt
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return sprintf('Value (%s)', var_export($this->value, true));
     }

@@ -10,6 +10,7 @@ use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Router\Router;
 use Omega\Text\Str;
+
 use function count;
 use function is_array;
 use function Omega\Console\style;
@@ -78,7 +79,7 @@ class RouteCommand extends AbstractCommand
         if (is_array($methods)) {
             $group  = new Style();
             $length = count($methods);
-            for ($i=0; $i < $length; $i++) {
+            for ($i = 0; $i < $length; $i++) {
                 $group->tap($this->coloringMethod($methods[$i]));
                 if ($i < $length - 1) {
                     $group->push('|')->textDim();

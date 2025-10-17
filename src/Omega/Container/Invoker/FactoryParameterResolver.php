@@ -10,6 +10,7 @@ use Omega\Container\Exceptions\NotFoundExceptionInterface;
 use Omega\Container\Invoker\ParameterResolver\ParameterResolverInterface;
 use ReflectionFunctionAbstract;
 use ReflectionNamedType;
+
 use function array_diff_key;
 
 /**
@@ -37,7 +38,7 @@ readonly class FactoryParameterResolver implements ParameterResolverInterface
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,
         array $resolvedParameters,
-    ) : array {
+    ): array {
         $parameters = $reflection->getParameters();
 
         // Skip parameters already resolved

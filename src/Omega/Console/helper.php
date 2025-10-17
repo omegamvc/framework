@@ -264,7 +264,8 @@ if (!function_exists('remove_exit_prompt')) {
     function remove_exit_prompt(): void
     {
         if (function_exists('sapi_windows_set_ctrl_handler') && 'cli' === PHP_SAPI) {
-            sapi_windows_set_ctrl_handler(function (int $handler): void {}, false);
+            sapi_windows_set_ctrl_handler(function (int $handler): void {
+            }, false);
         }
 
         $signal  = defined('SIGINT') ? constant('SIGINT') : 2;

@@ -16,7 +16,7 @@ use ReflectionNamedType;
  */
 class ReflectionBasedAutowiring implements DefinitionSourceInterface, AutowiringInterface
 {
-    public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition
+    public function autowire(string $name, ?ObjectDefinition $definition = null): ?ObjectDefinition
     {
         $className = $definition ? $definition->getClassName() : $name;
 
@@ -37,7 +37,7 @@ class ReflectionBasedAutowiring implements DefinitionSourceInterface, Autowiring
         return $definition;
     }
 
-    public function getDefinition(string $name) : ?ObjectDefinition
+    public function getDefinition(string $name): ?ObjectDefinition
     {
         return $this->autowire($name);
     }
@@ -45,7 +45,7 @@ class ReflectionBasedAutowiring implements DefinitionSourceInterface, Autowiring
     /**
      * Autowiring cannot guess all existing definitions.
      */
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         return [];
     }
@@ -53,7 +53,7 @@ class ReflectionBasedAutowiring implements DefinitionSourceInterface, Autowiring
     /**
      * Read the type-hinting from the parameters of the function.
      */
-    private function getParametersDefinition(\ReflectionFunctionAbstract $constructor) : array
+    private function getParametersDefinition(\ReflectionFunctionAbstract $constructor): array
     {
         $parameters = [];
 

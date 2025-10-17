@@ -103,7 +103,7 @@ interface ConfigRepositoryInterface
      */
     public function merge(
         ConfigRepositoryInterface $configuration,
-        ?string  $key = null,
+        ?string $key = null,
         MergeStrategy|string|null $strategy = null
     ): void;
 }

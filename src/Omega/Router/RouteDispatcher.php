@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Omega\Router;
 
 use Omega\Http\Request;
+
 use function array_filter;
 use function array_shift;
 use function is_numeric;
@@ -12,6 +13,7 @@ use function parse_url;
 use function preg_match;
 use function rtrim;
 use function strtolower;
+
 use const ARRAY_FILTER_USE_KEY;
 
 final class RouteDispatcher
@@ -286,7 +288,11 @@ final class RouteDispatcher
             array_shift($matches);
             $cleanMatches = $matches;
         } else {
-            $cleanMatches = array_filter($namedMatches, static fn (string $key): bool => false === is_numeric($key), ARRAY_FILTER_USE_KEY);
+            $cleanMatches = array_filter(
+                $namedMatches,
+                static fn (string $key): bool => false === is_numeric($key),
+                ARRAY_FILTER_USE_KEY
+            );
         }
 
         return $cleanMatches;

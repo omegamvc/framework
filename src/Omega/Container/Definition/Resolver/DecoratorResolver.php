@@ -9,6 +9,7 @@ use Omega\Container\Definition\DecoratorDefinition;
 use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
+
 use function is_callable;
 
 /**
@@ -26,7 +27,7 @@ class DecoratorResolver implements DefinitionResolverInterface
      * @param DefinitionResolverInterface $definitionResolver Used to resolve nested definitions.
      */
     public function __construct(
-        private ContainerInterface                   $container,
+        private ContainerInterface $container,
         private readonly DefinitionResolverInterface $definitionResolver,
     ) {
     }
@@ -42,7 +43,7 @@ class DecoratorResolver implements DefinitionResolverInterface
      * @throws DependencyException
      * @throws InvalidDefinitionException
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []): mixed
     {
         $callable = $definition->getCallable();
 
@@ -76,7 +77,7 @@ class DecoratorResolver implements DefinitionResolverInterface
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
         return true;
     }

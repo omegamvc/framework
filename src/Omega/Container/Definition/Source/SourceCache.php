@@ -8,10 +8,12 @@ use LogicException;
 use Omega\Container\Definition\AutowireDefinition;
 use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\ObjectDefinition;
+
 use function apcu_fetch;
 use function apcu_store;
 use function function_exists;
 use function ini_get;
+
 use const PHP_SAPI;
 
 /**
@@ -23,11 +25,11 @@ class SourceCache implements DefinitionSourceInterface, MutableDefinitionSourceI
 
     public function __construct(
         private readonly DefinitionSourceInterface $cachedSource,
-        private readonly string                    $cacheNamespace = '',
+        private readonly string $cacheNamespace = '',
     ) {
     }
 
-    public function getDefinition(string $name) : ?DefinitionInterface
+    public function getDefinition(string $name): ?DefinitionInterface
     {
         $definition = apcu_fetch($this->getCacheKey($name));
 
@@ -48,7 +50,7 @@ class SourceCache implements DefinitionSourceInterface, MutableDefinitionSourceI
      *
      * @return array
      */
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         return $this->cachedSource->getDefinitions();
     }
@@ -56,7 +58,7 @@ class SourceCache implements DefinitionSourceInterface, MutableDefinitionSourceI
     /**
      * @return bool
      */
-    public static function isSupported() : bool
+    public static function isSupported(): bool
     {
         return function_exists('apcu_fetch')
             && ini_get('apc.enabled')
@@ -67,7 +69,7 @@ class SourceCache implements DefinitionSourceInterface, MutableDefinitionSourceI
      * @param string $name
      * @return string
      */
-    public function getCacheKey(string $name) : string
+    public function getCacheKey(string $name): string
     {
         return self::CACHE_KEY . $this->cacheNamespace . $name;
     }
@@ -76,7 +78,7 @@ class SourceCache implements DefinitionSourceInterface, MutableDefinitionSourceI
      * @param DefinitionInterface $definition
      * @return void
      */
-    public function addDefinition(DefinitionInterface $definition) : void
+    public function addDefinition(DefinitionInterface $definition): void
     {
         throw new LogicException(
             'You cannot set a definition at runtime on a container that has caching enabled.' .
@@ -90,7 +92,7 @@ class SourceCache implements DefinitionSourceInterface, MutableDefinitionSourceI
      * @param DefinitionInterface|null $definition
      * @return bool
      */
-    private function shouldBeCached(?DefinitionInterface $definition = null) : bool
+    private function shouldBeCached(?DefinitionInterface $definition = null): bool
     {
         return
             // Cache missing definitions

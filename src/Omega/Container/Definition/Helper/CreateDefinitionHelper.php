@@ -55,7 +55,7 @@ class CreateDefinitionHelper implements DefinitionHelperInterface
      *
      * @return $this
      */
-    public function lazy() : self
+    public function lazy(): self
     {
         $this->lazy = true;
 
@@ -71,7 +71,7 @@ class CreateDefinitionHelper implements DefinitionHelperInterface
      * @param mixed ...$parameters Parameters to use for calling the constructor of the class.
      * @return $this
      */
-    public function constructor(mixed ...$parameters) : self
+    public function constructor(mixed ...$parameters): self
     {
         $this->constructor = $parameters;
 
@@ -85,7 +85,7 @@ class CreateDefinitionHelper implements DefinitionHelperInterface
      * @param mixed  $value    Value to inject in the property.
      * @return $this
      */
-    public function property(string $property, mixed $value) : self
+    public function property(string $property, mixed $value): self
     {
         $this->properties[$property] = $value;
 
@@ -105,7 +105,7 @@ class CreateDefinitionHelper implements DefinitionHelperInterface
      * @param mixed ...$parameters Parameters to use for calling the method.
      * @return $this
      */
-    public function method(string $method, mixed ...$parameters) : self
+    public function method(string $method, mixed ...$parameters): self
     {
         if (! isset($this->methods[$method])) {
             $this->methods[$method] = [];
@@ -121,7 +121,7 @@ class CreateDefinitionHelper implements DefinitionHelperInterface
      * @return ObjectDefinition
      * @throws InvalidDefinitionException
      */
-    public function getDefinition(string $entryName) : ObjectDefinition
+    public function getDefinition(string $entryName): ObjectDefinition
     {
         $class = $this::DEFINITION_CLASS;
         $definition = new $class($entryName, $this->className);
@@ -168,7 +168,7 @@ class CreateDefinitionHelper implements DefinitionHelperInterface
      * @return array
      * @throws InvalidDefinitionException
      */
-    private function fixParameters(ObjectDefinition $definition, string $method, array $parameters) : array
+    private function fixParameters(ObjectDefinition $definition, string $method, array $parameters): array
     {
         $fixedParameters = [];
 

@@ -39,7 +39,7 @@ class FactoryResolver implements DefinitionResolverInterface
      * so that the factory can access other entries of the container.
      */
     public function __construct(
-        private readonly ContainerInterface          $container,
+        private readonly ContainerInterface $container,
         private readonly DefinitionResolverInterface $resolver,
     ) {
     }
@@ -56,14 +56,14 @@ class FactoryResolver implements DefinitionResolverInterface
      * @throws InvalidDefinitionException
      * @throws InvocationException
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []): mixed
     {
         if (! $this->invoker) {
             $parameterResolver = new ResolverChain([
-                new AssociativeArrayResolver,
+                new AssociativeArrayResolver(),
                 new FactoryParameterResolver($this->container),
-                new NumericArrayResolver,
-                new DefaultValueResolver,
+                new NumericArrayResolver(),
+                new DefaultValueResolver(),
             ]);
 
             $this->invoker = new Invoker($parameterResolver, $this->container);
@@ -85,9 +85,10 @@ class FactoryResolver implements DefinitionResolverInterface
                         'Entry "%s" cannot be resolved: factory %s. Invokable classes cannot be automatically'  .
                         'resolved if autowiring is disabled on the container, you need to enable autowiring or define' .
                         'the entry manually.',
-                    $definition->getName(),
-                    $e->getMessage()
-                ));
+                        $definition->getName(),
+                        $e->getMessage()
+                    )
+                );
             }
 
             throw new InvalidDefinitionException(sprintf(
@@ -109,7 +110,7 @@ class FactoryResolver implements DefinitionResolverInterface
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
         return true;
     }
@@ -120,7 +121,7 @@ class FactoryResolver implements DefinitionResolverInterface
      * @throws InvalidDefinitionException
      * @throws DependencyException
      */
-    private function resolveExtraParams(array $params) : array
+    private function resolveExtraParams(array $params): array
     {
         $resolved = [];
         foreach ($params as $key => $value) {

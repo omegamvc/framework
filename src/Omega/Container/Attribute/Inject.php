@@ -25,9 +25,9 @@ class Inject
     /**
      * Entry name.
      */
-    public ?string $name = null {
+    public ?string $name = null { // phpcs:ignore
         get {
-            return $this->name;
+            return $this->name; // phpcs:ignore
         }
     }
 
@@ -67,7 +67,7 @@ class Inject
     /**
      * @return array Parameters, indexed by the parameter number (index) or name
      */
-    public function getParameters() : array
+    public function getParameters(): array
     {
         return $this->parameters;
     }

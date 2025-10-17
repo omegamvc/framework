@@ -21,24 +21,26 @@ class EnvironmentVariableDefinition implements DefinitionInterface
 
     /**
      * @param string $variableName The name of the environment variable
-     * @param bool $isOptional Whether the environment variable definition is optional. If true and the environment variable given by $variableName has not been defined, $defaultValue is used.
+     * @param bool   $isOptional   Whether the environment variable definition is optional.
+     *                             If true and the environment variable given by $variableName has not been defined,
+     *                             $defaultValue is used.
      * @param mixed $defaultValue The default value to use if the environment variable is optional and not provided
      */
     public function __construct(
         public string $variableName {
-            get {
-                return $this->variableName;
-            }
+        get {
+        return $this->variableName;
+        }
         },
-        public bool   $isOptional = false {
-            get {
-                return $this->isOptional;
-            }
+        public bool $isOptional = false {
+        get {
+        return $this->isOptional;
+        }
         },
-        public mixed  $defaultValue = null {
-            get {
-                return $this->defaultValue;
-            }
+        public mixed $defaultValue = null {
+        get {
+        return $this->defaultValue;
+        }
         },
     ) {
     }
@@ -46,7 +48,7 @@ class EnvironmentVariableDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -55,7 +57,7 @@ class EnvironmentVariableDefinition implements DefinitionInterface
      * @param string $name
      * @return void
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -64,7 +66,7 @@ class EnvironmentVariableDefinition implements DefinitionInterface
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         $this->defaultValue = $replacer($this->defaultValue);
     }
@@ -72,7 +74,7 @@ class EnvironmentVariableDefinition implements DefinitionInterface
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         $str = '    variable = ' . $this->variableName . PHP_EOL
             . '    optional = ' . ($this->isOptional ? 'yes' : 'no');

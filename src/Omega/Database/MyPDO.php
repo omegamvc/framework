@@ -274,7 +274,8 @@ class MyPDO implements ConnectionInterface
         }
         $path = $config['database'];
 
-        if ($path === ':memory:'
+        if (
+            $path === ':memory:'
             || str_contains($path, '?mode=memory')
             || str_contains($path, '&mode=memory')
         ) {

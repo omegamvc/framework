@@ -413,8 +413,10 @@ class Model implements \ArrayAccess, \IteratorAggregate
         }
 
         foreach (array_keys($this->columns) as $key) {
-            if (!array_key_exists($column, $this->columns[$key])
-            || !array_key_exists($column, $this->fresh[$key])) {
+            if (
+                !array_key_exists($column, $this->columns[$key])
+                || !array_key_exists($column, $this->fresh[$key])
+            ) {
                 throw new \Exception("Column {$column} is not in table `{$this->tableName}`.");
             }
 
@@ -449,8 +451,10 @@ class Model implements \ArrayAccess, \IteratorAggregate
         }
 
         foreach ($column as $key => $value) {
-            if (array_key_exists($key, $this->fresh[$current])
-            && $this->fresh[$current][$key] !== $value) {
+            if (
+                array_key_exists($key, $this->fresh[$current])
+                && $this->fresh[$current][$key] !== $value
+            ) {
                 $change[$key] = $value;
             }
         }

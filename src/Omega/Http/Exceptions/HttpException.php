@@ -25,11 +25,11 @@ class HttpException extends RuntimeException
      * @param array<string, string> $headers
      */
     public function __construct(
-        int        $statusCode,
-        string     $message,
+        int $statusCode,
+        string $message,
         ?Throwable $previous = null,
-        array      $headers = [],
-        int        $code = 0,
+        array $headers = [],
+        int $code = 0,
     ) {
         $this->statusCode = $statusCode;
         $this->headers    = $headers;

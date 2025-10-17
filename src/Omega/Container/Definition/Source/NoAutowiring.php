@@ -20,7 +20,7 @@ class NoAutowiring implements AutowiringInterface
      * @return ObjectDefinition|null
      * @throws InvalidDefinitionException
      */
-    public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition
+    public function autowire(string $name, ?ObjectDefinition $definition = null): ?ObjectDefinition
     {
         throw new InvalidDefinitionException(
             sprintf(

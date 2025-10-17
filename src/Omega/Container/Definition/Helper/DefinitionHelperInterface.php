@@ -14,5 +14,5 @@ interface DefinitionHelperInterface
     /**
      * @param string $entryName Container entry name
      */
-    public function getDefinition(string $entryName) : DefinitionInterface;
+    public function getDefinition(string $entryName): DefinitionInterface;
 }

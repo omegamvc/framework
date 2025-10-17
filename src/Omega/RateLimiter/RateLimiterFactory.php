@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Omega\RateLimiter;
 
 use Omega\Cache\CacheInterface;
-
 use Omega\RateLimiter\RateLimiter\FixedWindow;
 use Omega\RateLimiter\RateLimiter\NoLimiter;
 

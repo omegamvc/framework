@@ -22,7 +22,7 @@ readonly class Injectable
     ) {
     }
 
-    public function isLazy() : ?bool
+    public function isLazy(): ?bool
     {
         return $this->lazy;
     }

@@ -6,12 +6,14 @@ namespace Omega\Template;
 
 use Omega\Template\Traits\CommentTrait;
 use Omega\Template\Traits\FormatterTrait;
+
 use function array_filter;
 use function count;
 use function implode;
 use function is_array;
 use function str_repeat;
 use function str_replace;
+
 use const ARRAY_FILTER_USE_KEY;
 
 class Property
@@ -62,8 +64,8 @@ class Property
 
         $comment = $this->generateComment(1);
         $comment = count($this->comments) > 0
-      ? $comment . "\n" . $tabDept(1)
-      : $comment;
+        ? $comment . "\n" . $tabDept(1)
+        : $comment;
 
         // generate visibility
         $visibility = '';
@@ -99,8 +101,8 @@ class Property
                 array_filter($this->expecting, fn ($key) => $key > 0, ARRAY_FILTER_USE_KEY)
             );
             $expecting = count($this->expecting) > 1
-        ? ' ' . $singleLine . "\n" . $tabDept(1) . $multiLine
-        : ' ' . $singleLine;
+            ? ' ' . $singleLine . "\n" . $tabDept(1) . $multiLine
+            : ' ' . $singleLine;
         }
 
         // final

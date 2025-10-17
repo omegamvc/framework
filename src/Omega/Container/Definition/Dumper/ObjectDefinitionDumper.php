@@ -32,7 +32,7 @@ class ObjectDefinitionDumper
      * @return string
      * @throws ReflectionException
      */
-    public function dump(ObjectDefinition $definition) : string
+    public function dump(ObjectDefinition $definition): string
     {
         $className = $definition->getClassName();
         $classExist = class_exists($className) || interface_exists($className);
@@ -69,7 +69,7 @@ class ObjectDefinitionDumper
      * @return string
      * @throws ReflectionException
      */
-    private function dumpConstructor(string $className, ObjectDefinition $definition) : string
+    private function dumpConstructor(string $className, ObjectDefinition $definition): string
     {
         $str = '';
 
@@ -78,7 +78,14 @@ class ObjectDefinitionDumper
         if ($constructorInjection !== null) {
             $parameters = $this->dumpMethodParameters($className, $constructorInjection);
 
-            $str .= sprintf(PHP_EOL . '    __construct(' . PHP_EOL . '        %s' . PHP_EOL . '    )', $parameters);
+            $str .= sprintf(
+                PHP_EOL
+                . '    __construct('
+                . PHP_EOL
+                . '        %s'
+                . PHP_EOL . '    )',
+                $parameters
+            );
         }
 
         return $str;
@@ -88,7 +95,7 @@ class ObjectDefinitionDumper
      * @param ObjectDefinition $definition
      * @return string
      */
-    private function dumpProperties(ObjectDefinition $definition) : string
+    private function dumpProperties(ObjectDefinition $definition): string
     {
         $str = '';
 
@@ -108,14 +115,23 @@ class ObjectDefinitionDumper
      * @return string
      * @throws ReflectionException
      */
-    private function dumpMethods(string $className, ObjectDefinition $definition) : string
+    private function dumpMethods(string $className, ObjectDefinition $definition): string
     {
         $str = '';
 
         foreach ($definition->getMethodInjections() as $methodInjection) {
             $parameters = $this->dumpMethodParameters($className, $methodInjection);
 
-            $str .= sprintf(PHP_EOL . '    %s(' . PHP_EOL . '        %s' . PHP_EOL . '    )', $methodInjection->methodName, $parameters);
+            $str .= sprintf(
+                PHP_EOL
+                . '    %s('
+                . PHP_EOL
+                . '        %s'
+                . PHP_EOL
+                . '    )',
+                $methodInjection->methodName,
+                $parameters
+            );
         }
 
         return $str;
@@ -127,7 +143,7 @@ class ObjectDefinitionDumper
      * @return string
      * @throws ReflectionException
      */
-    private function dumpMethodParameters(string $className, MethodInjection $methodInjection) : string
+    private function dumpMethodParameters(string $className, MethodInjection $methodInjection): string
     {
         $methodReflection = new ReflectionMethod($className, $methodInjection->methodName);
 

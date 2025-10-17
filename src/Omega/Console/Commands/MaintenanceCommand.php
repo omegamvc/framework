@@ -9,6 +9,7 @@ use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
+
 use function file_exists;
 use function file_get_contents;
 use function file_put_contents;
@@ -65,10 +66,19 @@ class MaintenanceCommand extends AbstractCommand
         }
 
         if (false === file_exists($down = get_path('path.storage') . 'app' . DIRECTORY_SEPARATOR . 'down')) {
-            file_put_contents($down, file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'down'));
+            file_put_contents(
+                $down,
+                file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'down')
+            );
         }
 
-        file_put_contents(get_path('path.storage') . 'app' . DIRECTORY_SEPARATOR . 'maintenance.php', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'maintenance'));
+        file_put_contents(
+            get_path('path.storage')
+            . 'app'
+            . DIRECTORY_SEPARATOR
+            . 'maintenance.php',
+            file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'maintenance')
+        );
         success('Successfully, your application now in under maintenance.')->out();
 
         return 0;

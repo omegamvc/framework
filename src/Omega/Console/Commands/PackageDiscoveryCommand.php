@@ -9,6 +9,7 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Style;
 use Omega\Support\PackageManifest;
 use Throwable;
+
 use function array_keys;
 use function Omega\Console\error;
 use function Omega\Console\info;

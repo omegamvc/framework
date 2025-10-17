@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Omega\Container\Invoker;
 
@@ -32,23 +34,23 @@ use function var_export;
 class Invoker implements InvokerInterface
 {
     /** @var CallableResolver|null */
-    private ?CallableResolver $callableResolver {
+    private ?CallableResolver $callableResolver { // phpcs:ignore
         get {
-            return $this->callableResolver;
+            return $this->callableResolver; // phpcs:ignore
         }
     }
 
     /** @var ParameterResolverInterface */
-    private ParameterResolverInterface $parameterResolver {
+    private ParameterResolverInterface $parameterResolver { // phpcs:ignore
         get {
-            return $this->parameterResolver;
+            return $this->parameterResolver; // phpcs:ignore
         }
     }
 
     /** @var ContainerInterface|null */
-    private ?ContainerInterface $container {
+    private ?ContainerInterface $container { // phpcs:ignore
         get {
-            return $this->container;
+            return $this->container; // phpcs:ignore
         }
     }
 
@@ -56,8 +58,10 @@ class Invoker implements InvokerInterface
      * @param ParameterResolverInterface|null $parameterResolver
      * @param ContainerInterface|null $container
      */
-    public function __construct(?ParameterResolverInterface $parameterResolver = null, ?ContainerInterface $container = null)
-    {
+    public function __construct(
+        ?ParameterResolverInterface $parameterResolver = null,
+        ?ContainerInterface $container = null
+    ) {
         $this->parameterResolver = $parameterResolver ?: $this->createParameterResolver();
         $this->container = $container;
 
@@ -117,9 +121,9 @@ class Invoker implements InvokerInterface
     private function createParameterResolver(): ParameterResolverInterface
     {
         return new ResolverChain([
-            new NumericArrayResolver,
-            new AssociativeArrayResolver,
-            new DefaultValueResolver,
+            new NumericArrayResolver(),
+            new AssociativeArrayResolver(),
+            new DefaultValueResolver(),
         ]);
     }
 }

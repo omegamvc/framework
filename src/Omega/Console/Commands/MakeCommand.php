@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+<?php
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
@@ -290,7 +292,9 @@ class MakeCommand extends AbstractCommand
         info('Creating Model class in ' . $modelLocation)->out(false);
 
         $class = new Generate($name);
-        $class->customizeTemplate("<?php\n\ndeclare(strict_types=1);\n{{before}}{{comment}}\n{{rule}}class\40{{head}}\n{\n{{body}}}{{end}}");
+        $class->customizeTemplate(
+            "<?php\n\ndeclare(strict_types=1);\n{{before}}{{comment}}\n{{rule}}class\40{{head}}\n{\n{{body}}}{{end}}"
+        );
         $class->tabSize(4);
         $class->tabIndent(' ');
         $class->setEndWithNewLine();
@@ -315,8 +319,14 @@ class MakeCommand extends AbstractCommand
             }
         }
 
-        $class->addProperty('tableName')->visibility(Property::PROTECTED_)->dataType('string')->expecting(" = '{$tableName}'");
-        $class->addProperty('primaryKey')->visibility(Property::PROTECTED_)->dataType('string')->expecting("= '{$primaryKey}'");
+        $class->addProperty('tableName')
+            ->visibility(Property::PROTECTED_)
+            ->dataType('string')
+            ->expecting(" = '{$tableName}'");
+        $class->addProperty('primaryKey')
+            ->visibility(Property::PROTECTED_)
+            ->dataType('string')
+            ->expecting("= '{$primaryKey}'");
 
         if (false === file_put_contents($modelLocation, $class->generate())) {
             error('Failed Create model file')->out();
@@ -338,7 +348,7 @@ class MakeCommand extends AbstractCommand
      * @param array<string, string> $makeOption Configuration to replace template
      * @param string                $folder     Create folder for save location
      *
-     * @return bool True if template success copie
+     * @return bool True if template success copied
      */
     private function makeTemplate(string $argument, array $makeOption, string $folder = ''): bool
     {

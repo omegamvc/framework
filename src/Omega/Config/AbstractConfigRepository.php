@@ -87,7 +87,7 @@ abstract class AbstractConfigRepository implements ConfigRepositoryInterface
         $config = $this->config;
 
         foreach (explode('.', $key) as $section) {
-            if (!is_array($config) || ! array_key_exists($section, $config) ) {
+            if (!is_array($config) || ! array_key_exists($section, $config)) {
                 return $default;
             }
 

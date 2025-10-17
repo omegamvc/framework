@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+<?php
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
@@ -502,7 +504,7 @@ class MigrationCommand extends AbstractCommand
      * @throws NotFoundException
      * @throws Exception
      */
-    public function databaseCreate(bool $silent=false): int
+    public function databaseCreate(bool $silent = false): int
     {
         $dbName  = $this->DbName();
         $message = style("Do you want to create database `{$dbName}`?")->textBlue();

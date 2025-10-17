@@ -15,12 +15,14 @@ declare(strict_types=1);
 namespace Omega\Console\IO;
 
 use Omega\Console\Exceptions\InvalidStreamException;
+
 use function fwrite;
 use function get_resource_type;
 use function is_resource;
 use function str_contains;
 use function stream_get_meta_data;
 use function stream_isatty;
+
 use const STDOUT;
 
 /**

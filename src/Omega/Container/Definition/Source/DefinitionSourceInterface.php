@@ -19,10 +19,10 @@ interface DefinitionSourceInterface
      * @return DefinitionInterface|null
      * @throws InvalidDefinitionException An invalid definition was found.
      */
-    public function getDefinition(string $name) : ?DefinitionInterface;
+    public function getDefinition(string $name): ?DefinitionInterface;
 
     /**
      * @return array<string,DefinitionInterface> Definitions indexed by their name.
      */
-    public function getDefinitions() : array;
+    public function getDefinitions(): array;
 }

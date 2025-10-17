@@ -35,7 +35,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @return ObjectDefinition|null
      * @throws InvalidAttributeException
      */
-    public function autowire(string $name, ?ObjectDefinition $definition = null) : ?ObjectDefinition
+    public function autowire(string $name, ?ObjectDefinition $definition = null): ?ObjectDefinition
     {
         $className = $definition ? $definition->getClassName() : $name;
 
@@ -62,7 +62,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @throws InvalidAttributeException
      * @throws InvalidArgumentException The class doesn't exist
      */
-    public function getDefinition(string $name) : ?ObjectDefinition
+    public function getDefinition(string $name): ?ObjectDefinition
     {
         return $this->autowire($name);
     }
@@ -72,7 +72,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      *
      * @return array
      */
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         return [];
     }
@@ -85,7 +85,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @return void
      * @throws InvalidAttributeException
      */
-    private function readProperties(ReflectionClass $class, ObjectDefinition $definition) : void
+    private function readProperties(ReflectionClass $class, ObjectDefinition $definition): void
     {
         foreach ($class->getProperties() as $property) {
             $this->readProperty($property, $definition);
@@ -107,8 +107,11 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @return void
      * @throws InvalidAttributeException
      */
-    private function readProperty(ReflectionProperty $property, ObjectDefinition $definition, ?string $classname = null) : void
-    {
+    private function readProperty(
+        ReflectionProperty $property,
+        ObjectDefinition $definition,
+        ?string $classname = null
+    ): void {
         if ($property->isStatic() || $property->isPromoted()) {
             return;
         }
@@ -138,7 +141,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
         if ($entryName === null && $propertyType instanceof ReflectionNamedType) {
             if (! class_exists($propertyType->getName()) && ! interface_exists($propertyType->getName())) {
                 throw new InvalidAttributeException(sprintf(
-                    '#[Inject] found on property %s::%s but unable to guess what to inject, the type of the property does not look like a valid class or interface name',
+                    '#[Inject] found on property %s::%s but unable to guess what to inject, the type of the property does not look like a valid class or interface name', // phpcs:ignore
                     $property->getDeclaringClass()->getName(),
                     $property->getName()
                 ));
@@ -148,7 +151,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
 
         if ($entryName === null) {
             throw new InvalidAttributeException(sprintf(
-                '#[Inject] found on property %s::%s but unable to guess what to inject, please add a type to the property',
+                '#[Inject] found on property %s::%s but unable to guess what to inject, please add a type to the property', // phpcs:ignore
                 $property->getDeclaringClass()->getName(),
                 $property->getName()
             ));
@@ -166,7 +169,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @param ObjectDefinition $objectDefinition
      * @return void
      */
-    private function readMethods(ReflectionClass $class, ObjectDefinition $objectDefinition) : void
+    private function readMethods(ReflectionClass $class, ObjectDefinition $objectDefinition): void
     {
         // This will look in all the methods, including those of the parent classes
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
@@ -192,7 +195,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @param ReflectionMethod $method
      * @return MethodInjection|null
      */
-    private function getMethodInjection(ReflectionMethod $method) : ?MethodInjection
+    private function getMethodInjection(ReflectionMethod $method): ?MethodInjection
     {
         // Look for #[Inject] attribute
         $attribute = $method->getAttributes(Inject::class)[0] ?? null;
@@ -230,8 +233,11 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @param array $annotationParameters
      * @return string|null
      */
-    private function getMethodParameter(int $parameterIndex, ReflectionParameter $parameter, array $annotationParameters) : ?string
-    {
+    private function getMethodParameter(
+        int $parameterIndex,
+        ReflectionParameter $parameter,
+        array $annotationParameters
+    ): ?string {
         // Let's check if this parameter has an #[Inject] attribute
         $attribute = $parameter->getAttributes(Inject::class)[0] ?? null;
         if ($attribute) {
@@ -269,7 +275,7 @@ class AttributeBasedAutowiring implements DefinitionSourceInterface, AutowiringI
      * @return void
      * @throws InvalidAttributeException
      */
-    private function readInjectableAttribute(ReflectionClass $class, ObjectDefinition $definition) : void
+    private function readInjectableAttribute(ReflectionClass $class, ObjectDefinition $definition): void
     {
         try {
             $attribute = $class->getAttributes(Injectable::class)[0] ?? null;

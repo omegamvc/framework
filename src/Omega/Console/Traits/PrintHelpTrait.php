@@ -16,6 +16,7 @@ namespace Omega\Console\Traits;
 
 use Omega\Console\Style\Style;
 use Omega\Text\Str;
+
 use function array_keys;
 use function implode;
 use function strlen;

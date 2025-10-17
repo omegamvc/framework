@@ -63,10 +63,9 @@ class ConfigRepository extends AbstractConfigRepository implements ArrayAccess, 
      */
     public function merge(
         ConfigRepositoryInterface $configuration,
-        ?string  $key = null,
+        ?string $key = null,
         MergeStrategy|string|null $strategy = null
-    ): void
-    {
+    ): void {
         $config = !is_null($key) ? $this->get($key) : $this->getAll();
 
         if (!is_array($config)) {

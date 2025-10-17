@@ -57,16 +57,16 @@ final class Application extends Container
     private array $loadedProviders = [];
 
     /** @var bool Detect application has been booted. */
-    private bool $isBooted = false {
+    private bool $isBooted = false { // phpcs:ignore
         get {
-            return $this->isBooted;
+            return $this->isBooted; // phpcs:ignore
         }
     }
 
     /** @var bool Detect application has been bootstrapped. */
-    private bool $isBootstrapped = false {
+    private bool $isBootstrapped = false { // phpcs:ignore
         get {
-            return $this->isBootstrapped;
+            return $this->isBootstrapped; // phpcs:ignore
         }
     }
 
@@ -493,12 +493,14 @@ final class Application extends Container
      */
     protected function registerAlias(): void
     {
-        foreach ([
+        foreach (
+            [
             'request'       => [Request::class],
             'view.instance' => [Templator::class],
             'vite.gets'     => [Vite::class],
             'config'        => [ConfigRepository::class],
-        ] as $abstract => $aliases) {
+            ] as $abstract => $aliases
+        ) {
             foreach ($aliases as $alias) {
                 $this->alias($abstract, $alias);
             }

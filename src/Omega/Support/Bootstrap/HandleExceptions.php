@@ -49,11 +49,11 @@ class HandleExceptions
 
         /** @phpstan-ignore-next-line */
         if ('testing' !== $app->getEnvironment()) {
-	        set_error_handler([$this, 'handleError']);
+            set_error_handler([$this, 'handleError']);
 
-	        set_exception_handler([$this, 'handleException']);
-		}
-		
+            set_exception_handler([$this, 'handleException']);
+        }
+
         register_shutdown_function([$this, 'handleShutdown']);
 
         if ('testing' !== $app->getEnvironment()) {

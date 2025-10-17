@@ -8,6 +8,7 @@ use LogicException;
 use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Definition\ExtendsPreviousDefinitionInterface;
+
 use function array_combine;
 use function array_filter;
 use function array_keys;
@@ -42,7 +43,7 @@ class SourceChain implements DefinitionSourceInterface, MutableDefinitionSourceI
      * @return DefinitionInterface|null
      * @throws InvalidDefinitionException
      */
-    public function getDefinition(string $name, int $startIndex = 0) : ?DefinitionInterface
+    public function getDefinition(string $name, int $startIndex = 0): ?DefinitionInterface
     {
         $count = count($this->sources);
         for ($i = $startIndex; $i < $count; ++$i) {
@@ -66,7 +67,7 @@ class SourceChain implements DefinitionSourceInterface, MutableDefinitionSourceI
      * @return array|DefinitionInterface[]
      * @throws InvalidDefinitionException
      */
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         $allDefinitions = array_merge(...array_map(fn ($source) => $source->getDefinitions(), $this->sources));
 
@@ -82,7 +83,7 @@ class SourceChain implements DefinitionSourceInterface, MutableDefinitionSourceI
      * @param DefinitionInterface $definition
      * @return void
      */
-    public function addDefinition(DefinitionInterface $definition) : void
+    public function addDefinition(DefinitionInterface $definition): void
     {
         if (! $this->mutableSource) {
             throw new LogicException(
@@ -115,7 +116,7 @@ class SourceChain implements DefinitionSourceInterface, MutableDefinitionSourceI
      * @param MutableDefinitionSourceInterface $mutableSource
      * @return void
      */
-    public function setMutableDefinitionSource(MutableDefinitionSourceInterface $mutableSource) : void
+    public function setMutableDefinitionSource(MutableDefinitionSourceInterface $mutableSource): void
     {
         $this->mutableSource = $mutableSource;
 

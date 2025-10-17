@@ -8,6 +8,7 @@ use function array_map;
 use function is_string;
 use function str_replace;
 use function var_export;
+
 use const PHP_EOL;
 
 /**
@@ -26,27 +27,27 @@ class ArrayDefinition implements DefinitionInterface
     ) {
     }
 
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
-    public function getValues() : array
+    public function getValues(): array
     {
         return $this->values;
     }
 
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         $this->values = array_map($replacer, $this->values);
     }
 
-    public function __toString() : string
+    public function __toString(): string
     {
         $str = '[' . PHP_EOL;
 

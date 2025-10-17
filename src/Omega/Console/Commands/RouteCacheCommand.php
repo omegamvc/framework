@@ -76,7 +76,8 @@ class RouteCacheCommand extends AbstractCommand
         $routes = [];
         /**foreach ($router->getRoutesRaw() as $route) {
             if (is_callable($route['function'])) {
-                warn("Route '{$route['name']}' cannot be cached because it contains a closure/callback function")->out();
+                warn("Route '{$route['name']}' cannot be cached because it contains a closure/callback function")
+                    ->out();
 
                 return 1;
             }
@@ -93,7 +94,6 @@ class RouteCacheCommand extends AbstractCommand
         }*/
         foreach ($router->getRoutesRaw() as $route) {
             if (is_callable($route['function'])) {
-                // Serializza invece di bloccare
                 $routeFunction = serialize(new UnsignedSerializableClosure($route['function']));
             } else {
                 $routeFunction = $route['function'];

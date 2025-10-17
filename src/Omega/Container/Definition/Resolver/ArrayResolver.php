@@ -9,7 +9,6 @@ use Omega\Container\Definition\DefinitionInterface;
 use Omega\Container\Exceptions\DependencyException;
 use Exception;
 
-
 use function array_walk_recursive;
 
 /**
@@ -37,12 +36,12 @@ readonly class ArrayResolver implements DefinitionResolverInterface
      * @param ArrayDefinition $definition
      * @throws DependencyException
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : array
+    public function resolve(DefinitionInterface $definition, array $parameters = []): array
     {
         $values = $definition->getValues();
 
         // Resolve nested definitions
-        array_walk_recursive($values, function (& $value, $key) use ($definition) {
+        array_walk_recursive($values, function (&$value, $key) use ($definition) {
             if ($value instanceof DefinitionInterface) {
                 $value = $this->resolveDefinition($value, $definition, $key);
             }
@@ -56,7 +55,7 @@ readonly class ArrayResolver implements DefinitionResolverInterface
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
         return true;
     }
@@ -68,7 +67,7 @@ readonly class ArrayResolver implements DefinitionResolverInterface
      * @return mixed
      * @throws DependencyException
      */
-    private function resolveDefinition(DefinitionInterface $value, ArrayDefinition $definition, int|string $key) : mixed
+    private function resolveDefinition(DefinitionInterface $value, ArrayDefinition $definition, int|string $key): mixed
     {
         try {
             return $this->definitionResolver->resolve($value);

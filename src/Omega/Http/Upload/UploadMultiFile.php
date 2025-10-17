@@ -7,6 +7,7 @@ namespace Omega\Http\Upload;
 use Omega\Http\Exceptions\FileNotExistsException;
 use Omega\Http\Exceptions\FileNotUploadedException;
 use Omega\Http\Exceptions\FolderNotExistsException;
+
 use function explode;
 use function file_get_contents;
 use function is_dir;

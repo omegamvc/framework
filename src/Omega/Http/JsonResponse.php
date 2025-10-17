@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Omega\Http;
 
 use ArrayObject;
-
 use Exception;
 use InvalidArgumentException;
 

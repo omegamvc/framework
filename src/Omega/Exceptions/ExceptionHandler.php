@@ -102,7 +102,6 @@ class ExceptionHandler
             ),
             fn($report) => $th instanceof $report
         );
-
     }
 
     /**

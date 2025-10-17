@@ -11,8 +11,8 @@ class Schedule
 
     public function __construct(
         protected ?int $time = null,
-        private ?InterpolateInterface $logger = null)
-    {
+        private ?InterpolateInterface $logger = null
+    ) {
     }
 
     /**

@@ -9,16 +9,16 @@ namespace Omega\Container\Definition\ObjectDefinition;
  */
 class PropertyInjection
 {
-    public string $propertyName {
+    public string $propertyName { // phpcs:ignore
         get {
-            return $this->propertyName;
+            return $this->propertyName; // phpcs:ignore
         }
     }
 
     /** @var mixed Value that should be injected in the property. */
-    public mixed $value {
+    public mixed $value { // phpcs:ignore
         get {
-            return $this->value;
+            return $this->value; // phpcs:ignore
         }
     }
 
@@ -29,9 +29,9 @@ class PropertyInjection
      *
      * @var string|null
      */
-    public ?string $className {
+    public ?string $className { // phpcs:ignore
         get {
-            return $this->className;
+            return $this->className; // phpcs:ignore
         }
     }
 
@@ -51,7 +51,7 @@ class PropertyInjection
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinition(callable $replacer) : void
+    public function replaceNestedDefinition(callable $replacer): void
     {
         $this->value = $replacer($this->value);
     }

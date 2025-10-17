@@ -12,7 +12,6 @@ use Omega\Cache\Storage\ArrayStorage;
 use function is_callable;
 use function sprintf;
 
-
 class CacheManager implements CacheInterface
 {
     /** @var array<string, CacheInterface|Closure(): CacheInterface> */

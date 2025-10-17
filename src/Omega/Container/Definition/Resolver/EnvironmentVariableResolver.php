@@ -41,7 +41,7 @@ class EnvironmentVariableResolver implements DefinitionResolverInterface
      * @throws InvalidDefinitionException
      * @throws DependencyException
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []) : mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = []): mixed
     {
         $value = call_user_func($this->variableReader, $definition->variableName);
 
@@ -71,7 +71,7 @@ class EnvironmentVariableResolver implements DefinitionResolverInterface
      * @param array $parameters
      * @return bool
      */
-    public function isResolvable(DefinitionInterface $definition, array $parameters = []) : bool
+    public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
         return true;
     }

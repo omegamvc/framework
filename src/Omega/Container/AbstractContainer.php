@@ -34,8 +34,8 @@ use Omega\Container\Invoker\ParameterResolver\DefaultValueResolver;
 use Omega\Container\Invoker\ParameterResolver\NumericArrayResolver;
 use Omega\Container\Invoker\ParameterResolver\ResolverChain;
 use Omega\Container\Proxy\NativeProxyFactory;
-
 use ReflectionClass;
+
 use function array_key_exists;
 use function array_keys;
 use function array_merge;
@@ -84,10 +84,10 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @return static
      * @throws Exception
      */
-    public static function create(array $definitions) : static
+    public static function create(array $definitions): static
     {
-        $source = new SourceChain([new ReflectionBasedAutowiring]);
-        $source->setMutableDefinitionSource(new DefinitionArray($definitions, new ReflectionBasedAutowiring));
+        $source = new SourceChain([new ReflectionBasedAutowiring()]);
+        $source->setMutableDefinitionSource(new DefinitionArray($definitions, new ReflectionBasedAutowiring()));
 
         return new static($definitions);
     }
@@ -105,7 +105,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      */
     public function __construct(
         array|MutableDefinitionSourceInterface $definitions = [],
-        ?ContainerInterface                    $wrapperContainer = null,
+        ?ContainerInterface $wrapperContainer = null,
     ) {
         if (is_array($definitions)) {
             $this->definitionSource = $this->createDefaultDefinitionSource($definitions);
@@ -136,7 +136,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @throws InvalidDefinitionException
      * @throws NotFoundException No entry found for the given name.
      */
-    public function get(string $id) : mixed
+    public function get(string $id): mixed
     {
         // If the entry is already resolved we return it
         if (isset($this->resolvedEntries[$id]) || array_key_exists($id, $this->resolvedEntries)) {
@@ -160,7 +160,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @return DefinitionInterface|null
      * @throws InvalidDefinitionException
      */
-    private function getDefinition(string $name) : ?DefinitionInterface
+    private function getDefinition(string $name): ?DefinitionInterface
     {
         // Local cache that avoids fetching the same definition twice
         if (!array_key_exists($name, $this->fetchedDefinitions)) {
@@ -190,7 +190,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @throws InvalidDefinitionException
      * @throws NotFoundException No entry found for the given name.
      */
-    public function make(string $name, array $parameters = []) : mixed
+    public function make(string $name, array $parameters = []): mixed
     {
         $definition = $this->getDefinition($name);
         if (! $definition) {
@@ -210,7 +210,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @return bool
      * @throws InvalidDefinitionException
      */
-    public function has(string $id) : bool
+    public function has(string $id): bool
     {
         if (array_key_exists($id, $this->resolvedEntries)) {
             return true;
@@ -233,7 +233,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @throws DependencyException
      * @throws InvalidDefinitionException
      */
-    public function injectOn(object $instance) : object
+    public function injectOn(object $instance): object
     {
         // If the class is anonymous, don't cache its definition
         // Checking for anonymous classes is cleaner via Reflection, but also slower
@@ -267,7 +267,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @throws NotCallableException
      * @throws NotEnoughParametersException
      */
-    public function call($callable, array $parameters = []) : mixed
+    public function call($callable, array $parameters = []): mixed
     {
         return $this->getInvoker()->call($callable, $parameters);
     }
@@ -278,7 +278,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @param string $name Entry name
      * @param mixed|DefinitionHelperInterface $value Value, use definition helpers to define objects
      */
-    public function set(string $name, mixed $value) : void
+    public function set(string $name, mixed $value): void
     {
         if ($value instanceof DefinitionHelperInterface) {
             $value = $value->getDefinition($name);
@@ -302,7 +302,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @return string[]
      * @throws InvalidDefinitionException
      */
-    public function getKnownEntryNames() : array
+    public function getKnownEntryNames(): array
     {
         $entries = array_unique(array_merge(
             array_keys($this->definitionSource->getDefinitions()),
@@ -321,7 +321,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @throws InvalidDefinitionException
      * @throws NotFoundException
      */
-    public function debugEntry(string $name) : string
+    public function debugEntry(string $name): string
     {
         $definition = $this->definitionSource->getDefinition($name);
         if ($definition instanceof DefinitionInterface) {
@@ -338,7 +338,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
     /**
      * Get formatted entry type.
      */
-    private function getEntryType(mixed $entry) : string
+    private function getEntryType(mixed $entry): string
     {
         if (is_object($entry)) {
             return sprintf("Object (\n    class = %s\n)", $entry::class);
@@ -370,7 +370,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @throws DependencyException Error while resolving the entry.
      * @throws InvalidDefinitionException
      */
-    private function resolveDefinition(DefinitionInterface $definition, array $parameters = []) : mixed
+    private function resolveDefinition(DefinitionInterface $definition, array $parameters = []): mixed
     {
         $entryName = $definition->getName();
 
@@ -379,7 +379,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
             $entryList = implode(' -> ', [...array_keys($this->entriesBeingResolved), $entryName]);
             throw new DependencyException(
                 sprintf(
-                "Circular dependency detected while trying to resolve entry '%s': Dependencies: '%s'",
+                    "Circular dependency detected while trying to resolve entry '%s': Dependencies: '%s'",
                     $entryName,
                     $entryList
                 )
@@ -397,7 +397,7 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
         return $value;
     }
 
-    protected function setDefinition(string $name, DefinitionInterface $definition) : void
+    protected function setDefinition(string $name, DefinitionInterface $definition): void
     {
         // Clear existing entry if it exists
         if (array_key_exists($name, $this->resolvedEntries)) {
@@ -411,14 +411,14 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
     /**
      * @return InvokerInterface
      */
-    private function getInvoker() : InvokerInterface
+    private function getInvoker(): InvokerInterface
     {
         if (! $this->invoker) {
             $parameterResolver = new ResolverChain([
                 new DefinitionParameterResolver($this->definitionResolver),
-                new NumericArrayResolver,
-                new AssociativeArrayResolver,
-                new DefaultValueResolver,
+                new NumericArrayResolver(),
+                new AssociativeArrayResolver(),
+                new DefaultValueResolver(),
                 new TypeHintContainerResolver($this->delegateContainer),
             ]);
 
@@ -433,9 +433,9 @@ class AbstractContainer implements ContainerInterface, FactoryInterface, Invoker
      * @return SourceChain
      * @throws Exception
      */
-    private function createDefaultDefinitionSource(array $definitions) : SourceChain
+    private function createDefaultDefinitionSource(array $definitions): SourceChain
     {
-        $autowiring = new ReflectionBasedAutowiring;
+        $autowiring = new ReflectionBasedAutowiring();
         $source = new SourceChain([$autowiring]);
         $source->setMutableDefinitionSource(new DefinitionArray($definitions, $autowiring));
 

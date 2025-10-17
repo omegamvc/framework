@@ -20,14 +20,14 @@ class MethodInjection implements DefinitionInterface
      */
     public function __construct(
         public string $methodName {
-            get {
-                return $this->methodName;
-            }
+        get {
+        return $this->methodName;
+        }
         },
-        public array  $parameters = [] {
-            get {
-                return $this->parameters;
-            }
+        public array $parameters = [] {
+        get {
+        return $this->parameters;
+        }
         },
     ) {
     }
@@ -36,7 +36,7 @@ class MethodInjection implements DefinitionInterface
      * @param array $parameters
      * @return self
      */
-    public static function constructor(array $parameters = []) : self
+    public static function constructor(array $parameters = []): self
     {
         return new self('__construct', $parameters);
     }
@@ -47,7 +47,7 @@ class MethodInjection implements DefinitionInterface
      * @param array $parameters
      * @return void
      */
-    public function replaceParameters(array $parameters) : void
+    public function replaceParameters(array $parameters): void
     {
         $this->parameters = $parameters;
     }
@@ -56,7 +56,7 @@ class MethodInjection implements DefinitionInterface
      * @param MethodInjection $definition
      * @return void
      */
-    public function merge(self $definition) : void
+    public function merge(self $definition): void
     {
         // In case of conflicts, the current definition prevails.
         $this->parameters += $definition->parameters;
@@ -65,7 +65,7 @@ class MethodInjection implements DefinitionInterface
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return '';
     }
@@ -74,7 +74,7 @@ class MethodInjection implements DefinitionInterface
      * @param string $name
      * @return void
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         // The name does not matter for method injections
     }
@@ -83,7 +83,7 @@ class MethodInjection implements DefinitionInterface
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void
+    public function replaceNestedDefinitions(callable $replacer): void
     {
         $this->parameters = array_map($replacer, $this->parameters);
     }
@@ -91,7 +91,7 @@ class MethodInjection implements DefinitionInterface
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return sprintf('method(%s)', $this->methodName);
     }

@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnused */
+<?php
+
+/** @noinspection PhpUnused */
 
 declare(strict_types=1);
 
@@ -6,6 +8,7 @@ namespace Omega\Text;
 
 class Regex
 {
+    /* phpcs:disable Generic.Files.LineLength.TooLong */
     /**
      * Regex common email.
      *

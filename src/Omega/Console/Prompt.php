@@ -216,7 +216,8 @@ class Prompt
         new Style($this->title)->out();
 
         $userLine = [];
-        readline_callback_handler_install('', function () {});
+        readline_callback_handler_install('', function () {
+        });
         while (true) {
             $keystroke = stream_get_contents(STDIN, 1);
 
@@ -249,7 +250,8 @@ class Prompt
     public function anyKey(callable $callable): mixed
     {
         $prompt = (string) $this->title;
-        readline_callback_handler_install($prompt, function () {});
+        readline_callback_handler_install($prompt, function () {
+        });
         $keystroke = stream_get_contents(STDIN, 1);
 
         return ($callable)($keystroke);

@@ -43,7 +43,7 @@ class Response
     public const int HTTP_PAYMENT_REQUIRED = 402;
     public const int HTTP_FORBIDDEN = 403;
     public const int HTTP_NOT_FOUND = 404;
-    public const int HTTP_METHOD_NOT_ALLOWED= 405;
+    public const int HTTP_METHOD_NOT_ALLOWED = 405;
 
     /**
      * Status response text.
@@ -191,7 +191,11 @@ class Response
         $level  = count($status);
         $flags  = PHP_OUTPUT_HANDLER_REMOVABLE | ($flush ? PHP_OUTPUT_HANDLER_FLUSHABLE : PHP_OUTPUT_HANDLER_CLEANABLE);
 
-        while ($level-- > $targetLevel && ($s = $status[$level]) && (!isset($s['del']) ? !isset($s['flags']) || ($s['flags'] & $flags) === $flags : $s['del'])) {
+        while (
+            $level-- > $targetLevel
+            && ($s = $status[$level])
+            && (!isset($s['del']) ? !isset($s['flags']) || ($s['flags'] & $flags) === $flags : $s['del'])
+        ) {
             if ($flush) {
                 ob_end_flush();
             } else {

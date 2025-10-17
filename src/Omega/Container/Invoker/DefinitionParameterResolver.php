@@ -40,7 +40,7 @@ readonly class DefinitionParameterResolver implements ParameterResolverInterface
         ReflectionFunctionAbstract $reflection,
         array $providedParameters,
         array $resolvedParameters,
-    ) : array {
+    ): array {
         // Skip parameters already resolved
         if (! empty($resolvedParameters)) {
             $providedParameters = array_diff_key($providedParameters, $resolvedParameters);

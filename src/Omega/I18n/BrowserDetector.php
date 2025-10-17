@@ -353,7 +353,6 @@ class BrowserDetector
                     $version = explode(' ', $result[1]);
 
                     if ($version[0] === '537.36') {
-                        // AppleWebKit/537.36 is Blink engine specific, exception is Blink emulated IEMobile, Trident or Edge
                         $this->engine = self::BLINK;
                     }
                 }

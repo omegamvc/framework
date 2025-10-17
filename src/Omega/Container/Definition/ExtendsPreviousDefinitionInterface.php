@@ -13,5 +13,5 @@ interface ExtendsPreviousDefinitionInterface extends DefinitionInterface
      * @param DefinitionInterface $definition
      * @return void
      */
-    public function setExtendedDefinition(DefinitionInterface $definition) : void;
+    public function setExtendedDefinition(DefinitionInterface $definition): void;
 }

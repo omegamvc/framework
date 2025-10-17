@@ -15,5 +15,5 @@ interface MutableDefinitionSourceInterface extends DefinitionSourceInterface
      * @param DefinitionInterface $definition
      * @return void
      */
-    public function addDefinition(DefinitionInterface $definition) : void;
+    public function addDefinition(DefinitionInterface $definition): void;
 }

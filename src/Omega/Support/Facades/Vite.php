@@ -20,8 +20,8 @@ namespace Omega\Support\Facades;
  * @method static int                   cacheTime()
  * @method static int                   manifestTime()
  * @method static string                getPreloadTags(string[] $entryPoints)
- * @method static string                getTags(string[] $entryPoints, array<string|int, string|bool|int|null> $attributes = null)
- * @method static string                getCustomTags(array $entryPoints, array<string|int, string|bool|int|null> $defaultAttributes = [])
+ * @method static string getTags(string[] $entryPoints, array<string|int, string|bool|int|null> $attributes = null)
+ * @method static string getCustomTags(array $entryPoints,array<string|int, string|bool|int|null> $defaultAttributes=[])
  *
  * @see \Omega\Support\Vite
  */

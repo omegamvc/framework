@@ -135,7 +135,9 @@ class ViewCommand extends AbstractCommand
         info('build compiler cache')->out(false);
         $count     = 0;
         $progress = new ProgressBar(':progress :percent - :current', [
-            ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], get_path('path.view'), '') : '',
+            ':current' => fn ($current, $max): string => array_key_exists($current, $files)
+                ? Str::replace($files[$current], get_path('path.view'), '')
+                : '',
         ]);
 
         $progress->mask = count($files);
@@ -148,7 +150,9 @@ class ViewCommand extends AbstractCommand
             }
             $progress->current++;
             $time               = round(microtime(true) - $watchStart, 3) * 1000;
-            $progress->complete = static fn (): string => (string) success("Success, $count file compiled ($time ms).");
+            $progress->complete = static fn (): string => (string) success(
+                "Success, $count file compiled ($time ms)."
+            );
             $progress->tick();
         }
 
@@ -174,7 +178,9 @@ class ViewCommand extends AbstractCommand
 
         $count     = 0;
         $progress = new ProgressBar(':progress :percent - :current', [
-            ':current' => fn ($current, $max): string => array_key_exists($current, $files) ? Str::replace($files[$current], get_path('path.view'), '') : '',
+            ':current' => fn ($current, $max): string => array_key_exists($current, $files)
+                ? Str::replace($files[$current], get_path('path.view'), '')
+                : '',
         ]);
 
         $progress->mask = count($files);
@@ -258,7 +264,7 @@ class ViewCommand extends AbstractCommand
             }
 
             if (function_exists('pcntl_signal_dispatch')) {
-               pcntl_signal_dispatch();
+                pcntl_signal_dispatch();
             }
 
             usleep(1_000); // 1ms

@@ -16,7 +16,7 @@ interface DefinitionInterface extends \Stringable
      *
      * @return string
      */
-    public function getName() : string;
+    public function getName(): string;
 
     /**
      * Set the name of the entry in the container.
@@ -24,7 +24,7 @@ interface DefinitionInterface extends \Stringable
      * @param string $name
      * @return void
      */
-    public function setName(string $name) : void;
+    public function setName(string $name): void;
 
     /**
      * Apply a callable that replaces the definitions nested in this definition.
@@ -32,12 +32,12 @@ interface DefinitionInterface extends \Stringable
      * @param callable $replacer
      * @return void
      */
-    public function replaceNestedDefinitions(callable $replacer) : void;
+    public function replaceNestedDefinitions(callable $replacer): void;
 
     /**
      * Definitions can be cast to string for debugging information.
      *
      * @return string
      */
-    public function __toString() : string;
+    public function __toString(): string;
 }

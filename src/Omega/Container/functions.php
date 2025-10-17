@@ -12,6 +12,7 @@ use Omega\Container\Definition\Helper\FactoryDefinitionHelper;
 use Omega\Container\Definition\Reference;
 use Omega\Container\Definition\StringDefinition;
 use Omega\Container\Definition\ValueDefinition;
+
 use function func_num_args;
 use function is_array;
 
@@ -19,7 +20,7 @@ if (! function_exists('Omega\Container\value')) {
     /**
      * Helper for defining a value.
      */
-    function value(mixed $value) : ValueDefinition
+    function value(mixed $value): ValueDefinition
     {
         return new ValueDefinition($value);
     }
@@ -33,7 +34,7 @@ if (! function_exists('Omega\Container\create')) {
      *                               If null, the name of the entry (in the container) will be used as class name.
      * @return CreateDefinitionHelper
      */
-    function create(?string $class_name = null) : CreateDefinitionHelper
+    function create(?string $class_name = null): CreateDefinitionHelper
     {
         return new CreateDefinitionHelper($class_name);
     }
@@ -47,7 +48,7 @@ if (! function_exists('Omega\Container\autowire')) {
      *                               If null, the name of the entry (in the container) will be used as class name.
      * @return AutowireDefinitionHelper
      */
-    function autowire(?string $class_name = null) : AutowireDefinitionHelper
+    function autowire(?string $class_name = null): AutowireDefinitionHelper
     {
         return new AutowireDefinitionHelper($class_name);
     }
@@ -61,7 +62,7 @@ if (! function_exists('Omega\Container\factory')) {
      *                                       and returns the value to register in the container.
      * @return FactoryDefinitionHelper
      */
-    function factory(callable|array|string $factory) : FactoryDefinitionHelper
+    function factory(callable|array|string $factory): FactoryDefinitionHelper
     {
         return new FactoryDefinitionHelper($factory);
     }
@@ -81,7 +82,7 @@ if (! function_exists('Omega\Container\decorate')) {
      *                                         the container as second.
      * @return FactoryDefinitionHelper
      */
-    function decorate(callable|array|string $callable) : FactoryDefinitionHelper
+    function decorate(callable|array|string $callable): FactoryDefinitionHelper
     {
         return new FactoryDefinitionHelper($callable, true);
     }
@@ -94,7 +95,7 @@ if (! function_exists('Omega\Container\get')) {
      * @param string $entry_name
      * @return Reference
      */
-    function get(string $entry_name) : Reference
+    function get(string $entry_name): Reference
     {
         return new Reference($entry_name);
     }
@@ -108,7 +109,7 @@ if (! function_exists('Omega\Container\env')) {
      * @param mixed  $defaultValue The default value to be used if the environment variable is not defined.
      * @return EnvironmentVariableDefinition
      */
-    function env(string $variableName, mixed $defaultValue = null) : EnvironmentVariableDefinition
+    function env(string $variableName, mixed $defaultValue = null): EnvironmentVariableDefinition
     {
         // Only mark as optional if the default value was *explicitly* provided.
         $isOptional = 2 === func_num_args();
@@ -134,7 +135,7 @@ if (! function_exists('Omega\Container\add')) {
      * @param mixed|array $values A value or an array of values to add to the array.
      * @return ArrayDefinitionExtension
      */
-    function add(mixed $values) : ArrayDefinitionExtension
+    function add(mixed $values): ArrayDefinitionExtension
     {
         if (!is_array($values)) {
             $values = [$values];
@@ -155,7 +156,7 @@ if (! function_exists('Omega\Container\string')) {
      * @param string $expression A string expression. Use the `{}` placeholders to reference other container entries.
      * @return StringDefinition
      */
-    function string(string $expression) : StringDefinition
+    function string(string $expression): StringDefinition
     {
         return new StringDefinition($expression);
     }

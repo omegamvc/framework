@@ -6,6 +6,7 @@ namespace Omega\Template;
 
 use Omega\Template\Traits\CommentTrait;
 use Omega\Template\Traits\FormatterTrait;
+
 use function array_filter;
 use function array_map;
 use function count;
