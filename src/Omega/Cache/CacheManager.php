@@ -1,36 +1,83 @@
 <?php
 
+/**
+ * Part of Omega - Cache Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Cache;
 
 use Closure;
 use DateInterval;
-use Omega\Cache\Exceptions\UnknownStorageDriverException;
+use Omega\Cache\Exceptions\UnknownStorageException;
 use Omega\Cache\Storage\ArrayStorage;
 
 use function is_callable;
-use function sprintf;
 
+/**
+ * Class CacheManager
+ *
+ * The CacheManager acts as a central point of access for all cache storage drivers.
+ * It allows setting and retrieving multiple cache drivers (e.g. file, memory, Redis),
+ * and automatically delegates cache operations to the default driver if no specific
+ * driver is requested.
+ *
+ * @category  Omega
+ * @package   Cache
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class CacheManager implements CacheInterface
 {
-    /** @var array<string, CacheInterface|Closure(): CacheInterface> */
+    /**
+     * Registered cache drivers.
+     *
+     * Each driver can be a direct instance of {@see CacheInterface} or a lazy-loaded
+     * closure returning a cache instance.
+     *
+     * @var array<string, CacheInterface|Closure(): CacheInterface>
+     */
     private array $driver = [];
 
-    /** @var CacheInterface */
+    /** @var CacheInterface The default cache driver used when no specific driver name is provided. */
     private CacheInterface $defaultDriver;
 
     /**
-     *
+     * Initializes the CacheManager with a default in-memory storage driver.
      */
-    public function __construct()
+    /**public function __construct()
     {
         $this->setDefaultDriver(new ArrayStorage());
+    }*/
+
+    /**
+     * Initializes the CacheManager with a default driver.
+     *
+     * @param CacheInterface|null $defaultDriver The default cache driver to be used as default.
+     * @eturn void
+     */
+    public function __construct(?CacheInterface $defaultDriver = null)
+    {
+        if ($defaultDriver !== null) {
+            $this->setDefaultDriver($defaultDriver);
+        }
     }
 
     /**
-     * @param CacheInterface $driver
-     * @return $this
+     * Sets the default cache driver instance.
+     *
+     * @param CacheInterface $driver The cache driver to be used as default.
+     * @return $this Returns the current instance for method chaining.
      */
     public function setDefaultDriver(CacheInterface $driver): self
     {
@@ -40,9 +87,14 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string                                   $driverName
-     * @param Closure(): CacheInterface|CacheInterface $driver
-     * @return self
+     * Registers a named cache driver.
+     *
+     * Drivers can be added either as ready-to-use instances or as closures
+     * that return a {@see CacheInterface} instance upon resolution.
+     *
+     * @param string                                   $driverName The unique driver name.
+     * @param Closure(): CacheInterface|CacheInterface $driver     The driver instance or a closure returning it.
+     * @return self Returns the current instance for method chaining.
      */
     public function setDriver(string $driverName, Closure|CacheInterface $driver): self
     {
@@ -52,9 +104,14 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $driverName
-     * @return CacheInterface
-     * @throws UnknownStorageDriverException
+     * Resolves a cache driver by its registered name.
+     *
+     * If the driver is registered as a closure, it will be executed and its
+     * resulting instance cached for future use.
+     *
+     * @param string $driverName The name of the driver to resolve.
+     * @return CacheInterface The resolved cache driver instance.
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     private function resolve(string $driverName): CacheInterface
     {
@@ -65,16 +122,18 @@ class CacheManager implements CacheInterface
         }
 
         if (null === $driver) {
-            throw new UnknownStorageDriverException($driverName);
+            throw new UnknownStorageException($driverName);
         }
 
         return $this->driver[$driverName] = $driver;
     }
 
     /**
-     * @param string|null $driver_name
-     * @return CacheInterface
-     * @throws UnknownStorageDriverException
+     * Retrieves a cache driver by name or returns the default driver if none is provided.
+     *
+     * @param string|null $driver_name Optional name of the driver to use.
+     * @return CacheInterface The corresponding cache driver instance.
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function driver(?string $driver_name = null): CacheInterface
     {
@@ -86,10 +145,15 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     * @throws UnknownStorageDriverException
+     * Magic method to delegate cache operations to the default driver.
+     *
+     * This allows direct method calls (e.g., `$cache->get('key')`) on the manager
+     * without explicitly calling `driver()`.
+     *
+     * @param string $method The method name being called.
+     * @param array  $parameters The parameters passed to the method.
+     * @return mixed The result returned by the underlying cache driver.
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function __call(string $method, array $parameters): mixed
     {
@@ -97,10 +161,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed|null $default
-     * @return mixed
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -108,11 +171,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
-     * @param int|DateInterval|null $ttl
-     * @return bool
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException
      */
     public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
     {
@@ -120,9 +181,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $key
-     * @return bool
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function delete(string $key): bool
     {
@@ -130,8 +191,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @return bool
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function clear(): bool
     {
@@ -139,10 +201,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param iterable $keys
-     * @param mixed|null $default
-     * @return iterable
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
@@ -150,10 +211,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param iterable $values
-     * @param int|DateInterval|null $ttl
-     * @return bool
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool
     {
@@ -161,9 +221,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param iterable $keys
-     * @return bool
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function deleteMultiple(iterable $keys): bool
     {
@@ -171,9 +231,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $key
-     * @return bool
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function has(string $key): bool
     {
@@ -181,10 +241,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $key
-     * @param int $value
-     * @return int
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function increment(string $key, int $value): int
     {
@@ -192,10 +251,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $key
-     * @param int $value
-     * @return int
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function decrement(string $key, int $value): int
     {
@@ -203,11 +261,9 @@ class CacheManager implements CacheInterface
     }
 
     /**
-     * @param string $key
-     * @param Closure $callback
-     * @param int|DateInterval|null $ttl
-     * @return mixed
-     * @throws UnknownStorageDriverException
+     * {@inheritdoc}
+     *
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function remember(string $key, Closure $callback, int|DateInterval|null $ttl): mixed
     {

@@ -16,8 +16,8 @@ use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
 use Omega\Container\Exceptions\DependencyException;
 use Omega\Container\Exceptions\NotFoundException;
-use Omega\Database\MySchema\MyPDO;
-use Omega\Database\MySchema\Table\Create;
+use Omega\Database\Schema\SchemaConnection;
+use Omega\Database\Schema\Table\Create;
 use Omega\Support\Facades\DB;
 use Omega\Support\Facades\PDO;
 use Omega\Support\Facades\Schema;
@@ -40,6 +40,8 @@ use const PATHINFO_FILENAME;
 class MigrationCommand extends AbstractCommand
 {
     use PrintHelpTrait;
+
+    /** @todo: Ho oaggiunto uno spazio prima dei DONE. Controllare se possono essere formattati in alto modo */
 
     /**
      * Register vendor migration path.
@@ -136,7 +138,7 @@ class MigrationCommand extends AbstractCommand
      */
     private function DbName(): string
     {
-        return $this->option('database', app()->get(MyPDO::class)->getDatabase());
+        return $this->option('database', app()->get(SchemaConnection::class)->getDatabase());
     }
 
     /**
@@ -306,7 +308,7 @@ class MigrationCommand extends AbstractCommand
             }
 
             if ($success) {
-                $print->push('DONE')->textGreen()->newLines();
+                $print->push(' DONE')->textGreen()->newLines();
                 continue;
             }
 
@@ -365,7 +367,7 @@ class MigrationCommand extends AbstractCommand
             }
 
             if ($success) {
-                $print->push('DONE')->textGreen()->newLines();
+                $print->push(' DONE')->textGreen()->newLines();
                 continue;
             }
 
@@ -484,7 +486,7 @@ class MigrationCommand extends AbstractCommand
             }
 
             if ($success) {
-                $print->push('DONE')->textGreen()->newLines();
+                $print->push(' DONE')->textGreen()->newLines();
                 continue;
             }
 

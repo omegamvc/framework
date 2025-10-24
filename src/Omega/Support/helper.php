@@ -144,7 +144,7 @@ if (!function_exists('redirect_route')) {
      * Redirect to another route.
      *
      * @param string   $route_name The name of the route.
-     * @param array<string|int, string|int|bool> $parameter Dinamic parameter to fill with url exprestion
+     * @param array<string|int, string|int|bool> $parameter Dynamic parameter to fill with url expression
      * @return RedirectResponse
      * @throws Exception
      */
@@ -194,14 +194,6 @@ if (!function_exists('env')) {
 }
 
 if (!function_exists('set_path')) {
-    /**
-     * Restituisce il path completo associato a una chiave tipo "app.middlewares",
-     * con slash iniziale e finale corretti.
-     *
-     * @param string $key Chiave da esplodere in path
-     * @return string Path completo
-     * @throws InvalidArgumentException se la chiave è vuota
-     */
     function set_path(string $key): string
     {
         if ($key === '') {
@@ -236,19 +228,10 @@ if (!function_exists('get_path')) {
 }
 
 if (!function_exists('path')) {
-    /**
-     * Converte un binding logico come "app.Services" in un percorso relativo al progetto,
-     * usando gli slash corretti per il sistema operativo.
-     *
-     * @param string $binding
-     * @return string
-     */
     function path(string $binding): string
     {
-        // Sostituisce i punti con DIRECTORY_SEPARATOR e aggiunge uno slash finale
         $relativePath = str_replace('.', DIRECTORY_SEPARATOR, $binding);
 
-        // Assicura lo slash finale
         if (!str_ends_with($relativePath, DIRECTORY_SEPARATOR)) {
             $relativePath .= DIRECTORY_SEPARATOR;
         }

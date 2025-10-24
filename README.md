@@ -20,7 +20,7 @@
 - Route
 - Model (database class relation)
 - View and Controller
-- [MyQuery](#Built-in-Query-Builder) (database query builder)
+- [Query;](#Built-in-Query-Builder) (database query builder)
 - [Collection](#Collection) (array collection)
 - [Console](#Console) (assembling beautiful console app)
 - Template (create class using class generator)
@@ -37,7 +37,7 @@ of course, we are support CRUD database, this a sample
 DB::table('table_name')
   ->select(['column_1'])
   ->equal('column_2', 'fast_mvc')
-  ->order("column_1", MyQuery::ORDER_ASC)
+  ->order("column_1", Query::ORDER_ASC)
   ->limit(1, 10)
   ->all()
 ;

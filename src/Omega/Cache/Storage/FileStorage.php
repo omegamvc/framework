@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Cache Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Cache\Storage;
@@ -8,6 +18,7 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeInterface;
 use FilesystemIterator;
+use Omega\Cache\Exceptions\CachePathException;
 use Omega\Cache\Exceptions\InvalidValueIncrementException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -32,24 +43,69 @@ use function unserialize;
 
 use const LOCK_EX;
 
+/**
+ * File-based cache storage implementation.
+ *
+ * This class provides a persistent caching mechanism that stores serialized cache
+ * entries as files within a structured directory tree. Each cache key is hashed
+ * into a multi-level path to prevent filesystem overload in a single directory.
+ *
+ * The cache entries include metadata such as value, expiration timestamp, and
+ * modification time. Expired items are automatically invalidated upon retrieval.
+ *
+ * @category   Omega
+ * @package    Cache
+ * @subpackage Storage
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class FileStorage extends AbstractStorage
 {
     use StorageTrait;
 
+    /**
+     * Create a new FileStorage instance.
+     *
+     * Initializes the storage directory and ensures it exists before use.
+     * If the given path does not exist, it will be created recursively.
+     *
+     * @param string $path       The directory path where cache files are stored.
+     * @param int    $defaultTTL The default time-to-live (in seconds) applied to cache items.
+     * @throws CachePathException If the directory cannot be created or is not writable.
+     */
     public function __construct(
         private readonly string $path,
         private readonly int $defaultTTL = 3_600,
     ) {
-        if (false === is_dir($this->path)) {
-            mkdir($this->path, 0777, true);
+        if (!is_dir($this->path) && !mkdir($this->path, 0777, true)) {
+            throw new CachePathException($this->path);
         }
     }
 
     /**
-     * Get info of storage.
+     * Retrieves metadata information about a specific cache entry.
      *
-     * @param string $key
+     * Implementations should return an associative array that includes at least
+     * the stored value and optionally other metadata such as creation time
+     * or modification time.
+     *
+     * Example:
+     * ```php
+     * [
+     *   'key_name' => [
+     *       'value'     => 'cached_value',
+     *       'timestamp' => 1697123456,
+     *       'mtime'     => 1697123456.123
+     *   ]
+     * ]
+     * ```
+     *
+     * @param string $key The cache item key to retrieve information for.
      * @return array<string, array{value: mixed, timestamp?: int, mtime?: float}>
+     *                Returns an array containing metadata for the given key.
      */
     public function getInfo(string $key): array
     {
@@ -183,7 +239,7 @@ class FileStorage extends AbstractStorage
     /**
      * {@inheritdoc}
      *
-     * @throws InvalidValueIncrementException
+     * @throws InvalidValueIncrementException if the current cache value is not an integer and cannot be incremented.
      */
     public function increment(string $key, int $value): int
     {
@@ -210,13 +266,24 @@ class FileStorage extends AbstractStorage
     }
 
     /**
-     * @param int|DateInterval|DateTimeInterface|null $ttl
-     * @return int
+     * Calculates the cache item's expiration timestamp based on the provided TTL.
+     *
+     * Implementations should convert the TTL (in seconds or as a DateInterval)
+     * into a UNIX timestamp representing the moment when the cache item expires.
+     * If the TTL is `null`, the cache item should be considered persistent.
+     *
+     * @param int|DateInterval|DateTimeInterface|null $ttl The time-to-live value.
+     *        - `int`: Number of seconds until expiration.
+     *        - `DateInterval`: A relative interval added to the current time.
+     *        - `DateTimeInterface`: A specific expiration moment.
+     *        - `null`: No expiration (persistent cache).
+     *
+     * @return int Returns the UNIX timestamp representing the expiration time.
      */
     protected function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int
     {
         if ($ttl instanceof DateInterval) {
-            return (new DateTimeImmutable())->add($ttl)->getTimestamp();
+            return new DateTimeImmutable()->add($ttl)->getTimestamp();
         }
 
         if ($ttl instanceof DateTimeInterface) {
@@ -229,10 +296,19 @@ class FileStorage extends AbstractStorage
     }
 
     /**
-     * Generate the full file path for the given cache key.
+     * Generate the full file path for a given cache key.
      *
-     * @param string $key
-     * @return string
+     * Converts the cache key into a deterministic hashed path to ensure
+     * even file distribution and avoid filesystem performance degradation.
+     *
+     * Example:
+     * ```php
+     * $path = $this->makePath('user_123');
+     * // "/var/cache/12/ab/12ab34cd...etc."
+     * ```
+     *
+     * @param string $key The cache key for which to generate the file path.
+     * @return string The fully qualified path to the cache file.
      */
     protected function makePath(string $key): string
     {

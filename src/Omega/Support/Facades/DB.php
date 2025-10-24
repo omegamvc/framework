@@ -6,8 +6,9 @@ namespace Omega\Support\Facades;
 
 use Omega\Database\DatabaseManager;
 use Omega\Database\ConnectionInterface;
-use Omega\Database\MyQuery\InnerQuery;
-use Omega\Database\MyQuery\Table;
+use Omega\Database\Connection;
+use Omega\Database\Query\InnerQuery;
+use Omega\Database\Query\Table;
 
 /**
  * @method static void                clearConnections()
@@ -38,9 +39,24 @@ final class DB extends AbstractFacade
 
     /**
      * Create builder and set table name.
+     *
+     * @param string|InnerQuery $tableName
+     * @return Table
      */
-    public static function table(string|InnerQuery $table_name): Table
+    public static function table(string|InnerQuery $tableName): Table
     {
-        return new Table($table_name, PDO::instance());
+        return new Table($tableName, PDO::getInstance());
+    }
+
+    /**
+     * Create Builder using static function.
+     *
+     * @param string|InnerQuery $tableName
+     * @param Connection             $pdo
+     * @return Table
+     */
+    public static function from(string|InnerQuery $tableName, Connection $pdo): Table
+    {
+        return new Table($tableName, $pdo);
     }
 }

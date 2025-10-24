@@ -2,5 +2,5 @@ vendor/
 composer.lock
 .idea/
 phpcs.xml
-phpdoc.xml
-
+phpstan.neon
+phpunit.xml

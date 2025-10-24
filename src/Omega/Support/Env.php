@@ -37,7 +37,7 @@ class Env
         };
     }*/
 
-    public static function get(string $key, mixed $default = null): mixed
+    /**public static function get(string $key, mixed $default = null): mixed
     {
         $value = self::$values[$key] ?? getenv($key) ?? $default;
 
@@ -48,5 +48,25 @@ class Env
             'null', '(null)'   => null,
             default            => is_numeric($value) ? $value + 0 : $value,
         };
+    }*/
+
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        $value = self::$values[$key] ?? getenv($key) ?: $default;
+
+        // Se il valore è una stringa, normalizza alcuni valori speciali
+        if (is_string($value)) {
+            $lower = strtolower($value);
+            return match ($lower) {
+                'true', '(true)'   => true,
+                'false', '(false)' => false,
+                'null', '(null)'   => null,
+                'empty', '(empty)' => '',
+                default            => is_numeric($value) ? $value + 0 : $value,
+            };
+        }
+
+        // Tutti gli altri tipi (int, bool, null) vengono restituiti così come sono
+        return $value;
     }
 }

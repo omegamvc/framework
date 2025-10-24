@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Omega\Database\Seeder;
 
 use Omega\Database\ConnectionInterface;
-use Omega\Database\MyQuery\Insert;
+use Omega\Database\Query\Insert;
 
 abstract class AbstractSeeder implements SeederInterface
 {

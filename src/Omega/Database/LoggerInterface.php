@@ -8,6 +8,8 @@ interface LoggerInterface
 {
     /**
      * Flush logs query.
+     *
+     * @return void
      */
     public function flushLogs(): void;
 

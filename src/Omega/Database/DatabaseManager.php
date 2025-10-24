@@ -8,6 +8,7 @@ use Omega\Database\Exceptions\InvalidConfigurationException;
 
 class DatabaseManager implements ConnectionInterface
 {
+    /** @var ConnectionInterface  */
     private ConnectionInterface $connection;
 
     /** @var array<string, ConnectionInterface> */
@@ -20,12 +21,17 @@ class DatabaseManager implements ConnectionInterface
     {
     }
 
+    /**
+     * @return void
+     */
     public function clearConnections(): void
     {
         $this->connections = [];
     }
 
     /**
+     * @param string $name
+     * @return ConnectionInterface
      * @throws InvalidConfigurationException
      */
     public function connection(string $name): ConnectionInterface
@@ -37,12 +43,16 @@ class DatabaseManager implements ConnectionInterface
 
             $config = $this->configs[$name];
 
-            $this->connections[$name] = new MyPDO($config);
+            $this->connections[$name] = new Connection($config);
         }
 
         return $this->connections[$name];
     }
 
+    /**
+     * @param ConnectionInterface $connection
+     * @return $this
+     */
     public function setDefaultConnection(ConnectionInterface $connection): self
     {
         $this->connection = $connection;

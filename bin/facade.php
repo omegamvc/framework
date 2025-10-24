@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+<?php
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
@@ -14,7 +16,7 @@ use function Omega\Console\warn;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$command = new class($argv) extends AbstractCommand
+$command = new class ($argv) extends AbstractCommand
 {
     private string $facadeFileLocation = '/src/Omega/Support/Facades/';
     private string $facadeNamespace    = 'Omega\\Support\\Facades';
@@ -31,7 +33,8 @@ $command = new class($argv) extends AbstractCommand
         }
 
         if ('facade:update' === $this->cmd) {
-            if (false !== ($file = $this->option('from-file', false))
+            if (
+                false !== ($file = $this->option('from-file', false))
                 && file_exists(dirname(__DIR__) . $file)
             ) {
                 $facades = require_once dirname(__DIR__) . $file;
@@ -45,12 +48,16 @@ $command = new class($argv) extends AbstractCommand
 
                 $count = count($facades);
                 if ($fail > 0) {
-                    error("{$fail} of {$count} facades " . ($this->hasOption('dry-run') ? 'failed validation' : 'could not be updated'))->outIf($this->canWrite());
+                    error("{$fail} of {$count} facades " . ($this->hasOption('dry-run')
+                            ? 'failed validation'
+                            : 'could not be updated'))->outIf($this->canWrite());
 
                     return AbstractCommand::FAILURE;
                 }
 
-                success('Successfully ' . ($this->hasOption('dry-run') ? 'validated' : 'updated') . " {$count} " . ($count === 1 ? 'facade' : 'facades'))->outIf($this->canWrite());
+                success('Successfully ' . ($this->hasOption('dry-run')
+                        ? 'validated' : 'updated') . " {$count} " . ($count === 1 ? 'facade'
+                        : 'facades'))->outIf($this->canWrite());
 
                 return AbstractCommand::SUCCESS;
             }
@@ -91,7 +98,8 @@ $command = new class($argv) extends AbstractCommand
 
     public function update(): int
     {
-        if (false === ($facade  = $this->option('facade', false))
+        if (
+            false === ($facade  = $this->option('facade', false))
             || false === ($accessor = $this->option('accessor', false))
         ) {
             error('The command argument is required: facade:update --facade --accessor')->outIf($this->canWrite());
@@ -103,7 +111,12 @@ $command = new class($argv) extends AbstractCommand
     }
 
     /**
-     * @param array{accessor?: string, excludes?: array<string, bool>, replaces?: array<string, string>, with?: array<string, array{param?: string[], return?: string}>} $options
+     * @param array{
+     *     accessor?: string,
+     *     excludes?: array<string, bool>,
+     *     replaces?: array<string, string>,
+     *     with?: array<string, array{param?: string[], return?: string}>
+     * } $options
      */
     public function updater(string $facade, array $options = []): int
     {
@@ -208,7 +221,12 @@ $command = new class($argv) extends AbstractCommand
      * Get all public method signatures of a class.
      *
      * @param ReflectionClass<object> $class
-     * @param array{accessor?: string, excludes?: array<string, bool>, replaces?: array<string, string>, with?: array<string, array{param?: string[], return?: string}>} $options
+     * @param array{
+     *     accessor?: string,
+     *     excludes?: array<string, bool>,
+     *     replaces?: array<string, string>,
+     *     with?: array<string, array{param?: string[], return?: string}>
+     * } $options
      * @return string[] list of method signatures
      */
     private function getMethodReflection(ReflectionClass $class, array $options = []): array
@@ -229,7 +247,8 @@ $command = new class($argv) extends AbstractCommand
         $optWith     = $options['with'] ?? [];
 
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if ($method->isConstructor()
+            if (
+                $method->isConstructor()
                 || $method->isDestructor()
                 || $method->isDeprecated()
                 || str_starts_with($method->getName(), '__')
@@ -244,7 +263,7 @@ $command = new class($argv) extends AbstractCommand
             $params     = [];
 
             // doc block lexer
-            if (false !== ($docComment =$method->getDocComment())) {
+            if (false !== ($docComment = $method->getDocComment())) {
                 $lines  = extractDocLines($docComment);
                 $blocks = groupMultilineBlocks($lines);
 
@@ -292,7 +311,7 @@ $command = new class($argv) extends AbstractCommand
                 $params[$paramName] = $this->getParameterString($param);
             }
 
-            // always offeriding parameter and return
+            // always offering parameter and return
             if (isset($optWith[$method->getName()]['return'])) {
                 $returnType = $optWith[$method->getName()]['return'];
             }

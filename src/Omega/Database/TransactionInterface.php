@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Omega\Database;
 
+use PDOException;
+
 interface TransactionInterface
 {
     /**
      * @param callable(): bool $callable
-     *
      * @return bool Transaction status
      */
     public function transaction(callable $callable): bool;
@@ -17,8 +18,7 @@ interface TransactionInterface
      * Initiates a transaction.
      *
      * @return bool True if success
-     *
-     * @throws \PDOException *
+     * @throws PDOException *
      */
     public function beginTransaction(): bool;
 
@@ -26,17 +26,15 @@ interface TransactionInterface
      * Commits a transaction.
      *
      * @return bool True if success
-     *
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function endTransaction(): bool;
 
-    /*
+    /**
      * Rolls back a transaction.
      *
      * @return bool True if success
-     *
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function cancelTransaction(): bool;
 }

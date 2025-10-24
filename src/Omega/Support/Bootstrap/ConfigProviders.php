@@ -44,7 +44,7 @@ class ConfigProviders
 
         // Altrimenti leggiamo tutti i file di config
         if (!$hasCache) {
-            foreach (glob($configPath . "*.php") as $path) {
+/**            foreach (glob($configPath . "*.php") as $path) {
                 $key = basename($path, '.php'); // nome file come chiave principale
                 $value = require $path;
 
@@ -55,7 +55,20 @@ class ConfigProviders
                 }
 
                 $config[$key] = $value;
-            }
+            }*/
+            foreach (glob($configPath . "*.php") as $path) {
+    			$value = require $path;
+
+    			if (!is_array($value)) {
+        			throw new \RuntimeException(
+            			"Invalid config file [$path]: expected array, got "
+            			. gettype($value)
+        			);
+    			}
+
+    			// Unisci l’array del file direttamente nella configurazione globale
+    			$config = array_merge($config, $value);
+			}
         }
 
         // Carichiamo il repository nel container/app

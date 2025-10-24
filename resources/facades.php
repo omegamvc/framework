@@ -25,7 +25,7 @@ return [
         ],
     ],
     'Hash'     => 'Omega\\Security\\Hashing\\HashManager',
-    'PDO'      => 'Omega\\Database\\MyPDO',
+    'PDO'      => 'Omega\\Database\\Connection',
     'Schedule' => [
         'accessor' => 'Omega\\Cron\\Schedule',
         'replaces' => [
@@ -33,7 +33,7 @@ return [
             'ScheduleTime[]' => '\\Omega\\Cron\\ScheduleTime[]',
         ],
     ],
-    'Schema'   => 'Omega\\Database\\MySchema',
+    'Schema'   => 'Omega\\Database\\Schema',
     'View'     => 'Omega\\View\\Templator',
     'Vite'     => 'Omega\\Support\\Vite',
 ];

@@ -111,7 +111,6 @@ final class Application extends Container
         return [
             'boot.cache'              => $this->basePath . set_path('bootstrap.cache'),
             'path.app'                => $this->basePath . set_path('app'),
-            'path.cache'              => $this->basePath . set_path('storage.app.cache'),
             'path.command'            => $this->basePath . set_path('app.Console.Commands'),
             'path.component'          => $this->basePath . set_path('resources.components'),
             'path.controller'         => $this->basePath . set_path('app.Http.Controllers'),
