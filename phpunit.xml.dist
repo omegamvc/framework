@@ -5,7 +5,7 @@
          cacheDirectory="cache/phpunit"
          cacheResult="true"
          executionOrder="depends,defects"
-         defaultTestSuite="Omega Test Suite"
+         defaultTestSuite="Omega Framework Test Suite"
          beStrictAboutOutputDuringTests="true"
          failOnRisky="true"
          failOnWarning="true"
@@ -14,7 +14,7 @@
          colors="true"
 >
     <testsuites>
-        <testsuite name="OmegaMVC">
+        <testsuite name="Omega Framework Test Suite">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
