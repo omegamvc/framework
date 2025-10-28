@@ -16,17 +16,32 @@ namespace Tests\Time;
 
 use DateInvalidTimeZoneException;
 use DateMalformedStringException;
-use PHPUnit\Framework\Attributes\CoversFunction;
 use PHPUnit\Framework\TestCase;
 
 use function Omega\Time\now;
 use function time;
 
-#[CoversFunction('now')]
+/**
+ * Test suite for helper functions provided by the date/time component.
+ *
+ * This class verifies that the global `now()` helper returns a valid `Now`
+ * instance and behaves consistently with the expected timestamp output.
+ *
+ * @category  Tests
+ * @package   Time
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 final class HelperFunctionTest extends TestCase
 {
     /**
-     * Test it can use function helper.
+     * Tests the global `now()` helper function.
+     *
+     * Ensures that calling the `now()` function returns a valid `Now` instance
+     * whose timestamp corresponds to the current system time.
      *
      * @return void
      * @throws DateInvalidTimeZoneException
