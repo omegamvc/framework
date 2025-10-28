@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Omega\RateLimiter;
 
+use function Omega\Time\now;
+
 class RateLimiter implements RateLimiterInterface
 {
     public function __construct(private RateLimiterPolicyInterface $Limiter)

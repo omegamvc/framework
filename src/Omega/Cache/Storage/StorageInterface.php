@@ -17,25 +17,16 @@ namespace Omega\Cache\Storage;
 use DateInterval;
 use DateTimeInterface;
 
-use function microtime;
-use function round;
-use function time;
-
 /**
- * Trait StorageTrait
+ * Interface for cache storage drivers.
  *
- * Provides shared time-related logic for cache storage drivers, such as precise
- * microtime calculation and cache expiration timestamp computation.
+ * This interface defines the essential methods that any cache storage implementation
+ * must provide. It focuses on tracking cache metadata, handling expiration,
+ * and providing precise creation/modification timestamps.
  *
- * This trait is designed to be used by concrete cache storage implementations
- * (e.g. FileStorage, RedisStorage) that need consistent time handling and
- * metadata generation for cache items.
- *
- * It defines a concrete helper method for microtime calculation and two abstract
- * methods to be implemented by the storage classes: one for retrieving cache
- * metadata (`getInfo`) and one for calculating expiration timestamps based on
- * TTL values.
- *
+ * Implementations can vary from in-memory storage (like arrays), file-based storage,
+ * or external systems (like Redis or Memcached). Each implementation must respect
+ * the TTL (time-to-live) policy and provide consistent metadata for cache items.
  *
  * @category   Omega
  * @package    Cache
@@ -46,7 +37,7 @@ use function time;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    2.0.0
  */
-trait StorageTrait
+interface StorageInterface
 {
     /**
      * Calculates a precise timestamp including microseconds based on the current time.
@@ -56,22 +47,7 @@ trait StorageTrait
      *
      * @return float Returns the calculated timestamp with millisecond precision.
      */
-    protected function createMtime(): float
-    {
-        $currentTime = time();
-        $microtime   = microtime(true);
-
-        $fractionalPart = $microtime - $currentTime;
-
-        if ($fractionalPart >= 1) {
-            $currentTime += (int) $fractionalPart;
-            $fractionalPart -= (int) $fractionalPart;
-        }
-
-        $mtime = $currentTime + $fractionalPart;
-
-        return round($mtime, 3);
-    }
+    public function createMtime(): float;
 
     /**
      * Retrieves metadata information about a specific cache entry.
@@ -95,7 +71,7 @@ trait StorageTrait
      * @return array<string, array{value: mixed, timestamp?: int, mtime?: float}>
      *                Returns an array containing metadata for the given key.
      */
-    abstract public function getInfo(string $key): array;
+    public function getInfo(string $key): array;
 
     /**
      * Calculates the cache item's expiration timestamp based on the provided TTL.
@@ -112,5 +88,5 @@ trait StorageTrait
      *
      * @return int Returns the UNIX timestamp representing the expiration time.
      */
-    abstract protected function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int;
+    public function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int;
 }

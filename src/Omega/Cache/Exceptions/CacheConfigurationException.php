@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of Omega - Time Package.
+ * Part of Omega - Cache Package.
  *
  * @link      https://omegamvc.github.io
  * @author    Adriano Giovannini <agisoftt@gmail.com>
@@ -12,16 +12,19 @@
 
 declare(strict_types=1);
 
-namespace Omega\Time\Exceptions;
+namespace Omega\Cache\Exceptions;
+
+use InvalidArgumentException;
 
 /**
- * Exception thrown when trying to access a property that does not exist.
+ * Class CacheConfigurationException
  *
- * This is typically raised by the `Now` class when accessing undefined properties
- * via __get().
+ * This exception is thrown when a cache storage is misconfigured or required
+ * options are missing. It indicates that the cache system cannot be initialized
+ * due to invalid or incomplete configuration parameters.
  *
  * @category   Omega
- * @package    Time
+ * @package    Cache
  * @subpackage Exceptions
  * @link       https://omegamvc.github.io
  * @author     Adriano Giovannini <agisoftt@gmail.com>
@@ -29,16 +32,6 @@ namespace Omega\Time\Exceptions;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    2.0.0
  */
-class PropertyNotExistException extends AbstractTimeException
+class CacheConfigurationException extends InvalidArgumentException implements CacheExceptionInterface
 {
-    /**
-     * Creates a new PropertyNotExistException instance.
-     *
-     * @param string $propertyName The name of the property that was attempted to access.
-     * @return void
-     */
-    public function __construct(string $propertyName)
-    {
-        parent::__construct('Property `%s` not exists.', $propertyName);
-    }
 }

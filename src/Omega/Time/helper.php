@@ -1,18 +1,57 @@
 <?php
 
+/**
+ * Part of Omega - Time Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
-use Omega\Time\Now;
+namespace Omega\Time;
 
+use DateInvalidTimeZoneException;
+use DateMalformedStringException;
+
+use function function_exists;
+
+/**
+ * Helper functions for Omega Time package.
+ *
+ * This file provides utility functions to easily access the `Now` class,
+ * allowing quick instantiation of time objects with optional date and timezone.
+ *
+ * Example usage:
+ * ```php
+ * $now = now(); // current time in default timezone
+ * $utcNow = now('now', 'UTC'); // current time in UTC
+ * $customDate = now('2023-01-29', 'Europe/Rome'); // specific date in a timezone
+ * ```
+ *
+ * @category  Omega
+ * @package   Time
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 if (!function_exists('now')) {
     /**
-     * Get time object class.
+     * Returns a `Now` object representing a specific date and timezone.
      *
-     * @param string      $date_format Set current time
-     * @param string|null $time_zone   Set timezone
-     * @return Now
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * This function is a convenient shortcut to create instances of the `Now` class.
+     * By default, it returns the current time in the system's default timezone.
+     *
+     * @param string      $date_format The date string to initialize the object (default 'now').
+     * @param string|null $time_zone   Optional timezone identifier (e.g., 'UTC', 'Europe/Rome').
+     * @return Now An instance of the `Now` class representing the specified date and timezone.
+     * @throws DateInvalidTimeZoneException If the provided timezone is invalid.
+     * @throws DateMalformedStringException If the date string cannot be parsed.
      */
     function now(string $date_format = 'now', ?string $time_zone = null): Now
     {

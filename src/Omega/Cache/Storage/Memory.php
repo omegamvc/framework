@@ -40,10 +40,8 @@ use function time;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    2.0.0
  */
-class ArrayStorage extends AbstractStorage
+class Memory extends AbstractStorage
 {
-    use StorageTrait;
-
     /**
      * Internal array holding cached items and their metadata.
      *
@@ -63,35 +61,23 @@ class ArrayStorage extends AbstractStorage
     protected array $storage = [];
 
     /**
-     * Create a new ArrayStorage instance.
+     * Memory constructor.
      *
-     * @param int $defaultTTL The default time-to-live (in seconds) for cache items.
+     * Initializes a new Memory instance with the given options.
+     *
+     * Required keys in $options:
+     * - 'ttl' : int|DateInterval  The default time-to-live for cache items.
+     *
+     * @param array<string, mixed> $options Configuration options for the storage.
+     * @return void
      */
-    public function __construct(private readonly int $defaultTTL = 3_600)
+    public function __construct(array $options)
     {
+        parent::__construct($options);
     }
 
     /**
-     * Retrieves metadata information about a specific cache entry.
-     *
-     * Implementations should return an associative array that includes at least
-     * the stored value and optionally other metadata such as creation time
-     * or modification time.
-     *
-     * Example:
-     * ```php
-     * [
-     *   'key_name' => [
-     *       'value'     => 'cached_value',
-     *       'timestamp' => 1697123456,
-     *       'mtime'     => 1697123456.123
-     *   ]
-     * ]
-     * ```
-     *
-     * @param string $key The cache item key to retrieve information for.
-     * @return array<string, array{value: mixed, timestamp?: int, mtime?: float}>
-     *                Returns an array containing metadata for the given key.
+     * {@inheritdoc}
      */
     public function getInfo(string $key): array
     {
@@ -196,21 +182,9 @@ class ArrayStorage extends AbstractStorage
     }
 
     /**
-     * Calculates the cache item's expiration timestamp based on the provided TTL.
-     *
-     * Implementations should convert the TTL (in seconds or as a DateInterval)
-     * into a UNIX timestamp representing the moment when the cache item expires.
-     * If the TTL is `null`, the cache item should be considered persistent.
-     *
-     * @param int|DateInterval|DateTimeInterface|null $ttl The time-to-live value.
-     *        - `int`: Number of seconds until expiration.
-     *        - `DateInterval`: A relative interval added to the current time.
-     *        - `DateTimeInterface`: A specific expiration moment.
-     *        - `null`: No expiration (persistent cache).
-     *
-     * @return int Returns the UNIX timestamp representing the expiration time.
+     * {@inheritdoc}
      */
-    protected function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int
+    public function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int
     {
         if ($ttl instanceof DateInterval) {
             return new DateTimeImmutable()->add($ttl)->getTimestamp();

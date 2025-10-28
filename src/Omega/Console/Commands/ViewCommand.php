@@ -179,7 +179,7 @@ class ViewCommand extends AbstractCommand
         $count     = 0;
         $progress = new ProgressBar(':progress :percent - :current', [
             ':current' => fn ($current, $max): string => array_key_exists($current, $files)
-                ? Str::replace($files[$current], get_path('path.view'), '')
+                ? Str::replace($files[$current], get_path('path.compiled_view_path'), '')
                 : '',
         ]);
 

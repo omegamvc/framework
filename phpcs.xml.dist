@@ -20,7 +20,4 @@
             <property name="ignoreComments" value="false"/>
         </properties>
     </rule>
-
-    <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/css/*</exclude-pattern>
-    <exclude-pattern>vendor/omegamvc/framework/src/Exception/Resources/js/*</exclude-pattern>
 </ruleset>

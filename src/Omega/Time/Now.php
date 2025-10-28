@@ -1,6 +1,19 @@
 <?php
 
-/** @noinspection PhpUnused */
+/**
+ * Part of Omega - Time Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+/**
+ * @noinspection PhpUnused
+ * @noinspection PhpPrivateFieldCanBeLocalVariableInspection
+ */
 
 declare(strict_types=1);
 
@@ -20,70 +33,92 @@ use function max;
 use function method_exists;
 use function property_exists;
 use function strtotime;
+use function time;
 
 /**
- * @property int    $timestamp
- * @property int    $year
- * @property int    $month
- * @property int    $day
- * @property int    $hour
- * @property int    $minute
- * @property int    $second
- * @property string $monthName
- * @property string $dayName
- * @property string $shortDay
- * @property string $timeZone
- * @property int    $age
+ * Now class - represents a specific point in time with convenient access to date and time components.
+ *
+ * This class wraps a DateTime object and exposes properties like year, month, day, hour, minute,
+ * second, as well as formatted names for month and day. It also provides helper methods to check
+ * if the current instance matches specific time conditions (e.g., isNextMonth(), isSaturday()).
+ *
+ * It is used throughout Omega Time package to manipulate, format, and inspect dates easily.
+ *
+ * @category  Omega
+ * @package   Time
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ *
+ * @property int    $timestamp         The Unix timestamp of the current time.
+ * @property int    $year              The year of the current date.
+ * @property int    $month             The month number (1-12) of the current date.
+ * @property int    $day               The day of the month (1-31) of the current date.
+ * @property int    $hour              The hour (0-23) of the current time.
+ * @property int    $minute            The minute (0-59) of the current time.
+ * @property int    $second            The second (0-59) of the current time.
+ * @property string $monthName         The full month name (e.g., "January").
+ * @property string $dayName           The full day name (e.g., "Monday").
+ * @property string $shortDay          The abbreviated day name (e.g., "Mon").
+ * @property string $timeZone          The timezone identifier (e.g., "UTC", "Europe/Rome").
+ * @property int    $age               The calculated age in years from this timestamp until now.
+ * @property mixed  $notExistProperty  Placeholder to demonstrate exception when property does not exist.
  */
 class Now
 {
     use DateTimeFormatTrait;
 
-    /** @var int|false */
+    /** @var int|false Current Unix timestamp of the object. */
     private int|false $timestamp;
 
+    /** @var DateTime The internal DateTime instance representing the current time. */
     private DateTime $date;
 
-    /** @var int */
+    /** @var int Year of the date. */
     private int $year;
 
-    /** @var int */
+    /** @var int Month of the date (1-12). */
     private int $month;
 
-    /** @var int */
+    /** @var int Day of the month. */
     private int $day;
 
-    /** @var int */
+    /** @var int Hour of the time (0-23). */
     private int $hour;
 
-    /** @var int */
+    /** @var int Minute of the time (0-59). */
     private int $minute;
 
-    /** @var int */
+    /** @var int Second of the time (0-59). */
     private int $second;
 
-    /** @var string */
+    /** @var string Full month name. */
     private string $monthName;
 
-    /** @var string */
+    /** @var string Full day name. */
     private string $dayName;
 
-    /** @var string */
+    /** @var string Short day name (3-letter abbreviation). */
     private string $shortDay;
 
-    /** @var string */
+    /** @var string Timezone identifier. */
     private string $timeZone;
 
+    /** @var int Age in years relative to the timestamp. */
     private int $age;
 
     /**
-     * Constructor.
+     * Constructs a new Now instance with a specific date and optional timezone.
      *
-     * @param string      $dateFormat
-     * @param string|null $timeZone
+     * Initializes the internal DateTime object and refreshes all related properties.
+     *
+     * @param string      $dateFormat The date string or 'now' for current time.
+     * @param string|null $timeZone   Optional timezone identifier (e.g., "UTC").
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException If the provided timezone is invalid.
+     * @throws DateMalformedStringException If the date string cannot be parsed.
      */
     public function __construct(string $dateFormat = 'now', ?string $timeZone = null)
     {
@@ -96,9 +131,11 @@ class Now
     }
 
     /**
-     * To string.
+     * Returns the ISO-like string representation of the current date and time.
      *
-     * @return string
+     * Format: "YYYY-MM-DDTHH:MM:SS".
+     *
+     * @return string The formatted date-time string.
      */
     public function __toString(): string
     {
@@ -109,10 +146,11 @@ class Now
     }
 
     /**
-     * Get private property.
+     * Retrieves a private property by name.
      *
-     * @param string $name
-     * @return mixed
+     * @param string $name The property name to get.
+     * @return mixed The value of the property.
+     * @throws PropertyNotExistException If the property does not exist in the class.
      */
     public function __get(string $name): mixed
     {
@@ -124,17 +162,19 @@ class Now
     }
 
     /**
-     * Set property by pase the `refresh` logic.
+     * Sets a property using the corresponding setter method.
      *
-     * @param string $name
-     * @param mixed  $value
+     * Only properties with dedicated setter methods can be set.
+     *
+     * @param string $name  The property name to set.
+     * @param mixed  $value The value to assign.
      * @return void
+     * @throws PropertyNotSettableException If the property cannot be set.
      */
     public function __set(string $name, mixed $value): void
     {
         if (method_exists($this, $name) && property_exists($this, $name)) {
             $this->{$name}($value);
-
             return;
         }
 
@@ -142,7 +182,9 @@ class Now
     }
 
     /**
-     * Refresh property with current time.
+     * Refreshes all properties based on the internal DateTime object.
+     *
+     * Updates timestamp, year, month, day, hour, minute, second, month/day names, timezone, and age.
      *
      * @return void
      */
@@ -165,27 +207,23 @@ class Now
     }
 
     /**
-     * Current.
+     * Returns a formatted string for a given timestamp.
      *
-     * @param string $format
-     * @param int    $timestamp
-     * @return string
+     * @param string $format    The date format (compatible with DateTime::format).
+     * @param int    $timestamp The Unix timestamp to format.
+     * @return string The formatted date-time string.
      */
     private function current(string $format, int $timestamp): string
     {
         $date = $this->date;
-
-        return $date
-            ->setTimestamp($timestamp)
-            ->format($format)
-        ;
+        return $date->setTimestamp($timestamp)->format($format);
     }
 
     /**
-     * Get formated date time.
+     * Formats the current date-time using a custom format string.
      *
-     * @param string $format
-     * @return string
+     * @param string $format The date format (compatible with DateTime::format).
+     * @return string The formatted date-time string.
      */
     public function format(string $format): string
     {
@@ -193,153 +231,105 @@ class Now
     }
 
     /**
-     * Set year time.
+     * Sets the year for the current date-time and refreshes all properties.
      *
-     * @param int $year
-     * @return self
+     * @param int $year The year to set (e.g., 2025).
+     * @return self The current instance for method chaining.
      */
     public function year(int $year): self
     {
-        $this->date
-        ->setDate(
-            $year,
-            $this->month,
-            $this->day
-        )
-        ->setTime(
-            $this->hour,
-            $this->minute,
-            $this->second
-        );
+        $this->date->setDate($year, $this->month, $this->day)
+            ->setTime($this->hour, $this->minute, $this->second);
+
         $this->refresh();
 
         return $this;
     }
 
     /**
-     * set month time.
+     * Sets the month for the current date-time and refreshes all properties.
      *
-     * @param int $month
-     * @return self
+     * @param int $month The month to set (1-12).
+     * @return self The current instance for method chaining.
      */
     public function month(int $month): self
     {
-        $this->date
-        ->setDate(
-            $this->year,
-            $month,
-            $this->day
-        )
-        ->setTime(
-            $this->hour,
-            $this->minute,
-            $this->second
-        );
+        $this->date->setDate($this->year, $month, $this->day)
+            ->setTime($this->hour, $this->minute, $this->second);
+
         $this->refresh();
 
         return $this;
     }
 
     /**
-     * Set day time.
+     * Sets the day for the current date-time and refreshes all properties.
      *
-     * @param int $day
-     * @return self
+     * @param int $day The day of the month to set (1-31).
+     * @return self The current instance for method chaining.
      */
     public function day(int $day): self
     {
-        $this->date
-        ->setDate(
-            $this->year,
-            $this->month,
-            $day
-        )
-        ->setTime(
-            $this->hour,
-            $this->minute,
-            $this->second
-        );
+        $this->date->setDate($this->year, $this->month, $day)
+            ->setTime($this->hour, $this->minute, $this->second);
+
         $this->refresh();
 
         return $this;
     }
 
     /**
-     * Set hour time.
+     * Sets the hour for the current date-time and refreshes all properties.
      *
-     * @param int $hour
-     * @return self
+     * @param int $hour The hour to set (0-23).
+     * @return self The current instance for method chaining.
      */
     public function hour(int $hour): self
     {
-        $this->date
-        ->setDate(
-            $this->year,
-            $this->month,
-            $this->day
-        )
-        ->setTime(
-            $hour,
-            $this->minute,
-            $this->second
-        );
+        $this->date->setDate($this->year, $this->month, $this->day)
+            ->setTime($hour, $this->minute, $this->second);
+
         $this->refresh();
 
         return $this;
     }
 
     /**
-     * Set minute time.
+     * Sets the minute for the current date-time and refreshes all properties.
      *
-     * @param int $minute
-     * @return self
+     * @param int $minute The minute to set (0-59).
+     * @return self The current instance for method chaining.
      */
     public function minute(int $minute): self
     {
-        $this->date
-        ->setDate(
-            $this->year,
-            $this->month,
-            $this->day
-        )
-        ->setTime(
-            $this->hour,
-            $minute,
-            $this->second
-        );
+        $this->date->setDate($this->year, $this->month, $this->day)
+            ->setTime($this->hour, $minute, $this->second);
+
         $this->refresh();
 
         return $this;
     }
 
     /**
-     * Set second time.
+     * Sets the second for the current date-time and refreshes all properties.
      *
-     * @param int $second
-     * @return self
+     * @param int $second The second to set (0-59).
+     * @return self The current instance for method chaining.
      */
     public function second(int $second): self
     {
-        $this->date
-        ->setDate(
-            $this->year,
-            $this->month,
-            $this->day
-        )
-        ->setTime(
-            $this->hour,
-            $this->minute,
-            $second
-        );
+        $this->date->setDate($this->year, $this->month, $this->day)
+            ->setTime($this->hour, $this->minute, $second);
+
         $this->refresh();
 
         return $this;
     }
 
     /**
-     * Is Jan.
+     * Checks if the current month is January.
      *
-     * @return bool
+     * @return bool True if the month is January, false otherwise.
      */
     public function isJan(): bool
     {
@@ -347,9 +337,9 @@ class Now
     }
 
     /**
-     * Is Feb.
+     * Checks if the current month is February.
      *
-     * @return bool
+     * @return bool True if the month is February, false otherwise.
      */
     public function isFeb(): bool
     {
@@ -357,9 +347,9 @@ class Now
     }
 
     /**
-     * Is Mar.
+     * Checks if the current month is March.
      *
-     * @return bool
+     * @return bool True if the month is March, false otherwise.
      */
     public function isMar(): bool
     {
@@ -367,9 +357,9 @@ class Now
     }
 
     /**
-     * Is Apr.
+     * Checks if the current month is April.
      *
-     * @return bool
+     * @return bool True if the month is April, false otherwise.
      */
     public function isApr(): bool
     {
@@ -377,9 +367,9 @@ class Now
     }
 
     /**
-     * Is May.
+     * Checks if the current month is May.
      *
-     * @return bool
+     * @return bool True if the month is May, false otherwise.
      */
     public function isMay(): bool
     {
@@ -387,9 +377,9 @@ class Now
     }
 
     /**
-     * Is Jun.
+     * Checks if the current month is June.
      *
-     * @return bool
+     * @return bool True if the month is June, false otherwise.
      */
     public function isJun(): bool
     {
@@ -397,9 +387,9 @@ class Now
     }
 
     /**
-     * Is Jul.
+     * Checks if the current month is July.
      *
-     * @return bool
+     * @return bool True if the month is July, false otherwise.
      */
     public function isJul(): bool
     {
@@ -407,9 +397,9 @@ class Now
     }
 
     /**
-     * Is Aug.
+     * Checks if the current month is August.
      *
-     * @return bool
+     * @return bool True if the month is August, false otherwise.
      */
     public function isAug(): bool
     {
@@ -417,9 +407,9 @@ class Now
     }
 
     /**
-     * Is Sep.
+     * Checks if the current month is September.
      *
-     * @return bool
+     * @return bool True if the month is September, false otherwise.
      */
     public function isSep(): bool
     {
@@ -427,9 +417,9 @@ class Now
     }
 
     /**
-     * Is Oct.
+     * Checks if the current month is October.
      *
-     * @return bool
+     * @return bool True if the month is October, false otherwise.
      */
     public function isOct(): bool
     {
@@ -437,9 +427,9 @@ class Now
     }
 
     /**
-     * Is Nov.
+     * Checks if the current month is November.
      *
-     * @return bool
+     * @return bool True if the month is November, false otherwise.
      */
     public function isNov(): bool
     {
@@ -447,9 +437,9 @@ class Now
     }
 
     /**
-     * Is Dec.
+     * Checks if the current month is December.
      *
-     * @return bool
+     * @return bool True if the month is December, false otherwise.
      */
     public function isDec(): bool
     {
@@ -457,9 +447,9 @@ class Now
     }
 
     /**
-     * Is Monday.
+     * Checks if the current day is Monday.
      *
-     * @return bool
+     * @return bool True if the day is Monday, false otherwise.
      */
     public function isMonday(): bool
     {
@@ -467,9 +457,9 @@ class Now
     }
 
     /**
-     * Is Tuesday.
+     * Checks if the current day is Tuesday.
      *
-     * @return bool
+     * @return bool True if the day is Tuesday, false otherwise.
      */
     public function isTuesday(): bool
     {
@@ -477,167 +467,162 @@ class Now
     }
 
     /**
-     * Is Wednesday.
+     * Checks if the current day is Wednesday.
      *
-     * @return bool
+     * @return bool True if the day is Wednesday, false otherwise.
      */
     public function isWednesday(): bool
     {
         return $this->date->format('D') === 'Wed';
     }
 
+    /**
+     * Checks if the current day is Thursday.
+     *
+     * @return bool True if the day is Thursday, false otherwise.
+     */
     public function isThursday(): bool
     {
-        return $this->date->format('D') == 'Thu';
+        return $this->date->format('D') === 'Thu';
     }
 
     /**
-     * Is Friday.
+     * Checks if the current day is Friday.
      *
-     * @return bool
+     * @return bool True if the day is Friday, false otherwise.
      */
     public function isFriday(): bool
     {
-        return $this->date->format('D') == 'Fri';
+        return $this->date->format('D') === 'Fri';
     }
 
     /**
-     * Is Saturday.
+     * Checks if the current day is Saturday.
      *
-     * @return bool
+     * @return bool True if the day is Saturday, false otherwise.
      */
     public function isSaturday(): bool
     {
-        return $this->date->format('D') == 'Sat';
+        return $this->date->format('D') === 'Sat';
     }
 
     /**
-     * Is Sunday.
+     * Checks if the current day is Sunday.
      *
-     * @return bool
+     * @return bool True if the day is Sunday, false otherwise.
      */
     public function isSunday(): bool
     {
-        return $this->date->format('D') == 'Sun';
+        return $this->date->format('D') === 'Sun';
     }
 
     /**
-     * Is Next Year.
+     * Checks if the current year is next year.
      *
-     * @return bool
+     * @return bool True if the year is next year, false otherwise.
      */
     public function isNextYear(): bool
     {
         $time = strtotime('next year');
-
         return $this->current('Y', $time) == $this->year;
     }
 
     /**
-     * Is Next Month.
+     * Checks if the current month is next month.
      *
-     * @return bool
+     * @return bool True if the month is next month, false otherwise.
      */
     public function isNextMonth(): bool
     {
         $time = strtotime('next month');
-
         return $this->current('n', $time) == $this->month;
     }
 
     /**
-     * Is Next Day.
+     * Checks if the current day is the next day.
      *
-     * @return bool
+     * @return bool True if the day is the next day, false otherwise.
      */
     public function isNextDay(): bool
     {
         $time = strtotime('next day');
-
         return $this->current('d', $time) == $this->day;
     }
 
     /**
-     * Is Next Hour.
+     * Checks if the current hour is the next hour.
      *
-     * @return bool
+     * @return bool True if the hour is the next hour, false otherwise.
      */
     public function isNextHour(): bool
     {
         $time = strtotime('next hour');
-
         return $this->current('H', $time) == $this->hour;
     }
 
     /**
-     * Is Next Minute.
+     * Checks if the current minute is the next minute.
      *
-     * @return bool
+     * @return bool True if the minute is the next minute, false otherwise.
      */
     public function isNextMinute(): bool
     {
         $time = strtotime('next minute');
-
         return $this->current('i', $time) == $this->minute;
     }
 
     /**
-     * Is Last Year.
+     * Checks if the current year is last year.
      *
-     * @return bool
+     * @return bool True if the year is last year, false otherwise.
      */
     public function isLastYear(): bool
     {
         $time = strtotime('last year');
-
         return $this->current('Y', $time) == $this->year;
     }
 
     /**
-     * Is Last Month.
+     * Checks if the current month is last month.
      *
-     * @return bool
+     * @return bool True if the month is last month, false otherwise.
      */
     public function isLastMonth(): bool
     {
         $time = strtotime('last month');
-
-        return $this->current('m', $time) == $this->month;
+        return $this->current('n', $time) == $this->month;
     }
 
     /**
-     * Is Last Day.
+     * Checks if the current day is the previous day.
      *
-     * @return bool
+     * @return bool True if the day is last day, false otherwise.
      */
     public function isLastDay(): bool
     {
         $time = strtotime('last day');
-
         return $this->current('d', $time) == $this->day;
     }
 
     /**
-     * Is Last Hour.
+     * Checks if the current hour is the previous hour.
      *
-     * @return bool
+     * @return bool True if the hour is last hour, false otherwise.
      */
     public function isLastHour(): bool
     {
         $time = strtotime('last hour');
-
         return $this->current('H', $time) == $this->hour;
     }
 
     /**
-     * Is Last Minute.
+     * Checks if the current minute is the previous minute.
      *
-     * @return bool
+     * @return bool True if the minute is last minute, false otherwise.
      */
     public function isLastMinute(): bool
     {
         $time = strtotime('last minute');
-
         return $this->current('i', $time) == $this->minute;
     }
 }

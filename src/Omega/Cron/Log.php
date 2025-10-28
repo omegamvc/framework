@@ -6,6 +6,7 @@ namespace Omega\Cron;
 
 use Omega\Support\Facades\DB;
 
+use function Omega\Time\now;
 use function json_encode;
 
 class Log implements InterpolateInterface

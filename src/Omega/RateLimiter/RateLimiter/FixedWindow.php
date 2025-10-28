@@ -8,6 +8,8 @@ use Omega\Cache\CacheInterface;
 use Omega\RateLimiter\RateLimiterPolicyInterface;
 use Omega\RateLimiter\RateLimit;
 
+use function Omega\Time\now;
+
 class FixedWindow implements RateLimiterPolicyInterface
 {
     public function __construct(

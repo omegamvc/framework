@@ -18,6 +18,7 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeInterface;
 use FilesystemIterator;
+use Omega\Cache\Exceptions\CacheConfigurationException;
 use Omega\Cache\Exceptions\CachePathException;
 use Omega\Cache\Exceptions\InvalidValueIncrementException;
 use RecursiveDirectoryIterator;
@@ -62,50 +63,42 @@ use const LOCK_EX;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    2.0.0
  */
-class FileStorage extends AbstractStorage
+class File extends AbstractStorage
 {
-    use StorageTrait;
+    /** @var string The directory path where cache files are stored. */
+    protected string $path;
 
     /**
-     * Create a new FileStorage instance.
+     * File constructor.
      *
-     * Initializes the storage directory and ensures it exists before use.
-     * If the given path does not exist, it will be created recursively.
+     * Initializes a new File instance with the given options.
      *
-     * @param string $path       The directory path where cache files are stored.
-     * @param int    $defaultTTL The default time-to-live (in seconds) applied to cache items.
-     * @throws CachePathException If the directory cannot be created or is not writable.
+     * Required keys in $options:
+     * - 'ttl'  : int|DateInterval  The default time-to-live for cache items.
+     * - 'path' : string            The directory path where cache files are stored.
+     *
+     * @param array<string, mixed> $options Configuration options for the storage.
+     * @return void
+     * @throws CacheConfigurationException If the 'path' option is missing.
+     * @throws CachePathException If the specified path does not exist and cannot be created.
      */
-    public function __construct(
-        private readonly string $path,
-        private readonly int $defaultTTL = 3_600,
-    ) {
+    public function __construct(array $options)
+    {
+        parent::__construct($options);
+
+        if (empty($options['path'])) {
+            throw new CacheConfigurationException('The "path" option is required for File.');
+        }
+
+        $this->path = $options['path'];
+
         if (!is_dir($this->path) && !mkdir($this->path, 0777, true)) {
             throw new CachePathException($this->path);
         }
     }
 
     /**
-     * Retrieves metadata information about a specific cache entry.
-     *
-     * Implementations should return an associative array that includes at least
-     * the stored value and optionally other metadata such as creation time
-     * or modification time.
-     *
-     * Example:
-     * ```php
-     * [
-     *   'key_name' => [
-     *       'value'     => 'cached_value',
-     *       'timestamp' => 1697123456,
-     *       'mtime'     => 1697123456.123
-     *   ]
-     * ]
-     * ```
-     *
-     * @param string $key The cache item key to retrieve information for.
-     * @return array<string, array{value: mixed, timestamp?: int, mtime?: float}>
-     *                Returns an array containing metadata for the given key.
+     * {@inheritdoc}
      */
     public function getInfo(string $key): array
     {
@@ -266,21 +259,9 @@ class FileStorage extends AbstractStorage
     }
 
     /**
-     * Calculates the cache item's expiration timestamp based on the provided TTL.
-     *
-     * Implementations should convert the TTL (in seconds or as a DateInterval)
-     * into a UNIX timestamp representing the moment when the cache item expires.
-     * If the TTL is `null`, the cache item should be considered persistent.
-     *
-     * @param int|DateInterval|DateTimeInterface|null $ttl The time-to-live value.
-     *        - `int`: Number of seconds until expiration.
-     *        - `DateInterval`: A relative interval added to the current time.
-     *        - `DateTimeInterface`: A specific expiration moment.
-     *        - `null`: No expiration (persistent cache).
-     *
-     * @return int Returns the UNIX timestamp representing the expiration time.
+     * {@inheritdoc}
      */
-    protected function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int
+    public function calculateExpirationTimestamp(int|DateInterval|DateTimeInterface|null $ttl): int
     {
         if ($ttl instanceof DateInterval) {
             return new DateTimeImmutable()->add($ttl)->getTimestamp();

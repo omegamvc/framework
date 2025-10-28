@@ -16,8 +16,9 @@ namespace Omega\Cache;
 
 use Closure;
 use DateInterval;
+use Omega\Cache\Exceptions\CachePathException;
 use Omega\Cache\Exceptions\UnknownStorageException;
-use Omega\Cache\Storage\ArrayStorage;
+use Omega\Cache\Storage\File;
 
 use function is_callable;
 
@@ -37,7 +38,7 @@ use function is_callable;
  * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version   2.0.0
  */
-class CacheManager implements CacheInterface
+class CacheFactory implements CacheInterface
 {
     /**
      * Registered cache drivers.
@@ -53,23 +54,24 @@ class CacheManager implements CacheInterface
     private CacheInterface $defaultDriver;
 
     /**
-     * Initializes the CacheManager with a default in-memory storage driver.
-     */
-    /**public function __construct()
-    {
-        $this->setDefaultDriver(new ArrayStorage());
-    }*/
-
-    /**
-     * Initializes the CacheManager with a default driver.
+     * Creates a new CacheManager instance and initializes the default cache driver.
      *
-     * @param CacheInterface|null $defaultDriver The default cache driver to be used as default.
-     * @eturn void
+     * The constructor always instantiates a {@see File} driver using the
+     * provided configuration options. This ensures that a file-based cache is
+     * available for essential framework operations (such as view caching),
+     * even when another cache driver is selected as the active default.
+     *
+     * @param array{
+     *     path?: string,
+     *     ttl?: int|DateInterval
+     * } $options Optional configuration array for the File driver.
+     * @return void
+     * @throws CachePathException If the specified cache path is invalid or cannot be created.
      */
-    public function __construct(?CacheInterface $defaultDriver = null)
+    public function __construct(array $options)
     {
-        if ($defaultDriver !== null) {
-            $this->setDefaultDriver($defaultDriver);
+        if (!isset($options['path'])) {
+            $this->setDefaultDriver(new File($options));
         }
     }
 
@@ -135,7 +137,7 @@ class CacheManager implements CacheInterface
      * @return CacheInterface The corresponding cache driver instance.
      * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
-    public function driver(?string $driver_name = null): CacheInterface
+    public function getDriver(?string $driver_name = null): CacheInterface
     {
         if (isset($this->driver[$driver_name])) {
             return $this->resolve($driver_name);
@@ -157,7 +159,7 @@ class CacheManager implements CacheInterface
      */
     public function __call(string $method, array $parameters): mixed
     {
-        return $this->driver()->{$method}(...$parameters);
+        return $this->getDriver()->{$method}(...$parameters);
     }
 
     /**
@@ -167,7 +169,7 @@ class CacheManager implements CacheInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        return $this->driver()->get($key, $default);
+        return $this->getDriver()->get($key, $default);
     }
 
     /**
@@ -177,7 +179,7 @@ class CacheManager implements CacheInterface
      */
     public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
     {
-        return $this->driver()->set($key, $value, $ttl);
+        return $this->getDriver()->set($key, $value, $ttl);
     }
 
     /**
@@ -187,7 +189,7 @@ class CacheManager implements CacheInterface
      */
     public function delete(string $key): bool
     {
-        return $this->driver()->delete($key);
+        return $this->getDriver()->delete($key);
     }
 
     /**
@@ -197,7 +199,7 @@ class CacheManager implements CacheInterface
      */
     public function clear(): bool
     {
-        return $this->driver()->clear();
+        return $this->getDriver()->clear();
     }
 
     /**
@@ -207,7 +209,7 @@ class CacheManager implements CacheInterface
      */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        return $this->driver()->getMultiple($keys, $default);
+        return $this->getDriver()->getMultiple($keys, $default);
     }
 
     /**
@@ -217,7 +219,7 @@ class CacheManager implements CacheInterface
      */
     public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool
     {
-        return $this->driver()->setMultiple($values, $ttl);
+        return $this->getDriver()->setMultiple($values, $ttl);
     }
 
     /**
@@ -227,7 +229,7 @@ class CacheManager implements CacheInterface
      */
     public function deleteMultiple(iterable $keys): bool
     {
-        return $this->driver()->deleteMultiple($keys);
+        return $this->getDriver()->deleteMultiple($keys);
     }
 
     /**
@@ -237,7 +239,7 @@ class CacheManager implements CacheInterface
      */
     public function has(string $key): bool
     {
-        return $this->driver()->has($key);
+        return $this->getDriver()->has($key);
     }
 
     /**
@@ -247,7 +249,7 @@ class CacheManager implements CacheInterface
      */
     public function increment(string $key, int $value): int
     {
-        return $this->driver()->increment($key, $value);
+        return $this->getDriver()->increment($key, $value);
     }
 
     /**
@@ -257,7 +259,7 @@ class CacheManager implements CacheInterface
      */
     public function decrement(string $key, int $value): int
     {
-        return $this->driver()->decrement($key, $value);
+        return $this->getDriver()->decrement($key, $value);
     }
 
     /**
@@ -267,6 +269,6 @@ class CacheManager implements CacheInterface
      */
     public function remember(string $key, Closure $callback, int|DateInterval|null $ttl): mixed
     {
-        return $this->driver()->remember($key, $callback, $ttl);
+        return $this->getDriver()->remember($key, $callback, $ttl);
     }
 }
