@@ -12,6 +12,7 @@ use ReturnTypeWillChange;
 
 use function array_key_exists;
 use function is_array;
+use function Omega\Collection\data_get;
 
 /**
  * @implements ArrayAccess<string, mixed>

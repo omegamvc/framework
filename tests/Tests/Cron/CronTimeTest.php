@@ -1,17 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Tests\Cron;
+
+use DateInvalidTimeZoneException;
+use DateMalformedStringException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use System\Cron\InterpolateInterface;
-use System\Cron\Schedule;
-use System\Cron\ScheduleTime;
-use System\Time\Now;
+use Omega\Cron\InterpolateInterface;
+use Omega\Cron\Schedule;
+use Omega\Cron\ScheduleTime;
+use Omega\Time\Now;
 
 use function Omega\Time\now;
 
+#[CoversClass(Schedule::class)]
+#[CoversClass(ScheduleTime::class)]
+#[CoversClass(Now::class)]
 final class CronTimeTest extends TestCase
 {
+    /** @var InterpolateInterface|null  */
     private ?InterpolateInterface $logger;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setUp(): void
     {
         $this->logger = new class implements InterpolateInterface {
@@ -22,23 +36,30 @@ final class CronTimeTest extends TestCase
         };
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function tearDown(): void
     {
         $this->logger = null;
     }
 
     /**
-     * @test
+     * Test it run only just in time.
+     *
+     * @return void
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
      */
-    public function itRunOnlyJustInTime(): void
+    public function testItRunOnlyJustInTime(): void
     {
-        $animusly = new Schedule(now()->timestamp, $this->logger);
-        $animusly
+        $anonymously = new Schedule(now()->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->justInTime()
             ->eventName('test 01');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -46,18 +67,20 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test i t run only every ten minute.
+     *
+     * @return void
      */
-    public function itRunOnlyEveryTenMinute(): void
+    public function testItRunOnlyEveryTenMinute(): void
     {
-        $time_trevel = new Now('09/07/2021 00:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('09/07/2021 00:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->everyTenMinute()
             ->eventName('test 10 minute');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -65,18 +88,20 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it run only every thirty minutes.
+     *
+     * @return void
      */
-    public function itRunOnlyEveryThirtyMinutes(): void
+    public function testItRunOnlyEveryThirtyMinutes(): void
     {
-        $time_trevel = new Now('09/07/2021 00:30:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('09/07/2021 00:30:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->everyThirtyMinutes()
             ->eventName('test 30 minute');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -84,18 +109,20 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it run only every two hour.
+     *
+     * @return void
      */
-    public function itRunOnlyEveryTwoHour(): void
+    public function testItRunOnlyEveryTwoHour(): void
     {
-        $time_trevel = new Now('09/07/2021 02:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('09/07/2021 02:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->everyTwoHour()
             ->eventName('test 2 hour');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -103,18 +130,20 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it run only every twelve hour.
+     *
+     * @return void
      */
-    public function itRunOnlyEveryTwelveHour(): void
+    public function testItRunOnlyEveryTwelveHour(): void
     {
-        $time_trevel = new Now('09/07/2021 12:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('09/07/2021 12:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->everyTwelveHour()
             ->eventName('test 12 hour');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -122,18 +151,20 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it run only hourly.
+     *
+     * @return void
      */
-    public function itRunOnlyHourly(): void
+    public function testItRunOnlyHourly(): void
     {
-        $time_trevel = new Now('09/07/2021 00:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('09/07/2021 00:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->hourly()
             ->eventName('test hourly');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -141,18 +172,20 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it run only hourly at.
+     *
+     * @return void
      */
-    public function itRunOnlyHourlyAt(): void
+    public function testItRunOnlyHourlyAt(): void
     {
-        $time_trevel = new Now('09/07/2021 05:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('09/07/2021 05:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->hourlyAt(5)
             ->eventName('test hourlyAt 5 hour');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -160,38 +193,42 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it run only daily.
+     *
+     * @return void
      */
-    public function itRunOnlyDaily(): void
+    public function testItRunOnlyDaily(): void
     {
-        $time_trevel = new Now('00:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('00:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->daily()
             ->eventName('test daily');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
-                // die(var_dump($scheduleItem->getTimeExect()));
+                // die(var_dump($scheduleItem->getTimeExpect()));
                 $this->assertTrue($scheduleItem->isDue());
             }
         }
     }
 
     /**
-     * @test
+     * Test it run only daily at.
+     *
+     * @return void
      */
-    public function itRunOnlyDailyAt(): void
+    public function testItRunOnlyDailyAt(): void
     {
-        $time_trevel = new Now('12/12/2012 00:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('12/12/2012 00:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->dailyAt(12)
             ->eventName('test dailyAt 12');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }
@@ -199,38 +236,42 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it run only weekly.
+     *
+     * @return void
      */
-    public function itRunOnlyWeekly(): void
+    public function testItRunOnlyWeekly(): void
     {
-        $time_trevel = new Now('12/16/2012 00:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('12/16/2012 00:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->weekly()
             ->eventName('test weekly');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
-                // die(var_dump($scheduleItem->getTimeExect()));
+                // die(var_dump($scheduleItem->getTimeExpect()));
                 $this->assertTrue($scheduleItem->isDue());
             }
         }
     }
 
     /**
-     * @test
+     * Test it run only monthly.
+     *
+     * @return void
      */
-    public function itRunOnlyMountly(): void
+    public function testItRunOnlyMonthly(): void
     {
-        $time_trevel = new Now('1/1/2012 00:00:00');
-        $animusly    = new Schedule($time_trevel->timestamp, $this->logger);
-        $animusly
+        $timeTravel  = new Now('1/1/2012 00:00:00');
+        $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
+        $anonymously
             ->call(fn (): string => 'due time')
             ->mountly()
-            ->eventName('test mountly');
+            ->eventName('test monthly');
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
                 $this->assertTrue($scheduleItem->isDue());
             }

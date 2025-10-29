@@ -98,14 +98,14 @@ class ScheduleTime
         return $this;
     }
 
-    public function animusly(bool $run_as_animusly = true): self
+    public function anonymously(bool $run_as_animusly = true): self
     {
         $this->animusly = $run_as_animusly;
 
         return $this;
     }
 
-    public function isAnimusly(): bool
+    public function isAnonymously(): bool
     {
         return $this->animusly;
     }

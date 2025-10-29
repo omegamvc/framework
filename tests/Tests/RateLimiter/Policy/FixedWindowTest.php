@@ -2,32 +2,48 @@
 
 declare(strict_types=1);
 
-namespace Tests\System\RateLimiter\Policy;
+namespace Tests\RateLimiter\Policy;
 
+use DateInvalidTimeZoneException;
+use DateMalformedStringException;
+use Omega\Cache\Storage\Memory;
+use Omega\RateLimiter\RateLimiter\FixedWindow;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use System\Cache\Storage\ArrayStorage;
-use System\RateLimiter\RateLimiter\FixedWindow;
 
 use function Omega\Time\now;
 
+#[CoversClass(FixedWindow::class)]
+#[CoversClass(Memory::class)]
 class FixedWindowTest extends TestCase
 {
-    private ArrayStorage $cache;
+    /** @var Memory */
+    private Memory $cache;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setUp(): void
     {
         parent::setUp();
-        $this->cache = new ArrayStorage();
+        $this->cache = new Memory(['ttl' => 3600]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function tearDown(): void
     {
         parent::tearDown();
         $this->cache->clear();
     }
 
-    /** @test */
-    public function itCanConsumeTokensWithinTheLimit()
+    /**
+     * Test it can consume tokens within the limit.
+     *
+     * @return void
+     */
+    public function itCanConsumeTokensWithinTheLimit(): void
     {
         $limiter   = new FixedWindow($this->cache, 5, 60);
         $rateLimit = $limiter->consume('test_key');
@@ -37,8 +53,12 @@ class FixedWindowTest extends TestCase
         $this->assertEquals(4, $rateLimit->getRemaining());
     }
 
-    /** @test */
-    public function itBlocksWhenConsumingTokensExceedsTheLimit()
+    /**
+     * Test it blocks when consuming tokens exceeds the limit.
+     *
+     * @return void
+     */
+    public function testItBlocksWhenConsumingTokensExceedsTheLimit(): void
     {
         $limiter = new FixedWindow($this->cache, 5, 60);
 
@@ -53,8 +73,14 @@ class FixedWindowTest extends TestCase
         $this->assertEquals(0, $rateLimit->getRemaining());
     }
 
-    /** @test */
-    public function itCanPeekAtTheRateLimitStatus()
+    /**
+     * Test it can peek at the rate limit status.
+     *
+     * @return void
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
+     */
+    public function testItCanPeekAtTheRateLimitStatus(): void
     {
         $limiter = new FixedWindow($this->cache, 5, 60);
 
@@ -67,8 +93,12 @@ class FixedWindowTest extends TestCase
         $this->assertEquals(2, $rateLimit->getRemaining());
     }
 
-    /** @test */
-    public function itCanResetTheRateLimit()
+    /**
+     * Test it can reset the rate limit.
+     *
+     * @return void
+     */
+    public function testItCanResetTheRateLimit(): void
     {
         $limiter = new FixedWindow($this->cache, 5, 60);
 

@@ -82,7 +82,7 @@ class CronCommand extends AbstractCommand
             $info[] = [
                 'time'   => $time,
                 'name'   => $name,
-                'animus' => $cron->isAnimusly(),
+                'animus' => $cron->isAnonymously(),
             ];
             $max = max(strlen($time), $max);
         }
@@ -163,7 +163,7 @@ class CronCommand extends AbstractCommand
         ])
         ->retry(2)
         ->justInTime()
-        ->animusly()
+        ->anonymously()
         ->eventName('cli-schedule');
 
         // others schedule

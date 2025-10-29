@@ -3,7 +3,6 @@
          xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
          cacheDirectory="cache/phpunit"
-         cacheResult="true"
          executionOrder="depends,defects"
          defaultTestSuite="Omega Framework Test Suite"
          beStrictAboutOutputDuringTests="true"
@@ -25,7 +24,7 @@
     </source>
     <coverage pathCoverage="true">
         <report>
-            <html outputDirectory="cache/coverage-report" lowUpperBound="50" highLowerBound="90"/>
+            <html outputDirectory="cache/coverage-report"/>
         </report>
     </coverage>
     <logging>

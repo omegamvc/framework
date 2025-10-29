@@ -1,16 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Tests\Cron;
+
+use DateInvalidTimeZoneException;
+use DateMalformedStringException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use System\Cron\InterpolateInterface;
-use System\Cron\Schedule;
-use System\Cron\ScheduleTime;
+use Omega\Cron\InterpolateInterface;
+use Omega\Cron\Schedule;
+use Omega\Cron\ScheduleTime;
 
 use function Omega\Time\now;
 
+#[CoversClass(Schedule::class)]
+#[CoversClass(ScheduleTime::class)]
 final class BasicCronTest extends TestCase
 {
+    /** @var InterpolateInterface|null  */
     private ?InterpolateInterface $logger;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setUp(): void
     {
         $this->logger = new class implements InterpolateInterface {
@@ -21,11 +34,21 @@ final class BasicCronTest extends TestCase
         };
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function tearDown(): void
     {
         $this->logger = null;
     }
 
+    /**
+     * Sample schedule example.
+     *
+     * @return Schedule Return the Schedule object.
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
+     */
     private function sampleSchedules(): Schedule
     {
         $schedule = new Schedule(now()->timestamp, $this->logger);
@@ -37,44 +60,56 @@ final class BasicCronTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it correct schedule class.
+     *
+     * @return void
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
      */
-    public function itCorrectScheduleClass(): void
+    public function testItCorrectScheduleClass(): void
     {
         foreach ($this->sampleSchedules()->getPools() as $scheduleItem) {
-            $this->assertInstanceOf(ScheduleTime::class, $scheduleItem, 'this is scheduletime');
+            $this->assertInstanceOf(ScheduleTime::class, $scheduleItem, 'this is schedule time');
         }
     }
 
     /**
-     * @test
+     * Test it schedule run anonymously.
+     *
+     * @return void
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
      */
-    public function itScheduleRunAnymusly(): void
+    public function testItScheduleRunAnonymously(): void
     {
-        $animusly = new Schedule(now()->timestamp, $this->logger);
-        $animusly
-            ->call(fn (): string => 'is run animusly')
+        $anonymously = new Schedule(now()->timestamp, $this->logger);
+        $anonymously
+            ->call(fn (): string => 'is run anonymously')
             ->justInTime()
             ->eventName('test 01')
-            ->animusly();
+            ->anonymously();
 
-        $animusly
-            ->call(fn (): string => 'is run animusly')
+        $anonymously
+            ->call(fn (): string => 'is run anonymously')
             ->hourly()
             ->eventName('test 02')
-            ->animusly();
+            ->anonymously();
 
-        foreach ($animusly->getPools() as $scheduleItem) {
+        foreach ($anonymously->getPools() as $scheduleItem) {
             if ($scheduleItem instanceof ScheduleTime) {
-                $this->assertTrue($scheduleItem->isAnimusly());
+                $this->assertTrue($scheduleItem->isAnonymously());
             }
         }
     }
 
     /**
-     * @test
+     * Test it can add schedule.
+     *
+     * @return void
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
      */
-    public function itCanAddSchedule(): void
+    public function testItCanAddSchedule(): void
     {
         $cron1 = new Schedule(now()->timestamp, $this->logger);
         $cron1->call(fn (): bool => true)->eventName('from1');
@@ -87,9 +122,13 @@ final class BasicCronTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it can flush.
+     *
+     * @return void
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
      */
-    public function itCanFlush(): void
+    public function testItCanFlush(): void
     {
         $cron = new Schedule(now()->timestamp, $this->logger);
         $cron->call(fn (): bool => true)->eventName('one');

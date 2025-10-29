@@ -1,13 +1,75 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use System\Collection\CollectionImmutable;
-use System\Collection\Exceptions\NoModify;
+/**
+ * Part of Omega - Tests\Collection Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 
+declare(strict_types=1);
+
+namespace Tests\Collection;
+
+use Omega\Collection\CollectionImmutable;
+use Omega\Collection\Exceptions\ImmutableCollectionException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
+use function array_keys;
+use function array_values;
+use function count;
+use function in_array;
+use function json_encode;
+use function str_contains;
+
+/**
+ * Class CollectionImmutableTest
+ *
+ * This test suite verifies the functionality, behavior, and immutability
+ * of the CollectionImmutable class from the Omega\Collection package.
+ *
+ * The CollectionImmutable class provides a collection implementation that:
+ *  - Is immutable: attempts to modify items via array access or removal throw exceptions.
+ *  - Supports iteration, key/value access, and common collection operations.
+ *  - Provides functional helpers such as `each`, `some`, `every`, `pluck`, `first`, `last`, `max`, and `min`.
+ *  - Can be treated like a native array for read-only operations.
+ *  - Handles both associative and indexed collections gracefully.
+ *
+ * This test suite includes:
+ *  - Verification of immutability enforcement via exceptions on set/unset operations.
+ *  - Validation of collection access methods including get, keys, items, firstKey, lastKey, firsts, lasts,
+ *    max, min, and pluck.
+ *  - Checks for iteration behavior and array-like access.
+ *  - Tests for functional helpers such as `each`, `some`, `every`, `contain`, `countIf`, and random element retrieval.
+ *  - Ensures JSON serialization reflects the underlying collection correctly.
+ *  - Confirms proper handling of strict type comparisons where applicable.
+ *
+ * The goal is to guarantee that CollectionImmutable behaves predictably and consistently
+ * across a wide variety of scenarios, preserving immutability while providing powerful
+ * read-only collection utilities.
+ *
+ * @category  Tests
+ * @package   Collection
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+#[CoversClass(CollectionImmutable::class)]
+#[CoversClass(ImmutableCollectionException::class)]
 class CollectionImmutableTest extends TestCase
 {
-    /** @test */
-    public function itCollectionImutableFuntionalWorKProperly(): void
+    /**
+     * Test it collection immutable functional work properly.
+     *
+     * @return void
+     */
+    public function testItCollectionImmutableFunctionalWorKProperly(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -20,8 +82,8 @@ class CollectionImmutableTest extends TestCase
         $test = new CollectionImmutable($original);
 
         // getter
-        $this->assertEquals($test->buah_1, 'mangga', 'add new item colection using __set');
-        $this->assertEquals($test->get('buah_1'), 'mangga', 'add new item collection using set()');
+        $this->assertEquals('mangga', $test->buah_1, 'add new item collection using __set');
+        $this->assertEquals('mangga', $test->get('buah_1'), 'add new item collection using set()');
 
         // cek array key
         $this->assertTrue($test->has('buah_1'), 'collection have item with key');
@@ -30,12 +92,12 @@ class CollectionImmutableTest extends TestCase
         $this->assertTrue($test->contain('mangga'), 'collection have item');
 
         // count
-        $this->assertEquals($test->count(), 6, 'count item in collection');
+        $this->assertEquals(6, $test->count(), 'count item in collection');
 
         // count by
         $countIf = $test->countIf(function ($item) {
             // find letter contain 'e' letter
-            return strpos($item, 'e') !== false ? true : false;
+            return str_contains($item, 'e');
         });
         $this->assertEquals(4, $countIf, 'count item in collection with some condition');
 
@@ -43,29 +105,29 @@ class CollectionImmutableTest extends TestCase
         $this->assertEquals('mangga', $test->first('bukan buah'), 'get first item in collection');
         $this->assertEquals('peer', $test->last('bukan buah'), 'get last item in collection');
 
-        // test array keys and vules
+        // test array keys and values
         $keys  = array_keys($original);
         $items = array_values($original);
         $this->assertEquals($keys, $test->keys(), 'get all key in collection');
         $this->assertEquals($items, $test->items(), 'get all item value in collection');
 
-        // each funtion
+        // each function
         $test->each(function ($item, $key) use ($original) {
             $this->assertTrue(in_array($item, $original), 'test each with value');
-            $this->assertTrue(array_key_exists($key, $original), 'test each with key');
+            $this->assertArrayHasKey($key, $original, 'test each with key');
         });
 
         // test the collection have item with e letter
         $some = $test->some(function ($item) {
             // find letter contain 'e' letter
-            return strpos($item, 'e') !== false ? true : false;
+            return str_contains($item, 'e');
         });
         $this->assertTrue($some, 'test the collection have item with "e" letter');
 
-        // test the collection every item dont have 'x' letter
+        // test the collection every item don't have 'x' letter
         $every = $test->every(function ($item) {
             // find letter contain 'x' letter
-            return strpos($item, 'x') === false ? true : false;
+            return !str_contains($item, 'x');
         });
         $this->assertTrue($every, 'collection every item dont have "x" letter');
 
@@ -74,8 +136,12 @@ class CollectionImmutableTest extends TestCase
         $this->assertJsonStringEqualsJsonString($test->json(), $json, 'collection convert to json string');
     }
 
-    /** @test */
-    public function itCanActingLikeArray()
+    /**
+     * Test it can act like array.
+     *
+     * @return void
+     */
+    public function testItCanActingLikeArray(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -84,8 +150,12 @@ class CollectionImmutableTest extends TestCase
         $this->assertArrayHasKey('three', $coll);
     }
 
-    /** @test */
-    public function itCanDoLikeArray()
+    /**
+     * Test it can do like array.
+     *
+     * @return void
+     */
+    public function testItCanDoLikeArray(): void
     {
         $arr  = ['one' => 1, 'two' => 2, 'three' => 3];
         $coll = new CollectionImmutable($arr);
@@ -99,8 +169,12 @@ class CollectionImmutableTest extends TestCase
         $this->assertTrue(isset($coll['one']));
     }
 
-    /** @test */
-    public function itCanByIterator()
+    /**
+     * Test it can by iterator.
+     *
+     * @return void
+     */
+    public function testItCanByIterator(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -109,26 +183,38 @@ class CollectionImmutableTest extends TestCase
         }
     }
 
-    /** @test */
-    public function itWillthrowExceptionWithSetMethod()
+    /**
+     * Test it will throw exception with set method.
+     *
+     * @return void
+     */
+    public function testItWillThrowExceptionWithSetMethod(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => 2, 'three' => 3]);
 
-        $this->expectException(NoModify::class);
+        $this->expectException(ImmutableCollectionException::class);
         $coll['one'] = 4;
     }
 
-    /** @test */
-    public function itWillthrowExceptionWithRemoveMethod()
+    /**
+     * Test it will throw exception with remove method.
+     *
+     * @return void
+     */
+    public function testItWillThrowExceptionWithRemoveMethod(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => 2, 'three' => 3]);
 
-        $this->expectException(NoModify::class);
+        $this->expectException(ImmutableCollectionException::class);
         unset($coll['one']);
     }
 
-    /** @test */
-    public function itCanCountUsingCountFunction()
+    /**
+     * Test it can count using count function.
+     *
+     * @return void
+     */
+    public function testItCanCountUsingCountFunction(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -136,8 +222,12 @@ class CollectionImmutableTest extends TestCase
         $this->assertEquals(3, count($coll));
     }
 
-    /** @test */
-    public function itCanRandomizeItemsInCollection()
+    /**
+     * Test it can randomize items in collection.
+     *
+     * @return void
+     */
+    public function testItCanRandomizeItemsInCollection(): void
     {
         $arr  = ['one' => 1, 'two' => 2, 'three' => 3];
         $coll = new CollectionImmutable($arr);
@@ -148,8 +238,12 @@ class CollectionImmutableTest extends TestCase
         );
     }
 
-    /** @test */
-    public function itCanGetCurrentNextPrev()
+    /**
+     * Test it can get current next prev.
+     *
+     * @return void
+     */
+    public function testItCanGetCurrentNextPrev(): void
     {
         $arr  = ['one' => 1, 'two' => 2, 'three' => 3];
         $coll = new CollectionImmutable($arr);
@@ -159,8 +253,12 @@ class CollectionImmutableTest extends TestCase
         $this->assertEquals(1, $coll->prev());
     }
 
-    /** @test */
-    public function itCanFilterUsingStrictType()
+    /**
+     * Test it can filter using strict type.
+     *
+     * @return void
+     */
+    public function testItCanFilterUsingStrictType(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => '2', 'three' => 3]);
 
@@ -172,56 +270,84 @@ class CollectionImmutableTest extends TestCase
         );
     }
 
-    /** @test */
-    public function itCanGetFirstKey()
+    /**
+     * Test it can get first key.
+     *
+     * @return void
+     */
+    public function testItCanGetFirstKey(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => '2', 'three' => 3]);
 
         $this->assertEquals('one', $coll->firstKey());
     }
 
-    /** @test */
-    public function itCanGetFirstKeyNull()
+    /**
+     * Test it can get first key null.
+     *
+     * @return void
+     */
+    public function testItCanGetFirstKeyNull(): void
     {
         $coll = new CollectionImmutable([]);
 
         $this->assertEquals(null, $coll->firstKey());
     }
 
-    /** @test */
-    public function itCanGetlastKey()
+    /**
+     * Test it can get last key.
+     *
+     * @return void
+     */
+    public function testItCanGetLastKey(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => '2', 'three' => 3]);
 
         $this->assertEquals('three', $coll->lastKey());
     }
 
-    /** @test */
-    public function itCanGetLastKeyNull()
+    /**
+     * Test it can get last key null.
+     *
+     * @return void
+     */
+    public function testItCanGetLastKeyNull(): void
     {
         $coll = new CollectionImmutable([]);
 
         $this->assertEquals(null, $coll->lastKey());
     }
 
-    /** @test */
-    public function itCanGetFirts()
+    /**
+     * Test it can get first.
+     *
+     * @return void
+     */
+    public function testItCanGetFirst(): void
     {
         $coll = new CollectionImmutable([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
         $this->assertEquals([10, 20], $coll->firsts(2));
     }
 
-    /** @test */
-    public function itCanGetLasts()
+    /**
+     * Test it can get lasts.
+     *
+     * @return void
+     */
+    public function testItCanGetLasts(): void
     {
         $coll = new CollectionImmutable([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
         $this->assertEquals([80, 90], $coll->lasts(2));
     }
 
-    /** @test */
-    public function itCanGetHigest()
+    /**
+     * Test it can get highest.
+     *
+     * @return void
+     */
+    public function testItCanGetHighest(): void
     {
         $coll = new CollectionImmutable([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
@@ -236,8 +362,12 @@ class CollectionImmutableTest extends TestCase
         $this->assertEquals(90, $coll->max('rank'));
     }
 
-    /** @test */
-    public function itCanGetLowestValue()
+    /**
+     * Test it can get the lowest value.
+     *
+     * @return void
+     */
+    public function testItCanGetLowestValue(): void
     {
         $coll = new CollectionImmutable([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
@@ -253,32 +383,36 @@ class CollectionImmutableTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it can pluck.
+     *
+     * @return void
      */
-    public function itCanPluck()
+    public function testItCanPluck(): void
     {
         $coll = [
             ['user' => 'taylor'],
             ['user' => 'nuno'],
-            ['user' => 'pradana'],
+            ['user' => 'giovannini'],
         ];
         $coll = new CollectionImmutable($coll);
 
-        $this->assertEquals(['taylor', 'nuno', 'pradana'], $coll->pluck('user'));
+        $this->assertEquals(['taylor', 'nuno', 'giovannini'], $coll->pluck('user'));
     }
 
     /**
-     * @test
+     * Test it can pluck key.
+     *
+     * @return void
      */
-    public function itCanPluckKey()
+    public function testItCanPluckKey(): void
     {
         $coll = [
             ['id' => 1, 'user' => 'taylor'],
             ['id' => 2, 'user' => 'nuno'],
-            ['id' => 3, 'user' => 'pradana'],
+            ['id' => 3, 'user' => 'giovannini'],
         ];
         $coll = new CollectionImmutable($coll);
 
-        $this->assertEquals([1 => 'taylor', 2 => 'nuno', 3 => 'pradana'], $coll->pluck('user', 'id'));
+        $this->assertEquals([1 => 'taylor', 2 => 'nuno', 3 => 'giovannini'], $coll->pluck('user', 'id'));
     }
 }

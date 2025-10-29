@@ -156,7 +156,6 @@ class Memory extends AbstractStorage
         return false;
     }
 
-
     /**
      * {@inheritdoc}
      */

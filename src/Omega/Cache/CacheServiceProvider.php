@@ -63,11 +63,9 @@ class CacheServiceProvider extends AbstractServiceProvider
         $default        = $config['cache.default'];
         $storages       = $config['cache.storage'];
 
-        $defaultOptions = $storages[$default];
-        $fileOptions    = $storages['file'];
+        $options        = $storages[$default];
 
-        $this->app->set('cache.options', $defaultOptions);
-        $this->app->set('cache.file.options', $fileOptions);
+        $this->app->set('cache.options', $options);
 
         $cache = match ($default) {
             'memory' => 'cache.memory',
@@ -76,7 +74,7 @@ class CacheServiceProvider extends AbstractServiceProvider
 
         $this->app->set(
             'cache.file',
-            fn(): File => new File($this->app->get('cache.file.options'))
+            fn(): File => new File($this->app->get('cache.options'))
         );
 
         $this->app->set(
@@ -84,10 +82,10 @@ class CacheServiceProvider extends AbstractServiceProvider
             fn(): Memory => new Memory($this->app->get('cache.options'))
         );
 
-        $this->app->set('cache', function () use ($cache, $fileOptions, $default): CacheFactory {
-            $manager = new CacheFactory($fileOptions);
-            $manager->setDriver($default, $this->app[$cache]);
-            return $manager;
+        $this->app->set('cache', function () use ($cache, $default): CacheFactory {
+            $factory = new CacheFactory();
+            $factory->setDriver($default, $this->app[$cache]);
+            return $factory;
         });
     }
 }

@@ -2,15 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Tests\System\RateLimiter\Policy;
+namespace Tests\RateLimiter\Policy;
 
+use Omega\RateLimiter\RateLimiter\NoLimiter;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use System\RateLimiter\RateLimiter\NoLimiter;
 
+use const PHP_INT_MAX;
+
+#[CoversClass(NoLimiter::class)]
 class NoLimiterTest extends TestCase
 {
-    /** @test */
-    public function itCanConsumeTokensWithinTheLimit()
+    /**
+     * Test it can consume tokens within the limit.
+     *
+     * @return void
+     */
+    public function testItCanConsumeTokensWithinTheLimit(): void
     {
         $limiter   = new NoLimiter();
         $rateLimit = $limiter->consume('test_key');
@@ -20,8 +28,12 @@ class NoLimiterTest extends TestCase
         $this->assertEquals(PHP_INT_MAX, $rateLimit->getRemaining());
     }
 
-    /** @test */
-    public function itNeverBlocksWhenConsumingTokensExceedsTheLimit()
+    /**
+     * Test it never blocks when consuming tokens exceeds the limit.
+     *
+     * @return void
+     */
+    public function testItNeverBlocksWhenConsumingTokensExceedsTheLimit(): void
     {
         $limiter = new NoLimiter();
 
@@ -36,22 +48,12 @@ class NoLimiterTest extends TestCase
         $this->assertEquals(PHP_INT_MAX, $rateLimit->getRemaining());
     }
 
-    /** @test */
-    // public function itCanPeekAtTheRateLimitStatus()
-    // {
-    //     $limiter = new NoLimiter();
-
-    //     $this->cache->set('test_key:fw:' . floor(now()->timestamp / 60), 3);
-
-    //     $rateLimit = $limiter->peek('test_key');
-
-    //     $this->assertFalse($rateLimit->isBlocked());
-    //     $this->assertEquals(3, $rateLimit->getConsumed());
-    //     $this->assertEquals(2, $rateLimit->getRemaining());
-    // }
-
-    /** @test */
-    public function itCanResetTheRateLimit()
+    /**
+     * Test it can reset the rate limiter.
+     *
+     * @return void
+     */
+    public function testItCanResetTheRateLimit(): void
     {
         $limiter = new NoLimiter();
 

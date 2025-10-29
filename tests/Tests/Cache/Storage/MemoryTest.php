@@ -1,40 +1,115 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Cache Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
-namespace System\Text\Cache\Storage;
+namespace Tests\Cache\Storage;
 
+use DateInterval;
+use DateTime;
+use Omega\Cache\Storage\Memory;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use System\Cache\Storage\ArrayStorage;
 
-class ArrayStorageTest extends TestCase
+use function time;
+
+/**
+ * Class MemoryTest
+ *
+ * Unit tests for the Memory cache storage implementation.
+ *
+ * @category   Tests
+ * @package    Cache
+ * @subpackage Storage
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
+#[CoversClass(Memory::class)]
+class MemoryTest extends TestCase
 {
-    protected ArrayStorage $storage;
+    /** @var Memory Memory storage instance. Used for temporary, in-memory storage operations. */
+    protected Memory $storage;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setUp(): void
     {
-        $this->storage = new ArrayStorage();
+        $this->storage = new Memory(['ttl' => 3600]);
     }
 
+    /**
+     * Test set and get.
+     *
+     * @return void
+     */
     public function testSetAndGet(): void
     {
         $this->assertTrue($this->storage->set('key1', 'value1'));
         $this->assertEquals('value1', $this->storage->get('key1'));
     }
 
+    /**
+     * Test get with default.
+     *
+     * @return void
+     */
     public function testGetWithDefault(): void
     {
         $this->assertEquals('default', $this->storage->get('non_existing_key', 'default'));
     }
 
-    public function testSetWithTTL(): void
+    /**
+     * Test set ith ttl.
+     *
+     * @return void
+     */
+    /**public function testSetWithTtl(): void
     {
         $this->markTestSkipped('sleep is not allowed');
         $this->assertTrue($this->storage->set('key2', 'value2', 1));
         sleep(2);
         $this->assertNull($this->storage->get('key2'));
+    }*/
+
+    /**
+     * Test set with TTL without using sleep.
+     *
+     * @return void
+     */
+    public function testSetWithTtl(): void
+    {
+        $key = 'key2';
+        $value = 'value2';
+
+        // Set with TTL = 1 second (relative)
+        $this->assertTrue($this->storage->set($key, $value, 1));
+        $this->assertEquals($value, $this->storage->get($key));
+
+        // Force expiration by setting TTL as a past DateTime
+        $past = DateInterval::createFromDateString('-1 second');
+        $this->storage->set($key, $value, $past);
+
+        $this->assertNull($this->storage->get($key), 'Item should now be expired');
     }
 
+    /**
+     * Test delete.
+     *
+     * @return void
+     */
     public function testDelete(): void
     {
         $this->storage->set('key3', 'value3');
@@ -42,11 +117,21 @@ class ArrayStorageTest extends TestCase
         $this->assertFalse($this->storage->has('key3'));
     }
 
+    /**
+     * Test delete non existing key.
+     *
+     * @return void
+     */
     public function testDeleteNonExistingKey(): void
     {
         $this->assertFalse($this->storage->delete('non_existing_key'));
     }
 
+    /**
+     * Test clear.
+     *
+     * @return void
+     */
     public function testClear(): void
     {
         $this->storage->set('key4', 'value4');
@@ -54,6 +139,11 @@ class ArrayStorageTest extends TestCase
         $this->assertFalse($this->storage->has('key4'));
     }
 
+    /**
+     * Test get multiple.
+     *
+     * @return void
+     */
     public function testGetMultiple(): void
     {
         $this->storage->set('key5', 'value5');
@@ -62,6 +152,11 @@ class ArrayStorageTest extends TestCase
         $this->assertEquals(['key5' => 'value5', 'key6' => 'value6', 'non_existing_key' => 'default'], $result);
     }
 
+    /**
+     * Test set multiple.
+     *
+     * @return void
+     */
     public function testSetMultiple(): void
     {
         $this->assertFalse($this->storage->setMultiple(['key7' => 'value7', 'key8' => 'value8']));
@@ -69,6 +164,11 @@ class ArrayStorageTest extends TestCase
         $this->assertEquals('value8', $this->storage->get('key8'));
     }
 
+    /**
+     * Test delete multiple.
+     *
+     * @return void
+     */
     public function testDeleteMultiple(): void
     {
         $this->storage->set('key9', 'value9');
@@ -78,6 +178,11 @@ class ArrayStorageTest extends TestCase
         $this->assertFalse($this->storage->has('key10'));
     }
 
+    /**
+     * Test has.
+     *
+     * @return void
+     */
     public function testHas(): void
     {
         $this->storage->set('key11', 'value11');
@@ -85,18 +190,33 @@ class ArrayStorageTest extends TestCase
         $this->assertFalse($this->storage->has('non_existing_key'));
     }
 
+    /**
+     * Test increment.
+     *
+     * @return void
+     */
     public function testIncrement(): void
     {
         $this->assertEquals(10, $this->storage->increment('key12', 10));
         $this->assertEquals(20, $this->storage->increment('key12', 10));
     }
 
+    /**
+     * Test decrement.
+     *
+     * @return void
+     */
     public function testDecrement(): void
     {
         $this->storage->increment('key13', 20);
         $this->assertEquals(10, $this->storage->decrement('key13', 10));
     }
 
+    /**
+     * Test get info.
+     *
+     * @return void
+     */
     public function testGetInfo(): void
     {
         $this->storage->set('key14', 'value14');
@@ -105,6 +225,11 @@ class ArrayStorageTest extends TestCase
         $this->assertEquals('value14', $info['value']);
     }
 
+    /**
+     * Test calculate expiration timestamp.
+     *
+     * @return void
+     */
     public function testCalculateExpirationTimestamp(): void
     {
         $time = time();
@@ -115,28 +240,45 @@ class ArrayStorageTest extends TestCase
         $expired = (fn () => $this->{'calculateExpirationTimestamp'}(time()))->call($this->storage);
         $this->assertGreaterThanOrEqual($time, $expired);
         // date interval
-        $expired = (fn () => $this->{'calculateExpirationTimestamp'}(\DateInterval::createFromDateString('1 day')))->call($this->storage);
+        $expired = (
+            fn () => $this->{'calculateExpirationTimestamp'}(DateInterval::createFromDateString('1 day'))
+        )->call($this->storage);
         $this->assertGreaterThanOrEqual($time, $expired);
         // date time
-        $expired = (fn () => $this->{'calculateExpirationTimestamp'}(new \DateTime()))->call($this->storage);
+        $expired = (fn () => $this->{'calculateExpirationTimestamp'}(new DateTime()))->call($this->storage);
         $this->assertGreaterThanOrEqual($time, $expired);
     }
 
+    /**
+     * Test is expired.
+     *
+     * @return void
+     */
     public function testIsExpired(): void
     {
         $expired = (fn () => $this->{'isExpired'}(time() + 2))->call($this->storage);
         $this->assertFalse($expired);
     }
 
+    /**
+     * Test create time.
+     *
+     * @return void
+     */
     public function testCreateTime(): void
     {
         $mtime = (fn () => $this->{'createMtime'}())->call($this->storage);
         $this->assertIsFloat($mtime);
     }
 
+    /**
+     * Test remember.
+     *
+     * @return void
+     */
     public function testRemember(): void
     {
-        $value = $this->storage->remember('key1', 1, fn (): string => 'value1');
+        $value = $this->storage->remember('key1', fn (): string => 'value1', 1);
         $this->assertEquals('value1', $value);
     }
 }

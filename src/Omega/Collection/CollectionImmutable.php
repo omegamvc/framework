@@ -11,6 +11,8 @@ use Omega\Collection\Exceptions\ImmutableCollectionException;
  * @template TValue
  *
  * @extends AbstractCollectionImmutable<TKey, TValue>
+ *
+ * @property mixed $buah_1
  */
 class CollectionImmutable extends AbstractCollectionImmutable
 {

@@ -57,18 +57,18 @@ class ConfigProviders
                 $config[$key] = $value;
             }*/
             foreach (glob($configPath . "*.php") as $path) {
-    			$value = require $path;
+                $value = require $path;
 
-    			if (!is_array($value)) {
-        			throw new \RuntimeException(
-            			"Invalid config file [$path]: expected array, got "
-            			. gettype($value)
-        			);
-    			}
+                if (!is_array($value)) {
+                    throw new \RuntimeException(
+                        "Invalid config file [$path]: expected array, got "
+                        . gettype($value)
+                    );
+                }
 
-    			// Unisci l’array del file direttamente nella configurazione globale
-    			$config = array_merge($config, $value);
-			}
+                // Unisci l’array del file direttamente nella configurazione globale
+                $config = array_merge($config, $value);
+            }
         }
 
         // Carichiamo il repository nel container/app

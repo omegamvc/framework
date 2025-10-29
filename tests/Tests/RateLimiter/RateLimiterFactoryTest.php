@@ -2,19 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Tests\System\RateLimiter;
+namespace Tests\RateLimiter;
 
+use Omega\Cache\Storage\Memory;
+use Omega\RateLimiter\RateLimiterFactory;
+use Omega\RateLimiter\RateLimiterInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use System\Cache\Storage\ArrayStorage;
-use System\RateLimiter\Interfaces\RateLimiterInterface;
-use System\RateLimiter\RateLimiterFactory;
 
+#[CoversClass(Memory::class)]
+#[CoversClass(RateLimiterFactory::class)]
 class RateLimiterFactoryTest extends TestCase
 {
-    /** @test */
-    public function itCanCreateRateLimiter(): void
+    /**
+     * Test it can create rate limiter.
+     *
+     * @return void
+     */
+    public function testItCanCreateRateLimiter(): void
     {
-        $factory = new RateLimiterFactory(new ArrayStorage());
+        $factory = new RateLimiterFactory(new Memory(['ttl' => 3600]));
 
         $this->assertInstanceOf(
             RateLimiterInterface::class,

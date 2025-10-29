@@ -3,4 +3,4 @@ parameters:
 	paths:
 		- src/
 		- tests/
-    tmpDir: cache/phpstan
+tmpDir: cache/phpstan

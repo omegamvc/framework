@@ -17,11 +17,11 @@ namespace Tests\Time;
 use DateInvalidTimeZoneException;
 use DateMalformedStringException;
 use DateTime;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
 use Omega\Time\Exceptions\PropertyNotExistException;
 use Omega\Time\Exceptions\PropertyNotSettableException;
 use Omega\Time\Now;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 use function date;
 use function date_default_timezone_set;

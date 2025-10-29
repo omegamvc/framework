@@ -1,13 +1,79 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use System\Collection\Collection;
-use System\Collection\CollectionImmutable;
+/**
+ * Part of Omega - Tests\Collection Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 
+/** @noinspection PhpConditionAlreadyCheckedInspection */
+
+declare(strict_types=1);
+
+namespace Tests\Collection;
+
+use Omega\Collection\Collection;
+use Omega\Collection\CollectionImmutable;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
+use function array_filter;
+use function array_keys;
+use function array_map;
+use function array_values;
+use function in_array;
+use function json_encode;
+use function ob_get_clean;
+use function ob_start;
+use function str_contains;
+use function ucfirst;
+
+/**
+ * Class CollectionTest
+ *
+ * This test suite verifies the behavior and functionality of the Collection class
+ * from the Omega\Collection package, a mutable collection implementation.
+ *
+ * The Collection class provides a rich set of features, including:
+ *  - Getter and setter access to collection elements.
+ *  - Adding, removing, and replacing items.
+ *  - Checking for existence of keys or values, counting items, and conditional counts.
+ *  - Retrieval of first, last, and subsets of items.
+ *  - Iteration and array-like access.
+ *  - Functional operations: each, map, filter, reduce, some, every, and shuffle.
+ *  - Set operations: diff, diffKeys, diffAssoc, complement, complementKeys, complementAssoc.
+ *  - Sorting operations: sort, sortDesc, sortBy, sortByDesc, sortKey, sortKeyDesc.
+ *  - Cloning, flattening, chunking, splitting, and selective access (only/except).
+ *  - Conversion to immutable CollectionImmutable instances.
+ *  - JSON serialization of collection contents.
+ *  - Handling of empty collections and null keys/values.
+ *
+ * This suite ensures that Collection behaves as expected in mutable scenarios,
+ * supports chainable operations, and integrates seamlessly with array-like and
+ * functional programming paradigms.
+ *
+ * @category  Tests
+ * @package   Collection
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+#[CoversClass(Collection::class)]
+#[CoversClass(CollectionImmutable::class)]
 class CollectionTest extends TestCase
 {
-    /** @test */
-    public function itCanGetGetterSetter(): void
+    /**
+     * Test it can get getter setter.
+     *
+     * @return void
+     */
+    public function testItCanGetGetterSetter(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -18,20 +84,24 @@ class CollectionTest extends TestCase
             'buah_6' => 'peer',
         ];
         $test = new Collection($original);
-        $this->assertEquals($test->buah_1, 'mangga');
-        $this->assertEquals($test->get('buah_1'), 'mangga');
+        $this->assertEquals('mangga', $test->buah_1);
+        $this->assertEquals('mangga', $test->get('buah_1'));
         $test->set('buah_7', 'kelengkeng');
         $test->buah_8 = 'cherry';
-        $this->assertEquals($test->buah_8, 'cherry');
-        $this->assertEquals($test->get('buah_7'), 'kelengkeng');
+        $this->assertEquals('cherry', $test->buah_8);
+        $this->assertEquals('kelengkeng', $test->get('buah_7'));
         $test->set('buah_7', 'durian');
         $test->buah_8 = 'nanas';
-        $this->assertEquals($test->buah_8, 'nanas');
-        $this->assertEquals($test->get('buah_7'), 'durian');
+        $this->assertEquals('nanas', $test->buah_8);
+        $this->assertEquals('durian', $test->get('buah_7'));
     }
 
-    /** @test */
-    public function itCanGetAddRemoveHasContain(): void
+    /**
+     * Test it can get add remove has contained.
+     *
+     * @return void
+     */
+    public function testItCanGetAddRemoveHasContain(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -49,8 +119,12 @@ class CollectionTest extends TestCase
         $test->replace($original);
     }
 
-    /** @test */
-    public function itCanGetCountAndCountIf(): void
+    /**
+     * Test it can get count and count if.
+     *
+     * @return void
+     */
+    public function testItCanGetCountAndCountIf(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -61,15 +135,19 @@ class CollectionTest extends TestCase
             'buah_6' => 'peer',
         ];
         $test = new Collection($original);
-        $this->assertEquals($test->count(), 6);
+        $this->assertEquals(6, $test->count());
         $countIf = $test->countIf(function ($item) {
-            return strpos($item, 'e') !== false;
+            return str_contains($item, 'e');
         });
         $this->assertEquals(4, $countIf);
     }
 
-    /** @test */
-    public function itCanGetFirstLast(): void
+    /**
+     * Test it can get first last.
+     *
+     * @eturn void
+     */
+    public function testItCanGetFirstLast(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -84,8 +162,12 @@ class CollectionTest extends TestCase
         $this->assertEquals('peer', $test->last('bukan buah'));
     }
 
-    /** @test */
-    public function itCanGetClearIsEmptyReplaceAll(): void
+    /**
+     * Test it can get clear is empty replace all.
+     *
+     * @return void
+     */
+    public function testItCanGetClearIsEmptyReplaceAll(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -103,8 +185,12 @@ class CollectionTest extends TestCase
         $this->assertEquals($test->all(), $original);
     }
 
-    /** @test */
-    public function itCanGetKeysItems(): void
+    /**
+     * Test it can get keys items.
+     *
+     * @return void
+     */
+    public function testItCanGetKeysItems(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -121,8 +207,12 @@ class CollectionTest extends TestCase
         $this->assertEquals($items, $test->items());
     }
 
-    /** @test */
-    public function itCanGetEachMapFilter(): void
+    /**
+     * Test it can get each map filter.
+     *
+     * @return void
+     */
+    public function testItCanGetEachMapFilter(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -135,24 +225,28 @@ class CollectionTest extends TestCase
         $test = new Collection($original);
         $test->each(function ($item, $key) use ($original) {
             $this->assertTrue(in_array($item, $original));
-            $this->assertTrue(array_key_exists($key, $original));
+            $this->assertArrayHasKey($key, $original);
         });
         $test->map(fn ($item) => ucfirst($item));
         $copy_origin = array_map(fn ($item) => ucfirst($item), $original);
         $this->assertEquals($test->all(), $copy_origin);
         $test->replace($original);
         $test->filter(function ($item) {
-            return strpos($item, 'e') !== false;
+            return str_contains($item, 'e');
         });
         $copy_origin = array_filter($original, function ($item) {
-            return strpos($item, 'e') !== false;
+            return str_contains($item, 'e');
         });
         $this->assertEquals($test->all(), $copy_origin);
         $test->replace($original);
     }
 
-    /** @test */
-    public function itCanGetSomeEvery(): void
+    /**
+     * Test it can get some every.
+     *
+     * @return void
+     */
+    public function testItCanGetSomeEvery(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -164,17 +258,21 @@ class CollectionTest extends TestCase
         ];
         $test = new Collection($original);
         $some = $test->some(function ($item) {
-            return strpos($item, 'e') !== false;
+            return str_contains($item, 'e');
         });
         $this->assertTrue($some);
         $every = $test->every(function ($item) {
-            return strpos($item, 'x') === false;
+            return !str_contains($item, 'x');
         });
         $this->assertTrue($every);
     }
 
-    /** @test */
-    public function itCanGetJson(): void
+    /**
+     * Test it can get json.
+     *
+     * @return void
+     */
+    public function testItCanGetJson(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -189,8 +287,12 @@ class CollectionTest extends TestCase
         $this->assertJsonStringEqualsJsonString($test->json(), $json);
     }
 
-    /** @test */
-    public function itCanGetReverseSort(): void
+    /**
+     * Test it can get reverse sort.
+     *
+     * @return void
+     */
+    public function testItCanGetReverseSort(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -204,8 +306,8 @@ class CollectionTest extends TestCase
         $copy_origin = $original;
         $this->assertEquals($test->reverse()->all(), array_reverse($copy_origin));
         $test->replace($original);
-        $this->assertEquals($test->sort()->first(), 'apel');
-        $this->assertEquals($test->sortDesc()->first(), 'rambutan');
+        $this->assertEquals('apel', $test->sort()->first());
+        $this->assertEquals('rambutan', $test->sortDesc()->first());
         $test->sortBy(function ($a, $b) {
             if ($a == $b) {
                 return 0;
@@ -213,22 +315,26 @@ class CollectionTest extends TestCase
 
             return ($a < $b) ? -1 : 1;
         });
-        $this->assertEquals($test->first(), 'apel');
-        $test->sortByDecs(function ($a, $b) {
+        $this->assertEquals('apel', $test->first());
+        $test->sortByDesc(function ($a, $b) {
             if ($a == $b) {
                 return 0;
             }
 
             return ($a < $b) ? -1 : 1;
         });
-        $this->assertEquals($test->first(), 'rambutan');
-        $this->assertEquals($test->sortKey()->first(), 'mangga');
-        $this->assertEquals($test->sortKeyDesc()->first(), 'peer');
+        $this->assertEquals('rambutan', $test->first());
+        $this->assertEquals('mangga', $test->sortKey()->first());
+        $this->assertEquals('peer', $test->sortKeyDesc()->first());
         $test->replace($original);
     }
 
-    /** @test */
-    public function itCanGetCloneRejectChunkSplitOnlyExceptFlatten(): void
+    /**
+     * Test it can get clone reject chunk split only except flatten.
+     *
+     * @return void
+     */
+    public function testItCanGetCloneRejectChunkSplitOnlyExceptFlatten(): void
     {
         $original = [
             'buah_1' => 'mangga',
@@ -267,8 +373,12 @@ class CollectionTest extends TestCase
         $this->assertEquals($original, $flatten->flatten()->all());
     }
 
-    /** @test */
-    public function itCollectionChainWorkGreat(): void
+    /**
+     * Test it collection chain work great.
+     *
+     * @return void
+     */
+    public function testItCollectionChainWorkGreat(): void
     {
         $origin     = [0, 1, 2, 3, 4];
         $collection = new Collection($origin);
@@ -293,7 +403,7 @@ class CollectionTest extends TestCase
 
                 return ($a < $b) ? -1 : 1;
             })
-            ->sortByDecs(function ($a, $b) {
+            ->sortByDesc(function ($a, $b) {
                 if ($b == $a) {
                     return 0;
                 }
@@ -303,11 +413,15 @@ class CollectionTest extends TestCase
             ->all()
         ;
 
-        $this->assertEquals($chain, $origin, 'all collection with chain is wotk');
+        $this->assertEquals($chain, $origin, 'all collection with chain is work');
     }
 
-    /** @test */
-    public function itCanAddCollectionFromCollection()
+    /**
+     * Test it can add collection from collection.
+     *
+     * @return void
+     */
+    public function testItCanAddCollectionFromCollection()
     {
         $arr_1 = ['a' => 'b'];
         $arr_2 = ['c' => 'd'];
@@ -318,11 +432,15 @@ class CollectionTest extends TestCase
         $collect = new Collection([]);
         $collect->ref($collect_1)->ref($collect_2);
 
-        $this->assertEquals(['a'=>'b', 'c'=>'d'], $collect->all());
+        $this->assertEquals(['a' => 'b', 'c' => 'd'], $collect->all());
     }
 
-    /** @test */
-    public function itCanActingLikeArray()
+    /**
+     * Test it can act like array.
+     *
+     * @return void
+     */
+    public function testItCanActingLikeArray()
     {
         $coll = new Collection(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -331,8 +449,12 @@ class CollectionTest extends TestCase
         $this->assertArrayHasKey('three', $coll);
     }
 
-    /** @test */
-    public function itCanDoLikeArray()
+    /**
+     * Test it can do like array.
+     *
+     * @return void
+     */
+    public function testItCanDoLikeArray()
     {
         $arr  = ['one' => 1, 'two' => 2, 'three' => 3];
         $coll = new Collection($arr);
@@ -354,8 +476,12 @@ class CollectionTest extends TestCase
         $this->assertEquals($arr, $coll->all());
     }
 
-    /** @test */
-    public function itCanByIterator()
+    /**
+     * Test it can by iterator.
+     *
+     * @return void
+     */
+    public function testItCanByIterator()
     {
         $coll = new Collection(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -364,8 +490,12 @@ class CollectionTest extends TestCase
         }
     }
 
-    /** @test */
-    public function itCanByShuffle()
+    /**
+     * Test it can by shuffle.
+     *
+     * @return void
+     */
+    public function testItCanByShuffle()
     {
         $arr  = ['one' => 1, 'two' => 2, 'three' => 3];
         $coll = new Collection($arr);
@@ -377,29 +507,37 @@ class CollectionTest extends TestCase
         }
     }
 
-    /** @test */
-    public function itCanMapWithKeys()
+    /**
+     * Test it can map with keys.
+     *
+     * @return void
+     */
+    public function testItCanMapWithKeys()
     {
         $arr = new Collection([
             [
                 'name'  => 'taylor',
                 'email' => 'taylor@laravel.com',
             ], [
-                'name'  => 'pradana',
-                'email' => 'pradana@savanna.com',
+                'name'  => 'giovannini',
+                'email' => 'giovannini@savanna.com',
             ],
         ]);
 
         $assocBy = $arr->assocBy(fn ($item) => [$item['name'] => $item['email']]);
 
         $this->assertEquals([
-            'taylor'  => 'taylor@laravel.com',
-            'pradana' => 'pradana@savanna.com',
+            'taylor'     => 'taylor@laravel.com',
+            'giovannini' => 'giovannini@savanna.com',
         ], $assocBy->toArray());
     }
 
-    /** @test */
-    public function itCanCloneColection()
+    /**
+     * Test it can clone collection.
+     *
+     * @return void
+     */
+    public function testItCanCloneCollection(): void
     {
         $ori = new Collection([
             'one' => 'one',
@@ -419,8 +557,12 @@ class CollectionTest extends TestCase
         $this->assertEquals('uno', $ori->get('one'));
     }
 
-    /** @test */
-    public function itCanGetSumUsingReduce()
+    /**
+     * Test it can get sum using reduce.
+     *
+     * @return void
+     */
+    public function testItCanGetSumUsingReduce()
     {
         $collection = new Collection([1, 2, 3, 4]);
 
@@ -429,24 +571,36 @@ class CollectionTest extends TestCase
         $this->assertTrue($sum === 10);
     }
 
-    /** @test */
-    public function itCanGetTakeFirst()
+    /**
+     * Test it can get take first.
+     *
+     * @return void
+     */
+    public function testItCanGetTakeFirst()
     {
         $coll = new Collection([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
         $this->assertEquals([10, 20], $coll->take(2)->toArray());
     }
 
-    /** @test */
-    public function itCanGetTakeLast()
+    /**
+     * Test it can get take last.
+     *
+     * @return void
+     */
+    public function testItCanGetTakeLast()
     {
         $coll = new Collection([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
         $this->assertEquals([80, 90], $coll->take(-2)->toArray());
     }
 
-    /** @test */
-    public function itCanPushNewItem()
+    /**
+     * Test it can push new item.
+     *
+     * @return void
+     */
+    public function testItCanPushNewItem()
     {
         $coll = new Collection([10, 20, 30, 40, 50, 60, 70, 80, 90]);
         $coll->push(100);
@@ -454,8 +608,12 @@ class CollectionTest extends TestCase
         $this->assertTrue(in_array(100, $coll->toArray()));
     }
 
-    /** @test */
-    public function itCanGetDiff()
+    /**
+     * Test it can get diff.
+     *
+     * @return void
+     */
+    public function testItCanGetDiff()
     {
         $coll = new Collection([1, 2, 3, 4, 5]);
         $coll->diff([2, 4, 6, 8]);
@@ -463,8 +621,12 @@ class CollectionTest extends TestCase
         $this->assertEquals([1, 3, 5], $coll->items());
     }
 
-    /** @test */
-    public function itCanGetDiffUsingKey()
+    /**
+     * Test it can get diff using key.
+     *
+     * @return void
+     */
+    public function testItCanGetDiffUsingKey()
     {
         $coll = new Collection([
             'buah_1' => 'mangga',
@@ -487,8 +649,12 @@ class CollectionTest extends TestCase
         ], $coll->toArray());
     }
 
-    /** @test */
-    public function itCanGetDiffUsingAssoc()
+    /**
+     * Test it can get diff using assoc.
+     *
+     * @return void
+     */
+    public function testItCanGetDiffUsingAssoc()
     {
         $coll = new Collection([
             'color'   => 'green',
@@ -509,8 +675,12 @@ class CollectionTest extends TestCase
         ], $coll->toArray());
     }
 
-    /** @test */
-    public function itCanGetcomplement()
+    /**
+     * Test it can get complements.
+     *
+     * @return void
+     */
+    public function testItCanGetComplement(): void
     {
         $coll = new Collection([1, 2, 3, 4, 5]);
         $coll->complement([2, 4, 6, 8]);
@@ -518,8 +688,12 @@ class CollectionTest extends TestCase
         $this->assertEquals([6, 8], $coll->items());
     }
 
-    /** @test */
-    public function itCanGetComplementUsingKey()
+    /**
+     * Test it can get complement using key.
+     *
+     * @return void
+     */
+    public function testItCanGetComplementUsingKey(): void
     {
         $coll = new Collection([
             'buah_1' => 'mangga',
@@ -541,8 +715,12 @@ class CollectionTest extends TestCase
         ], $coll->toArray());
     }
 
-    /** @test */
-    public function itCanGetComplementUsingAssoc()
+    /**
+     * Test it can get complements using assoc.
+     *
+     * @return void
+     */
+    public function testItCanGetComplementUsingAssoc()
     {
         $coll = new Collection([
             'color'   => 'green',
@@ -565,9 +743,11 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it can get filtered using where.
+     *
+     * @return void
      */
-    public function itCanGetFilteredUsingWhere()
+    public function testItCanGetFilteredUsingWhere()
     {
         $data = [
             ['user' => 'user1', 'age' => 10],
@@ -576,17 +756,17 @@ class CollectionTest extends TestCase
             ['user' => 'user4', 'age' => 13],
             ['user' => 'user5', 'age' => 14],
         ];
-        $equal = (new Collection($data))->where('age', '=', '13');
+        $equal = new Collection($data)->where('age', '=', '13');
         $this->assertEquals([
             3 => ['user' => 'user4', 'age' => 13],
         ], $equal->toArray());
 
-        $identical = (new Collection($data))->where('age', '===', 13);
+        $identical = new Collection($data)->where('age', '===', 13);
         $this->assertEquals([
             3 => ['user' => 'user4', 'age' => 13],
         ], $identical->toArray());
 
-        $notequal = (new Collection($data))->where('age', '!=', '13');
+        $notequal = new Collection($data)->where('age', '!=', '13');
         $this->assertEquals([
             ['user' => 'user1', 'age' => 10],
             ['user' => 'user2', 'age' => 12],
@@ -594,45 +774,47 @@ class CollectionTest extends TestCase
             4       => ['user' => 'user5', 'age' => 14],
         ], $notequal->toArray());
 
-        $notequalidentical = (new Collection($data))->where('age', '!==', 13);
+        $notEqualIdentical = new Collection($data)->where('age', '!==', 13);
         $this->assertEquals([
             ['user' => 'user1', 'age' => 10],
             ['user' => 'user2', 'age' => 12],
             ['user' => 'user3', 'age' => 10],
             4       => ['user' => 'user5', 'age' => 14],
-        ], $notequalidentical->toArray());
+        ], $notEqualIdentical->toArray());
 
-        $greathat = (new Collection($data))->where('age', '>', 13);
+        $greaterThan = new Collection($data)->where('age', '>', 13);
         $this->assertEquals([
             4 => ['user' => 'user5', 'age' => 14],
-        ], $greathat->toArray());
+        ], $greaterThan->toArray());
 
-        $greathatequal = (new Collection($data))->where('age', '>=', 13);
+        $greaterThanEqual = new Collection($data)->where('age', '>=', 13);
         $this->assertEquals([
             3 => ['user' => 'user4', 'age' => 13],
             4 => ['user' => 'user5', 'age' => 14],
-        ], $greathatequal->toArray());
+        ], $greaterThanEqual->toArray());
 
-        $lessthat = (new Collection($data))->where('age', '<', 13);
+        $lessThan = new Collection($data)->where('age', '<', 13);
         $this->assertEquals([
             ['user' => 'user1', 'age' => 10],
             ['user' => 'user2', 'age' => 12],
             ['user' => 'user3', 'age' => 10],
-        ], $lessthat->toArray());
+        ], $lessThan->toArray());
 
-        $lessthatequal = (new Collection($data))->where('age', '<=', 13);
+        $lessThanEqual = new Collection($data)->where('age', '<=', 13);
         $this->assertEquals([
             ['user' => 'user1', 'age' => 10],
             ['user' => 'user2', 'age' => 12],
             ['user' => 'user3', 'age' => 10],
             ['user' => 'user4', 'age' => 13],
-        ], $lessthatequal->toArray());
+        ], $lessThanEqual->toArray());
     }
 
     /**
-     * @test
+     * Test it can filter data using where in.
+     *
+     * @return void
      */
-    public function itCanFilterDataUsingWhereIn()
+    public function testItCanFilterDataUsingWhereIn()
     {
         $data = [
             ['user' => 'user1', 'age' => 10],
@@ -642,7 +824,7 @@ class CollectionTest extends TestCase
             ['user' => 'user5', 'age' => 14],
         ];
 
-        $wherein = (new Collection($data))->whereIn('age', [10, 12]);
+        $wherein = new Collection($data)->whereIn('age', [10, 12]);
         $this->assertEquals([
             ['user' => 'user1', 'age' => 10],
             ['user' => 'user2', 'age' => 12],
@@ -651,9 +833,11 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it can filter data using where not in.
+     *
+     * @return void
      */
-    public function itCanFilterDataUsingWhereNotIn()
+    public function testItCanFilterDataUsingWhereNotIn()
     {
         $data = [
             ['user' => 'user1', 'age' => 10],
@@ -663,7 +847,7 @@ class CollectionTest extends TestCase
             ['user' => 'user5', 'age' => 14],
         ];
 
-        $wherein = (new Collection($data))->whereNotIn('age', [13, 14]);
+        $wherein = new Collection($data)->whereNotIn('age', [13, 14]);
         $this->assertEquals([
             ['user' => 'user1', 'age' => 10],
             ['user' => 'user2', 'age' => 12],
@@ -671,8 +855,12 @@ class CollectionTest extends TestCase
         ], $wherein->toArray());
     }
 
-    /** @test */
-    public function itCanConvertToImmutable(): void
+    /**
+     * Test it can convert to immutable.
+     *
+     * @return void
+     */
+    public function testItCanConvertToImmutable(): void
     {
         $coll      = new Collection(['a' => 1, 'b' => 2]);
         $immutable = $coll->immutable();
@@ -680,8 +868,12 @@ class CollectionTest extends TestCase
         $this->assertEquals(['a' => 1, 'b' => 2], $immutable->all());
     }
 
-    /** @test */
-    public function itCanHandleEmptyCollection(): void
+    /**
+     * Test it can handle empty collection.
+     *
+     * @return void
+     */
+    public function testItCanHandleEmptyCollection(): void
     {
         $coll = new Collection([]);
         $this->assertTrue($coll->isEmpty());
@@ -691,16 +883,20 @@ class CollectionTest extends TestCase
         $this->assertEquals([], $coll->items());
     }
 
-    /** @test */
-    public function itCanHandleNullKeyAndValue(): void
+    /**
+     * Test it can handle null kwy and value.
+     *
+     * @return void
+     */
+    public function testItCanHandleNullKeyAndValue(): void
     {
         $coll = new Collection([null => null]);
         $this->assertTrue($coll->has(null));
         $this->assertNull($coll->get(null));
     }
 
-    /** @test */
-    public function itCanDumpWithoutError(): void
+    /** @return void */
+    public function testItCanDumpWithoutError(): void
     {
         $coll = new Collection(['a' => 1]);
 

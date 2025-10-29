@@ -32,6 +32,9 @@ use const INF;
  * @template TValue
  *
  * @extends AbstractCollectionImmutable<TKey, TValue>
+ *
+ * @property mixed $buah_1
+ * @property mixed $buah_8
  */
 class Collection extends AbstractCollectionImmutable
 {

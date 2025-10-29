@@ -2,15 +2,28 @@
 
 declare(strict_types=1);
 
-use PHPUnit\Framework\TestCase;
-use System\Cron\InterpolateInterface;
-use System\Cron\Schedule;
-use System\Time\Now;
+namespace Tests\Cron;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+use Omega\Cron\InterpolateInterface;
+use Omega\Cron\Schedule;
+use Omega\Time\Now;
+
+use function ob_get_clean;
+use function ob_start;
+use function str_repeat;
+
+#[CoversClass(Now::class)]
+#[CoversClass(Schedule::class)]
 final class ScheduleTest extends TestCase
 {
+    /** @var InterpolateInterface|null */
     private ?InterpolateInterface $logger;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setUp(): void
     {
         $this->logger = new class implements InterpolateInterface {
@@ -21,20 +34,29 @@ final class ScheduleTest extends TestCase
         };
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function tearDown(): void
     {
         $this->logger = null;
     }
 
-    /** @test */
-    public function itCanContinueScheduleEventJobFail()
+    /**
+     * Test it can continue schedule  event job fail.
+     *
+     * @return void
+     */
+    public function testItCanContinueScheduleEventJobFail()
     {
-        $time_trevel = new Now('09/07/2021 00:30:00');
-        $schedule    = new Schedule($time_trevel->timestamp, $this->logger);
+        $timeTravel = new Now('09/07/2021 00:30:00');
+        $schedule   = new Schedule($timeTravel->timestamp, $this->logger);
 
         $schedule
             ->call(function () {
-                $devide = 0 / 0;
+                /** @noinspection PhpDivisionByZeroInspection */
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                $division = 0 / 0;
             })
             ->everyThirtyMinutes()
             ->eventName('test 30 minute');
@@ -51,15 +73,21 @@ final class ScheduleTest extends TestCase
         ob_get_clean();
     }
 
-    /** @test */
-    public function itCanRunRetrySchedule()
+    /**
+     * Test it can run retry schedule.
+     *
+     * @return void
+     */
+    public function testItCanRunRetrySchedule()
     {
-        $time_trevel = new Now('09/07/2021 00:30:00');
-        $schedule    = new Schedule($time_trevel->timestamp, $this->logger);
+        $timeTravel = new Now('09/07/2021 00:30:00');
+        $schedule   = new Schedule($timeTravel->timestamp, $this->logger);
 
         $schedule
             ->call(function () {
-                $devide = 0 / 0;
+                /** @noinspection PhpDivisionByZeroInspection */
+                /** @noinspection PhpUnusedLocalVariableInspection */
+                $division = 0 / 0;
             })
             ->retry(5)
             ->everyThirtyMinutes()
@@ -77,11 +105,15 @@ final class ScheduleTest extends TestCase
         ob_get_clean();
     }
 
-    /** @test */
-    public function itCanRunRetryCondtionSchedule()
+    /**
+     * Test it can run retry condition schedule.
+     *
+     * @return void
+     */
+    public function testItCanRunRetryConditionSchedule()
     {
-        $time_trevel = new Now('09/07/2021 00:30:00');
-        $schedule    = new Schedule($time_trevel->timestamp, $this->logger);
+        $timeTravel = new Now('09/07/2021 00:30:00');
+        $schedule   = new Schedule($timeTravel->timestamp, $this->logger);
 
         $test = 1;
 
@@ -99,14 +131,21 @@ final class ScheduleTest extends TestCase
         $this->assertEquals(3, $test);
     }
 
-    /** @test */
-    public function itCanLogCronExectWhateverCondition()
+    /**
+     * Tets it can log cron expect whatever condition.
+     *
+     * @return void
+     */
+    public function testItCanLogCronExpectWhateverCondition()
     {
-        $time_trevel = new Now('09/07/2021 00:30:00');
-        $schedule    = new Schedule($time_trevel->timestamp, $this->logger);
+        $timeTravel = new Now('09/07/2021 00:30:00');
+        $schedule   = new Schedule($timeTravel->timestamp, $this->logger);
 
         $schedule
-            ->call(fn () => 0 / 0)
+            ->call(function () {
+                /** @noinspection PhpDivisionByZeroInspection */
+                return 0 / 0;
+            })
             ->retry(20)
             ->everyThirtyMinutes()
             ->eventName('test 30 minute');
@@ -118,16 +157,20 @@ final class ScheduleTest extends TestCase
         $this->assertEquals(str_repeat('works', 20), $out);
     }
 
-    /** @test */
-    public function itCanSkipScheduleEventIsDue()
+    /**
+     * est it can skip schedule event is due.
+     *
+     * @return void
+     */
+    public function testItCanSkipScheduleEventIsDue()
     {
-        $time_trevel = new Now('09/07/2021 00:30:00');
-        $schedule    = new Schedule($time_trevel->timestamp, $this->logger);
-        $always_false= false;
+        $timeTravel  = new Now('09/07/2021 00:30:00');
+        $schedule    = new Schedule($timeTravel->timestamp, $this->logger);
+        $alwaysFalse = false;
 
         $schedule
-            ->call(function () use (&$always_false) {
-                $always_false = true;
+            ->call(function () use (&$alwaysFalse) {
+                $alwaysFalse = true;
 
                 return 'never call';
             })
@@ -135,6 +178,6 @@ final class ScheduleTest extends TestCase
             ->skip(fn (): bool => true);
 
         $schedule->execute();
-        $this->assertFalse($always_false);
+        $this->assertFalse($alwaysFalse);
     }
 }

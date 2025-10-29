@@ -1,11 +1,59 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Collection Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+declare(strict_types=1);
+
+namespace Tests\Collection;
+
+use Omega\Collection\Collection;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
+use function Omega\Collection\data_get;
+
+/**
+ * Class DataGetTest
+ *
+ * This test class validates the behavior of the `data_get` helper function.
+ * It ensures that values can be retrieved from nested arrays using dot notation,
+ * supporting:
+ * - Nested keys of arbitrary depth.
+ * - Default values when keys do not exist.
+ * - Wildcard segments (*) for arrays of arrays.
+ * - Integer keys for indexed arrays.
+ *
+ * @category  Tests
+ * @package   Collection
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+#[CoversClass(Collection::class)]
 class DataGetTest extends TestCase
 {
+    /**
+     * Sample nested array for testing `data_get`.
+     *
+     * Structure includes:
+     * - Multiple levels of nesting.
+     * - Arrays with numeric and string keys.
+     * - Wildcard scenarios.
+     *
+     * @var array<string, mixed>
+     */
     private array $array = [
-        'awsome' => [
+        'awesome'   => [
             'lang' => [
                 'go',
                 'rust',
@@ -14,7 +62,7 @@ class DataGetTest extends TestCase
                 'js',
             ],
         ],
-        'fav' => [
+        'fav'       => [
             'lang' => [
                 'rust',
                 'php',
@@ -24,20 +72,32 @@ class DataGetTest extends TestCase
         'one'       => ['two' => ['three' => ['four' => ['five' => 6]]]],
     ];
 
-    /** @test */
-    public function itCanFindItemUsingDotKeys()
+    /**
+     * Test it can find item using dot keys.
+     *
+     * @return void
+     */
+    public function testItCanFindItemUsingDotKeys(): void
     {
         $this->assertEquals(6, data_get($this->array, 'one.two.three.four.five'));
     }
 
-    /** @test */
-    public function itCanFindItemUsingDotKeysButDontExist()
+    /**
+     * Test it can find item using dot keys but key does not exist.
+     *
+     * @return void
+     */
+    public function testItCanFindItemUsingDotKeysButDontExist(): void
     {
         $this->assertEquals('six', data_get($this->array, '1.2.3.4.5', 'six'));
     }
 
-    /** @test */
-    public function itCanFindItemUsingDotKeysWithWildchart()
+    /**
+     * Test it can find items using dot key with wildcard (*).
+     *
+     * @return void
+     */
+    public function testItCanFindItemUsingDotKeysWithWildcard(): void
     {
         $this->assertEquals([
             ['go', 'rust', 'php', 'python', 'js'],
@@ -45,8 +105,12 @@ class DataGetTest extends TestCase
         ], data_get($this->array, '*.lang'));
     }
 
-    /** @test */
-    public function itcanGeKeysAsInteger()
+    /**
+     * Test it can retrieve values using integer keys for indexed arrays.
+     *
+     * @return void
+     */
+    public function testItCanGetKeysAsInteger(): void
     {
         $array5 = ['foo', 'bar', 'baz'];
         $this->assertEquals('bar', data_get($array5, 1));

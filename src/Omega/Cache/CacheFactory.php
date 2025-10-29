@@ -16,7 +16,6 @@ namespace Omega\Cache;
 
 use Closure;
 use DateInterval;
-use Omega\Cache\Exceptions\CachePathException;
 use Omega\Cache\Exceptions\UnknownStorageException;
 use Omega\Cache\Storage\File;
 
@@ -61,18 +60,10 @@ class CacheFactory implements CacheInterface
      * available for essential framework operations (such as view caching),
      * even when another cache driver is selected as the active default.
      *
-     * @param array{
-     *     path?: string,
-     *     ttl?: int|DateInterval
-     * } $options Optional configuration array for the File driver.
      * @return void
-     * @throws CachePathException If the specified cache path is invalid or cannot be created.
      */
-    public function __construct(array $options)
+    public function __construct()
     {
-        if (!isset($options['path'])) {
-            $this->setDefaultDriver(new File($options));
-        }
     }
 
     /**

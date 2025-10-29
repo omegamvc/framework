@@ -56,6 +56,7 @@ abstract class AbstractStorage implements CacheInterface, StorageInterface
      *
      * @param array{
      *   ttl: int|DateInterval,
+     *   path: string,
      * } $options Configuration options for the storage.
      * @return void
      * @throws CacheConfigurationException If the 'ttl' option is missing.
