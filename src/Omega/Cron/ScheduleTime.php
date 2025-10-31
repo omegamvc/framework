@@ -1,87 +1,122 @@
 <?php
 
+/**
+ * Part of Omega - Cron Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Cron;
 
 use Closure;
+use Throwable;
 
+use function call_user_func;
+use function date;
+use function microtime;
+use function range;
+use function round;
+
+/**
+ * Class ScheduleTime
+ *
+ * Represents a single scheduled task with its execution time, callback, retry policy,
+ * and optional logging. This class supports flexible scheduling intervals including
+ * just-in-time, hourly, daily, weekly, and monthly tasks, as well as anonymous execution.
+ *
+ * Each instance tracks execution attempts, failure states, and optional skipping rules.
+ *
+ * @category  Omega
+ * @package   Cron
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class ScheduleTime
 {
-    /**
-     * Closure to call if due the time.
-     *
-     * @var \Closure
-     */
-    private $call_back;
+    /** @var Closure The callback function to execute when the schedule is due. */
+    private Closure $callBack;
 
-    /**
-     * Parameter of closure.
-     *
-     * @var mixed[]
-     */
-    private $params = [];
+    /** @var array Parameters to pass to the callback function. */
+    private array $params;
 
-    /**
-     * Current time.
-     */
+    /** @var int Timestamp representing the current time for this schedule. */
     private int $time;
 
-    /**
-     * Event name.
-     */
-    private string $event_name = 'animus';
+    /** @var string Name of the event; default is 'anonymously'. */
+    public string $eventName = 'anonymously' { // phpcs:ignore
+        get {
+            return $this->eventName; // phpcs:ignore
+        }
+    }
 
-    /**
-     * Times to check (cron time).
-     *
-     * @var array<int, array<string, int|string>|int>
-     */
-    private $time_exect;
+    /** @var array<int, array<string,int|string>|int> The expected times for cron execution. */
+    private array $timeExpect { // phpcs:ignore
+        get {
+            return $this->timeExpect; // phpcs:ignore
+        }
+    }
 
-    /**
-     * Cron time name.
-     */
-    private string $time_name = '';
+    /** @var string Name of the cron time type (e.g., 'hourly', 'daily'). */
+    public string $timeName = '' { // phpcs:ignore
+        get {
+            return $this->timeName; // phpcs:ignore
+        }
+    }
 
-    /**
-     * Check is animus cron job.
-     */
-    private bool $animusly  = false;
+    /** @var bool Whether the task runs anonymously without logging. */
+    public bool $anonymously  = false { // phpcs:ignore
+        get {
+            return $this->anonymously; // phpcs:ignore
+        }
+    }
 
-    /**
-     * Determinate cron execute run error.
-     */
-    private bool $is_fail = false;
+    /** @var bool Tracks if the cron task execution failed. */
+    private bool $isFail = false { // phpcs:ignore
+        get {
+            return $this->isFail; // phpcs:ignore
+        }
+    }
 
-    /**
-     * Determinate retry maxsimum execute.
-     */
-    private int $retry_atempts = 0;
+    /** @var int Maximum retry attempts allowed for this schedule. */
+    private int $retryAttempts = 0;
 
-    /**
-     * Reatry if condition is true.
-     */
-    private bool $retry_condition = false;
+    /** @var bool Whether the schedule should retry if a condition evaluates true. */
+    private bool $retryCondition = false;
 
-    /**
-     * Skip task (due) in some condition.
-     */
+    /** @var bool Whether to skip this schedule execution under certain conditions. */
     private bool $skip = false;
 
+    /**
+     * Logger instance used to handle interpolated debug output during execution.
+     * Nullable to avoid external dependencies.
+     *
+     * @var InterpolateInterface|null
+     */
     private ?InterpolateInterface $logger = null;
 
     /**
-     * Contructor.
+     * ScheduleTime constructor.
      *
-     * @param mixed[] $params
+     * @param Closure $callBack The callback to execute when the schedule is due.
+     * @param array $params Optional parameters for the callback.
+     * @param int $timestamp Base timestamp to determine execution time.
+     * @return void
      */
-    public function __construct(\Closure $call_back, array $params, int $timestamp)
+    public function __construct(Closure $callBack, array $params, int $timestamp)
     {
-        $this->call_back  = $call_back;
+        $this->callBack   = $callBack;
         $this->params     = $params;
         $this->time       = $timestamp;
-        $this->time_exect = [
+        $this->timeExpect = [
             [
                 'D' => date('D', $this->time),
                 'd' => date('d', $this->time),
@@ -91,154 +126,175 @@ class ScheduleTime
         ];
     }
 
+    /**
+     * Set the name of the event for this scheduled task.
+     *
+     * @param string $val Name of the event.
+     * @return $this Fluent interface.
+     */
     public function eventName(string $val): self
     {
-        $this->event_name = $val;
+        $this->eventName = $val;
 
         return $this;
-    }
-
-    public function anonymously(bool $run_as_animusly = true): self
-    {
-        $this->animusly = $run_as_animusly;
-
-        return $this;
-    }
-
-    public function isAnonymously(): bool
-    {
-        return $this->animusly;
-    }
-
-    public function getEventname(): string
-    {
-        return $this->event_name;
-    }
-
-    public function getTimeName(): string
-    {
-        return $this->time_name;
     }
 
     /**
-     * Get cron time.
+     * Mark the schedule to run anonymously, disabling logging.
      *
-     * @return  array<int, array<string, int|string>|int> */
-    public function getTimeExect()
+     * @param bool $runAsAnonymously True to run without logging.
+     * @return $this Fluent interface.
+     */
+    public function anonymously(bool $runAsAnonymously = true): self
     {
-        return $this->time_exect;
-    }
-
-    public function isFail(): bool
-    {
-        return $this->is_fail;
-    }
-
-    public function retryAtempts(): int
-    {
-        return $this->retry_atempts;
-    }
-
-    public function retry(int $atempt): self
-    {
-        $this->retry_atempts = $atempt;
+        $this->anonymously = $runAsAnonymously;
 
         return $this;
     }
 
+    /**
+     * Get the remaining retry attempts for this schedule.
+     *
+     * @return int Number of retry attempts left.
+     */
+    public function retryAttempts(): int
+    {
+        return $this->retryAttempts;
+    }
+
+    /**
+     * Set the number of retry attempts for this schedule.
+     *
+     * @param int $attempt Maximum number of retries allowed.
+     * @return $this Fluent interface.
+     */
+    public function retry(int $attempt): self
+    {
+        $this->retryAttempts = $attempt;
+
+        return $this;
+    }
+
+    /**
+     * Set a conditional flag to retry this schedule only if the condition is true.
+     *
+     * @param bool $condition True to enable retry based on condition.
+     * @return $this Fluent interface.
+     */
     public function retryIf(bool $condition): self
     {
-        $this->retry_condition = $condition;
+        $this->retryCondition = $condition;
 
         return $this;
     }
 
+    /**
+     * Check if the schedule is set to retry based on condition.
+     *
+     * @return bool True if conditional retry is enabled.
+     */
     public function isRetry(): bool
     {
-        return $this->retry_condition;
+        return $this->retryCondition;
     }
 
     /**
-     * Skip schedule in due time.
+     * Conditionally skip the schedule execution.
      *
-     * @param bool|\Closure(): bool $skip_when True if skip the due schedule
+     * @param bool|Closure(): bool $skipWhen True to skip, or a closure returning bool.
+     * @return $this Fluent interface.
      */
-    public function skip($skip_when): self
+    public function skip(bool|Closure $skipWhen): self
     {
-        if ($skip_when instanceof \Closure) {
-            $skip_when = $skip_when();
+        if ($skipWhen instanceof Closure) {
+            $skipWhen = $skipWhen();
         }
 
-        $this->skip = $skip_when;
+        $this->skip = $skipWhen;
 
         return $this;
     }
 
-    // TODO: get next due time
-
-    public function exect(): void
+    /**
+     * Execute the scheduled callback if the schedule is due and not skipped.
+     *
+     * Tracks execution time, handles retry attempts, updates failure state,
+     * and optionally logs execution via the logger if not anonymous.
+     *
+     * @return void
+     */
+    public function expect(): void
     {
         if ($this->isDue() && false === $this->skip) {
-            // stopwatch
-            $watch_start = microtime(true);
+            $watchStart = microtime(true);
 
             try {
-                $out_put             = call_user_func($this->call_back, $this->params) ?? [];
-                $this->retry_atempts = 0;
-                $this->is_fail       = false;
-            } catch (\Throwable $th) {
-                $this->retry_atempts--;
-                $this->is_fail = true;
-                $out_put       = [
-                    'error' => $th->getMessage(),
-                ];
+                $outPut              = call_user_func($this->callBack, $this->params) ?? [];
+                $this->retryAttempts = 0;
+                $this->isFail        = false;
+            } catch (Throwable $th) {
+                $this->retryAttempts--;
+                $this->isFail = true;
+                $outPut       = ['error' => $th->getMessage()];
             }
 
-            // stopwatch
-            $watch_end = round(microtime(true) - $watch_start, 3) * 1000;
+            $watchEnd = round(microtime(true) - $watchStart, 3) * 1000;
 
-            // send command log
-            if (!$this->animusly) {
-                if (null !== $this->logger) {
-                    $this->logger->interpolate(
-                        $this->event_name,
-                        [
-                            'excute_time'   => $watch_end,
-                            'cron_time'     => $this->time,
-                            'event_name'    => $this->event_name,
-                            'atempts'       => $this->retry_atempts,
-                            'error_message' => $out_put,
-                        ]
-                    );
-                }
+            if (!$this->anonymously) {
+                $this->logger?->interpolate(
+                    $this->eventName,
+                    [
+                        'execute_time'  => $watchEnd,
+                        'cron_time'     => $this->time,
+                        'event_name'    => $this->eventName,
+                        'attempts'      => $this->retryAttempts,
+                        'error_message' => $outPut,
+                    ]
+                );
             }
         }
     }
 
     /**
-     * @param array<string, mixed> $contex
+     * Placeholder method for internal logging or message interpolation.
+     *
+     * @param string $message Message to log.
+     * @param array<string, mixed> $context Context data for interpolation.
+     * @return void
      */
-    protected function interpolate(string $message, array $contex): void
+    protected function interpolate(string $message, array $context): void
     {
         // do stuff
     }
 
+    /**
+     * Set the logger instance to be used for recording schedule execution.
+     *
+     * @param InterpolateInterface $logger Logger implementing InterpolateInterface.
+     * @return void
+     */
     public function setLogger(InterpolateInterface $logger): void
     {
         $this->logger = $logger;
     }
 
+    /**
+     * Check if the schedule is due to run at the current time.
+     *
+     * Compares the current timestamp against the defined time expectations.
+     *
+     * @return bool True if the schedule should run now.
+     */
     public function isDue(): bool
     {
-        $events = $this->time_exect;
-
+        $events     = $this->timeExpect;
         $dayLetter  = date('D', $this->time);
         $day        = date('d', $this->time);
         $hour       = date('H', $this->time);
         $minute     = date('i', $this->time);
 
         foreach ($events as $event) {
-            $eventDayLetter = $event['D'] ?? $dayLetter; // default day letter every event
+            $eventDayLetter = $event['D'] ?? $dayLetter;
 
             if (
                 $eventDayLetter == $dayLetter
@@ -253,10 +309,17 @@ class ScheduleTime
         return false;
     }
 
+    /**
+     * Schedule the task to run exactly at the current timestamp.
+     *
+     * Sets the timeName to 'justInTime' and updates the timeExpect accordingly.
+     *
+     * @return $this Fluent interface.
+     */
     public function justInTime(): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
+        $this->timeName  = __FUNCTION__;
+        $this->timeExpect = [
             [
                 'D' => date('D', $this->time),
                 'd' => date('d', $this->time),
@@ -268,12 +331,19 @@ class ScheduleTime
         return $this;
     }
 
+    /**
+     * Schedule the task to run every 10 minutes within the hour.
+     *
+     * Sets the timeName to 'everyTenMinute' and updates the timeExpect array.
+     *
+     * @return $this Fluent interface.
+     */
     public function everyTenMinute(): self
     {
-        $this->time_name = __FUNCTION__;
-        $minute          = [];
+        $this->timeName = __FUNCTION__;
+        $minute = [];
         foreach (range(0, 59) as $time) {
-            if ($time % 10 == 0) {
+            if ($time % 10 === 0) {
                 $minute[] = [
                     'd' => date('d', $this->time),
                     'h' => date('H', $this->time),
@@ -282,130 +352,134 @@ class ScheduleTime
             }
         }
 
-        $this->time_exect = $minute;
+        $this->timeExpect = $minute;
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run every 30 minutes (on the hour and half hour).
+     *
+     * @return $this Fluent interface.
+     */
     public function everyThirtyMinutes(): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
-            [
-                'd' => date('d', $this->time),
-                'h' => date('H', $this->time),
-                'm' => 0,
-            ],
-            [
-                'd' => date('d', $this->time),
-                'h' => date('H', $this->time),
-                'm' => 30,
-            ],
+        $this->timeName  = __FUNCTION__;
+        $this->timeExpect = [
+            ['d' => date('d', $this->time), 'h' => date('H', $this->time), 'm' => 0],
+            ['d' => date('d', $this->time), 'h' => date('H', $this->time), 'm' => 30],
         ];
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run every two hours.
+     *
+     * @return $this Fluent interface.
+     */
     public function everyTwoHour(): self
     {
-        $this->time_name = __FUNCTION__;
-
+        $this->timeName = __FUNCTION__;
         $thisDay = date('d', $this->time);
-        $hourly  = []; // from 00.00 to 23.00 (12 time)
+        $hourly = [];
         foreach (range(0, 23) as $time) {
-            if ($time % 2 == 0) {
-                $hourly[] = [
-                    'd' => $thisDay,
-                    'h' => $time,
-                    'm' => 0,
-                ];
+            if ($time % 2 === 0) {
+                $hourly[] = ['d' => $thisDay, 'h' => $time, 'm' => 0];
             }
         }
-
-        $this->time_exect = $hourly;
+        $this->timeExpect = $hourly;
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run every 12 hours (midnight and noon).
+     *
+     * @return $this Fluent interface.
+     */
     public function everyTwelveHour(): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
-            [
-                'd' => date('d', $this->time),
-                'h' => 0,
-                'm' => 0,
-            ],
-            [
-                'd' => date('d', $this->time),
-                'h' => 12,
-                'm' => 0,
-            ],
+        $this->timeName = __FUNCTION__;
+        $this->timeExpect = [
+            ['d' => date('d', $this->time), 'h' => 0, 'm' => 0],
+            ['d' => date('d', $this->time), 'h' => 12, 'm' => 0],
         ];
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run hourly on the hour.
+     *
+     * @return $this Fluent interface.
+     */
     public function hourly(): self
     {
-        $this->time_name = __FUNCTION__;
-        $hourly          = []; // from 00.00 to 23.00 (24 time)
+        $this->timeName = __FUNCTION__;
+        $hourly = [];
         foreach (range(0, 23) as $time) {
-            $hourly[] = [
-                'd' => date('d', $this->time),
-                'h' => $time,
-                'm' => 0,
-            ];
+            $hourly[] = ['d' => date('d', $this->time), 'h' => $time, 'm' => 0];
         }
-
-        $this->time_exect = $hourly;
+        $this->timeExpect = $hourly;
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run once at a specific hour of the day.
+     *
+     * @param int $hour24 Hour in 24-hour format.
+     * @return $this Fluent interface.
+     */
     public function hourlyAt(int $hour24): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
-            [
-                'd' => date('d', $this->time),
-                'h' => $hour24,
-                'm' => 0,
-            ],
+        $this->timeName = __FUNCTION__;
+        $this->timeExpect = [
+            ['d' => date('d', $this->time), 'h' => $hour24, 'm' => 0],
         ];
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run daily at midnight.
+     *
+     * @return $this Fluent interface.
+     */
     public function daily(): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
-            // from day 1 to 31 (31 time)
-            ['d' => (int) date('d'), 'h' => 0, 'm' => 0],
-        ];
+        $this->timeName = __FUNCTION__;
+        $this->timeExpect = [['d' => (int) date('d'), 'h' => 0, 'm' => 0]];
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run daily at a specific day of the month at midnight.
+     *
+     * @param int $day Day of the month.
+     * @return $this Fluent interface.
+     */
     public function dailyAt(int $day): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
-            [
-                'd' => $day,
-                'h' => 0,
-                'm' => 0,
-            ],
-        ];
+        $this->timeName = __FUNCTION__;
+        $this->timeExpect = [['d' => $day, 'h' => 0, 'm' => 0]];
 
         return $this;
     }
 
+    /**
+     * Schedule the task to run weekly on Sunday at midnight.
+     *
+     * Sets the timeName to 'weekly' and the timeExpect to the next Sunday at 00:00.
+     *
+     * @return $this Fluent interface.
+     */
     public function weekly(): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
+        $this->timeName  = __FUNCTION__;
+        $this->timeExpect = [
             [
                 'D' => 'Sun',
                 'd' => date('d', $this->time),
@@ -417,10 +491,17 @@ class ScheduleTime
         return $this;
     }
 
-    public function mountly(): self
+    /**
+     * Schedule the task to run monthly on the first day at midnight.
+     *
+     * Sets the timeName to 'monthly' and the timeExpect to the 1st day of the month at 00:00.
+     *
+     * @return $this Fluent interface.
+     */
+    public function monthly(): self
     {
-        $this->time_name  = __FUNCTION__;
-        $this->time_exect = [
+        $this->timeName  = __FUNCTION__;
+        $this->timeExpect = [
             [
                 'd' => 1,
                 'h' => 0,

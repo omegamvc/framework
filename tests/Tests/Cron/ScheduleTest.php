@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Cron Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Cron;
@@ -14,11 +24,43 @@ use function ob_get_clean;
 use function ob_start;
 use function str_repeat;
 
+/**
+ * Class ScheduleTest
+ *
+ * This test suite verifies the behavior of the scheduling system when executing tasks,
+ * particularly in scenarios involving errors, retries, logging, and conditional execution.
+ *
+ * The tests focus on the following behaviors:
+ * - Ensuring that schedule execution continues even if a scheduled job throws an exception.
+ * - Verifying retry logic, both with a fixed retry count and with conditional retry rules.
+ * - Confirming that logging is triggered the correct number of times during repeated failures.
+ * - Ensuring scheduled tasks can be conditionally skipped based on user-defined predicates.
+ *
+ * A mock logger implementing `InterpolateInterface` is injected to simulate log output without
+ * performing any actual I/O operations. Output buffering is used to capture execution output
+ * for assertions without affecting the test runner’s output.
+ *
+ * @category  Tests
+ * @package   Cron
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Now::class)]
 #[CoversClass(Schedule::class)]
 final class ScheduleTest extends TestCase
 {
-    /** @var InterpolateInterface|null */
+    /**
+     * Logger instance used to handle interpolated debug output during schedule execution.
+     *
+     * This is a nullable implementation of `InterpolateInterface`, injected in `setUp()`
+     * to avoid external dependencies. The logger does not write to files or streams; it
+     * simply simulates logging so the tests can verify behavior without performing I/O.
+     *
+     * @var InterpolateInterface|null
+     */
     private ?InterpolateInterface $logger;
 
     /**

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Cron Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Cron;
@@ -15,12 +25,44 @@ use Omega\Time\Now;
 
 use function Omega\Time\now;
 
+/**
+ * Class CronTimeTest
+ *
+ * This test suite verifies that the scheduling system executes tasks at the correct time intervals.
+ * It ensures that the `Schedule` and `ScheduleTime` classes properly recognize when a scheduled task
+ * is "due" based on different time configurations such as:
+ *
+ * - Just-in-time execution
+ * - Every N minutes/hours (e.g., every ten or thirty minutes, every two or twelve hours)
+ * - Hourly, daily, weekly, and monthly schedules
+ * - Specific time-based variants (e.g., `hourlyAt`, `dailyAt`)
+ *
+ * Each test simulates a controlled time context using the `Now` class, validates the expected
+ * behavior of `isDue()` for scheduled tasks, and ensures reliable and predictable scheduling
+ * operations without relying on real system time.
+ *
+ * @category  Tests
+ * @package   Cron
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Schedule::class)]
 #[CoversClass(ScheduleTime::class)]
 #[CoversClass(Now::class)]
 final class CronTimeTest extends TestCase
 {
-    /** @var InterpolateInterface|null  */
+    /**
+     * Logger instance used to handle interpolated debug output during schedule execution.
+     *
+     * This is a nullable implementation of `InterpolateInterface`, injected in `setUp()`
+     * to avoid external dependencies. The logger does not write to files or streams; it
+     * simply simulates logging so the tests can verify behavior without performing I/O.
+     *
+     * @var InterpolateInterface|null
+     */
     private ?InterpolateInterface $logger;
 
     /**
@@ -268,7 +310,7 @@ final class CronTimeTest extends TestCase
         $anonymously = new Schedule($timeTravel->timestamp, $this->logger);
         $anonymously
             ->call(fn (): string => 'due time')
-            ->mountly()
+            ->monthly()
             ->eventName('test monthly');
 
         foreach ($anonymously->getPools() as $scheduleItem) {

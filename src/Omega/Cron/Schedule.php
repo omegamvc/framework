@@ -1,14 +1,49 @@
 <?php
 
+/**
+ * Part of Omega - Cron Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Cron;
 
+use Closure;
+
+/**
+ * Class Schedule
+ *
+ * Manages a collection of scheduled tasks (`ScheduleTime`) and allows their execution
+ * based on defined intervals, just-in-time triggers, and retry policies.
+ *
+ * Each `Schedule` object maintains a pool of scheduled tasks, which can be executed,
+ * retried, or cleared. Logging can be optionally injected to monitor execution details.
+ *
+ * @category  Omega
+ * @package   Cron
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class Schedule
 {
-    /** @var ScheduleTime[] */
+    /** @var ScheduleTime[] The collection of scheduled tasks (`ScheduleTime` instances) in this schedule. */
     protected array $pools = [];
 
+    /**
+     * Schedule constructor.
+     *
+     * @param int|null $time Optional timestamp for the schedule. Defaults to current time.
+     * @param InterpolateInterface|null $logger Optional logger to record task execution.
+     */
     public function __construct(
         protected ?int $time = null,
         private ?InterpolateInterface $logger = null
@@ -16,49 +51,76 @@ class Schedule
     }
 
     /**
-     * @return ScheduleTime[]
+     * Get all scheduled tasks in the pool.
+     *
+     * @return ScheduleTime[] Array of ScheduleTime objects.
      */
-    public function getPools()
+    public function getPools(): array
     {
         return $this->pools;
     }
 
     /**
-     * @param mixed[] $params
+     * Add a new task to the schedule pool.
      *
-     * @return ScheduleTime
+     * @param Closure $callBack The function to execute for this task.
+     * @param array $params Optional parameters to pass to the callback.
+     * @return ScheduleTime The created ScheduleTime instance.
      */
-    public function call(\Closure $call_back, $params = [])
+    public function call(Closure $callBack, array $params = []): ScheduleTime
     {
-        return $this->pools[] = new ScheduleTime($call_back, $params, $this->time);
+        return $this->pools[] = new ScheduleTime($callBack, $params, $this->time);
     }
 
+    /**
+     * Execute all tasks in the schedule pool.
+     *
+     * Each task will be executed according to its timing, retry policy, and
+     * logging configuration.
+     *
+     * @return void
+     */
     public function execute(): void
     {
         foreach ($this->pools as $cron) {
             $cron->setLogger($this->logger);
             do {
-                $cron->exect();
-            } while ($cron->retryAtempts() > 0);
+                $cron->expect();
+            } while ($cron->retryAttempts() > 0);
 
             if ($cron->isRetry()) {
-                $cron->exect();
+                $cron->expect();
             }
         }
     }
 
+    /**
+     * Inject a logger to record schedule execution.
+     *
+     * @param InterpolateInterface $logger The logger instance.
+     * @return void
+     */
     public function setLogger(InterpolateInterface $logger): void
     {
         $this->logger = $logger;
     }
 
+    /**
+     * Set the base timestamp for scheduling tasks.
+     *
+     * @param int $time Timestamp to set for the schedule.
+     * @return void
+     */
     public function setTime(int $time): void
     {
         $this->time = $time;
     }
 
     /**
-     * Add Schedule pool to the collection pool.
+     * Add another schedule's pool into this schedule.
+     *
+     * @param Schedule $schedule Another schedule instance.
+     * @return self
      */
     public function add(Schedule $schedule): self
     {
@@ -70,7 +132,10 @@ class Schedule
     }
 
     /**
-     * Clear schedule pool.
+     * Clear all tasks from the schedule pool.
+     *
+     * @return void
+     * @property ScheduleTime[] $pools Reset to an empty array.
      */
     public function flush(): void
     {

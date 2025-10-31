@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Collection Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Collection;
@@ -9,6 +19,19 @@ use Countable;
 use IteratorAggregate;
 
 /**
+ * Base interface for all collection types.
+ *
+ * Provides a common contract for accessing and iterating over a set of elements.
+ * Implementations may be mutable or immutable based on their specific behavior.
+ *
+ * @category  Omega
+ * @package   Collection
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ *
  * @template TKey of array-key
  * @template TValue
  *
@@ -17,6 +40,10 @@ use IteratorAggregate;
  */
 interface CollectionInterface extends ArrayAccess, Countable, IteratorAggregate
 {
-    /** @return array<TKey, TValue> */
+    /**
+     * Convert the collection into a plain PHP array.
+     *
+     * @return array<TKey, TValue> A standard array representation of the collection.
+     */
     public function toArray(): array;
 }

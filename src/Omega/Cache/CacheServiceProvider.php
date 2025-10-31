@@ -53,6 +53,8 @@ class CacheServiceProvider extends AbstractServiceProvider
     /**
      * {@inheritdoc}
      *
+     * Register the Cache engine.
+     *
      * @throws InvalidDefinitionException
      * @throws DependencyException
      * @throws NotFoundException

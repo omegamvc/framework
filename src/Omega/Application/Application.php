@@ -6,7 +6,6 @@ namespace Omega\Application;
 
 use App\Providers\AppServiceProvider;
 use App\Providers\DatabaseServiceProvider;
-use App\Providers\RateLimiterServiceProvider;
 use App\Providers\RouteServiceProvider;
 use App\Providers\ViewServiceProvider;
 use Exception;
@@ -22,6 +21,7 @@ use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Request;
+use Omega\RateLimiter\RateLimiterServiceProvider;
 use Omega\Support\AddonServiceProvider;
 use Omega\Support\PackageManifest;
 use Omega\Support\Vite;

@@ -1,21 +1,69 @@
 <?php
 
+/**
+ * Part of Omega - Tests\RateLimiter Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\RateLimiter;
 
+use DateInvalidTimeZoneException;
+use DateMalformedStringException;
 use Omega\Cache\Storage\Memory;
+use Omega\RateLimiter\Policy\FixedWindow;
 use Omega\RateLimiter\RateLimiter;
-use Omega\RateLimiter\RateLimiter\FixedWindow;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class RateLimiterTest
+ *
+ * This test suite verifies the core behavior of the `RateLimiter` wrapper, ensuring that
+ * it correctly delegates rate limiting operations to the underlying strategy
+ * implementation (`FixedWindow` in this case).
+ *
+ * The tests cover:
+ * - Determining whether further actions are blocked (`isBlocked()`).
+ * - Consuming allowance tokens (`consume()`).
+ * - Retrieving the number of consumed actions (`getCount()`).
+ * - Calculating retry-after timing (`getRetryAfter()`).
+ * - Checking remaining allowed actions (`remaining()`).
+ * - Resetting the limiter state for a given key (`reset()`).
+ *
+ * By validating these behaviors, this test suite ensures that the `RateLimiter` serves
+ * as a reliable facade overrate limiting strategies while preserving consistent and
+ * predictable API semantics.
+ *
+ * @category  Tests
+ * @package   RateLimiter
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license  https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(FixedWindow::class)]
 #[CoversClass(Memory::class)]
 #[CoversClass(RateLimiter::class)]
 class RateLimiterTest extends TestCase
 {
-    /** @var RateLimiter  */
+    /**
+     * Rate limiter instance used throughout the test suite.
+     *
+     * This instance is configured with a `FixedWindow` rate limiting strategy backed by
+     * in-memory storage (`Memory`). The limiter allows only one action per minute for the
+     * test scenarios, enabling validation of consumption, blocking behavior, retry timing,
+     * and state reset operations.
+     *
+     * @var RateLimiter
+     */
     private RateLimiter $rateLimiter;
 
     /**
@@ -71,6 +119,8 @@ class RateLimiterTest extends TestCase
      * Test get retry after.
      *
      * @return void
+     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException
      */
     public function getRetryAfter(): void
     {

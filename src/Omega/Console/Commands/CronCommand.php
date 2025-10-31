@@ -77,12 +77,12 @@ class CronCommand extends AbstractCommand
         $info = [];
         $max  = 0;
         foreach ($this->getSchedule()->getPools() as $cron) {
-            $time   = $cron->getTimeName();
-            $name   = $cron->getEventname();
+            $time   = $cron->timeName;
+            $name   = $cron->eventName;
             $info[] = [
                 'time'   => $time,
                 'name'   => $name,
-                'animus' => $cron->isAnonymously(),
+                'animus' => $cron->anonymously,
             ];
             $max = max(strlen($time), $max);
         }
