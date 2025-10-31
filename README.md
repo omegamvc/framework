@@ -177,7 +177,7 @@ class GreatConsole extends Console
   public function main()
   {
     // getter to get param form cli argument
-    $name = $this->name ?? 'animus';
+    $name = $this->name ?? 'anonymously';
 
     style("Great console Application")
     	->textGreen()

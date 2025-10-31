@@ -80,15 +80,15 @@ class CronCommand extends AbstractCommand
             $time   = $cron->timeName;
             $name   = $cron->eventName;
             $info[] = [
-                'time'   => $time,
-                'name'   => $name,
-                'animus' => $cron->anonymously,
+                'time'        => $time,
+                'name'        => $name,
+                'anonymously' => $cron->anonymously,
             ];
             $max = max(strlen($time), $max);
         }
         foreach ($info as $cron) {
             $print->push('#');
-            if ($cron['animus']) {
+            if ($cron['anonymously']) {
                 $print->push($cron['time'])->textDim()->repeat(' ', $max + 1 - strlen($cron['time']));
             } else {
                 $print->push($cron['time'])->textGreen()->repeat(' ', $max + 1 - strlen($cron['time']));
