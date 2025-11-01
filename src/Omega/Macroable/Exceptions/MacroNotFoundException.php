@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Macroable Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Macroable\Exceptions;
@@ -8,10 +18,28 @@ use InvalidArgumentException;
 
 use function sprintf;
 
+/**
+ * Exception thrown when attempting to call a macro that has not been registered.
+ *
+ * This exception indicates that the requested method name does not exist
+ * in the macro registry for the current class.
+ *
+ * @category   Omega
+ * @package    Macroable
+ * @subpackage Exceptions
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class MacroNotFoundException extends InvalidArgumentException
 {
     /**
-     * Creates a new Exception instance.
+     * Create a new MacroNotFoundException instance.
+     *
+     * @param string $methodName The name of the macro that was requested.
+     * @return void
      */
     public function __construct(string $methodName)
     {

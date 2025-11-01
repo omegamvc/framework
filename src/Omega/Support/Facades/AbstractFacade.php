@@ -1,33 +1,55 @@
 <?php
 
+/**
+ * Part of Omega - Facades Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Support\Facades;
 
-use DI\DependencyException;
-use DI\NotFoundException;
 use Omega\Application\Application;
-use RuntimeException;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
+use Omega\Support\Facades\Exceptions\FacadeObjectNotSetException;
 
 use function array_key_exists;
 
+/**
+ * Base class for implementing facades.
+ *
+ * Facades provide a static interface to underlying objects managed by the
+ * application container. This class handles resolving and caching the actual
+ * instance behind the facade, as well as forwarding static calls to that instance.
+ *
+ * @category   Omega
+ * @package    Support
+ * @subpackage Facades
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 abstract class AbstractFacade implements FacadeInterface
 {
-    /**
-     * Application accessor.
-     */
+    /** @var Application|null The Application container instance. */
     protected static ?Application $app = null;
 
-    /**
-     * Instance accessor.
-     *
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> Array mapping accessor names to resolved instances */
     protected static array $instance = [];
 
     /**
-     * Set Accessor.
+     * Create a new facade instance and register the application container.
      *
+     * @param Application $app The application container instance
      * @return void
      */
     public function __construct(Application $app)
@@ -36,7 +58,10 @@ abstract class AbstractFacade implements FacadeInterface
     }
 
     /**
-     * Set facade instance.
+     * Set the application container to be used by all facades.
+     *
+     * @param Application|null $app The application container, or null to unset
+     * @return void
      */
     public static function setFacadeBase(?Application $app = null): void
     {
@@ -44,18 +69,19 @@ abstract class AbstractFacade implements FacadeInterface
     }
 
     /**
-     * Get accessor from application.
+     * Get the container binding key for the underlying instance.
      *
-     * @return string
+     * @return string The service identifier used to resolve the instance
      */
     abstract public static function getFacadeAccessor(): string;
 
     /**
-     * Facade.
+     * Resolve and retrieve the underlying facade instance.
      *
-     * @return mixed
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @return mixed The resolved instance
+     * @throws DependencyException If a dependency cannot be resolved
+     * @throws InvalidDefinitionException If the container definition is invalid
+     * @throws NotFoundException If the service cannot be found in the container
      */
     protected static function getFacade(): mixed
     {
@@ -63,12 +89,13 @@ abstract class AbstractFacade implements FacadeInterface
     }
 
     /**
-     * Facade.
+     * Resolve a facade instance by name or class.
      *
-     * @param string|class-string $name Entry name or a class name
-     * @return mixed
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @param string|class-string $name Entry name or class name to resolve
+     * @return mixed The resolved instance
+     * @throws DependencyException If a dependency cannot be resolved
+     * @throws InvalidDefinitionException If the container definition is invalid
+     * @throws NotFoundException If the service cannot be found in the container
      */
     protected static function getFacadeBase(string $name): mixed
     {
@@ -80,7 +107,9 @@ abstract class AbstractFacade implements FacadeInterface
     }
 
     /**
-     * Clear all the instances.
+     * Clear all cached resolved facade instances.
+     *
+     * @return void
      */
     public static function flushInstance(): void
     {
@@ -88,14 +117,15 @@ abstract class AbstractFacade implements FacadeInterface
     }
 
     /**
-     * Call static from accessor.
+     * Forward static method calls to the underlying instance.
      *
-     * @param string $name
-     * @param array<int, mixed> $arguments
-     * @return mixed
-     * @throws RuntimeException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @param string $name The method name being called
+     * @param array<int, mixed> $arguments The method arguments
+     * @return mixed The method return value
+     * @throws FacadeObjectNotSetException If no underlying instance is available
+     * @throws DependencyException If a dependency cannot be resolved
+     * @throws InvalidDefinitionException If the container definition is invalid
+     * @throws NotFoundException If the service is not found in the container
      */
     public static function __callStatic(string $name, array $arguments): mixed
     {

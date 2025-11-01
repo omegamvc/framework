@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Facades Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Support\Facades;
@@ -11,6 +21,25 @@ use Omega\Database\Query\InnerQuery;
 use Omega\Database\Query\Table;
 
 /**
+ * Facade for the Database service.
+ *
+ * This facade provides a static interface to the underlying `Database` instance
+ * resolved from the application container. It allows convenient static-style
+ * calls while still relying on dependency injection and the container under the hood.
+ *
+ * Usage of this facade does not create a global state; the underlying instance
+ * is still managed by the container and may be swapped, mocked, or replaced
+ * for testing or customization purposes.
+ *
+ * @category   Omega
+ * @package    Support
+ * @subpackges Facades
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @method static void                clearConnections()
  * @method static ConnectionInterface connection(string $name)
  * @method static DatabaseManager     setDefaultConnection(ConnectionInterface $connection)
@@ -32,16 +61,24 @@ use Omega\Database\Query\Table;
  */
 final class DB extends AbstractFacade
 {
+    /**
+     * {@inheritdoc}
+     */
     public static function getFacadeAccessor(): string
     {
         return DatabaseManager::class;
     }
 
     /**
-     * Create builder and set table name.
+     * Start a new query builder for the given table.
      *
-     * @param string|InnerQuery $tableName
-     * @return Table
+     * This is a convenience method that automatically uses the default PDO
+     * connection instance managed by the database container. It initializes
+     * a fresh query builder, optionally using an InnerQuery as a subquery
+     * source when provided.
+     *
+     * @param string|InnerQuery $tableName The name of the table or an InnerQuery instance.
+     * @return Table A new Table query builder instance.
      */
     public static function table(string|InnerQuery $tableName): Table
     {
@@ -49,11 +86,15 @@ final class DB extends AbstractFacade
     }
 
     /**
-     * Create Builder using static function.
+     * Start a new query builder with a custom database connection.
      *
-     * @param string|InnerQuery $tableName
-     * @param Connection             $pdo
-     * @return Table
+     * This method behaves like `table()` but allows specifying a custom or
+     * alternative database connection. Useful in scenarios involving multiple
+     * connections or dynamically selected data sources.
+     *
+     * @param string|InnerQuery $tableName The target table name or InnerQuery instance.
+     * @param Connection        $pdo       The database connection to associate with the query.
+     * @return Table A new Table query builder bound to the provided connection.
      */
     public static function from(string|InnerQuery $tableName, Connection $pdo): Table
     {
