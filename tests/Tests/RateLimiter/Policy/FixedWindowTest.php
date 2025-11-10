@@ -65,7 +65,13 @@ class FixedWindowTest extends TestCase
     private Memory $cache;
 
     /**
-     * {@inheritdoc}
+     * Sets up the environment before each test method.
+     *
+     * This method is called automatically by PHPUnit before each test runs.
+     * It is responsible for initializing the application instance, setting up
+     * dependencies, and preparing any state required by the test.
+     *
+     * @return void
      */
     protected function setUp(): void
     {
@@ -74,7 +80,14 @@ class FixedWindowTest extends TestCase
     }
 
     /**
-     * {@inheritdoc}
+     * Tears down the environment after each test method.
+     *
+     * This method is called automatically by PHPUnit after each test runs.
+     * It is responsible for cleaning up resources, flushing the application
+     * state, unsetting properties, and resetting any static or global state
+     * to avoid side effects between tests.
+     *
+     * @return void
      */
     protected function tearDown(): void
     {

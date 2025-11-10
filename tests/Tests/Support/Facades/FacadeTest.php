@@ -14,11 +14,12 @@ declare(strict_types=1);
 
 namespace Tests\Support\Facades;
 
+use Exception;
+use Omega\Application\Application;
+use Omega\Collection\Collection;
+use Omega\Support\Facades\AbstractFacade;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Omega\Collection\Collection;
-use Omega\Application\Application;
-use Omega\Support\Facades\AbstractFacade;
 use Tests\Support\Facades\Sample\FacadesTestClass;
 use Throwable;
 
@@ -48,10 +49,11 @@ final class FacadeTest extends TestCase
      * Test it can call static.
      *
      * @return void
+     * @throws Exception
      */
     final public function testItCanCallStatic(): void
     {
-        $app = new Application(__DIR__);
+        $app = new Application(basePath: __DIR__);
         $app->set(Collection::class, fn () => new Collection(['php' => 'greater']));
 
         AbstractFacade::setFacadeBase($app);

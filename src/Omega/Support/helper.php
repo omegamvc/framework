@@ -239,3 +239,23 @@ if (!function_exists('path')) {
         return $relativePath;
     }
 }
+
+if (!function_exists('slash')) {
+    /**
+     * Normalize a filesystem path by converting forward slashes (`/`)
+     * into the platform-specific directory separator.
+     *
+     * This helper is mainly intended for the testing environment, where
+     * paths may be manually constructed using `/`, while the application
+     * runtime relies on `DIRECTORY_SEPARATOR` depending on the operating
+     * system. The function does not alter the meaning of the path; it
+     * simply ensures portability and consistency.
+     *
+     * @param string $path  The path to normalize.
+     * @return string       The normalized path with slashes converted.
+     */
+    function slash(string $path): string
+    {
+        return str_replace('/', DIRECTORY_SEPARATOR, $path);
+    }
+}

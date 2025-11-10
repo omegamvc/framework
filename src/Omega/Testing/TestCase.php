@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Testing Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Testing;
@@ -18,17 +28,45 @@ use Throwable;
 
 use function array_key_exists;
 
+/**
+ * TestCase
+ *
+ * This class extends the PHPUnit TestCase and provides convenient methods for testing
+ * HTTP requests and JSON responses within the Omega framework. It initializes an
+ * Application instance and allows interaction with the Http kernel to simulate requests
+ * in a controlled test environment.
+ *
+ * @category   Omega
+ * @package    Testing
+ * @subpackage Traits
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class TestCase extends PhpUnitTestCase
 {
+    /** @var Application  The application instance used for testing. */
     protected Application $app;
 
+    /** @var Http The Http kernel used to handle requests. */
     protected Http $kernel;
 
+    /** @var string Fully qualified class name under test. */
     protected string $class;
 
+    /**
+     * Clean up after each test.
+     *
+     * This method flushes the application, resets facades and service providers,
+     * and unsets the $app and $kernel properties.
+     *
+     * @return void
+     */
     protected function tearDown(): void
     {
-        $this->app?->flush();
+        $this->app->flush();
         AbstractFacade::flushInstance();
         AbstractServiceProvider::flushModule();
         unset($this->app);
@@ -36,17 +74,22 @@ class TestCase extends PhpUnitTestCase
     }
 
     /**
-     * @param string|array<string, string> $call call the given function using the given parameters
-     * @param array<string, string> $params
-     * @throws Exception
+     * Call a service method and return a TestJsonResponse.
+     *
+     * @param array|string $call The service method to call, can be a string or an array for object callables.
+     * @param array<string, string> $params Parameters to pass to the method.
+     * @return TestJsonResponse The response wrapped in a TestJsonResponse instance.
+     * @throws Exception If an error occurs during the service call.
      */
     protected function json(array|string $call, array $params = []): TestJsonResponse
     {
         $data     = $this->app->call($call, $params);
         $response = new Response($data);
+
         if (array_key_exists('code', $data)) {
             $response->setResponseCode((int) $data['code']);
         }
+
         if (array_key_exists('headers', $data)) {
             $response->setHeaders($data['headers']);
         }
@@ -55,20 +98,22 @@ class TestCase extends PhpUnitTestCase
     }
 
     /**
-     * @param string $url
-     * @param array $query
-     * @param array $post
-     * @param array $attributes
-     * @param array $cookies
-     * @param array $files
-     * @param array $headers
-     * @param string $method
-     * @param string $remoteAddress
-     * @param string|null $rawBody
-     * @return TestResponse
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws Throwable
+     * Make an HTTP request and return a TestResponse.
+     *
+     * @param string $url The URL to request.
+     * @param array<string, string> $query Query parameters.
+     * @param array<string, string> $post POST parameters.
+     * @param array<string, string> $attributes Attributes to pass to the request.
+     * @param array<string, string> $cookies Cookies to include in the request.
+     * @param array<string, string> $files Files to include in the request.
+     * @param array<string, string> $headers HTTP headers to include.
+     * @param string $method HTTP method to use (GET, POST, PUT, DELETE, etc.).
+     * @param string $remoteAddress Remote IP address for the request.
+     * @param string|null $rawBody Raw request body content.
+     * @return TestResponse The response wrapped in a TestResponse instance.
+     * @throws DependencyException If a dependency cannot be resolved.
+     * @throws NotFoundException If a service or route cannot be found.
+     * @throws Throwable For other runtime exceptions during request handling.
      */
     protected function call(
         string $url,
@@ -104,27 +149,27 @@ class TestCase extends PhpUnitTestCase
     }
 
     /**
-     * @param array<string, string> $parameter
-     */
-    /**
-     * @param string                $url
-     * @param array<string, string> $parameter
-     * @return TestResponse
+     * Perform a GET request and return a TestResponse.
+     *
+     * @param string $url The URL to request.
+     * @param array<string, string> $parameter Optional query parameters.
+     * @return TestResponse The response wrapped in a TestResponse instance.
      * @throws DependencyException
      * @throws NotFoundException
      * @throws Throwable
      */
     protected function get(string $url, array $parameter = []): TestResponse
     {
-        /** @noinspection PhpRedundantOptionalArgumentInspection */
         return $this->call(url: $url, query: $parameter, method: 'GET');
     }
 
     /**
-     * @param string $url
-     * @param array<string, string> $post
-     * @param array<string, string> $files
-     * @return TestResponse
+     * Perform a POST request and return a TestResponse.
+     *
+     * @param string $url The URL to request.
+     * @param array<string, string> $post POST data.
+     * @param array<string, string> $files Optional files to upload.
+     * @return TestResponse The response wrapped in a TestResponse instance.
      * @throws DependencyException
      * @throws NotFoundException
      * @throws Throwable
@@ -135,10 +180,12 @@ class TestCase extends PhpUnitTestCase
     }
 
     /**
-     * @param string                $url
-     * @param array<string, string> $put
-     * @param array<string, string> $files
-     * @return TestResponse
+     * Perform a PUT request and return a TestResponse.
+     *
+     * @param string $url The URL to request.
+     * @param array<string, string> $put PUT data (sent as attributes).
+     * @param array<string, string> $files Optional files to upload.
+     * @return TestResponse The response wrapped in a TestResponse instance.
      * @throws DependencyException
      * @throws NotFoundException
      * @throws Throwable
@@ -149,9 +196,11 @@ class TestCase extends PhpUnitTestCase
     }
 
     /**
-     * @param string                $url
-     * @param array<string, string> $delete
-     * @return TestResponse
+     * Perform a DELETE request and return a TestResponse.
+     *
+     * @param string $url The URL to request.
+     * @param array<string, string> $delete DELETE data.
+     * @return TestResponse The response wrapped in a TestResponse instance.
      * @throws DependencyException
      * @throws NotFoundException
      * @throws Throwable

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Bootstrap Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Support\Bootstrap;
@@ -29,15 +39,45 @@ use const E_ERROR;
 use const E_PARSE;
 use const E_USER_DEPRECATED;
 
+/**
+ * HandleExceptions is responsible for registering and managing the application's error and exception handling.
+ *
+ * This class sets up global handlers for PHP errors, exceptions, and shutdown events.
+ * It reserves memory to allow handling fatal errors gracefully and logs deprecation warnings if a logger is available.
+ *
+ * Key responsibilities include:
+ * - Setting custom error and exception handlers
+ * - Capturing fatal errors on shutdown
+ * - Logging deprecation notices
+ *
+ * @category   Omega
+ * @package    Support
+ * @subpackage Bootstrap
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class HandleExceptions
 {
+    /** @var Application The application instance used by this handler. */
     private Application $app;
+
+    /** @var string|null Reserved memory buffer to allow handling fatal errors without running out of memory. */
     public static ?string $reserveMemory = null;
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * Bootstrap the exception handling for the given application instance.
+     *
+     * Sets up error reporting, registers custom handlers for errors, exceptions, and shutdown,
+     * and disables displaying errors outside the testing environment.
+     *
+     * @param Application $app The application instance
+     * @return void
+     * @throws InvalidDefinitionException When container definitions are invalid
+     * @throws DependencyException When a dependency cannot be resolved
+     * @throws NotFoundException When a service is not found in the container
      */
     public function bootstrap(Application $app): void
     {
@@ -50,7 +90,6 @@ class HandleExceptions
         /** @phpstan-ignore-next-line */
         if ('testing' !== $app->getEnvironment()) {
             set_error_handler([$this, 'handleError']);
-
             set_exception_handler([$this, 'handleException']);
         }
 
@@ -62,12 +101,14 @@ class HandleExceptions
     }
 
     /**
-     * @param int $level
-     * @param string $message
-     * @param string $file
-     * @param int|null $line
+     * Handle PHP errors by converting them to ErrorException or logging deprecation notices.
+     *
+     * @param int $level The error level
+     * @param string $message The error message
+     * @param string $file The file in which the error occurred
+     * @param int|null $line The line number of the error
      * @return void
-     * @throws ErrorException
+     * @throws ErrorException When a non-deprecated error occurs
      */
     public function handleError(int $level, string $message, string $file = '', ?int $line = 0): void
     {
@@ -81,10 +122,12 @@ class HandleExceptions
     }
 
     /**
-     * @param string $message
-     * @param string $file
-     * @param int $line
-     * @param int $level
+     * Handle deprecation errors by logging them if a logger is available.
+     *
+     * @param string $message The deprecation message
+     * @param string $file The file where the deprecation occurred
+     * @param int $line The line number of the deprecation
+     * @param int $level The error level
      * @return void
      */
     private function handleDeprecationError(string $message, string $file, int $line, int $level): void
@@ -93,7 +136,9 @@ class HandleExceptions
     }
 
     /**
-     * @param Throwable $th
+     * Handle uncaught exceptions by reporting and rendering them.
+     *
+     * @param Throwable $th The exception to handle
      * @return void
      * @throws Throwable
      */
@@ -103,19 +148,23 @@ class HandleExceptions
 
         $handler = $this->getHandler();
         $handler->report($th);
+
         if (php_sapi_name() !== 'cli') {
             $handler->render($this->app['request'], $th)->send();
         }
     }
 
     /**
+     * Handle shutdown events, checking for fatal errors.
+     *
      * @return void
      * @throws Throwable
      */
     public function handleShutdown(): void
     {
         self::$reserveMemory = null;
-        $error               = error_get_last();
+
+        $error = error_get_last();
         if ($error && $this->isFatal($error['type'])) {
             $this->handleException(
                 new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line'])
@@ -124,15 +173,16 @@ class HandleExceptions
     }
 
     /**
-     * @param int $level
-     * @param string $message
-     * @return bool
+     * Log a message if the logger is available in the application.
+     *
+     * @param int $level The error or deprecation level
+     * @param string $message The message to log
+     * @return bool True if logged, false otherwise
      */
     private function log(int $level, string $message): bool
     {
         if ($this->app->has('log')) {
             $this->app['log']->log($level, $message);
-
             return true;
         }
 
@@ -140,6 +190,8 @@ class HandleExceptions
     }
 
     /**
+     * Get the exception handler instance from the container.
+     *
      * @return ExceptionHandler
      */
     private function getHandler(): ExceptionHandler
@@ -147,11 +199,23 @@ class HandleExceptions
         return $this->app[ExceptionHandler::class];
     }
 
+    /**
+     * Determine if an error level corresponds to a deprecation notice.
+     *
+     * @param int $level The error level
+     * @return bool True if it is a deprecation, false otherwise
+     */
     private function isDeprecation(int $level): bool
     {
         return in_array($level, [E_DEPRECATED, E_USER_DEPRECATED]);
     }
 
+    /**
+     * Determine if an error level corresponds to a fatal error.
+     *
+     * @param int $level The error level
+     * @return bool True if it is fatal, false otherwise
+     */
     private function isFatal(int $level): bool
     {
         return in_array($level, [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE]);

@@ -21,14 +21,14 @@ final class PackageManifest
      *
      * @var array<string, array<string, array<int, string>>>|null
      */
-    public ?array $package_manifest = null;
+    public ?array $packageManifest = null;
 
     public function __construct(
-        private readonly string $base_path,
-        private readonly string $application_cache_path,
-        private ?string $vendor_path = null,
+        private readonly string $basePath,
+        private readonly string $applicationCachePath,
+        private ?string         $vendorPath = null,
     ) {
-        $this->vendor_path ??= DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'composer' . DIRECTORY_SEPARATOR;
+        $this->vendorPath ??= DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'composer' . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -72,15 +72,15 @@ final class PackageManifest
      */
     protected function getPackageManifest(): array
     {
-        if ($this->package_manifest) {
-            return $this->package_manifest;
+        if ($this->packageManifest) {
+            return $this->packageManifest;
         }
 
-        if (false === file_exists($this->application_cache_path . 'packages.php')) {
+        if (false === file_exists($this->applicationCachePath . 'packages.php')) {
             $this->build();
         }
 
-        return $this->package_manifest = require $this->application_cache_path . 'packages.php';
+        return $this->packageManifest = require $this->applicationCachePath . 'packages.php';
     }
 
     /**
@@ -92,7 +92,7 @@ final class PackageManifest
         $provider = [];
 
         // vendor\composer\installed.json
-        if (file_exists($file = $this->base_path . $this->vendor_path . 'installed.json')) {
+        if (file_exists($file = $this->basePath . $this->vendorPath . 'installed.json')) {
             $installed = file_get_contents($file);
             $installed = json_decode($installed, true);
 
@@ -107,7 +107,7 @@ final class PackageManifest
         array_filter($provider);
 
         file_put_contents(
-            $this->application_cache_path
+            $this->applicationCachePath
             . 'packages.php',
             '<?php return '
             . var_export($provider, true)

@@ -40,7 +40,14 @@ class FileTest extends TestCase
     protected File $storage;
 
     /**
-     * @throws CachePathException
+     * Sets up the environment before each test method.
+     *
+     * This method is called automatically by PHPUnit before each test runs.
+     * It is responsible for initializing the application instance, setting up
+     * dependencies, and preparing any state required by the test.
+     *
+     * @return void
+     * @throws CachePathException if the path is not valid for the cache.
      */
     protected function setUp(): void
     {

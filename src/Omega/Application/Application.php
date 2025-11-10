@@ -4,12 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Application;
 
-use App\Providers\AppServiceProvider;
-use App\Providers\DatabaseServiceProvider;
-use App\Providers\RouteServiceProvider;
-use App\Providers\ViewServiceProvider;
 use Exception;
-use Omega\Cache\CacheServiceProvider;
 use Omega\Config\ConfigRepository;
 use Omega\Container\Container;
 use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
@@ -21,7 +16,6 @@ use Omega\Container\Invoker\Exception\NotEnoughParametersException;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Request;
-use Omega\RateLimiter\RateLimiterServiceProvider;
 use Omega\Support\AddonServiceProvider;
 use Omega\Support\PackageManifest;
 use Omega\Support\Vite;
@@ -31,24 +25,20 @@ use function array_map;
 use function count;
 use function file_exists;
 use function in_array;
+use function str_replace;
+
+use const DIRECTORY_SEPARATOR;
 
 final class Application extends Container
 {
     /** @var Application|null Application instance. */
-    private static ?Application $app;
+    private static ?Application $app = null;
 
     /** @var string Base path. */
     private string $basePath;
 
     /** @var AbstractServiceProvider[] All service provider. */
-    private array $providers = [
-        AppServiceProvider::class,
-        RouteServiceProvider::class,
-        DatabaseServiceProvider::class,
-        ViewServiceProvider::class,
-        CacheServiceProvider::class,
-        RateLimiterServiceProvider::class,
-    ];
+    private ?array $providers = [];
 
     /** @var AbstractServiceProvider[] Booted service provider. */
     private array $bootedProviders = [];
@@ -57,7 +47,7 @@ final class Application extends Container
     private array $loadedProviders = [];
 
     /** @var bool Detect application has been booted. */
-    private bool $isBooted = false { // phpcs:ignore
+    public bool $isBooted = false { // phpcs:ignore
         get {
             return $this->isBooted; // phpcs:ignore
         }
@@ -80,16 +70,17 @@ final class Application extends Container
     protected array $bootedCallbacks = [];
 
     /**
-     * Constructor.
+     * Application constructor.
      *
-     * @param string $basePath application path
+     * @param string $basePath Base application path.
+     * @return void
      * @throws Exception
      */
     public function __construct(string $basePath)
     {
         parent::__construct();
 
-        $this->basePath = $basePath;
+        $this->basePath = str_replace('/', DIRECTORY_SEPARATOR, $basePath);
 
         $this->set('path.base', $this->basePath . DIRECTORY_SEPARATOR);
 
@@ -178,6 +169,7 @@ final class Application extends Container
         $this->set('config', fn (): ConfigRepository => $configs);
 
         $this->set('config.view.extensions', $configs['VIEW_EXTENSIONS']);
+        $this->providers = $configs['providers'];
     }
 
     /**
@@ -398,6 +390,7 @@ final class Application extends Container
             $provider->boot();
             $this->bootedProviders[] = $providerClassName;
         }
+
 
         $this->providers[] = $providerClassName;
 
