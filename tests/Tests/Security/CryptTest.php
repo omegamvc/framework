@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Security Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Security;
@@ -9,12 +19,37 @@ use PHPUnit\Framework\TestCase;
 use Omega\Security\Algo;
 use Omega\Security\Crypt;
 
+/**
+ * Unit tests for the Crypt class.
+ *
+ * This test suite verifies the correct functionality of encryption and decryption
+ * operations, including the ability to handle custom pass phrases. It ensures
+ * that the Crypt class produces reversible and consistent results for secured data.
+ *
+ * @category  Tests
+ * @package   Security
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Algo::class)]
 #[CoversClass(Crypt::class)]
 class CryptTest extends TestCase
 {
+    /** @var Crypt Instance used for encrypting and decrypting test data. */
     private Crypt $crypt;
 
+    /**
+     * Sets up the environment before each test method.
+     *
+     * This method is called automatically by PHPUnit before each test runs.
+     * It is responsible for initializing the application instance, setting up
+     * dependencies, and preparing any state required by the test.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();

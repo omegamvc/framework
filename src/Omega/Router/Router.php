@@ -6,6 +6,9 @@ namespace Omega\Router;
 
 use Closure;
 use Exception;
+use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\DependencyException;
+use Omega\Container\Exceptions\NotFoundException;
 use Omega\Router\Attribute\Middleware;
 use Omega\Router\Attribute\Name;
 use Omega\Router\Attribute\Prefix;
@@ -60,6 +63,11 @@ class Router
 
     private static bool $cacheLoaded = false;
 
+    /**
+     * @throws InvalidDefinitionException
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public static function loadCache(): void
     {
         $cacheFile = get_path('boot.cache') . 'route.php';
@@ -72,7 +80,6 @@ class Router
         $routes = require $cacheFile;
 
         foreach ($routes as $route) {
-            // Se la funzione è serializzata, la deserializziamo
             if (is_string($route['function']) && str_starts_with($route['function'], 'O:')) {
                 $route['function'] = unserialize($route['function'])->getClosure();
             }
@@ -396,30 +403,35 @@ class Router
         array $attributes = [],
         array $attributesMethods = []
     ): array {
-        $prefixUri   = '';
-        $prefixName  = '';
-        $middlewares = [];
-        $name        = '';
-        $pattern     = [];
-        $classes     = [];
-        $httpMethod  = '';
-        $uri         = '';
+        $prefixUri       = '';
+        $prefixName      = '';
+        $rootMiddlewares = [];
+        $classes         = [];
 
         foreach ($attributes as $classAttribute) {
             $instance = $classAttribute->newInstance();
+
             if ($instance instanceof Middleware) {
-                $middlewares = $instance->middleware;
+                $rootMiddlewares = $instance->middleware;
             }
+
             if ($instance instanceof Name) {
                 $prefixName = $instance->name;
             }
+
             if ($instance instanceof Prefix) {
                 $prefixUri = $instance->prefix;
             }
         }
 
         foreach ($attributesMethods as $method) {
-            $found = false;
+            $middlewares = $rootMiddlewares;
+            $name        = '';
+            $pattern     = [];
+            $uri         = '';
+            $httpMethod  = '';
+            $found       = false;
+
             foreach ($method->getAttributes() as $attribute) {
                 $instance = $attribute->newInstance();
 
@@ -446,6 +458,7 @@ class Router
                     $found = true;
                 }
             }
+
             if (true === $found) {
                 $classes[] = [
                     'method'     => $httpMethod,

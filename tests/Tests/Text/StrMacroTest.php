@@ -1,40 +1,59 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use System\Support\Exceptions\MacroNotFound;
-use System\Text\Str;
+declare(strict_types=1);
 
+namespace Tests\Text;
+
+use Omega\Macroable\Exceptions\MacroNotFoundException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+use Omega\Text\Str;
+
+#[CoversClass(MacroNotFoundException::class)]
+#[CoversClass(Str::class)]
 final class StrMacroTest extends TestCase
 {
-    /** @test */
-    public function itCanRegisterStringMacro()
+    /**
+     * Test it can register string macro.
+     *
+     * @return void
+     */
+    public function testItCanRegisterStringMacro(): void
     {
-        Str::macro('add_prefix', fn ($text, $prefix) => $prefix . $text);
+        Str::macro('addPrefix', fn ($text, $prefix) => $prefix . $text);
 
-        $this->assertEquals('i love laravel', Str::add_prefix('laravel', 'i love '));
+        $this->assertEquals('i love laravel', Str::addPrefix('laravel', 'i love '));
 
         Str::resetMacro();
     }
 
-    /** @test */
-    public function itCanThrowErrorWhenMacroNotFound()
+    /**
+     * Test it can throw error when macro not found.
+     *
+     * @return void
+     */
+    public function testItCanThrowErrorWhenMacroNotFound(): void
     {
-        $this->expectException(MacroNotFound::class);
+        $this->expectException(MacroNotFoundException::class);
         Str::hay();
     }
 
-    /** @test */
-    public function itCanResetStringMacro()
+    /**
+     * Tes it can reset string macro.
+     *
+     * @return void
+     */
+    public function testItCanResetStringMacro(): void
     {
-        Str::macro('add_prefix', fn ($text, $prefix) => $prefix . $text);
+        Str::macro('addPrefix', fn ($text, $prefix) => $prefix . $text);
 
-        $add_prefix = Str::add_prefix('a', 'b');
-        $this->assertEquals('ba', $add_prefix);
+        $addPrefix = Str::addPrefix('a', 'b');
+        $this->assertEquals('ba', $addPrefix);
         Str::resetMacro();
 
-        $this->expectException(MacroNotFound::class);
+        $this->expectException(MacroNotFoundException::class);
 
-        Str::add_prefix('a', 'b');
+        Str::addPrefix('a', 'b');
         Str::resetMacro();
     }
 }

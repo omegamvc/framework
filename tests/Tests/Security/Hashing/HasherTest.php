@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Security Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Security\Hashing;
@@ -11,6 +21,23 @@ use Omega\Security\Hashing\ArgonHasher;
 use Omega\Security\Hashing\BcryptHasher;
 use Omega\Security\Hashing\DefaultHasher;
 
+/**
+ * Unit tests for all available hashing implementations.
+ *
+ * This test suite validates the functionality of DefaultHasher, BcryptHasher,
+ * ArgonHasher, and Argon2IdHasher. Each test ensures that plaintext values
+ * are properly hashed, that verification against the original value succeeds,
+ * and that the algorithm used is correctly recognized as valid.
+ *
+ * @category   Tests
+ * @package    Security
+ * @subpackage Hashing
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 #[CoversClass(Argon2IdHasher::class)]
 #[CoversClass(ArgonHasher::class)]
 #[CoversClass(BcryptHasher::class)]

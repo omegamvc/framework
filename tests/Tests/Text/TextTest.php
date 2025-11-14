@@ -1,53 +1,72 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Tests\Text;
+
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use System\Text\Str;
-use System\Text\Text;
+use Omega\Text\Str;
+use Omega\Text\Text;
 
-use function System\Text\string;
-use function System\Text\text;
+use function Omega\Text\string;
+use function Omega\Text\text;
 
+#[CoversClass(Str::class)]
+#[CoversClass(Text::class)]
 class TextTest extends TestCase
 {
-    /** @test */
-    public function canCreateNewIntanceUsingConstructor()
-    {
-        $class = new Text('text');
-
-        $this->assertInstanceOf(Text::class, $class);
-    }
-
-    /** @test */
-    public function canCreateNewIntanceUsingHelper()
+    /**
+     * Test it can create new instance using helper.
+     *
+     * @return void
+     */
+    public function testItCanCreateNewInstanceUsingHelper(): void
     {
         $this->assertInstanceOf(Text::class, string('text'));
         $this->assertInstanceOf(Text::class, text('text'));
     }
 
-    /** @test */
-    public function canCreateNewIntanceUsingSTRClass()
+    /**
+     * Test it can create new instance using str class.
+     *
+     * @return void
+     */
+    public function testItCanCreateNewInstanceUsingSTRClass(): void
     {
         $this->assertInstanceOf(Text::class, Str::of('text'));
     }
 
-    /** @test */
-    public function canSetGetCurrentText()
+    /**
+     * Test it can set get current text.
+     *
+     * @return void
+     */
+    public function testItCanSetGetCurrentText(): void
     {
         $class = new Text('text');
 
         $this->assertEquals('text', $class->getText());
     }
 
-    /** @test */
-    public function canSetGetCurrentTextUsingToString()
+    /**
+     * Test it can set get current text using to string.
+     *
+     * @return void
+     */
+    public function testItCanSetGetCurrentTextUsingToString(): void
     {
         $class = new Text('text');
 
         $this->assertEquals('text', $class);
     }
 
-    /** @test */
-    public function canSetNewTextWhitoutReset()
+    /**
+     * Test it can set new text without reset.
+     *
+     * @return void
+     */
+    public function testItCanSetNewTextWithoutReset(): void
     {
         $class = new Text('text');
         $class->upper()->lower()->firstUpper();
@@ -57,8 +76,12 @@ class TextTest extends TestCase
         $this->assertCount(5, $class->logs());
     }
 
-    /** @test */
-    public function canSetGetLogOfString()
+    /**
+     * Test it can set get log of string.
+     *
+     * @return void
+     */
+    public function testItCanSetGetLogOfString(): void
     {
         $class = new Text('text');
         $class->upper()->lower()->firstUpper();
@@ -75,8 +98,12 @@ class TextTest extends TestCase
         }
     }
 
-    /** @test */
-    public function canSetReset()
+    /**
+     * Test it can set reset.
+     *
+     * @return void
+     */
+    public function testItCanSetReset(): void
     {
         $class = new Text('text');
         $class->upper()->lower()->firstUpper();
@@ -86,8 +113,12 @@ class TextTest extends TestCase
         $this->assertEmpty($class->logs());
     }
 
-    /** @test */
-    public function canSetRefresh()
+    /**
+     * Test it can set refresh.
+     *
+     * @return void
+     */
+    public function testItCanSetRefresh(): void
     {
         $class = new Text('text');
         $class->upper()->lower()->firstUpper();
@@ -97,8 +128,12 @@ class TextTest extends TestCase
         $this->assertEmpty($class->logs());
     }
 
-    /** @test */
-    public function canChainNonStringAndContinueChainWithoutBreak()
+    /**
+     * Test it can chain non string and continue chain without break.
+     *
+     * @return void
+     */
+    public function testItCanChainNonStringAndContinueChainWithoutBreak(): void
     {
         $class = new Text('text');
         $class->upper()->firstUpper();

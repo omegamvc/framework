@@ -158,7 +158,7 @@ final class Str
      * @param int|null $length Length of string
      * @return string|false
      */
-    public static function slice(string $text, int $start, ?int $length): string|false
+    public static function slice(string $text, int $start, ?int $length = null): string|false
     {
         $textLength = $length ?? self::length($text);
 

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Security Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Security\Hashing;
@@ -9,6 +19,23 @@ use PHPUnit\Framework\TestCase;
 use Omega\Security\Hashing\BcryptHasher;
 use Omega\Security\Hashing\HashManager;
 
+/**
+ * Unit tests for the HashManager class.
+ *
+ * This test suite validates the default hashing behavior and ensures that
+ * custom hashing drivers, such as BcryptHasher, can be set and used correctly.
+ * It checks that hashed values differ from plaintext, and verifies that
+ * password verification and algorithm validation work as expected.
+ *
+ * @category   Tests
+ * @package    Security
+ * @subpackage Hashing
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 #[CoversClass(BcryptHasher::class)]
 #[CoversClass(HashManager::class)]
 class HasherMangerTest extends TestCase

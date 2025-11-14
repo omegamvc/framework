@@ -11,6 +11,6 @@ class NoReturnException extends AbstractTextException
      */
     public function __construct(string $method, string $originalText)
     {
-        parent::__construct('Method %s called with %s does not return anything.', $method, $originalText);
+        parent::__construct('The method %s called with %s did not return anything.', $method, $originalText);
     }
 }

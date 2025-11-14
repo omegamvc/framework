@@ -1,15 +1,42 @@
 <?php
 
+/**
+ * Part of Omega - Security Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Security\Hashing;
 
-use RuntimeException;
+use Omega\Security\Exceptions\Argon2IdHashingNotSupportedException;
 
 use const PASSWORD_ARGON2ID;
 
+/**
+ * Hashes values using the Argon2id algorithm, extending ArgonHasher to
+ * provide Argon2id-specific behavior while allowing configuration of memory,
+ * time, and threads for secure password hashing.
+ *
+ * @category   Omega
+ * @package    Security
+ * @subpackage Hashing
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class Argon2IdHasher extends ArgonHasher implements HashInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function make(string $value, array $options = []): string
     {
         $hash = @password_hash($value, PASSWORD_ARGON2ID, [
@@ -19,12 +46,15 @@ class Argon2IdHasher extends ArgonHasher implements HashInterface
         ]);
 
         if (!is_string($hash)) {
-            throw new RuntimeException(PASSWORD_ARGON2ID . ' hashing not supported.');
+            throw new Argon2IdHashingNotSupportedException(PASSWORD_ARGON2ID . ' hashing not supported.');
         }
 
         return $hash;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function isValidAlgorithm(string $hash): bool
     {
         return 'argon2id' === $this->info($hash)['algoName'];

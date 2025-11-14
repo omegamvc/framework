@@ -1,13 +1,20 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use System\Text\Regex;
-use System\Text\Text;
+declare(strict_types=1);
 
+namespace Tests\Text;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+use Omega\Text\Regex;
+use Omega\Text\Text;
+
+#[CoversClass(Regex::class)]
+#[CoversClass(Text::class)]
 class TextAPITest extends TestCase
 {
     /** @var Text */
-    private $text;
+    private Text $text;
 
     protected function setUp(): void
     {
@@ -19,145 +26,227 @@ class TextAPITest extends TestCase
         $this->text->reset();
     }
 
-    // api test ----------------------------
-
-    /** @test */
-    public function itCanReturnChartAt()
+    /**
+     * Test it can return chart at.
+     *
+     * @return void
+     */
+    public function testItCanReturnChartAt(): void
     {
-        $this->assertEquals('o', $this->text->chartAt(3));
+        $this->assertEquals('o', $this->text->charAt(3));
     }
 
-    /** @test */
-    public function itCanReturnSlice()
+    /**
+     * Test it can return slice.
+     *
+     * @return void
+     */
+    public function testItCanReturnSlice(): void
     {
         $this->assertEquals('symfony', $this->text->slice(7));
     }
 
-    /** @test */
-    public function itCanReturnLower()
+    /**
+     * Test it can return lower.
+     *
+     * @return void
+     */
+    public function testItCanReturnLower(): void
     {
         $this->assertEquals('i love symfony', $this->text->lower());
     }
 
-    /** @test */
-    public function itCanReturnUpper()
+    /**
+     * Test it can return upper.
+     *
+     * @return void
+     */
+    public function testItCanReturnUpper(): void
     {
         $this->assertEquals('I LOVE SYMFONY', $this->text->upper());
     }
 
-    /** @test */
-    public function itCanReturnFirstUpper()
+    /**
+     * Test it can return first upper.
+     *
+     * @return void
+     */
+    public function testItCanReturnFirstUpper(): void
     {
         $this->assertEquals('I love symfony', $this->text->firstUpper());
     }
 
-    /** @test */
-    public function itCanReturnFirstUpperAll()
+    /**
+     * Test it can return first upper all.
+     *
+     * @return void
+     */
+    public function testItCanReturnFirstUpperAll(): void
     {
         $this->assertEquals('I Love Symfony', $this->text->firstUpperAll());
     }
 
-    /** @test */
-    public function itCanReturnSnack()
+    /**
+     * Test it can return snake.
+     *
+     * @return void
+     */
+    public function testItCanReturnSnake(): void
     {
-        $this->assertEquals('i_love_symfony', $this->text->snack());
+        $this->assertEquals('i_love_symfony', $this->text->snake());
     }
 
-    /** @test */
-    public function itCanReturnKebab()
+    /**
+     * Test it can return kebab.
+     *
+     * @return void
+     */
+    public function testItCanReturnKebab(): void
     {
         $this->assertEquals('i-love-symfony', $this->text->kebab());
     }
 
-    /** @test */
-    public function itCanReturnPascal()
+    /**
+     * Test it can return pascal.
+     *
+     * @return void
+     */
+    public function testItCanReturnPascal(): void
     {
         $this->assertEquals('ILoveSymfony', $this->text->pascal());
     }
 
-    /** @test */
-    public function itCanReturnCamel()
+    /**
+     * Test it can return camel.
+     *
+     * @return void
+     */
+    public function testItCanReturnCamel(): void
     {
         $this->assertEquals('iLoveSymfony', $this->text->camel());
     }
 
-    /** @test */
-    public function itCanReturnSlug()
+    /**
+     * Test it can return slug.
+     *
+     * @return void
+     */
+    public function testItCanReturnSlug(): void
     {
         $this->assertEquals('i-love-symfony', $this->text->slug());
     }
 
-    // bool ------------------------------
-
-    /** @test */
-    public function itCanReturnIsEmpty()
+    /**
+     * Test it can return is empty.
+     *
+     * @return void
+     */
+    public function testItCanReturnIsEmpty(): void
     {
         $this->assertFalse($this->text->isEmpty());
     }
 
-    /** @test */
-    public function itCanReturnIs()
+    /**
+     * Test it can return is.
+     *
+     * @return void
+     */
+    public function testItCanReturnIs(): void
     {
         $this->assertFalse($this->text->is(Regex::USER));
     }
 
-    /** @test */
-    public function itCanReturnContains()
+    /**
+     * Test it can return contains.
+     *
+     * @return void
+     */
+    public function testItCanReturnContains(): void
     {
         $this->assertTrue($this->text->contains('love'));
     }
 
-    /** @test */
-    public function itCanReturnStartsWith()
+    /**
+     * Test it can return stars with.
+     *
+     * @return void
+     */
+    public function testItCanReturnStartsWith(): void
     {
         $this->assertTrue($this->text->startsWith('i love'));
     }
 
-    /** @test */
-    public function itCanReturnEndsWith()
+    /**
+     * Test it can return ends with.
+     *
+     * @return void
+     */
+    public function testItCanReturnEndsWith(): void
     {
         $this->assertTrue($this->text->endsWith('symfony'));
     }
 
-    // int ---------------------------------------
-
-    /** @test */
-    public function itCanReturnLength()
+    /**
+     * test it can return length.
+     *
+     * @return void
+     */
+    public function testItCanReturnLength(): void
     {
         $this->assertIsInt($this->text->length());
         $this->assertEquals(14, $this->text->length());
     }
 
-    /** @test */
-    public function itCanReturnIndexOf()
+    /**
+     * Test it can return index of.
+     *
+     * @return void
+     */
+    public function testItCanReturnIndexOf(): void
     {
         $this->assertIsInt($this->text->length());
         $this->assertEquals(7, $this->text->indexOf('symfony'));
     }
 
-    /** @test */
-    public function itCanReturnLastIndexOf()
+    /**
+     * Test it can return index of.
+     *
+     * @return void
+     */
+    public function testItCanReturnLastIndexOf(): void
     {
         $this->assertIsInt($this->text->length());
         $this->assertEquals(3, $this->text->indexOf('o'));
     }
 
-    /** @test */
-    public function itCanReturnFill()
+    /**
+     * Test it can return fill.
+     *
+     * @return void
+     */
+    public function testItCanReturnFill(): void
     {
         $this->text->text('1234');
         $this->assertEquals('001234', $this->text->fill('0', 6));
     }
 
-    /** @test */
-    public function itCanReturnFillEnd()
+    /**
+     * Test it can return fill end.
+     *
+     * @return void
+     */
+    public function testItCanReturnFillEnd(): void
     {
         $this->text->text('1234');
         $this->assertEquals('123400', $this->text->fillEnd('0', 6));
     }
 
-    /** @test */
-    public function itCanReturnMask()
+    /**
+     * Test it can return mask.
+     *
+     * @return void
+     */
+    public function testItCanReturnMask(): void
     {
         $this->text->text('laravel');
         $this->assertEquals('l****el', $this->text->mask('*', 1, 4));
@@ -172,13 +261,23 @@ class TextAPITest extends TestCase
         $this->assertEquals('lara***', $this->text->mask('*', -3));
     }
 
-    public function itCanReturnLimit()
+    /**
+     * Test it can return limit.
+     *
+     * @return void
+     */
+    public function testItCanReturnLimit(): void
     {
-        $this->assertEquals('laravel...', $this->text->limit(7));
+        //$this->assertEquals('laravel...', $this->text->limit(7));
+        $this->assertEquals('i love ...', (string) $this->text->limit(7));
     }
 
-    /** @test */
-    public function itCanReturnAfetText()
+    /**
+     * Test it can return after text.
+     *
+     * @return void
+     */
+    public function testItCanReturnAfetText(): void
     {
         $this->assertEquals('symfony', $this->text->after('love ')->__toString());
     }
