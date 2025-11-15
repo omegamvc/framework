@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Text Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Text;
@@ -8,38 +18,37 @@ use Omega\Text\Exceptions\NoReturnException;
 
 use function gettype;
 
-class Text
+/**
+ * Class Text
+ *
+ * Provides an object-oriented wrapper for string manipulation.
+ * Tracks original string, current string, and modification history.
+ * Allows method chaining and optional error handling when string operations fail.
+ *
+ * @category  Omega
+ * @package   Text
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+final class Text
 {
-    /**
-     * Original string input.
-     *
-     * @var string
-     */
+    /** @var string Original string input. */
     private string $original;
 
-    /**
-     * Current string.
-     *
-     * @var string
-     */
+    /** @var string Current string. */
     private string $current;
 
-    /**
-     * Log string modifier.
-     *
-     * @var array<string, array<string, string>>
-     */
+    /** @var array<string, array<string, string>> Log of string modifications. */
     private array $latest;
 
-    /**
-     * Throw when string method return 'false' instance 'string'.
-     *
-     * @var bool
-     */
+    /** @var bool Throw exception when string method returns false instead of string. */
     private bool $throwOnFailure = false;
 
     /**
-     * Create string class.
+     * Initialize the Text object with an input string.
      *
      * @param string $text Input string
      */
@@ -50,10 +59,10 @@ class Text
     }
 
     /**
-     * Basically is history for text modify.
+     * Execute a string modification and log it.
      *
-     * @param bool|string|array<int|string, string> $text          new incoming text
-     * @param string                                $functionName Method to call (Str::class)
+     * @param bool|string|array<int|string, string> $text New incoming text
+     * @param string                                $functionName Name of the method calling this execution
      * @return string
      */
     private function execute(array|bool|string $text, string $functionName): string
@@ -63,18 +72,18 @@ class Text
         }
 
         $this->latest[] = [
-            'function'  => $functionName,
-            'return'    => $text,
-            'type'      => gettype($text),
+            'function' => $functionName,
+            'return'   => $text,
+            'type'     => gettype($text),
         ];
 
         return $text;
     }
 
     /**
-     * Push new string text without erase history.
+     * Set a new string value without erasing the modification history.
      *
-     * @param string $text New text
+     * @param string $text New string
      * @return self
      */
     public function text(string $text): self
@@ -85,9 +94,9 @@ class Text
     }
 
     /**
-     * Get last/current string text.
+     * Get the current string.
      *
-     * @return string
+     * @return string Last/current string
      */
     public function getText(): string
     {
@@ -95,9 +104,9 @@ class Text
     }
 
     /**
-     * Get last/current string text.
+     * Get the current string as string.
      *
-     * @return string
+     * @return string Last/current string
      */
     public function __toString(): string
     {
@@ -105,7 +114,7 @@ class Text
     }
 
     /**
-     * Get string history.
+     * Get the modification history of the string.
      *
      * @return array<string, array<string, string>>
      */
@@ -115,23 +124,23 @@ class Text
     }
 
     /**
-     * Reset or flush this class to origin string.
+     * Reset the Text object to the original string.
      *
      * @return self
      */
     public function reset(): self
     {
-        $this->current          = $this->original;
-        $this->latest           = [];
+        $this->current = $this->original;
+        $this->latest = [];
         $this->throwOnFailure = false;
 
         return $this;
     }
 
     /**
-     * Refresh class with new text.
+     * Refresh the object with a new string and reset history.
      *
-     * @param string $text Input string
+     * @param string $text New input string
      * @return self
      */
     public function refresh(string $text): self
@@ -142,9 +151,9 @@ class Text
     }
 
     /**
-     * Throw when string method return 'false' instance 'string'.
+     * Enable or disable throwing exception when a string operation fails.
      *
-     * @param bool $throwError Throw on failure
+     * @param bool $throwError Whether to throw on failure
      * @return self
      */
     public function throwOnFailure(bool $throwError): self
@@ -155,9 +164,9 @@ class Text
     }
 
     /**
-     * Return the character at the specified position.
+     * Return the character at the specified index as a new Text instance.
      *
-     * @param int $index character position
+     * @param int $index Character position
      * @return self
      */
     public function charAt(int $index): self
@@ -170,11 +179,12 @@ class Text
     }
 
     /**
-     * Extracts a section of string.
+     * Extract a subsection of the current string.
      *
-     * @param int      $start  Start position text
-     * @param int|null $length Length of string
+     * @param int      $start  Start position
+     * @param int|null $length Length of the substring, or null to the end
      * @return self
+     * @throws NoReturnException if slicing fails and throwOnFailure is enabled
      */
     public function slice(int $start, ?int $length = null): self
     {
@@ -190,7 +200,7 @@ class Text
     }
 
     /**
-     * Convert string to lowercase.
+     * Convert the current string to lowercase.
      *
      * @return self
      */
@@ -203,7 +213,7 @@ class Text
     }
 
     /**
-     * Convert string to lowercase.
+     * Convert the current string to uppercase.
      *
      * @return self
      */
@@ -216,7 +226,7 @@ class Text
     }
 
     /**
-     * Make first character uppercase.
+     * Make the first character of the current string uppercase.
      *
      * @return self
      */
@@ -229,7 +239,7 @@ class Text
     }
 
     /**
-     * Make first character uppercase each words.
+     * Capitalize the first character of each word in the current string.
      *
      * @return self
      */
@@ -242,7 +252,7 @@ class Text
     }
 
     /**
-     * Make text separate with underscore (snake_case).
+     * Convert the current string to snake_case.
      *
      * @return self
      */
@@ -255,7 +265,7 @@ class Text
     }
 
     /**
-     * Make text separate with - (kebab case).
+     * Convert the current string to kebab-case.
      *
      * @return self
      */
@@ -268,7 +278,7 @@ class Text
     }
 
     /**
-     * Make text each word start with capital (pascalcase).
+     * Convert the current string to PascalCase.
      *
      * @return self
      */
@@ -281,7 +291,7 @@ class Text
     }
 
     /**
-     * Make text camelcase.
+     * Convert the current string to camelCase.
      *
      * @return self
      */
@@ -294,7 +304,7 @@ class Text
     }
 
     /**
-     * Make text each word start with capital (pascalcase).
+     * Convert the current string into a slug (kebab-case).
      *
      * @return self
      */
@@ -307,10 +317,10 @@ class Text
     }
 
     /**
-     * Fill string (start) with string if length is less.
+     * Fill the beginning of the string with a given value if it is shorter than the desired length.
      *
-     * @param string $fill   String fill for miss length
-     * @param int    $length Max length of output string
+     * @param string $fill   String to pad
+     * @param int    $length Desired total length of the string
      * @return self
      */
     public function fill(string $fill, int $length): self
@@ -322,10 +332,10 @@ class Text
     }
 
     /**
-     * Fill string (end) with string if length is less.
+     * Fill the end of the string with a given value if it is shorter than the desired length.
      *
-     * @param string $fill   String fill for miss length
-     * @param int    $length Max length of output string
+     * @param string $fill   String to pad
+     * @param int    $length Desired total length of the string
      * @return self
      */
     public function fillEnd(string $fill, int $length): self
@@ -337,11 +347,11 @@ class Text
     }
 
     /**
-     * Create mask string.
+     * Mask a portion of the string with a specified mask character.
      *
-     * @param string $mask       Mask
-     * @param int    $start      Start position mask
-     * @param int    $maskLength Mask length
+     * @param string $mask       Character(s) to mask with
+     * @param int    $start      Start position for masking
+     * @param int    $maskLength Length of the mask (default 9999)
      * @return self
      */
     public function mask(string $mask, int $start, int $maskLength = 9999): self
@@ -353,10 +363,10 @@ class Text
     }
 
     /**
-     * Truncate text to limited length.
+     * Truncate the string to a specific length, adding an optional truncation character.
      *
-     * @param int    $length            Length text
-     * @param string $truncateCharacter Truncate character
+     * @param int    $length            Maximum length
+     * @param string $truncateCharacter Characters to append when truncated (default '...')
      * @return self
      */
     public function limit(int $length, string $truncateCharacter = '...'): self
@@ -368,20 +378,20 @@ class Text
     }
 
     /**
-     * Get text after text found.
+     * Return the portion of the string after the specified substring.
+     *
+     * @param string $find Substring to search for
+     * @return self
      */
     public function after(string $find): self
     {
-        $this->execute(
-            Str::after($this->current, $find),
-            __FUNCTION__
-        );
+        $this->execute(Str::after($this->current, $find), __FUNCTION__);
 
         return $this;
     }
 
     /**
-     * Get string length (0 if empty).
+     * Get the length of the current string.
      *
      * @return int
      */
@@ -391,10 +401,10 @@ class Text
     }
 
     /**
-     * Index of first occurrence of specified text with in string.
+     * Get the index of the first occurrence of a substring within the current string.
      *
-     * @param string $find Find
-     * @return int|false
+     * @param string $find Substring to search for
+     * @return int|false Position of the substring or false if not found
      */
     public function indexOf(string $find): int|false
     {
@@ -402,10 +412,10 @@ class Text
     }
 
     /**
-     * Last index of first occurrence of specified text with in string.
+     * Get the index of the last occurrence of a substring within the current string.
      *
-     * @param string $find Find
-     * @return int|false
+     * @param string $find Substring to search for
+     * @return int|false Position of the substring or false if not found
      */
     public function lastIndexOf(string $find): int|false
     {
@@ -413,9 +423,9 @@ class Text
     }
 
     /**
-     * Check string is empty string.
+     * Check if the current string is empty.
      *
-     * @return bool
+     * @return bool True if the string is empty
      */
     public function isEmpty(): bool
     {
@@ -423,10 +433,10 @@ class Text
     }
 
     /**
-     * Check string is empty string.
+     * Check if the current string matches a regular expression pattern.
      *
-     * @param string $pattern String regular expression
-     * @return bool
+     * @param string $pattern Regular expression to match
+     * @return bool True if the string matches the pattern
      */
     public function is(string $pattern): bool
     {
@@ -434,10 +444,10 @@ class Text
     }
 
     /**
-     * Check string is empty string.
+     * Alias for `is()`. Check if the current string matches a regular expression pattern.
      *
-     * @param string $pattern String regular expression
-     * @return bool
+     * @param string $pattern Regular expression to match
+     * @return bool True if the string matches the pattern
      */
     public function isMatch(string $pattern): bool
     {
@@ -445,10 +455,10 @@ class Text
     }
 
     /**
-     * Check text contain with.
+     * Check if the current string contains a given substring.
      *
-     * @param string $find Text contain
-     * @return bool True if text contain
+     * @param string $find Substring to search for
+     * @return bool True if the string contains the substring
      */
     public function contains(string $find): bool
     {
@@ -456,10 +466,10 @@ class Text
     }
 
     /**
-     * Check text starts with.
+     * Check if the current string starts with a given substring.
      *
-     * @param string $startWith Start with
-     * @return bool True if text starts with
+     * @param string $startWith Substring to check at the start
+     * @return bool True if the string starts with the substring
      */
     public function startsWith(string $startWith): bool
     {
@@ -467,10 +477,10 @@ class Text
     }
 
     /**
-     * Check text ends with.
+     * Check if the current string ends with a given substring.
      *
-     * @param string $endWith Start with
-     * @return bool True if text ends with
+     * @param string $endWith Substring to check at the end
+     * @return bool True if the string ends with the substring
      */
     public function endsWith(string $endWith): bool
     {

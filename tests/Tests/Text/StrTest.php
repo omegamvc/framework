@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Text Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Text;
@@ -9,6 +19,30 @@ use PHPUnit\Framework\TestCase;
 use Omega\Text\Str;
 use Throwable;
 
+/**
+ * Comprehensive test suite for the `Str` utility class.
+ *
+ * This class verifies the correctness and robustness of a wide range
+ * of string-manipulation features provided by `Str`, including:
+ *
+ * - Character lookup, slicing, splitting, and searching.
+ * - Case transformations (upper, lower, title, pascal, camel, snake, kebab).
+ * - Pattern matching, replacing, masking, limiting, and slug generation.
+ * - Template rendering, length evaluation, repetition, and type checks.
+ * - Prefix/suffix detection and substring extraction helpers.
+ *
+ * Each test ensures consistent behavior across normal cases, edge cases,
+ * invalid inputs, and formatting conventions, confirming the reliability
+ * of the string helpers used throughout the application.
+ *
+ * @category  Tests
+ * @package   Text
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Str::class)]
 final class StrTest extends TestCase
 {

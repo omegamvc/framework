@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Text Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Text;
@@ -36,12 +46,34 @@ use const PHP_INT_MAX;
 use const PREG_SPLIT_NO_EMPTY;
 use const STR_PAD_LEFT;
 
+/**
+ * Final utility class providing a rich set of string manipulation methods.
+ *
+ * This class offers static methods for common string operations including:
+ *   - Creating Text instances
+ *   - Character access
+ *   - Searching, replacing, and splitting strings
+ *   - Case transformations (lower, upper, camel, pascal, snake, kebab)
+ *   - String padding and masking
+ *   - Template rendering and slug generation
+ *   - Validation and checking (isString, isEmpty, contains, startsWith, endsWith)
+ *
+ * All methods are static, and the class is designed to complement the Text class.
+ *
+ * @category  Omega
+ * @package   Text
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 final class Str
 {
     use MacroableTrait;
 
     /**
-     * Create new instance.
+     * Create a new Text instance from a string.
      *
      * @param string $text Input text
      * @return Text
@@ -52,11 +84,11 @@ final class Str
     }
 
     /**
-     * Return the character at the specified position.
+     * Get the character at the specified index in a string.
      *
-     * @param string $text  String text
-     * @param int    $index character position
-     * @return string|false
+     * @param string $text  The string to search
+     * @param int    $index Character index
+     * @return string|false Returns the character or false if index invalid
      */
     public static function charAt(string $text, int $index): string|false
     {
@@ -64,12 +96,12 @@ final class Str
     }
 
     /**
-     * Join two or more string into once.
+     * Concatenate multiple strings with optional separators.
      *
-     * @param array<int, string> $text          String array
-     * @param string             $separator     Separator
-     * @param string             $lastSeparator Separator before last item
-     * @return string
+     * @param string[] $text Array of strings
+     * @param string   $separator Separator between strings
+     * @param string   $lastSeparator Separator before last element
+     * @return string Concatenated string
      */
     public static function concat(array $text, string $separator = ' ', string $lastSeparator = ''): string
     {
@@ -83,11 +115,11 @@ final class Str
     }
 
     /**
-     * Index of first occurrence of specified text with in string.
+     * Get the index of the first occurrence of a substring.
      *
-     * @param string $text String to search
-     * @param string $find Find
-     * @return int|false
+     * @param string $text  String to search
+     * @param string $find  Substring to find
+     * @return int|false Position of first occurrence or false if not found
      */
     public static function indexOf(string $text, string $find): int|false
     {
@@ -95,11 +127,11 @@ final class Str
     }
 
     /**
-     * Last index of first occurrence of specified text with in string.
+     * Get the last index of a substring within a string.
      *
      * @param string $text String to search
-     * @param string $find Find
-     * @return int|false
+     * @param string $find Substring to find
+     * @return int|false Last occurrence position or false if not found
      */
     public static function lastIndexOf(string $text, string $find): int|false
     {
@@ -107,11 +139,11 @@ final class Str
     }
 
     /**
-     * Retrieves the matches of string against a search pattern.
+     * Match a string against a regular expression pattern.
      *
-     * @param string $text    String
-     * @param string $pattern String regular expression.
-     * @return array<int, string>|null Null if not match found
+     * @param string $text    Input string
+     * @param string $pattern Regex pattern
+     * @return array<int, string>|null Array of matches or null if none
      */
     public static function match(string $text, string $pattern): ?array
     {
@@ -126,12 +158,12 @@ final class Str
     }
 
     /**
-     * Find and replace specified text in string.
+     * Replace occurrences of a string or array of strings.
      *
-     * @param string                    $original The subject text
-     * @param string|array<int, string> $find     find
-     * @param string|array<int, string> $replace  replace
-     * @return string
+     * @param string|string[] $find    String(s) to find
+     * @param string|string[] $replace Replacement string(s)
+     * @param string          $original Original string
+     * @return string Modified string
      */
     public static function replace(string $original, string|array $find, string|array $replace): string
     {
@@ -139,11 +171,11 @@ final class Str
     }
 
     /**
-     * Search for matching text and return as position.
+     * Find the first occurrence of a substring and return its position.
      *
-     * @param string $text String to search
-     * @param string $find Find
-     * @return int|false
+     * @param string $text The string to search within.
+     * @param string $find The substring to locate.
+     * @return int|false Returns the position of the first match or false if not found.
      */
     public static function search(string $text, string $find): int|false
     {
@@ -151,12 +183,12 @@ final class Str
     }
 
     /**
-     * Extracts a section of string.
+     * Slice a portion of a string from start with optional length.
      *
-     * @param string   $text   String to slice
-     * @param int      $start  Start position text
-     * @param int|null $length Length of string
-     * @return string|false
+     * @param string   $text   Input string
+     * @param int      $start  Start position
+     * @param int|null $length Optional length of slice
+     * @return string|false Substring or false on failure
      */
     public static function slice(string $text, int $start, ?int $length = null): string|false
     {
@@ -166,12 +198,17 @@ final class Str
     }
 
     /**
-     * Splits a string into array of string.
+     * Splits a string into an array of substrings.
      *
-     * @param string $text     string to split
-     * @param string $separator Separator
-     * @param int    $limit    Limit array length
-     * @return string[]|false
+     * This method splits the input string `$text` using the specified `$separator`.
+     * If the `$separator` is an empty string, the string is split into individual characters.
+     * Otherwise, it behaves like `explode()`. The `$limit` parameter controls the maximum
+     * number of elements in the resulting array.
+     *
+     * @param string $text      The input string to split.
+     * @param string $separator The delimiter to split by. Default is empty string (splits into characters).
+     * @param int    $limit     Maximum number of elements in the returned array. Default is PHP_INT_MAX.
+     * @return string[]|false An array of substrings if successful, or false on failure.
      */
     public static function split(string $text, string $separator = '', int $limit = PHP_INT_MAX): array|false
     {
@@ -181,10 +218,10 @@ final class Str
     }
 
     /**
-     * Convert string to lowercase.
+     * Convert a string to lowercase.
      *
      * @param string $text Input string
-     * @return string
+     * @return string Lowercased string
      */
     public static function toLowerCase(string $text): string
     {
@@ -192,10 +229,10 @@ final class Str
     }
 
     /**
-     * Convert string to lowercase.
+     * Convert a string to uppercase.
      *
      * @param string $text Input string
-     * @return string
+     * @return string Uppercased string
      */
     public static function toUpperCase(string $text): string
     {
@@ -203,7 +240,11 @@ final class Str
     }
 
     /**
-     * Get string after find text find.
+     * Return the substring after the first occurrence of the specified text.
+     *
+     * @param string $text The original string.
+     * @param string $find The substring to search for.
+     * @return string The portion of the string after the first occurrence of $find.
      */
     public static function after(string $text, string $find): string
     {
@@ -216,10 +257,10 @@ final class Str
     }
 
     /**
-     * Make first character uppercase.
+     * Convert the first character of the string to uppercase.
      *
-     * @param string $text Input string
-     * @return string
+     * @param string $text Input string.
+     * @return string String with first character in uppercase.
      */
     public static function firstUpper(string $text): string
     {
@@ -227,10 +268,10 @@ final class Str
     }
 
     /**
-     * Make first character uppercase each words.
+     * Convert the first character of each word in the string to uppercase.
      *
-     * @param string $text Input string
-     * @return string
+     * @param string $text Input string.
+     * @return string String with each word starting with an uppercase character.
      */
     public static function firstUpperAll(string $text): string
     {
@@ -238,10 +279,10 @@ final class Str
     }
 
     /**
-     * Make text separate with dash (snake_case).
+     * Convert the string to snake_case (words separated by underscores).
      *
-     * @param string $text input text
-     * @return string
+     * @param string $text Input string.
+     * @return string Converted string in snake_case.
      */
     public static function toSnakeCase(string $text): string
     {
@@ -249,10 +290,10 @@ final class Str
     }
 
     /**
-     * Make text separated with - (kebab-case).
+     * Convert the string to kebab-case (words separated by dashes).
      *
-     * @param string $text input text
-     * @return string
+     * @param string $text Input string.
+     * @return string Converted string in kebab-case.
      */
     public static function toKebabCase(string $text): string
     {
@@ -260,10 +301,10 @@ final class Str
     }
 
     /**
-     * Make text each word start with capital (pascalcase).
+     * Convert the string to PascalCase (each word starts with uppercase, no separators).
      *
-     * @param string $text input text
-     * @return string
+     * @param string $text Input string.
+     * @return string Converted string in PascalCase.
      */
     public static function toPascalCase(string $text): string
     {
@@ -274,10 +315,10 @@ final class Str
     }
 
     /**
-     * Make text camelcase.
+     * Convert the string to camelCase (first word lowercase, subsequent words start with uppercase).
      *
-     * @param string $text input text
-     * @return string
+     * @param string $text Input string.
+     * @return string Converted string in camelCase.
      */
     public static function toCamelCase(string $text): string
     {
@@ -300,12 +341,12 @@ final class Str
     }
 
     /**
-     * Make slugify (url-title).
+    /**
+     * Generate a URL-friendly "slug" from a string.
      *
-     * @param string $text input text
-     * @return string
-     *
-     * @throw NoReturnException
+     * @param string $text Input string
+     * @return string Slugified string
+     * @throws NoReturnException if the resulting slug is empty
      */
     public static function slug(string $text): string
     {
@@ -337,11 +378,11 @@ final class Str
     }
 
     /**
-     * Make multiple text (repeat).
+     * Repeat a string multiple times.
      *
-     * @param string $text     Text
-     * @param int    $multiple Number repeat (less than 0 will return empty)
-     * @return string
+     * @param string $text     Text to repeat
+     * @param int    $multiple Number of repetitions
+     * @return string Repeated string
      */
     public static function repeat(string $text, int $multiple): string
     {
@@ -349,10 +390,10 @@ final class Str
     }
 
     /**
-     * Get string length (0 if empty).
+     * Get the length of a string.
      *
-     * @param string $text
-     * @return int
+     * @param string $text Input string
+     * @return int Length of string
      */
     public static function length(string $text): int
     {
@@ -360,13 +401,14 @@ final class Str
     }
 
     /**
-     * Render template text.
+    /**
+     * Render a template string by replacing placeholders with provided data.
      *
      * @param string                $template       Template string
-     * @param array<string, string> $data           Template data to replace placeholders
-     * @param string                $openDelimiter  Opening delimiter (recommended: '{')
-     * @param string                $closeDelimiter Closing delimiter (recommended: '}')
-     * @return string Rendered template with replaced data
+     * @param array<string, string> $data           Replacement data
+     * @param string                $openDelimiter  Opening delimiter
+     * @param string                $closeDelimiter Closing delimiter
+     * @return string Rendered string
      */
     public static function template(
         string $template,
@@ -387,12 +429,12 @@ final class Str
     }
 
     /**
-     * Fill string (start) with string if length is less.
+     * Fill a string to a maximum length at the start.
      *
-     * @param string $text      String Text
-     * @param string $fill      String fill for miss length
-     * @param int    $maxLength max length of output string
-     * @return string
+     * @param string $text      Input string
+     * @param string $fill      Fill character
+     * @param int    $maxLength Desired length
+     * @return string Padded string
      */
     public static function fill(string $text, string $fill, int $maxLength): string
     {
@@ -400,12 +442,12 @@ final class Str
     }
 
     /**
-     * Fill string (end) with string if length is less.
+     * Fill a string to a maximum length at the end.
      *
-     * @param string $text      String text
-     * @param string $fill      String fill for miss length
-     * @param int    $maxLength max length of output string
-     * @return string
+     * @param string $text      Input string
+     * @param string $fill      Fill character
+     * @param int    $maxLength Desired length
+     * @return string Padded string
      */
     public static function fillEnd(string $text, string $fill, int $maxLength): string
     {
@@ -414,13 +456,13 @@ final class Str
     }
 
     /**
-     * Create mask string.
+     * Mask part of a string with a given character.
      *
-     * @param string $text       String text
-     * @param string $mask       Mask
-     * @param int    $start      Start position mask
-     * @param int    $maskLength Mask length
-     * @return string String with mask
+     * @param string $text       Input string
+     * @param string $mask       Mask character
+     * @param int    $start      Start index
+     * @param int    $maskLength Length of mask
+     * @return string Masked string
      */
     public static function mask(string $text, string $mask, int $start, int $maskLength = 9999): string
     {
@@ -444,10 +486,10 @@ final class Str
     }
 
     /**
-     * Check determinate input is string.
+     * Check if input is a string.
      *
-     * @param string $text Text
-     * @return bool
+     * @param string $text Input
+     * @return bool True if string
      */
     public static function isString(string $text): bool
     {
@@ -455,10 +497,10 @@ final class Str
     }
 
     /**
-     * Check string is empty string.
+     * Check if string is empty.
      *
-     * @param string $text
-     * @return bool
+     * @param string $text Input
+     * @return bool True if empty
      */
     public static function isEmpty(string $text): bool
     {
@@ -466,30 +508,26 @@ final class Str
     }
 
     /**
-     * Retrieves the matches of string against a search pattern.
+    /**
+     * Check if the string matches a given regular expression pattern.
      *
-     * @param string $text    String
-     * @param string $pattern String regular expression.
-     * @return bool
+     * @param string $text    The string to test against the pattern.
+     * @param string $pattern The regular expression pattern to match.
+     * @return bool True if the pattern matches the string, false otherwise.
      */
     public static function isMatch(string $text, string $pattern): bool
     {
         $hasResult = preg_match($pattern, $text);
 
-        if (1 === $hasResult) {
-            return true;
-        }
-
-        return false;
+        return 1 === $hasResult;
     }
 
     /**
-     * Retrieves the matches of string against a search pattern.
-     * Shorthand for `isMatch`.
+     * Shorthand method for `isMatch()`. Checks if the string matches a pattern.
      *
-     * @param string $text    String
-     * @param string $pattern String regular expression.
-     * @return bool
+     * @param string $text    The string to test.
+     * @param string $pattern The regular expression pattern to match.
+     * @return bool True if the pattern matches the string, false otherwise.
      */
     public static function is(string $text, string $pattern): bool
     {
@@ -499,11 +537,11 @@ final class Str
     // Backward Compatible php 8.0 --------------------------------
 
     /**
-     * Check text contain with.
+     * Check if string contains a substring.
      *
-     * @param string $text Text
-     * @param string $find Text contain
-     * @return bool True if text contain
+     * @param string $text Text to search
+     * @param string $find Substring
+     * @return bool True if contains
      */
     public static function contains(string $text, string $find): bool
     {
@@ -511,11 +549,11 @@ final class Str
     }
 
     /**
-     * Check text starts with.
+     * Check if string starts with given substring.
      *
-     * @param string $text      Text
-     * @param string $startWith Start with
-     * @return bool True if text starts with
+     * @param string $text      Input string
+     * @param string $startWith Substring
+     * @return bool True if starts with
      */
     public static function startsWith(string $text, string $startWith): bool
     {
@@ -523,11 +561,11 @@ final class Str
     }
 
     /**
-     * Check text ends with.
+     * Check if string ends with given substring.
      *
-     * @param string $text       Text
-     * @param string $startWith Start with
-     * @return bool True if text ends with
+     * @param string $text       Input string
+     * @param string $startWith  Substring
+     * @return bool True if ends with
      */
     public static function endsWith(string $text, string $startWith): bool
     {
@@ -545,12 +583,12 @@ final class Str
     }
 
     /**
-     * Truncate text to limited length.
+     * Limit string to a maximum length and append a truncation character.
      *
-     * @param string $text              Text
-     * @param int    $length            Maximum text length
-     * @param string $truncateCharacter Truncate character
-     * @return string
+     * @param string $text              Input string
+     * @param int    $length            Maximum length
+     * @param string $truncateCharacter Character to append
+     * @return string Truncated string
      */
     public static function limit(string $text, int $length, string $truncateCharacter = '...'): string
     {

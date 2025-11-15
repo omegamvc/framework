@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Text Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Text;
@@ -9,6 +19,27 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Omega\Text\Str;
 
+/**
+ * Unit tests for the string macro system implemented in the `Str` class.
+ *
+ * This test suite verifies the ability to dynamically register, invoke,
+ * and reset string macros, as well as the correct handling of missing
+ * macro invocations through the `MacroNotFoundException`.
+ *
+ * Covered scenarios include:
+ * - Registering a custom macro and ensuring it behaves as expected.
+ * - Throwing an exception when calling an undefined macro.
+ * - Resetting all macros and validating that previously registered macros
+ *   are no longer available after the reset.
+ *
+ * @category  Tests
+ * @package   Text
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(MacroNotFoundException::class)]
 #[CoversClass(Str::class)]
 final class StrMacroTest extends TestCase

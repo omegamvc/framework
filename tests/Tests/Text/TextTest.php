@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Text Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Text;
@@ -12,6 +22,25 @@ use Omega\Text\Text;
 use function Omega\Text\string;
 use function Omega\Text\text;
 
+/**
+ * Test suite for validating the core behavior of the Text value object.
+ *
+ * This class ensures that Text instances can be created through helper
+ * functions, via the Str facade, and directly. It verifies correct text
+ * retrieval, string casting, mutation without reset, logging of operations,
+ * state resetting and refreshing, and the ability to chain transformations
+ * while preserving workflow continuity. Together, these tests confirm that
+ * the Text API behaves consistently as a fluent, traceable, and predictable
+ * string manipulation utility.
+ *
+ * @category  Tests
+ * @package   Text
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Str::class)]
 #[CoversClass(Text::class)]
 class TextTest extends TestCase

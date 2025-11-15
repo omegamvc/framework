@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Text Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Text;
@@ -9,11 +19,41 @@ use PHPUnit\Framework\TestCase;
 use Omega\Text\Regex;
 use Omega\Text\Text;
 
+/**
+ * Test suite for validating the Text API behavior.
+ *
+ * This class ensures that the `Text` value object and its associated
+ * transformation helpers behave consistently across all supported
+ * string-manipulation features. It covers operations such as slicing,
+ * casing, slug generation, pattern validation, prefix/suffix detection,
+ * padding, masking, limiting, and substring lookup.
+ *
+ * Each test verifies correctness, immutability expectations, and
+ * integration with the `Regex` helper where pattern-based checks
+ * are required. The suite guarantees that the `Text` API provides
+ * a reliable and predictable interface for high-level string handling.
+ *
+ * @category  Tests
+ * @package   Text
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Regex::class)]
 #[CoversClass(Text::class)]
 class TextAPITest extends TestCase
 {
-    /** @var Text */
+    /**
+     * Holds the Text instance under test.
+     *
+     * This value object represents the current string being processed,
+     * and each test method operates on it to validate the behavior of the
+     * `Text` API across various string transformations and queries.
+     *
+     * @var Text
+     */
     private Text $text;
 
     protected function setUp(): void

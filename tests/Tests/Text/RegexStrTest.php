@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Text Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Text;
@@ -9,6 +19,23 @@ use PHPUnit\Framework\TestCase;
 use Omega\Text\Regex;
 use Omega\Text\Str;
 
+/**
+ * Test suite for validating predefined regular expressions.
+ *
+ * This class verifies that all built-in Regex patterns correctly match
+ * or reject common string formats such as emails, usernames, plain text,
+ * slugs, HTML tags, inline JavaScript, passwords, dates, IP addresses,
+ * and URLs. Each test ensures the `Str::isMatch()` method behaves as
+ * expected for both valid and invalid inputs.
+ *
+ * @category  Tests
+ * @package   Text
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Regex::class)]
 #[CoversClass(Str::class)]
 final class RegexStrTest extends TestCase
