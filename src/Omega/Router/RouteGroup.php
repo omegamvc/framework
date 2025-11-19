@@ -1,36 +1,65 @@
 <?php
 
+/**
+ * Part of Omega - Router Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Router;
 
 use Closure;
 
-class RouteGroup
+/**
+ * Class RouteGroup
+ *
+ * Handles grouping of routes by executing setup and cleanup callbacks
+ * around a given route registration closure. Useful for applying middleware,
+ * prefixes, or other route group configurations.
+ *
+ * @category  Omega
+ * @package   Router
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+readonly class RouteGroup
 {
-    /** @var callable */
-    private $setup;
-
-    /** @var callable */
-    private $cleanup;
-
-    public function __construct(Closure $setup, Closure $cleanup)
+    /**
+     * RouteGroup constructor.
+     *
+     * @param Closure $setup   Callback executed before the group.
+     * @param Closure $cleanup Callback executed after the group.
+     * @return void
+     */
+    public function __construct(private Closure $setup, private Closure $cleanup)
     {
-        $this->setup   = $setup;
-        $this->cleanup = $cleanup;
     }
 
     /**
-     * @template T
+     * Execute a route group with setup and cleanup hooks.
      *
-     * @param callable(): T $callback
-     * @return T
+     * @template T
+     * @param callable(): T $callback Callback that defines routes inside the group.
+     * @return T Returns the result of the callback execution.
      */
     public function group(callable $callback)
     {
-        // call stack
+        // Execute setup callback
         ($this->setup)();
+
+        // Execute the user-provided callback
         $result = ($callback)();
+
+        // Execute cleanup callback
         ($this->cleanup)();
 
         return $result;

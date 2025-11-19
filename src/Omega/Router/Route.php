@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Router Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Router;
@@ -11,17 +21,60 @@ use ReturnTypeWillChange;
 use function sprintf;
 
 /**
+ * Represents a single route definition including name, URI,
+ * handler, middleware, and custom parameter patterns.
+ *
+ * This class serves as a convenient wrapper for route metadata
+ * and allows fluent configuration through methods such as
+ * name(), middleware(), and where(). It also implements ArrayAccess
+ * so that route attributes can be accessed like an array.
+ *
+ * @category  Omega
+ * @package   Router
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ *
  * @implements ArrayAccess<string, mixed>
+ *
+ * @method route()
  */
 class Route implements ArrayAccess
 {
-    /** @var array<string, mixed> */
+    /**
+     * Internal route definition array containing all metadata such as:
+     * - expression
+     * - method(s)
+     * - function (handler)
+     * - name
+     * - middleware
+     * - patterns
+     *
+     * @var array<string, mixed>
+     */
     private array $route;
 
+    /**
+     * Route name prefix added from the current Router group context.
+     *
+     * Used to automatically prepend group-based naming prefixes
+     * (e.g., "admin." -> "admin.dashboard").
+     *
+     * @var string
+     */
     private string $prefixName;
 
     /**
-     * @param array<string, mixed> $route
+    /**
+     * Create a new Route instance.
+     *
+     * Injects the raw route array and automatically applies any active
+     * group name prefix from Router::$group['as'].
+     *
+     * @param array<string, mixed> $route Initial route definition
+     * @return void
      */
     public function __construct(array $route)
     {
@@ -33,10 +86,15 @@ class Route implements ArrayAccess
     }
 
     /**
-     * @param string $name
-     * @param string[] $arguments
+     * Dynamically access certain route properties.
+     *
+     * Currently, supports:
+     *   - route(): returns the entire route definition array.
+     *
+     * @param string   $name      The called method name
+     * @param string[] $arguments Arguments passed to the magic call
      * @return array<string, mixed>
-     * @throws Exception
+     * @throws Exception If an unsupported magic method is called
      */
     public function __call(string $name, array $arguments)
     {
@@ -48,9 +106,12 @@ class Route implements ArrayAccess
     }
 
     /**
-     * Set Route name.
+     * Set the route name.
      *
-     * @param string $name Route name (uniq)
+     * Automatically prepends any active group prefix. The final route name
+     * must be unique within the routing system.
+     *
+     * @param string $name Route name without prefix
      * @return self
      */
     public function name(string $name): self
@@ -61,9 +122,12 @@ class Route implements ArrayAccess
     }
 
     /**
-     * Add middleware this route.
+     * Attach one or more middleware class names to this route.
      *
-     * @param class-string[] $middlewares Route class-name
+     * Middleware are executed during dispatch, allowing preprocessing
+     * such as authentication, rate limiting, etc.
+     *
+     * @param class-string[] $middlewares Array of middleware class names
      * @return self
      */
     public function middleware(array $middlewares): self
@@ -76,9 +140,12 @@ class Route implements ArrayAccess
     }
 
     /**
-     * Costume url match pattern for this route.
+     * Define custom URL parameter patterns for this route.
      *
-     * @param array<string, string> $patterns
+     * Patterns map placeholder formats (e.g. "(:num)") to regex
+     * expressions used during matching and URL generation.
+     *
+     * @param array<string, string> $patterns Map of pattern => regex
      * @return self
      */
     public function where(array $patterns): self
@@ -89,10 +156,10 @@ class Route implements ArrayAccess
     }
 
     /**
-     * Assigns a value to the specified offset.
+     * Assign a value to the given route attribute.
      *
-     * @param string $offset the offset to assign the value to
-     * @param mixed  $value  the value to set
+     * @param string $offset The attribute name
+     * @param mixed  $value  The value to assign
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -100,11 +167,12 @@ class Route implements ArrayAccess
     }
 
     /**
-     * Whether an offset exists.
-     * This method is executed when using isset() or empty().
+     * Determine whether the given route attribute exists.
      *
-     * @param string $offset an offset to check for
-     * @return bool returns true on success or false on failure
+     * Called automatically by isset() or empty().
+     *
+     * @param string $offset Attribute name
+     * @return bool True if the attribute exists, false otherwise
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -112,10 +180,12 @@ class Route implements ArrayAccess
     }
 
     /**
-     * Unsets an offset.
+     * Determine whether the given route attribute exists.
      *
-     * @param string $offset unsets an offset
-     * @return void
+     * Called automatically by isset() or empty().
+     *
+     * @param string $offset Attribute name
+     * @return void True if the attribute exists, false otherwise
      */
     public function offsetUnset(mixed $offset): void
     {
@@ -123,10 +193,12 @@ class Route implements ArrayAccess
     }
 
     /**
-     * Returns the value at specified offset.
+     * Retrieve a route attribute by name.
      *
-     * @param string $offset the offset to retrieve
-     * @return mixed|null Can return all value types
+     * Returns null if the attribute does not exist.
+     *
+     * @param string $offset Attribute name
+     * @return mixed|null The stored value or null if absent
      */
     #[ReturnTypeWillChange]
     public function offsetGet(mixed $offset): mixed

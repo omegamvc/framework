@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Router Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -11,15 +21,39 @@ use Omega\Collection\CollectionImmutable;
 
 use function array_key_exists;
 
-class ResourceController
+/**
+ * Class Resource
+ *
+ * Handles the creation and management of RESTful resource routes
+ * for a given controller. Generates routes for standard resource actions
+ * such as index, create, store, show, edit, update, and destroy.
+ *
+ * Each generated route can include middleware, HTTP methods, and URI patterns.
+ *
+ * @category  Omega
+ * @package   Router
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+class Resource
 {
-    /** @var Collection<string, Route> */
+    /**
+     * Collection of resource routes.
+     *
+     * Keys are the resource action names and values are Route instances.
+     *
+     * @var Collection<string, Route>
+     */
     private Collection $resource;
 
     /**
-     * List resource method.
+     * Returns the list of standard RESTful resource methods.
      *
-     * @return array<string, string>
+     * @return array<string, string> An associative array where keys and values are
+     *                                the standard resource action names.
      */
     public static function method(): array
     {
@@ -35,9 +69,14 @@ class ResourceController
     }
 
     /**
-     * @param string                $url
-     * @param class-string          $className
-     * @param array<string, string> $map
+     * Resource constructor.
+     *
+     * Initializes a collection of resource routes and generates
+     * routes based on the provided URI, controller class, and action map.
+     *
+     * @param string                $url       Base URI for the resource.
+     * @param class-string          $className Controller class handling the resource.
+     * @param array<string, string> $map       Mapping of resource actions to method names.
      */
     public function __construct(string $url, string $className, array $map)
     {
@@ -46,10 +85,13 @@ class ResourceController
     }
 
     /**
-     * @param string                $uri
-     * @param class-string $className
-     * @param array<string, string> $map
-     * @return self
+     * Generates resource routes for the given URI, controller, and action map.
+     *
+     * @param string                $uri       Base URI for the resource.
+     * @param class-string          $className Controller class handling the resource.
+     * @param array<string, string> $map       Mapping of resource actions to method names.
+     *
+     * @return self Returns the current instance for method chaining.
      */
     public function generate(string $uri, string $className, array $map): self
     {
@@ -143,7 +185,9 @@ class ResourceController
     }
 
     /**
-     * @return CollectionImmutable<string, Route>
+     * Returns an immutable collection of the generated resource routes.
+     *
+     * @return CollectionImmutable<string, Route> The collection of resource routes.
      */
     public function get(): CollectionImmutable
     {
@@ -151,8 +195,11 @@ class ResourceController
     }
 
     /**
-     * @param string[] $resource
-     * @return self
+     * Filters the resource collection to include only the specified actions.
+     *
+     * @param string[] $resource List of resource action names to keep.
+     *
+     * @return self Returns the current instance for method chaining.
      */
     public function only(array $resource): self
     {
@@ -162,8 +209,11 @@ class ResourceController
     }
 
     /**
-     * @param string[] $resource
-     * @return self
+     * Filters the resource collection to exclude the specified actions.
+     *
+     * @param string[] $resource List of resource action names to remove.
+     *
+     * @return self Returns the current instance for method chaining.
      */
     public function except(array $resource): self
     {

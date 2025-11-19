@@ -60,7 +60,7 @@ class RouteCacheCommand extends AbstractCommand
     public function cache(Application $app, Router $router): int
     {
         if (false !== ($files = $this->option('files', false))) {
-            $router->Reset();
+            $router->reset();
             $files = is_string($files) ? [$files] : $files;
             foreach ($files as $file) {
                 if (false === file_exists(get_path('path.base') . $file)) {
@@ -74,41 +74,21 @@ class RouteCacheCommand extends AbstractCommand
         }
 
         $routes = [];
-        /**foreach ($router->getRoutesRaw() as $route) {
-            if (is_callable($route['function'])) {
-                warn("Route '{$route['name']}' cannot be cached because it contains a closure/callback function")
-                    ->out();
 
-                return 1;
-            }
-
-            $routes[] = [
-                'method'     => $route['method'],
-                'uri'        => $route['uri'],
-                'expression' => $route['expression'],
-                'function'   => $route['function'],
-                'middleware' => $route['middleware'],
-                'name'       => $route['name'],
-                'patterns'   => $route['patterns'] ?? [],
-            ];
-        }*/
         foreach ($router->getRoutesRaw() as $route) {
-            if (is_callable($route['function'])) {
-                $routeFunction = serialize(new UnsignedSerializableClosure($route['function']));
-            } else {
-                $routeFunction = $route['function'];
-            }
-
             $routes[] = [
                 'method'     => $route['method'],
                 'uri'        => $route['uri'],
                 'expression' => $route['expression'],
-                'function'   => $routeFunction,
+                'function'   => is_callable($route['function'])
+                    ? serialize(new UnsignedSerializableClosure($route['function']))
+                    : $route['function'],
                 'middleware' => $route['middleware'],
                 'name'       => $route['name'],
                 'patterns'   => $route['patterns'] ?? [],
             ];
         }
+
         $cached_route = '<?php return ' . var_export($routes, true) . ';' . PHP_EOL;
         if (file_put_contents($app->getApplicationCachePath() . 'route.php', $cached_route)) {
             success('Route file has successfully created.')->out();

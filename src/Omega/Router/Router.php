@@ -1,19 +1,25 @@
 <?php
 
+/**
+ * Part of Omega - Router Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Router;
 
 use Closure;
 use Exception;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
 use Omega\Router\Attribute\Middleware;
 use Omega\Router\Attribute\Name;
 use Omega\Router\Attribute\Prefix;
 use Omega\Router\Attribute\Where;
-use Omega\SerializableClosure\UnsignedSerializableClosure;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
@@ -28,27 +34,80 @@ use function call_user_func_array;
 use function preg_replace_callback;
 use function str_replace;
 
+/**
+ * Core routing manager responsible for registering routes, grouping them,
+ * applying middleware, resolving attributes, and dispatching incoming HTTP requests.
+ *
+ * This class maintains a static registry of all defined routes and provides helper
+ * methods for route creation (e.g., GET, POST, resource), grouping (prefix, middleware, name),
+ * controller-based routing, and attribute-based routing via reflection.
+ *
+ * Routes are dispatched using a RouteDispatcher and may trigger custom handlers
+ * when no matching path or method is found.
+ *
+ * @category  Omega
+ * @package   Router
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class Router
 {
-    /** @var Route[] */
-    private static array $routes = [];
+    /**
+     * List of all registered routes.
+     *
+     * @var Route[]
+     */
+    protected static array $routes = [];
 
-    /** @var ?callable(string): mixed */
-    private static $pathNotFound;
+    /**
+     * Callback triggered when no route matches the requested path.
+     *
+     * Signature: function(string $path): mixed
+     *
+     * @var callable(string): mixed|null
+     */
+    protected static $pathNotFound;
 
-    /** @var ?callable(string, string): mixed */
-    private static $methodNotAllowed;
+    /**
+     * Callback triggered when a route exists but does not support
+     * the requested HTTP method.
+     *
+     * Signature: function(string $path, string $method): mixed
+     *
+     * @var callable(string, string): mixed|null
+     */
+    protected static $methodNotAllowed;
 
-    /** @var array<string, string|string[]> */
+    /**
+     * Current route grouping context.
+     *
+     * Supported keys:
+     * - 'prefix'     string
+     * - 'middleware' string[]
+     * - 'as'         string (optional)
+     * - 'controller' string (optional)
+     *
+     * @var array<string, string|string[]>
+     */
     public static array $group = [
         'prefix'     => '',
         'middleware' => [],
     ];
-    /** @var Route|null */
+
+    /**
+     * The route that matched the current request, if any.
+     *
+     * @var Route|null
+     */
     private static ?Route $current = null;
 
     /**
-     * Alias router param to readable regex url.
+     * Alias patterns mapped to their respective regex expressions.
+     * Used to convert user-friendly placeholders such as (:id) or (:slug)
+     * into valid regex patterns for route matching.
      *
      * @var array<string, string>
      */
@@ -61,39 +120,15 @@ class Router
         '(:all)'  => '(.*)',
     ];
 
-    private static bool $cacheLoaded = false;
-
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
-     */
-    public static function loadCache(): void
-    {
-        $cacheFile = get_path('boot.cache') . 'route.php';
-
-        if (!file_exists($cacheFile)) {
-            return;
-        }
-
-        /** @var array<int, array<string, mixed>> $routes */
-        $routes = require $cacheFile;
-
-        foreach ($routes as $route) {
-            if (is_string($route['function']) && str_starts_with($route['function'], 'O:')) {
-                $route['function'] = unserialize($route['function'])->getClosure();
-            }
-
-            self::addRoutes([$route]);
-        }
-    }
-
-    /**
-     * Replace alias to regex.
+     * Converts URL aliases into a full regular expression pattern.
      *
-     * @param string                $url Alias pattern url
-     * @param array<string, string> $patterns
-     * @return string Pattern regex
+     * Replaces user-defined aliases and expands segments of the form
+     * `(name:alias)` into named regex groups.
+     *
+     * @param string                $url       The URL pattern containing aliases.
+     * @param array<string, string> $patterns  Mapping of alias → regex.
+     * @return string                          The resulting regular expression.
      */
     public static function mapPatterns(string $url, array $patterns): string
     {
@@ -107,16 +142,23 @@ class Router
             static function (array $matches) use ($patterns): string {
                 $pattern = $patterns["(:" . $matches[2] . ")"] ?? '[^/]+';
 
-                return "(?P<{" . $matches[1] . ">" . $pattern . ")";
+                //return "(?P<{" . $matches[1] . ">" . $pattern . ")";
+                return "(?P<" . $matches[1] . ">" . $pattern . ")";
             },
             $expression
         );
     }
 
     /**
-     * Adding new router using array of router.
+     * Adds a new route to the internal collection if it contains
+     * the required fields: expression, function, and method.
      *
-     * @param Route[] $route Router array format (expression, function, method)
+     * @param array{
+     *     expression:string,
+     *     function:callable,
+     *     method:string
+     * } $route  Route definition.
+     * @return void
      */
     public static function addRoutes(array $route): void
     {
@@ -130,7 +172,10 @@ class Router
     }
 
     /**
-     * Remove router using router name.
+     * Removes a route from the collection by its name.
+     *
+     * @param string $routeName  The name of the route to remove.
+     * @return void
      */
     public static function removeRoutes(string $routeName): void
     {
@@ -142,10 +187,11 @@ class Router
     }
 
     /**
-     * Change exists route using router name.
+     * Replaces an existing route with a new instance, identified by name.
      *
-     * @param string $routeName
-     * @param Route  $newRoute
+     * @param string $routeName  The name of the route to replace.
+     * @param Route  $newRoute   The new Route instance.
+     * @return void
      */
     public static function changeRoutes(string $routeName, Route $newRoute): void
     {
@@ -158,9 +204,12 @@ class Router
     }
 
     /**
-     * Merge router array from other router array.
+     * Merges multiple sets of routes into the current collection.
      *
-     * @param Route[][] $arrayRoutes
+     * Each element of the array is passed to addRoutes().
+     *
+     * @param array<int, array> $arrayRoutes  An array of route definitions.
+     * @return void
      */
     public static function mergeRoutes(array $arrayRoutes): void
     {
@@ -170,9 +219,10 @@ class Router
     }
 
     /**
-     * Get routes array.
+     * Returns the list of registered routes in their normalized array form,
+     * as provided by Route::route().
      *
-     * @return Route[] Routes array
+     * @return array<int, array<string, mixed>>  The list of routes.
      */
     public static function getRoutes(): array
     {
@@ -185,7 +235,9 @@ class Router
     }
 
     /**
-     * @return Route[]
+     * Returns the internal list of Route objects as stored.
+     *
+     * @return Route[]  Raw Route instances.
      */
     public static function getRoutesRaw(): array
     {
@@ -193,9 +245,9 @@ class Router
     }
 
     /**
-     * Get current route.
+     * Returns the currently matched route, if any.
      *
-     * @return Route|null
+     * @return Route|null  The active route or null if none is set.
      */
     public static function getCurrent(): ?Route
     {
@@ -203,9 +255,12 @@ class Router
     }
 
     /**
-     * Reset all property to be null.
+     * Resets all router state, including the route list, fallback handlers,
+     * and active grouping configuration.
+     *
+     * @return void
      */
-    public static function Reset(): void
+    public static function reset(): void
     {
         self::$routes           = [];
         self::$pathNotFound     = null;
@@ -217,9 +272,11 @@ class Router
     }
 
     /**
-     * Grouping routes using same prefix.
+     * Creates a route group that applies a shared URL prefix to all routes
+     * defined within its scope.
      *
-     * @param string $prefix Prefix of router expression
+     * @param string $prefix  The URL prefix to apply.
+     * @return RouteGroup     A RouteGroup instance managing setup/cleanup.
      */
     public static function prefix(string $prefix): RouteGroup
     {
@@ -238,9 +295,11 @@ class Router
     }
 
     /**
-     * Run middleware before run group route.
+     * Defines a middleware group that will be applied to all routes created
+     * within the returned RouteGroup scope.
      *
-     * @param array<int, class-string> $middlewares Middleware
+     * @param array<int, class-string> $middlewares  List of middleware class names.
+     * @return RouteGroup                               A RouteGroup handling setup and reset behavior.
      */
     public static function middleware(array $middlewares): RouteGroup
     {
@@ -258,6 +317,13 @@ class Router
         );
     }
 
+    /**
+     * Defines a name prefix to apply to all routes created inside the returned
+     * RouteGroup scope.
+     *
+     * @param string $name  The name prefix to apply.
+     * @return RouteGroup   A RouteGroup handling setup and reset behavior.
+     */
     public static function name(string $name): RouteGroup
     {
         return new RouteGroup(
@@ -272,6 +338,13 @@ class Router
         );
     }
 
+    /**
+     * Defines a default controller class for routes created inside the returned
+     * RouteGroup scope. Route callbacks can be specified as method names.
+     *
+     * @param class-string $className  The controller class name.
+     * @return RouteGroup              A RouteGroup handling setup and reset behavior.
+     */
     public static function controller(string $className): RouteGroup
     {
         // backup current route
@@ -290,8 +363,15 @@ class Router
     }
 
     /**
-     * @param array<string, string|string> $setupGroup
-     * @param Closure                     $group
+     * Creates a grouped routing context with custom configuration such as
+     * middleware, prefixes, names, or controllers.
+     *
+     * The provided Closure is executed inside this temporary context and the
+     * previous configuration is restored afterward.
+     *
+     * @param array<string, string|string> $setupGroup  Group configuration options.
+     * @param Closure                      $group       The callback defining grouped routes.
+     * @return void
      */
     public static function group(array $setupGroup, Closure $group): void
     {
@@ -317,15 +397,24 @@ class Router
         $routeGroup->group($group);
     }
 
+    /**
+     * Checks whether a route with the given name exists.
+     *
+     * @param string $routeName  The name of the route to check.
+     * @return bool              True if a route with that name exists, false otherwise.
+     */
     public static function has(string $routeName): bool
     {
         return array_any(self::$routes, fn($route) => $routeName === $route['name']);
     }
 
     /**
-     * Redirect to another route.
+     * Returns the route object associated with a given name.
+     * Useful for redirecting to named routes.
      *
-     * @throws Exception
+     * @param string $to  The name of the route to redirect to.
+     * @return Route      The matched Route instance.
+     * @throws Exception  If the route name does not exist.
      */
     public static function redirect(string $to): Route
     {
@@ -339,16 +428,31 @@ class Router
     }
 
     /**
-     * @param string                  $uri
-     * @param class-string            $className
-     * @param array<string, string[]> $setup
-     * @return ResourceControllerCollection
+     * Registers a REST-style resource controller.
+     *
+     * Automatically maps CRUD endpoints based on the given URI and controller class.
+     * Allows additional configuration via the $setup array (e.g., only, except, missing hooks).
+     *
+     * @param string   $uri       Base URI for the resource.
+     * @param class-string $className Controller class handling the resource.
+     * @param array{
+     *     map?: array<string, string>,
+     *     only?: string[],
+     *     except?: string[],
+     *     missing?: \Closure
+     * } $setup  Optional configuration:
+     *           - map: custom method → action map
+     *           - only: restrict to selected actions
+     *           - except: exclude selected actions
+     *           - missing: callback for missing resources
+     *
+     * @return ResourceCollection A collection wrapper for further configuration.
      */
-    public static function resource(string $uri, string $className, array $setup = []): ResourceControllerCollection
+    public static function resource(string $uri, string $className, array $setup = []): ResourceCollection
     {
-        $setup['map'] ??= ResourceController::method();
+        $setup['map'] ??= Resource::method();
 
-        $resource = new ResourceController($uri, $className, $setup['map']);
+        $resource = new Resource($uri, $className, $setup['map']);
 
         if (isset($setup['only'])) {
             $resource->only($setup['only']);
@@ -363,7 +467,7 @@ class Router
             return true;
         });
 
-        $router = new ResourceControllerCollection($className);
+        $router = new ResourceCollection($className);
 
         if (array_key_exists('missing', $setup)) {
             $router->missing($setup['missing']);
@@ -373,8 +477,11 @@ class Router
     }
 
     /**
-     * @param class-string|class-string[] $className
-     * @throws ReflectionException
+     * Registers routes defined using PHP 8 attributes in a class or a set of classes.
+     *
+     * @param class-string|class-string[] $className  A class name or an array of class names to scan.
+     * @return void
+     * @throws ReflectionException  If the class cannot be reflected.
      */
     public static function register(string|array $className): void
     {
@@ -393,10 +500,13 @@ class Router
     }
 
     /**
-     * @param ReflectionAttribute<object>[] $attributes
-     * @param ReflectionMethod[]            $attributesMethods
+     * Resolves routing attributes on a class and its methods, generating route
+     * definitions based on annotations such as Prefix, Name, Middleware, and Route.
      *
-     * @return array<int, array<string, string|array<string, string>>>
+     * @param string                        $className         The class being processed.
+     * @param ReflectionAttribute<object>[] $attributes        Class-level attributes.
+     * @param ReflectionMethod[]            $attributesMethods Method-level attributes.
+     * @return array<int, array<string, string|array<string, string>>>  Parsed route definitions.
      */
     private static function resolveRouteAttribute(
         string $className,
@@ -476,12 +586,15 @@ class Router
     }
 
     /**
-     * Function used to add a new route.
+     * Registers a new route using the given HTTP method(s), URI, and callback.
      *
-     * @param string|string[] $method   Methods allow
-     * @param string                   $uri      Route string or expression
-     * @param callable|string|string[] $callback Function to call if route with allowed method is found
-     * @return Route
+     * Supports grouped context (prefix, middleware, controller).
+     * Pattern expressions are automatically expanded.
+     *
+     * @param string|string[]                 $method    Allowed HTTP method(s).
+     * @param string                          $uri       Route URI or expression.
+     * @param callable|string|string[]|array  $callback  A callable, controller method, or handler definition.
+     * @return Route                                      The created Route instance.
      */
     public static function match(array|string $method, string $uri, array|callable|string $callback): Route
     {
@@ -501,10 +614,10 @@ class Router
     }
 
     /**
-     * Function used to add a new route [any method].
+     * Registers a new route that matches any HTTP method.
      *
-     * @param string   $expression Route string or expression
-     * @param callable $function   Function to call if route with allowed method is found
+     * @param string   $expression Route pattern or expression.
+     * @param callable $function   Callback executed when the route is matched.
      * @return Route
      */
     public static function any(string $expression, mixed $function): Route
@@ -513,30 +626,22 @@ class Router
     }
 
     /**
-     * Function used to add a new route [method: get].
+     * Registers a new route for the GET method.
      *
-     * @param string   $expression Route string or expression
-     * @param callable $function   Function to call if route with allowed method is found
+     * @param string   $expression Route pattern or expression.
+     * @param callable $function   Callback executed when the route is matched.
      * @return Route
      */
-    /**public static function get(string $expression, mixed $function): Route
-    {
-        return self::match(['get', 'head'], $expression, $function);
-    }*/
     public static function get(string $expression, mixed $function): Route
     {
-        if (!self::$cacheLoaded) {
-            self::loadCache();
-            self::$cacheLoaded = true;
-        }
-
         return self::match(['get', 'head'], $expression, $function);
     }
+
     /**
-     * Function used to add a new route [method: post].
+     * Registers a new route for the POST method.
      *
-     * @param string   $expression Route string or expression
-     * @param callable $function   Function to call if route with allowed method is found
+     * @param string   $expression Route pattern or expression.
+     * @param callable $function   Callback executed when the route is matched.
      * @return Route
      */
     public static function post(string $expression, mixed $function): Route
@@ -545,10 +650,10 @@ class Router
     }
 
     /**
-     * Function used to add a new route [method: put].
+     * Registers a new route for the PUT method.
      *
-     * @param string   $expression Route string or expression
-     * @param callable $function   Function to call if route with allowed method is found
+     * @param string   $expression Route pattern or expression.
+     * @param callable $function   Callback executed when the route is matched.
      * @return Route
      */
     public static function put(string $expression, mixed $function): Route
@@ -557,10 +662,10 @@ class Router
     }
 
     /**
-     * Function used to add a new route [method: patch].
+     * Registers a new route for the PATCH method.
      *
-     * @param string   $expression Route string or expression
-     * @param callable $function   Function to call if route with allowed method is found
+     * @param string   $expression Route pattern or expression.
+     * @param callable $function   Callback executed when the route is matched.
      * @return Route
      */
     public static function patch(string $expression, mixed $function): Route
@@ -569,10 +674,10 @@ class Router
     }
 
     /**
-     * Function used to add a new route [method: delete].
+     * Registers a new route for the DELETE method.
      *
-     * @param string   $expression Route string or expression
-     * @param callable $function   Function to call if route with allowed method is found
+     * @param string   $expression Route pattern or expression.
+     * @param callable $function   Callback executed when the route is matched.
      * @return Route
      */
     public static function delete(string $expression, mixed $function): Route
@@ -581,10 +686,10 @@ class Router
     }
 
     /**
-     * Function used to add a new route [method: options].
+     * Registers a new route for the OPTIONS method.
      *
-     * @param string   $expression Route string or expression
-     * @param callable $function   Function to call if route with allowed method is found
+     * @param string   $expression Route pattern or expression.
+     * @param callable $function   Callback executed when the route is matched.
      * @return Route
      */
     public static function options(string $expression, mixed $function): Route
@@ -593,9 +698,10 @@ class Router
     }
 
     /**
-     * Result when route expression not register/found.
+     * Sets the callback executed when no matching route is found.
      *
-     * @param callable $function Function to be Call
+     * @param callable $function Callback to execute.
+     * @return void
      */
     public static function pathNotFound(mixed $function): void
     {
@@ -603,9 +709,10 @@ class Router
     }
 
     /**
-     * Result when route method not match/allowed.
+     * Sets the callback executed when a route is found but the HTTP method is not allowed.
      *
-     * @param callable $function Function to be Call
+     * @param callable $function Callback to execute.
+     * @return void
      */
     public static function methodNotAllowed(mixed $function): void
     {
@@ -613,12 +720,13 @@ class Router
     }
 
     /**
-     * Run/execute routes.
+     * Executes the routing process.
      *
-     * @param string $basePath             Base Path
-     * @param bool   $caseMatters          Case-sensitive matters
-     * @param bool   $trailingSlashMatters Trailing slash matters
-     * @param bool   $multiMatch           Return multi route
+     * @param string $basePath             Base path to apply to all routes.
+     * @param bool   $caseMatters          Whether matching is case-sensitive.
+     * @param bool   $trailingSlashMatters Whether trailing slashes affect matching.
+     * @param bool   $multiMatch           Whether multiple routes may be returned.
+     * @return mixed                       The result of the matched route callback.
      */
     public static function run(
         string $basePath = '',
@@ -641,15 +749,15 @@ class Router
 
         self::$current = $dispatcher->current();
 
-        // run middleware
+        // Execute middleware
         $middlewareUsed = [];
         foreach ($dispatch['middleware'] as $middleware) {
             if (in_array($middleware, $middlewareUsed)) {
                 continue;
             }
 
-            $middlewareUsed[]  = $middleware;
-            $middlewareClass   = new $middleware();
+            $middlewareUsed[] = $middleware;
+            $middlewareClass  = new $middleware();
             $middlewareClass->handle();
         }
 

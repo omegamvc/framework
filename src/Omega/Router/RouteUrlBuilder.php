@@ -1,24 +1,67 @@
 <?php
 
+/**
+ * Part of Omega - Router Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Router;
 
 use InvalidArgumentException;
 
+use function array_is_list;
+use function array_merge;
+use function is_string;
+use function preg_match;
+use function preg_match_all;
+use function preg_quote;
+use function preg_replace;
+use function sprintf;
+use function str_contains;
+use function trim;
+
+/**
+ * Class RouteUrlBuilder
+ *
+ * Builds URLs from routes and parameters, validating them against
+ * defined patterns. Supports both named and positional parameters.
+ *
+ * @category  Omega
+ * @package   Router
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class RouteUrlBuilder
 {
-    /** @var array<string, string> */
-    private array $patterns;
-
-    /** @param array<string, string> $patterns */
-    public function __construct(array $patterns = [])
+    /**
+     * RouteUrlBuilder constructor.
+     *
+     * @param array<string, string> $patterns Optional custom patterns for placeholders.
+     * @return void
+     */
+    public function __construct(private array $patterns = [])
     {
-        $this->patterns = $patterns;
     }
 
     /**
-     * @param array<string|int, string|int|bool> $parameters
+     * Build a URL from a Route and parameters.
+     *
+     * @param Route                              $route      Route object containing URI and patterns.
+     * @param array<string|int, string|int|bool> $parameters Associative or indexed parameters to fill
+     *                                                       in the route placeholders.
+     * @return string Final URL with parameters replaced.
      */
     public function buildUrl(Route $route, array $parameters): string
     {
@@ -34,7 +77,10 @@ class RouteUrlBuilder
     }
 
     /**
-     * @param array<string, string> $patterns
+     * Add or merge additional patterns for URL building.
+     *
+     * @param array<string, string> $patterns Associative array of pattern => regex.
+     * @return void
      */
     public function addPatterns(array $patterns): void
     {
@@ -42,7 +88,9 @@ class RouteUrlBuilder
     }
 
     /**
-     * @return array<string, string>
+     * Get the currently registered patterns.
+     *
+     * @return array<string, string> Array of pattern => regex.
      */
     public function getPatterns(): array
     {
@@ -50,8 +98,13 @@ class RouteUrlBuilder
     }
 
     /**
-     * @param array<string|int, string|int|bool> $parameters
-     * @param array<string, string>              $patternMap
+     * Process named parameters in the URL.
+     *
+     * @param string                           $url           URL containing placeholders.
+     * @param array<string|int, string|int|bool> $parameters     Parameters to replace in the URL.
+     * @param array<string, string>            $patternMap    Map of patterns to regex.
+     * @param bool                             $isAssociative True if parameters are associative, false if indexed.
+     * @return string URL with named parameters replaced.
      */
     private function processNamedParameters(
         string $url,
@@ -85,8 +138,13 @@ class RouteUrlBuilder
     }
 
     /**
-     * @param array<string|int, string|int|bool> $parameters
-     * @param array<string, string>              $patternMap
+     * Process generic pattern placeholders in the URL.
+     *
+     * @param string                             $url           URL containing placeholders.
+     * @param array<string|int, string|int|bool> $parameters    Parameters to replace.
+     * @param array<string, string>              $patternMap    Map of pattern => regex.
+     * @param bool                               $isAssociative True if parameters are associative.
+     * @return string URL with patterns replaced.
      */
     private function processPatternPlaceholders(
         string $url,
@@ -97,7 +155,7 @@ class RouteUrlBuilder
         $paramIndex = $isAssociative ? 0 : $this->countProcessedParameters($url);
 
         foreach ($patternMap as $pattern => $regex) {
-            while (strpos($url, $pattern) !== false) {
+            while (str_contains($url, $pattern)) {
                 $value = $this->getNextParameterValue($parameters, $pattern, $paramIndex, $isAssociative);
 
                 $this->validateParameterAgainstPattern($value, $value, $pattern, $regex);
@@ -111,8 +169,11 @@ class RouteUrlBuilder
     }
 
     /**
-     * @param array<string, string> $patternMap
+     * Validate that a given pattern key exists in the pattern map.
      *
+     * @param string                 $patternKey Pattern key to check.
+     * @param array<string, string>  $patternMap Map of patterns.
+     * @return void
      * @throws InvalidArgumentException
      */
     private function validatePatternExists(string $patternKey, array $patternMap): void
@@ -123,8 +184,13 @@ class RouteUrlBuilder
     }
 
     /**
-     * @param array<string|int, string|int|bool> $parameters
+     * Extract a parameter value from the parameters array.
      *
+     * @param array<string|int, string|int|bool> $parameters Array of parameters.
+     * @param string                             $paramName  Name of the parameter to extract.
+     * @param int                                $paramIndex Index to use if parameters are numeric.
+     * @param bool                               $isAssociative True if parameters are associative.
+     * @return string|int|bool Value of the parameter.
      * @throws InvalidArgumentException
      */
     private function extractParameterValue(
@@ -151,8 +217,13 @@ class RouteUrlBuilder
     }
 
     /**
-     * @param array<string|int, string|int|bool> $parameters
+     * Get the next parameter value for pattern replacement.
      *
+     * @param array<string|int, string|int|bool> $parameters Array of parameters.
+     * @param string                             $pattern     Pattern placeholder.
+     * @param int                                $paramIndex  Index to use for numeric parameters.
+     * @param bool                               $isAssociative True if parameters are associative.
+     * @return string|int|bool Parameter value to replace pattern.
      * @throws InvalidArgumentException
      */
     private function getNextParameterValue(
@@ -186,6 +257,13 @@ class RouteUrlBuilder
     }
 
     /**
+     * Validate that a parameter value matches its regex pattern.
+     *
+     * @param mixed           $value      Parameter value.
+     * @param string|int      $identifier Parameter name or index for error messages.
+     * @param string          $pattern    Pattern placeholder.
+     * @param string          $regex      Regex to validate against.
+     * @return void
      * @throws InvalidArgumentException
      */
     private function validateParameterAgainstPattern(
@@ -205,14 +283,23 @@ class RouteUrlBuilder
         }
     }
 
+    /**
+     * Count how many parameters have been processed in a URL.
+     *
+     * @param string $originalUrl Original URL with placeholders.
+     * @return int Number of processed parameters.
+     */
     private function countProcessedParameters(string $originalUrl): int
     {
         return preg_match_all('/\([^:)]+:[^)]+\)/', $originalUrl);
     }
 
     /**
-     * @param array<string, string> $patternMap
+     * Ensure all named parameters and patterns have been processed in the URL.
      *
+     * @param string                $url        Final URL.
+     * @param array<string, string> $patternMap Pattern map to validate.
+     * @return void
      * @throws InvalidArgumentException
      */
     private function validateAllParametersProcessed(string $url, array $patternMap): void

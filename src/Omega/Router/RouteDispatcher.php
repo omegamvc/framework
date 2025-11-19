@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * Part of Omega - Router Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Router;
@@ -16,40 +28,85 @@ use function strtolower;
 
 use const ARRAY_FILTER_USE_KEY;
 
+/**
+ * RouteDispatcher is responsible for handling the matching of incoming HTTP requests
+ * against a set of defined routes. It evaluates the request URI and HTTP method,
+ * applies base path, case sensitivity, and trailing slash rules, and triggers the
+ * appropriate callbacks or middleware.
+ *
+ * This class supports:
+ * - Dispatching requests based on method and path.
+ * - Route parameter extraction (including named parameters).
+ * - Case-sensitive and trailing slash-aware matching.
+ * - Multi-route matching.
+ * - Middleware execution before the final callback.
+ * - Handling of unmatched routes or disallowed HTTP methods.
+ *
+ * Example usage:
+ *
+ * ```php
+ * $dispatcher = RouteDispatcher::dispatchFrom('/users/123', 'GET', $routes);
+ * $dispatcher
+ *     ->basePath('/api')
+ *     ->caseMatters(true)
+ *     ->trailingSlashMatters(false)
+ *     ->multiMatch(false)
+ *     ->run(
+ *         fn($routeCallable, $params) => call_user_func_array($routeCallable, $params),
+ *         fn($path) => echo "No route found for $path",
+ *         fn($path, $method) => echo "Method $method not allowed for $path"
+ *     );
+ * ```
+ *
+ * @category  Omega
+ * @package   Router
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 final class RouteDispatcher
 {
-    /** @var Request */
+    /** @var Request Incoming HTTP request. */
     private Request $request;
 
-    /** @var Route[] */
+    /** @var Route[] List of routes to match against. */
     private array $routes;
 
-    /** @var callable */
+    /** @var callable Callback executed when a matching route is found. */
     private $found;
 
-    /** @var ?callable(string): mixed */
+    /** @var ?callable(string): mixed Callback executed when no matching route is found. */
     private $notFound;
 
-    /** @var ?callable(string, string): mixed */
+    /** @var ?callable(string, string): mixed Callback executed when the HTTP method is not allowed. */
     private $methodNotAllowed;
 
+    /** @var string Base path to be prepended to route matching. */
     private string $basepath = '';
 
+    /** @var bool Whether the route matching is case-sensitive. */
     private bool $caseMatters = false;
 
+    /** @var bool Whether trailing slash is significant. */
     private bool $trailingSlashMatters = false;
 
+    /** @var bool Whether to return multiple matches or only the first. */
     private bool $multiMatch = false;
 
-    /** @var array<string, mixed> */
+    /** @var array<string, mixed> Triggered action with callable and parameters after dispatch. */
     private array $trigger;
 
-    /** @var Route */
-    private Route $current;
+    /** @var Route|null The current matched route. */
+    private ?Route $current = null;
 
     /**
-     * @param Request $request Incoming request
-     * @param Route[] $routes  Array of route
+     * RouteDispatcher constructor.
+     *
+     * @param Request $request Incoming request.
+     * @param Route[] $routes  Array of Route objects.
+     * @return void
      */
     public function __construct(Request $request, array $routes)
     {
@@ -58,11 +115,12 @@ final class RouteDispatcher
     }
 
     /**
-     * Create new construct using uri and method.
+     * Create a new dispatcher instance from a URI and HTTP method.
      *
-     * @param string  $uri    Ulr
-     * @param string  $method Method
-     * @param Route[] $routes Array of route
+     * @param string  $uri    The request URI.
+     * @param string  $method HTTP method.
+     * @param Route[] $routes Array of Route objects.
+     * @return self
      */
     public static function dispatchFrom(string $uri, string $method, array $routes): self
     {
@@ -72,9 +130,9 @@ final class RouteDispatcher
     }
 
     /**
-     * Setup Base Path.
+     * Set the base path for route matching.
      *
-     * @param string $basePath Base Path
+     * @param string $basePath Base path to prepend to routes.
      * @return self
      */
     public function basePath(string $basePath): self
@@ -85,9 +143,9 @@ final class RouteDispatcher
     }
 
     /**
-     * Case-sensitive matters.
+     * Enable or disable case-sensitive route matching.
      *
-     * @param bool $case_matters Case-sensitive matters
+     * @param bool $case_matters Whether case matters.
      * @return self
      */
     public function caseMatters(bool $case_matters): self
@@ -98,9 +156,9 @@ final class RouteDispatcher
     }
 
     /**
-     * Trailing slash matters.
+     * Enable or disable strict trailing slash matching.
      *
-     * @param bool $trailingSlashMatters Trailing slash matters
+     * @param bool $trailingSlashMatters Whether trailing slash matters.
      * @return self
      */
     public function trailingSlashMatters(bool $trailingSlashMatters): self
@@ -111,9 +169,9 @@ final class RouteDispatcher
     }
 
     /**
-     * Return multi route.
+     * Enable or disable multi-route matching.
      *
-     * @param bool $multiMatch Return multi route
+     * @param bool $multiMatch Return multiple matches if true.
      * @return self
      */
     public function multiMatch(bool $multiMatch): self
@@ -124,22 +182,22 @@ final class RouteDispatcher
     }
 
     /**
-     * Get current router after dispatch.
+     * Get the currently matched route after dispatch.
      *
-     * @return Route
+     * @return Route|null Return the current matched route after dispatch.
      */
-    public function current(): Route
+    public function current(): ?Route
     {
         return $this->current;
     }
 
     /**
-     * Setup action and dispatch route.
+     * Run the dispatcher and trigger the appropriate callbacks.
      *
-     * @param callable $found
-     * @param callable $notFound
-     * @param callable $methodNotAllowed
-     * @return array<string, mixed> trigger action ['callable' => callable, 'param' => param]
+     * @param callable $found             Callback for a successful route match.
+     * @param callable $notFound          Callback if no route matches.
+     * @param callable $methodNotAllowed  Callback if the route exists but method is invalid.
+     * @return array<string, mixed> Triggered action with 'callable' and 'params'.
      */
     public function run(callable $found, callable $notFound, callable $methodNotAllowed): array
     {
@@ -153,11 +211,12 @@ final class RouteDispatcher
     }
 
     /**
-     * Catch action from callable (found, not_found, method_not_allowed).
+     * Store the triggered callback with its parameters and middleware.
      *
-     * @param callable                   $callable   Callback
-     * @param array<int, mixed|string[]> $params     Callback params
-     * @param class-string[]             $middleware Array of middleware class-name
+     * @param callable                   $callable   The callback to execute.
+     * @param array<int, mixed|string[]> $params     Parameters for the callback.
+     * @param class-string[]             $middleware Middleware classes to apply.
+     * @return void
      */
     private function trigger(callable $callable, array $params, array $middleware = []): void
     {
@@ -169,12 +228,13 @@ final class RouteDispatcher
     }
 
     /**
-     * Dispatch routes and setup trigger.
+     * Dispatch routes and set up the trigger action.
      *
-     * @param string $basePath             Base Path
-     * @param bool   $caseMatters          Case-sensitive matters
-     * @param bool   $trailingSlashMatters Trailing slash matters
-     * @param bool   $multiMatch           Return multi route
+     * @param string $basePath             Base path prefix.
+     * @param bool   $caseMatters          Case-sensitive matching.
+     * @param bool   $trailingSlashMatters Whether trailing slash is significant.
+     * @param bool   $multiMatch           Allow multiple matches.
+     * @return void
      */
     private function dispatch(
         string $basePath = '',
@@ -242,12 +302,12 @@ final class RouteDispatcher
     }
 
     /**
-     * Resolve path to sanitize trailing slash.
+     * Resolve the request path taking into account base path and trailing slash.
      *
-     * @param false|array<string, int|string> $parsedUrl
-     * @param string                          $basePath
-     * @param bool                            $trailingSlashMatters
-     * @return string
+     * @param false|array<string, int|string> $parsedUrl Parsed URL from parse_url().
+     * @param string                          $basePath  Base path prefix.
+     * @param bool                            $trailingSlashMatters Whether trailing slash matters.
+     * @return string Normalized path string.
      */
     private function resolvePath(array|false $parsedUrl, string $basePath, bool $trailingSlashMatters): string
     {
@@ -255,16 +315,18 @@ final class RouteDispatcher
 
         return match (true) {
             null === $parsedPath           => '/',
-            $trailingSlashMatters         => $parsedPath,
+            $trailingSlashMatters          => $parsedPath,
             "{$basePath}/" !== $parsedPath => rtrim($parsedPath, '/'),
-            default                         => $parsedPath,
+            default                        => $parsedPath,
         };
     }
 
     /**
-     * Parse expression with costume pattern.
+     * Replace placeholders in route expression with actual patterns.
      *
-     * @param array<string, string> $pattern
+     * @param string                 $expression Route URI expression.
+     * @param array<string, string>  $pattern    Pattern replacements.
+     * @return string
      */
     private function makeRoutePatterns(string $expression, array $pattern): string
     {
@@ -276,10 +338,10 @@ final class RouteDispatcher
     }
 
     /**
-     * Resolve matches from preg_match path.
+     * Resolve named parameters from preg_match matches.
      *
-     * @param string[] $matches
-     * @return array<string|int, string>
+     * @param string[] $matches Matches from preg_match.
+     * @return array<string|int, string> Filtered array of named parameters.
      */
     private function resolveNamedParameters(array $matches): array
     {
