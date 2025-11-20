@@ -367,9 +367,17 @@ class NamedParameterRouteTest extends TestCase
             },
         ];
         $routeInstance = new Route($route);
-        $this->assertEquals('test.route', $routeInstance->route()['name'], 'Route name should not be overwritten');
+        $this->assertEquals(
+            'test.route',
+            $routeInstance->route()['name'],
+            'Route name should not be overwritten'
+        );
         $routeInstance->name('new.route');
-        $this->assertEquals('new.route', $routeInstance->route()['name'], 'Route name should remain unchanged after setting a new name');
+        $this->assertEquals(
+            'new.route',
+            $routeInstance->route()['name'],
+            'Route name should remain unchanged after setting a new name'
+        );
     }
 
     /**
@@ -391,9 +399,17 @@ class NamedParameterRouteTest extends TestCase
         ];
 
         $routeInstance = new Route($route);
-        $this->assertEquals('prefix.test.route', $routeInstance['name'], 'Route name should not be overwritten');
+        $this->assertEquals(
+            'prefix.test.route',
+            $routeInstance['name'],
+            'Route name should not be overwritten'
+        );
         $routeInstance->name('new.route');
-        $this->assertEquals('prefix.new.route', $routeInstance->route()['name'], 'Route name should remain unchanged after setting a new name');
+        $this->assertEquals(
+            'prefix.new.route',
+            $routeInstance->route()['name'],
+            'Route name should remain unchanged after setting a new name'
+        );
 
         Router::$group = $backup;
     }

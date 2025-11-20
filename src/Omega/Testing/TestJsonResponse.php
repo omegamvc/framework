@@ -230,4 +230,3 @@ class TestJsonResponse extends TestResponse implements ArrayAccess
         Assert::assertNotEmpty($this->getData());
     }
 }
-

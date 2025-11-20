@@ -137,7 +137,8 @@ final class UrlBuilderTest extends TestCase
                 [
                     'identitas' => 456,
                     'tanggal'   => 'today',
-                ])
+                ]
+            )
         );
     }
 
@@ -157,7 +158,8 @@ final class UrlBuilderTest extends TestCase
                 [
                     0           => 123,
                     'identitas' => 456,
-                ])
+                ]
+            )
         );
     }
 
@@ -178,7 +180,9 @@ final class UrlBuilderTest extends TestCase
                 [
                     'section' => 'users',
                     'userId'  => 999,
-                ], '/backend')
+                ],
+                '/backend'
+            )
         );
     }
 
@@ -200,7 +204,8 @@ final class UrlBuilderTest extends TestCase
                     'search' => 'query_123',
                     'num'    => 5,
                     'filter' => 'active-users',
-                ])
+                ]
+            )
         );
     }
 
@@ -259,7 +264,8 @@ final class UrlBuilderTest extends TestCase
                     'empId'  => 456,
                     1        => 'john-doe',
                     'avatar' => 'large',
-                ])
+                ]
+            )
         );
     }
 

@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * Part of Omega - Template Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Template;
@@ -17,88 +29,174 @@ use function is_callable;
 use function str_repeat;
 use function str_replace;
 
+/**
+ * Class responsible for generating PHP class, abstract class, or trait code.
+ *
+ * This class provides a fluent API to configure:
+ * - class/abstract/trait declaration
+ * - final modifier
+ * - namespace and use statements
+ * - extends and implements
+ * - traits, constants, properties, methods, and raw body
+ * - pre/post string replacements
+ * - comments and formatting
+ *
+ * It integrates FormatterTrait for tab/indent control and CommentTrait
+ * for generating docblock comments.
+ *
+ * @category  Omega
+ * @package   Template
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class Generate
 {
     use FormatterTrait;
     use CommentTrait;
 
+    /** @var int Constant representing a regular class declaration. */
     public const int SET_CLASS = 0;
 
+    /** @var int Constant representing an abstract class declaration. */
     public const int SET_ABSTRACT = 1;
 
+    /** @var int Constant representing a trait declaration. */
     public const int SET_TRAIT = 2;
 
+    /** @var bool Whether the class/trait is marked as final. */
     private bool $isFinal = false;
 
+    /** @var int Rule for type of generation: class, abstract class, or trait. */
     private int $rule;
 
+    /** @var bool Whether the generated file ends with a newline. */
     private bool $endWithNewline = false;
 
-    private ?string $name = null;
+    /** @var string|null Name of the class/trait being generated. */
+    private ?string $name;
 
-    /** @var string[] */
+    /** @var string[] PHP declare directives to add at the beginning of the file. */
     private array $declare = [];
 
+    /** @var string|null Namespace for the generated class/trait. */
     private ?string $namespace = null;
 
-    /** @var string[] */
+    /** @var string[] List of use statements for the generated file. */
     private array $uses = [];
 
+    /** @var string|null Class or trait to extend. */
     private ?string $extend = null;
 
-    /** @var string[] */
+    /** @var string[] List of interfaces implemented by the class. */
     private array $implements = [];
 
-    /** @var string[] */
+    /** @var string[] List of traits used in the generated class. */
     private array $traits = [];
 
-    /** @var string[] */
+    /** @var string[] List of constants added to the generated class. Can contain Constant objects or strings. */
     private array $constants = [];
 
-    /** @var string[] */
+    /** @var string[] List of properties added to the generated class. Can contain Property objects or strings. */
     private array $properties = [];
 
-    /** @var string[] */
+    /** @var string[] List of methods added to the generated class. Can contain Method objects or strings. */
     private array $methods = [];
 
-    /** @var string[] */
+    /** @var string[] Raw body lines added to the generated class. */
     private array $body = [];
 
-    /** @var string[][] */
+    /** @var string [][] Pre-replacement search and replace arrays. [0] => search patterns [1] => replacement strings */
     private array $preReplace = [[], []];
 
-    /** @var string[][] */
+    /**
+     * Replacement search and replace arrays applied after generation.
+     *
+     * [0] => search patterns
+     * [1] => replacement strings
+     *
+     * @var string[][]
+     */
     private array $replace = [[], []];
 
+    /**
+     * Constructor.
+     *
+     * @param string $name Name of the class/trait to generate. Defaults to 'NewClass'.
+     * @return void
+     */
     public function __construct(string $name = 'NewClass')
     {
         $this->name = $name;
+
         $this->rule = Generate::SET_CLASS;
     }
 
+    /**
+     * Invokes the generator object as a function to set the class/trait name.
+     *
+     * @param string $name Name of the class or trait to generate.
+     *
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function __invoke(string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 
+    /**
+     * Static factory method to create a new generator instance with a given name.
+     *
+     * @param string $name Name of the class or trait to generate.
+     *
+     * @return self Returns a new instance of Generate.
+     */
     public static function static(string $name): self
     {
         return new self($name);
     }
 
+    /**
+     * Converts the generator object to a string by generating the PHP code.
+     *
+     * @return string The generated PHP code as a string.
+     */
     public function __toString(): string
     {
         return $this->generate();
     }
 
+    /**
+     * Returns the template for generating the PHP class/abstract class/trait code.
+     *
+     * If a custom template has been set via `customizeTemplate()`, it will be used.
+     * Otherwise, a default PHP class template is returned.
+     *
+     * @return string The raw template string for code generation.
+     */
     private function planTemplate(): string
     {
         return $this->customizeTemplate
             ?? "<?php\n{{before}}{{comment}}\n{{rule}}class\40{{head}}\n{\n{{body}}\n}{{end}}";
     }
 
+    /**
+     * Generates the PHP code for the class/abstract class/trait with all configured elements.
+     *
+     * This method processes:
+     * - namespace and use statements
+     * - declare directives
+     * - class rule (abstract/final)
+     * - extends and implements
+     * - traits, constants, properties, methods
+     * - raw body lines
+     * - pre- / post-replacements
+     *
+     * @return string The fully generated PHP code.
+     */
     public function generate(): string
     {
         // pre replace
@@ -249,6 +347,14 @@ class Generate
         );
     }
 
+    /**
+     * Returns the textual representation of the class rule.
+     *
+     * Determines whether the class should be generated as `abstract`, `trait`, or a normal class
+     * based on the current rule value.
+     *
+     * @return string The keyword for the class rule: 'abstract', 'trait', or an empty string for a normal class.
+     */
     private function ruleText(): string
     {
         return match ($this->rule) {
@@ -259,16 +365,23 @@ class Generate
     }
 
     /**
-     * @param string $pathToSave
-     * @return int|false
+     * Saves the generated PHP code to a file.
+     *
+     * @param string $pathToSave The directory path where the PHP file should be saved.
+     * @return int|false Returns the number of bytes written on success, or false on failure.
      */
     public function save(string $pathToSave): int|false
     {
         return file_put_contents($pathToSave . '/' . $this->name . '.php', $this->generate());
     }
 
-    // setter property
-
+    /**
+     * Sets the rule for this generator (class, abstract class, or trait).
+     *
+     * @param int $rule One of the class constants: SET_CLASS, SET_ABSTRACT, SET_TRAIT.
+     *
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function rule(int $rule = self::SET_CLASS): self
     {
         $this->rule = $rule;
@@ -276,6 +389,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Marks the class/trait as final or not.
+     *
+     * @param bool $isFinal Set to true to generate the class/trait as final, false otherwise.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function setFinal(bool $isFinal = true): self
     {
         $this->isFinal = $isFinal;
@@ -283,6 +402,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Sets whether the generated PHP code should end with a newline character.
+     *
+     * @param bool $enable Set to true to append a newline at the end of the generated file.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function setEndWithNewLine(bool $enable = true): self
     {
         $this->endWithNewline = $enable;
@@ -291,12 +416,16 @@ class Generate
     }
 
     /**
-     * Generates PHP declare directives.
+     * Adds a PHP `declare` directive to the generated file.
      *
-     * Supported directives:
+     * Supported directives include:
      * - ticks
      * - encoding
      * - strict_types
+     *
+     * @param string $directive The directive name (e.g., 'strict_types').
+     * @param string|int $value The value for the directive (integer or string).
+     * @return self Returns the current instance for fluent chaining.
      */
     public function addDeclare(string $directive, string|int $value): self
     {
@@ -305,6 +434,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Convenience method to set the `strict_types` declare directive.
+     *
+     * @param int $level The strict types level, usually 1 to enable strict types.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function setDeclareStrictTypes(int $level = 1): self
     {
         return $this->addDeclare('strict_types', $level);
@@ -312,6 +447,12 @@ class Generate
 
     // setter
 
+    /**
+     * Sets the name of the class or trait to be generated.
+     *
+     * @param string $name The name of the class or trait.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function name(string $name): self
     {
         $this->name = $name;
@@ -319,6 +460,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Sets the namespace for the generated class or trait.
+     *
+     * @param string $namespace The namespace to apply to the generated code.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function namespace(string $namespace): self
     {
         $this->namespace = $namespace;
@@ -326,6 +473,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Adds a single `use` statement for importing a namespace.
+     *
+     * @param string $useNamespace The fully qualified namespace to import.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function use(string $useNamespace): self
     {
         $this->uses[] = $useNamespace;
@@ -334,7 +487,10 @@ class Generate
     }
 
     /**
-     * @param string[] $usesNamespace
+     * Sets multiple `use` statements for importing namespaces.
+     *
+     * @param string[] $usesNamespace An array of fully qualified namespaces to import.
+     * @return self Returns the current instance for fluent chaining.
      */
     public function uses(array $usesNamespace): self
     {
@@ -343,6 +499,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Sets the class or trait that the generated class should extend.
+     *
+     * @param string $extend The parent class name.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function extend(string $extend): self
     {
         $this->extend = $extend;
@@ -350,6 +512,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Adds a single interface that the generated class should implement.
+     *
+     * @param string $implement The interface name to implement.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function implement(string $implement): self
     {
         $this->implements[] = $implement;
@@ -358,7 +526,10 @@ class Generate
     }
 
     /**
-     * @param string[] $implements
+     * Sets multiple interfaces that the generated class should implement.
+     *
+     * @param string[] $implements An array of interface names.
+     * @return self Returns the current instance for fluent chaining.
      */
     public function implements(array $implements): self
     {
@@ -367,6 +538,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Adds a single trait to be used by the generated class.
+     *
+     * @param string $trait The trait name to include.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function trait(string $trait): self
     {
         $this->traits[] = $trait;
@@ -375,7 +552,10 @@ class Generate
     }
 
     /**
-     * @param string[] $traits
+     * Sets multiple traits to be used by the generated class.
+     *
+     * @param string[] $traits An array of trait names.
+     * @return self Returns the current instance for fluent chaining.
      */
     public function traits(array $traits): self
     {
@@ -384,6 +564,12 @@ class Generate
         return $this;
     }
 
+    /**
+     * Adds a raw string to the body of the generated class.
+     *
+     * @param string $rawBody The raw PHP code to include in the class body.
+     * @return self Returns the current instance for fluent chaining.
+     */
     public function body(string $rawBody): self
     {
         $this->body[] = $rawBody;
@@ -391,15 +577,25 @@ class Generate
         return $this;
     }
 
-    // setter - other
+    /**
+     * Adds a new constant with a default or custom name.
+     *
+     * @param string $name The name of the constant to add. Defaults to 'NEW_CONST'.
+     * @return Constant Returns the newly created Constant instance.
+     */
     public function addConst(string $name = 'NEW_CONST'): Constant
     {
         return $this->constants[] = new Constant($name);
     }
 
     /**
-     * @param callable(ConstPool): void|Constant|ConstPool $newConst callable with param pools constants,
-     *                                                                single constants or constPool
+     * Adds one or more constants to the generated class.
+     *
+     * @param callable(ConstPool): void|Constant|ConstPool $newConst Either:
+     *      - a single Constant instance,
+     *      - a ConstPool instance containing multiple constants,
+     *      - or a callable that receives a ConstPool to define multiple constants.
+     * @return self Returns the current instance for fluent chaining.
      */
     public function constants(callable|ConstPool|Constant $newConst): self
     {
@@ -427,14 +623,26 @@ class Generate
         return $this;
     }
 
+    /**
+     * Adds a new property with a default or custom name.
+     *
+     * @param string $name The name of the property. Defaults to 'new_property'.
+     *
+     * @return Property Returns the newly created Property instance.
+     */
     public function addProperty(string $name = 'new_property'): Property
     {
         return $this->properties[] = new Property($name);
     }
 
     /**
-     * @param callable(PropertyPool): void|Property|PropertyPool $newProperty callable with param pools constants or
-     *                                                                         single property
+     * Adds one or more properties to the generated class.
+     *
+     * @param callable(PropertyPool): void|Property|PropertyPool $newProperty Either:
+     *      - a single Property instance,
+     *      - a PropertyPool instance containing multiple properties,
+     *      - or a callable that receives a PropertyPool to define multiple properties.
+     * @return self Returns the current instance for fluent chaining.
      */
     public function properties(callable|Property|PropertyPool $newProperty): self
     {
@@ -462,14 +670,25 @@ class Generate
         return $this;
     }
 
+    /**
+     * Adds a new method with a default or custom name.
+     *
+     * @param string $name The name of the method. Defaults to 'new_method'.
+     * @return Method Returns the newly created Method instance.
+     */
     public function addMethod(string $name = 'new_method'): Method
     {
         return $this->methods[] = new Method($name);
     }
 
     /**
-     * @param callable(MethodPool): void|Method|MethodPool $newMethod callable with param pools constants or
-     *                                                                 single property
+     * Adds one or more methods to the generated class.
+     *
+     * @param callable(MethodPool): void|Method|MethodPool $newMethod Either:
+     *      - a single Method instance,
+     *      - a MethodPool instance containing multiple methods,
+     *      - or a callable that receives a MethodPool to define multiple methods.
+     * @return self Returns the current instance for fluent chaining.
      */
     public function methods(MethodPool|callable|Method $newMethod): self
     {
@@ -498,8 +717,11 @@ class Generate
     }
 
     /**
-     * @param string|string[] $search  Text to replace
-     * @param string|string[] $replace Text replacer
+     * Sets search-and-replace pairs to apply before generating the class.
+     *
+     * @param string|string[] $search The text(s) to search for.
+     * @param string|string[] $replace The text(s) to replace with.
+     * @return self Returns the current instance for fluent chaining.
      */
     public function preReplace(array|string $search, array|string $replace): self
     {
@@ -512,8 +734,12 @@ class Generate
     }
 
     /**
-     * @param string|string[] $search  Text to replace
-     * @param string|string[] $replace Text replacer
+     * Sets search-and-replace pairs to apply after generating the class.
+     *
+     * @param string|string[] $search The text(s) to search for.
+     * @param string|string[] $replace The text(s) to replace with.
+     *
+     * @return self Returns the current instance for fluent chaining.
      */
     public function replace(array|string $search, array|string $replace): self
     {
