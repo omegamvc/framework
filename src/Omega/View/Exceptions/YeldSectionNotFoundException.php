@@ -8,6 +8,6 @@ class YeldSectionNotFoundException extends AbstractViewException
 {
     public function __construct(string $fileName)
     {
-        parent::__construct('Yeld section not found: `%s`', $fileName);
+        parent::__construct('Yield section not found: `%s`', $fileName);
     }
 }

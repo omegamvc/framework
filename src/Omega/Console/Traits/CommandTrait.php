@@ -383,10 +383,10 @@ trait CommandTrait
      * Just-In-Time foreground color using ForegroundColor object.
      *
      * @param ForegroundColor $color Foreground color object
-     * @param string $text Text to colorize
+     * @param string|null $text Text to colorize
      * @return string Colored text
      */
-    protected function textColor(ForegroundColor $color, string $text): string
+    protected function textColor(ForegroundColor $color, ?string $text = null): string
     {
         return $this->rules($color->getRule(), $text);
     }

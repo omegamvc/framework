@@ -43,5 +43,5 @@ interface CommandInterface
      *
      * @return int Exit code of the command execution (0 for success, non-zero for error).
      */
-    public function main(): int;
+    public function main();
 }

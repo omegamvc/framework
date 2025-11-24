@@ -55,6 +55,31 @@ use function str_split;
  * @version   2.0.0
  *
  * @implements ArrayAccess<string, string|bool|int|null>
+ *
+ * @property string|int|bool|null $name
+ * @property string|int|bool|null $nick
+ * @property string|int|bool|null $whois
+ * @property string|int|bool|null $default
+ * @property string|int|bool|null $_
+ * @property string|int|bool|null $t
+ * @property string|int|bool|null $n
+ * @property string|int|bool|null $config
+ * @property string|int|bool|null $s
+ * @property string|int|bool|null $l
+ * @property string|int|bool|null $cp
+ * @property string|int|bool|null $io
+ * @property string|int|bool|null $i
+ * @property string|int|bool|null $o
+ * @property string|int|bool|null $ab
+ * @property string|int|bool|null $a
+ * @property string|int|bool|null $b
+ * @property string|int|bool|null $y
+ * @property string|int|bool|null $d
+ * @property array                $vvv
+ * @property string|int|bool|null $v
+ * @method echoTextGreen()
+ * @method echoTextYellow()
+ * @method echoTextRed()
  */
 abstract class AbstractCommand implements ArrayAccess, CommandInterface
 {
@@ -396,9 +421,9 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      * Magic getter to access option values as properties.
      *
      * @param string $name Option name
-     * @return string|bool|int|null Option value or null if not set
+     * @return array|string|bool|int|null Option value or null if not set
      */
-    public function __get(string $name): string|bool|int|null
+    public function __get(string $name): array|string|bool|int|null
     {
         return $this->option($name);
     }
@@ -452,8 +477,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     /**
      * {@inheritdoc}
      */
-    public function main(): int
+    public function main()
     {
-        return 0;
     }
 }

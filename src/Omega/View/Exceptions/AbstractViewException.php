@@ -12,6 +12,6 @@ abstract class AbstractViewException extends InvalidArgumentException implements
 {
     public function __construct(string $message, ...$args)
     {
-        parent::__construct(sprintf($message, $args));
+        parent::__construct(sprintf($message, ...$args));
     }
 }

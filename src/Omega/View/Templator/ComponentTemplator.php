@@ -130,7 +130,7 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
                             return $params[$yieldMatches[1]];
                         }
 
-                        throw new YeldSectionNotFoundException('yield section not found: ' . $yieldMatches[1]);
+                        throw new YeldSectionNotFoundException($yieldMatches[1]);
                     },
                     $content
                 );
