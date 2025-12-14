@@ -7,6 +7,7 @@ namespace Tests\Console;
 use PHPUnit\Framework\TestCase;
 use Omega\Console\Test\TestCommand;
 use Omega\Console\Traits\CommandTrait;
+
 use function chr;
 use function explode;
 use function ob_get_clean;

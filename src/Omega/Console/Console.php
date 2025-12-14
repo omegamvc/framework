@@ -16,16 +16,14 @@ namespace Omega\Console;
 
 use Omega\Application\Application;
 use Omega\Console\Style\Style;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
-use Omega\Container\Invoker\Exception\InvocationException;
-use Omega\Container\Invoker\Exception\NotCallableException;
-use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Bootstrap\BootProviders;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\RegisterFacades;
 use Omega\Support\Bootstrap\RegisterProviders;
+use ReflectionException;
 
 use function array_fill;
 use function array_merge;
@@ -106,13 +104,10 @@ class Console
      *
      * @param string|array<int, string> $arguments CLI arguments
      * @return int Exit code
-     *
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function handle(array|string $arguments): int
     {
@@ -168,9 +163,10 @@ class Console
      * (e.g., registering config, facades, and service providers).
      *
      * @return void
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootstrap(): void
     {
@@ -187,12 +183,10 @@ class Console
      * @param string $signature Command signature (e.g., "make:model User")
      * @param array<string, string|bool|int|null> $parameter Named parameters
      * @return int Exit code
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function call(string $signature, array $parameter = []): int
     {

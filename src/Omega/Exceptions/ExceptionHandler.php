@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Omega\Exceptions;
 
 use Omega\Container\Container;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Exceptions\HttpResponseException;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\View\Templator;
 use Omega\View\TemplatorFinder;
+use ReflectionException;
 use Throwable;
 
 use function array_map;
@@ -107,9 +108,10 @@ class ExceptionHandler
     /**
      * @param Throwable $th
      * @return Response
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function handleJsonResponse(Throwable $th): Response
     {
@@ -142,9 +144,10 @@ class ExceptionHandler
     /**
      * @param Throwable $th
      * @return Response
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function handleResponse(Throwable $th): Response
     {
@@ -156,9 +159,10 @@ class ExceptionHandler
     /**
      * @param HttpException $e
      * @return Response
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function handleHttpException(HttpException $e): Response
     {
@@ -180,9 +184,10 @@ class ExceptionHandler
      * Register error view path.
      *
      * @return Templator
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function registerViewPath(): Templator
     {
@@ -201,9 +206,10 @@ class ExceptionHandler
 
     /**
      * @return bool
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function isDebug(): bool
     {
@@ -212,9 +218,10 @@ class ExceptionHandler
 
     /**
      * @return bool
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function isProduction(): bool
     {

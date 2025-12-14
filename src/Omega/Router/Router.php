@@ -439,7 +439,7 @@ class Router
      *     map?: array<string, string>,
      *     only?: string[],
      *     except?: string[],
-     *     missing?: \Closure
+     *     missing?: Closure
      * } $setup  Optional configuration:
      *           - map: custom method → action map
      *           - only: restrict to selected actions
@@ -481,7 +481,7 @@ class Router
      *
      * @param class-string|class-string[] $className  A class name or an array of class names to scan.
      * @return void
-     * @throws ReflectionException  If the class cannot be reflected.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.  If the class cannot be reflected.
      */
     public static function register(string|array $className): void
     {

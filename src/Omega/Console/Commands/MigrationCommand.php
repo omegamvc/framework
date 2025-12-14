@@ -13,14 +13,15 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\Prompt;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Database\Schema\SchemaConnection;
 use Omega\Database\Schema\Table\Create;
 use Omega\Support\Facades\DB;
 use Omega\Support\Facades\PDO;
 use Omega\Support\Facades\Schema;
+use ReflectionException;
 use Throwable;
 
 use function Omega\Console\error;
@@ -41,7 +42,7 @@ class MigrationCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 
-    /** @todo: Ho oaggiunto uno spazio prima dei DONE. Controllare se possono essere formattati in alto modo */
+    /** @todo: Ho aggiunto uno spazio prima dei DONE. Controllare se possono essere formattati in alto modo */
 
     /**
      * Register vendor migration path.
@@ -132,9 +133,10 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * @return string
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function DbName(): string
     {
@@ -142,9 +144,6 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
      * @throws Exception
      */
     private function runInDev(): bool
@@ -193,9 +192,10 @@ class MigrationCommand extends AbstractCommand
      *
      * @param false|int $batch
      * @return Collection<string, array<string, string>>
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function baseMigrate(false|int &$batch = false): Collection
     {
@@ -252,9 +252,7 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws Exception
      */
     public function main(): int
     {
@@ -264,9 +262,7 @@ class MigrationCommand extends AbstractCommand
     /**
      * @param bool $silent
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws Exception
      */
     public function migration(bool $silent = false): int
     {
@@ -321,9 +317,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     * @throws DependencyException
+     * @param bool $silent
+     * @return int
+     * @throws Exception
      */
     public function fresh(bool $silent = false): int
     {
@@ -380,9 +376,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     * @throws DependencyException
+     * @param bool $silent
+     * @return int
+     * @throws Exception
      */
     public function reset(bool $silent = false): int
     {
@@ -396,9 +392,8 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     * @throws DependencyException
+     * @return int
+     * @throws Exception
      */
     public function refresh(): int
     {
@@ -417,9 +412,7 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @return int
      */
     public function rollback(): int
     {
@@ -445,9 +438,10 @@ class MigrationCommand extends AbstractCommand
      * @param false|int $batch
      * @param int $take
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function rollbacks(false|int $batch, int $take): int
     {
@@ -501,9 +495,6 @@ class MigrationCommand extends AbstractCommand
     /**
      * @param bool $silent
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
      * @throws Exception
      */
     public function databaseCreate(bool $silent = false): int
@@ -535,9 +526,6 @@ class MigrationCommand extends AbstractCommand
     /**
      * @param bool $silent
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
      * @throws Exception
      */
     public function databaseDrop(bool $silent = false): int
@@ -565,9 +553,11 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @return int
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function databaseShow(): int
     {
@@ -610,6 +600,10 @@ class MigrationCommand extends AbstractCommand
         return 0;
     }
 
+    /**
+     * @param string $table
+     * @return int
+     */
     public function tableShow(string $table): int
     {
         $table = DB::table($table)->info();
@@ -642,6 +636,9 @@ class MigrationCommand extends AbstractCommand
         return 0;
     }
 
+    /**
+     * @return int
+     */
     public function status(): int
     {
         $print = new Style();
@@ -667,9 +664,10 @@ class MigrationCommand extends AbstractCommand
      * Integrate seeder during run migration.
      *
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function seed(): int
     {
@@ -715,6 +713,8 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * Create migration table schema.
+     *
+     * @return bool
      */
     private function createMigrationTable(): bool
     {
@@ -796,6 +796,9 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * Add migration from vendor path.
+     *
+     * @param string $path
+     * @return void
      */
     public static function addVendorMigrationPath(string $path): void
     {
@@ -804,6 +807,8 @@ class MigrationCommand extends AbstractCommand
 
     /**
      * Flush migration vendor paths.
+     *
+     * @return void
      */
     public static function flushVendorMigrationPaths(): void
     {

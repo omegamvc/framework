@@ -17,7 +17,6 @@ namespace Omega\Cache;
 use Closure;
 use DateInterval;
 use Omega\Cache\Exceptions\UnknownStorageException;
-use Omega\Cache\Storage\File;
 
 use function is_callable;
 
@@ -53,17 +52,19 @@ class CacheFactory implements CacheInterface
     private CacheInterface $defaultDriver;
 
     /**
-     * Creates a new CacheManager instance and initializes the default cache driver.
+     * Initializes a new CacheFactory instance with the specified default cache driver.
      *
-     * The constructor always instantiates a {@see File} driver using the
-     * provided configuration options. This ensures that a file-based cache is
-     * available for essential framework operations (such as view caching),
-     * even when another cache driver is selected as the active default.
+     * This constructor registers the provided cache driver as the default driver
+     * and ensures that all subsequent cache operations (via getDriver() or
+     * magic methods) will use this driver unless explicitly overridden.
      *
-     * @return void
+     * @param string         $defaultDriverName The name of the default cache driver.
+     * @param CacheInterface $defaultDriver     The cache driver instance to use as default.
      */
-    public function __construct()
+    public function __construct(string $defaultDriverName, CacheInterface $defaultDriver)
     {
+        $this->driver[$defaultDriverName] = $defaultDriver;
+        $this->defaultDriver = $defaultDriver;
     }
 
     /**
@@ -124,14 +125,14 @@ class CacheFactory implements CacheInterface
     /**
      * Retrieves a cache driver by name or returns the default driver if none is provided.
      *
-     * @param string|null $driver_name Optional name of the driver to use.
+     * @param string|null $driverName Optional name of the driver to use.
      * @return CacheInterface The corresponding cache driver instance.
      * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
-    public function getDriver(?string $driver_name = null): CacheInterface
+    public function getDriver(?string $driverName = null): CacheInterface
     {
-        if (isset($this->driver[$driver_name])) {
-            return $this->resolve($driver_name);
+        if (isset($this->driver[$driverName])) {
+            return $this->resolve($driverName);
         }
 
         return $this->defaultDriver;
@@ -166,7 +167,7 @@ class CacheFactory implements CacheInterface
     /**
      * {@inheritdoc}
      *
-     * @throws UnknownStorageException
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
     {

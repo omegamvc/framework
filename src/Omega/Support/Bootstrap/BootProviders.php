@@ -15,12 +15,9 @@ declare(strict_types=1);
 namespace Omega\Support\Bootstrap;
 
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
-use Omega\Container\Invoker\Exception\InvocationException;
-use Omega\Container\Invoker\Exception\NotCallableException;
-use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\EntryNotFoundException;
+use ReflectionException;
 
 /**
  * BootProviders is responsible for bootstrapping all service providers within the application.
@@ -44,12 +41,13 @@ class BootProviders
      *
      * @param Application $app The application instance whose providers should be bootstrapped
      * @return void
-     * @throws InvalidDefinitionException If a provider definition is invalid in the container
-     * @throws InvocationException If a provider cannot be invoked due to an error in its callable
-     * @throws NotCallableException If the provider registered in the container is not callable
-     * @throws NotFoundException If a provider or dependency is missing in the container
-     * @throws DependencyException If a dependency cannot be resolved by the container
-     * @throws NotEnoughParametersException If a provider requires more parameters than provided by the container
+     */
+    /**
+     * @param Application $app
+     * @return void
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootstrap(Application $app): void
     {

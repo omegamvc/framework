@@ -7,11 +7,12 @@ namespace Omega\Console\Commands;
 use Omega\Application\Application;
 use Omega\Config\ConfigRepository;
 use Omega\Console\AbstractCommand;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Bootstrap\ConfigProviders;
 
+use ReflectionException;
 use function file_exists;
 use function file_put_contents;
 use function Omega\Console\error;
@@ -54,9 +55,10 @@ class ConfigCommand extends AbstractCommand
 
     /**
      * @return int
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function main(): int
     {
@@ -78,9 +80,10 @@ class ConfigCommand extends AbstractCommand
 
     /**
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function clear(): int
     {

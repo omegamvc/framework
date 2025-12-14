@@ -78,19 +78,6 @@ class MemoryTest extends TestCase
     }
 
     /**
-     * Test set ith ttl.
-     *
-     * @return void
-     */
-    /**public function testSetWithTtl(): void
-    {
-        $this->markTestSkipped('sleep is not allowed');
-        $this->assertTrue($this->storage->set('key2', 'value2', 1));
-        sleep(2);
-        $this->assertNull($this->storage->get('key2'));
-    }*/
-
-    /**
      * Test set with TTL without using sleep.
      *
      * @return void

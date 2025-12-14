@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace Omega\Http;
 
 use Omega\Application\Application;
-use Omega\Container\Invoker\Exception\InvocationException;
-use Omega\Container\Invoker\Exception\NotCallableException;
-use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Router\RouteDispatcher;
 use Omega\Router\Router;
+use ReflectionException;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 
 class HttpError extends Http
 {
     /**
-     * @throws NotCallableException
-     * @throws InvocationException
-     * @throws NotEnoughParametersException
+     * @param Application $app
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function __construct(Application $app)
     {
@@ -39,7 +40,11 @@ class HttpError extends Http
         });
     }
 
-    protected function dispatcher($request): array
+    /**
+     * @param Request $request
+     * @return array
+     */
+    protected function dispatcher(Request $request): array
     {
         $dispatcher = new RouteDispatcher($request, Router::getRoutesRaw());
 

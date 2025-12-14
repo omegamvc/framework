@@ -7,12 +7,9 @@ namespace Omega\Application;
 use Exception;
 use Omega\Config\ConfigRepository;
 use Omega\Container\Container;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
-use Omega\Container\Invoker\Exception\InvocationException;
-use Omega\Container\Invoker\Exception\NotCallableException;
-use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Http\Exceptions\HttpException;
 use Omega\Http\Request;
@@ -20,6 +17,7 @@ use Omega\Support\AddonServiceProvider;
 use Omega\Support\PackageManifest;
 use Omega\Support\Vite;
 use Omega\View\Templator;
+use ReflectionException;
 
 use function array_map;
 use function count;
@@ -37,7 +35,7 @@ final class Application extends Container
     /** @var string Base path. */
     private string $basePath;
 
-    /** @var AbstractServiceProvider[] All service provider. */
+    /** @var array<int, class-string<AbstractServiceProvider>>|null All registered service provider class names. */
     private ?array $providers = [];
 
     /** @var AbstractServiceProvider[] Booted service provider. */
@@ -54,10 +52,11 @@ final class Application extends Container
     }
 
     /** @var bool Detect application has been bootstrapped. */
-    private bool $isBootstrapped = false { // phpcs:ignore
-        get {
-            return $this->isBootstrapped; // phpcs:ignore
-        }
+    private bool $isBootstrapped = false;
+
+    /** Indicates whether the application has completed its bootstrap phase. */
+    public bool $bootstrapped {
+        get => $this->isBootstrapped;
     }
 
     /** @var callable[] Terminate callback register. */
@@ -78,8 +77,6 @@ final class Application extends Container
      */
     public function __construct(string $basePath)
     {
-        parent::__construct();
-
         $this->basePath = str_replace('/', DIRECTORY_SEPARATOR, $basePath);
 
         $this->set('path.base', $this->basePath . DIRECTORY_SEPARATOR);
@@ -140,6 +137,7 @@ final class Application extends Container
      * Register base binding container.
      *
      * @return void
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
      */
     protected function setBaseBinding(): void
     {
@@ -163,6 +161,7 @@ final class Application extends Container
      *
      * @param ConfigRepository $configs
      * @return void
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
      */
     public function loadConfig(ConfigRepository $configs): void
     {
@@ -177,9 +176,10 @@ final class Application extends Container
      * default './boostrap/cache/'.
      *
      * @return string
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function getApplicationCachePath(): string
     {
@@ -192,9 +192,13 @@ final class Application extends Container
      * Detect application environment.
      *
      * @return string
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     */
+    /**
+     * @return string
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function getEnvironment(): string
     {
@@ -205,9 +209,10 @@ final class Application extends Container
      * Detect application debug enable.
      *
      * @return bool
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function isDebugMode(): bool
     {
@@ -218,9 +223,10 @@ final class Application extends Container
      * Detect application production mode.
      *
      * @return bool
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function isProduction(): bool
     {
@@ -231,9 +237,10 @@ final class Application extends Container
      * Detect application development mode.
      *
      * @return bool
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function isDev(): bool
     {
@@ -247,9 +254,10 @@ final class Application extends Container
      *
      * @param array<int, class-string> $bootstrappers
      * @return void
-     * @throws DependencyException
-     * @throws NotFoundException
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootstrapWith(array $bootstrappers): void
     {
@@ -264,12 +272,9 @@ final class Application extends Container
      * Boot service provider.
      *
      * @return void
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootProvider(): void
     {
@@ -297,12 +302,9 @@ final class Application extends Container
      * Register service providers.
      *
      * @return void
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function registerProvider(): void
     {
@@ -322,9 +324,9 @@ final class Application extends Container
      *
      * @param callable[] $bootCallBacks
      * @return void
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function callBootCallbacks(array $bootCallBacks): void
     {
@@ -342,9 +344,9 @@ final class Application extends Container
      *
      * @param callable $callback
      * @return void
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootedCallback(callable $callback): void
     {
@@ -401,9 +403,9 @@ final class Application extends Container
      * Terminate the application.
      *
      * @return void
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function terminate(): void
     {
@@ -420,9 +422,10 @@ final class Application extends Container
      * Determinate application maintenance mode.
      *
      * @return bool
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function isDownMaintenanceMode(): bool
     {
@@ -438,9 +441,10 @@ final class Application extends Container
      * Get down maintenance file config.
      *
      * @return array<string, string|int|null>
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function getDownData(): array
     {
@@ -504,9 +508,10 @@ final class Application extends Container
      * Merge application provider and vendor package provider.
      *
      * @return AbstractServiceProvider[]
-     * @throws DependencyException
-     * @throws NotFoundException|
-     * @throws InvalidDefinitionException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function getMergeProviders(): array
     {

@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace Omega\Http;
 
 use Closure;
-use InvalidArgumentException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
 use Exception;
+use InvalidArgumentException;
 use Omega\Application\Application;
-use Omega\Container\Invoker\Exception\InvocationException;
-use Omega\Container\Invoker\Exception\NotCallableException;
-use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
+use Omega\Exceptions\ExceptionHandler;
+use Omega\Middleware\MaintenanceMiddleware;
+use Omega\Router\Router;
 use Omega\Support\Bootstrap\BootProviders;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\HandleExceptions;
 use Omega\Support\Bootstrap\RegisterFacades;
 use Omega\Support\Bootstrap\RegisterProviders;
-use Omega\Exceptions\ExceptionHandler;
-use Omega\Middleware\MaintenanceMiddleware;
-use Omega\Router\Router;
+use ReflectionException;
 use Throwable;
 
 use function array_merge;
@@ -66,8 +65,6 @@ class Http
      *
      * @param Request $request
      * @return Response
-     * @throws DependencyException
-     * @throws NotFoundException
      * @throws Throwable
      */
     public function handle(Request $request): Response
@@ -95,6 +92,12 @@ class Http
 
     /**
      * Register bootstrap application.
+     *
+     * @return void
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootstrap(): void
     {
@@ -107,6 +110,9 @@ class Http
      * @param Request $request
      * @param Response $response
      * @return void
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function terminate(Request $request, Response $response): void
     {
@@ -189,9 +195,9 @@ class Http
      * @param Request $request
      * @param callable $next
      * @return Response
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function executeMiddleware(string $middleware, Request $request, callable $next): Response
     {

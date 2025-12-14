@@ -43,7 +43,7 @@ abstract class AbstractFile implements SourceInterface
      * @param string $file The file path to load configuration from.
      * @return void
      */
-    public function __construct(private string $file)
+    public function __construct(private readonly string $file)
     {
     }
 

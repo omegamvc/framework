@@ -100,8 +100,8 @@ final class BasicCronTest extends TestCase
      * Sample schedule example.
      *
      * @return Schedule Return the Schedule object.
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     private function sampleSchedules(): Schedule
     {
@@ -117,8 +117,8 @@ final class BasicCronTest extends TestCase
      * Test it correct schedule class.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItCorrectScheduleClass(): void
     {
@@ -131,8 +131,8 @@ final class BasicCronTest extends TestCase
      * Test it schedule run anonymously.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItScheduleRunAnonymously(): void
     {
@@ -160,8 +160,8 @@ final class BasicCronTest extends TestCase
      * Test it can add schedule.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItCanAddSchedule(): void
     {
@@ -179,8 +179,8 @@ final class BasicCronTest extends TestCase
      * Test it can flush.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItCanFlush(): void
     {

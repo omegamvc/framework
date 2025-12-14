@@ -103,8 +103,8 @@ final class CronTimeTest extends TestCase
      * Test it run only just in time.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItRunOnlyJustInTime(): void
     {

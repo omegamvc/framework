@@ -5,22 +5,18 @@ declare(strict_types=1);
 namespace Omega\Support\Bootstrap;
 
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
-use Omega\Container\Invoker\Exception\InvocationException;
-use Omega\Container\Invoker\Exception\NotCallableException;
-use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\EntryNotFoundException;
+use ReflectionException;
 
 class RegisterProviders
 {
     /**
-     * @throws InvalidDefinitionException
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotFoundException
-     * @throws DependencyException
-     * @throws NotEnoughParametersException
+     * @param Application $app
+     * @return void
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootstrap(Application $app): void
     {

@@ -16,9 +16,10 @@ namespace Omega\Support\Bootstrap;
 
 use Omega\Application\Application;
 use Omega\Config\ConfigRepository;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
+use ReflectionException;
 use RuntimeException;
 
 use function array_merge;
@@ -56,9 +57,10 @@ class ConfigProviders
      *
      * @param Application $app The application instance to load configuration into
      * @return void
-     * @throws NotFoundException If a dependency required by the Application cannot be found
-     * @throws DependencyException If the Application cannot resolve a required dependency
-     * @throws InvalidDefinitionException If a definition registered in the container is invalid
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws RuntimeException If a cached config file or a regular config file does not return an array
      */
     public function bootstrap(Application $app): void

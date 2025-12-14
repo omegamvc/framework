@@ -20,9 +20,10 @@ use Omega\Console\Exceptions\ImmutableOptionException;
 use Omega\Console\IO\OutputStream;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\TerminalTrait;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
+use ReflectionException;
 use ReturnTypeWillChange;
 
 use function array_key_exists;
@@ -77,6 +78,7 @@ use function str_split;
  * @property string|int|bool|null $d
  * @property array                $vvv
  * @property string|int|bool|null $v
+ *
  * @method echoTextGreen()
  * @method echoTextYellow()
  * @method echoTextRed()
@@ -290,9 +292,10 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      *
      * @param string $binding Logical path or container binding (e.g., "app.Http.Middlewares")
      * @return string Absolute filesystem path
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function isPath(string $binding): string
     {
@@ -328,7 +331,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     /**
      * @param array{
      *  colorize?: bool,
-     *  decorate?: bool
+     *  decorate?: bool,
      * } $options
      */
     protected function output(OutputStream $output_stream, array $options = []): Style

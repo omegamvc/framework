@@ -69,8 +69,8 @@ readonly class FixedWindow implements PolicyInterface
     /**
      * {@inheritdoc}
      *
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function consume(string $key, int $token = 1): RateLimit
     {
@@ -106,8 +106,8 @@ readonly class FixedWindow implements PolicyInterface
     /**
      * {@inheritdoc}
      *
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function peek(string $key): RateLimit
     {
@@ -127,8 +127,8 @@ readonly class FixedWindow implements PolicyInterface
     /**
      * {@inheritdoc}
      *
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function reset(string $key): void
     {
@@ -140,8 +140,8 @@ readonly class FixedWindow implements PolicyInterface
      *
      * @param string $key The unique identifier
      * @return string The computed window key used in the cache
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     private function getWindowKey(string $key): string
     {
@@ -154,8 +154,8 @@ readonly class FixedWindow implements PolicyInterface
      * Get the start DateTime of the next fixed window.
      *
      * @return DateTime The start time of the next window
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     private function getNextWindowStart(): DateTime
     {

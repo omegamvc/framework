@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\Console;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Omega\Text\Str;
+
 use function fclose;
 use function function_exists;
 use function fwrite;
 use function proc_close;
 use function proc_open;
 use function stream_get_contents;
-use const DIRECTORY_SEPARATOR;
 
+#[CoversClass(Str::class)]
 final class PromptTest extends TestCase
 {
     private function runCommand($command, $input): false|string
@@ -40,51 +42,81 @@ final class PromptTest extends TestCase
         return $output;
     }
 
+    /**
+     * Test option prompt.
+     *
+     * @return void
+     */
     public function testOptionPrompt(): void
     {
         $input  = 'test_1';
-        $cli    = __DIR__ . DIRECTORY_SEPARATOR . 'Assets' . DIRECTORY_SEPARATOR . 'option';
+        $cli    = slash(path: __DIR__ . '/fixtures/option');
         $output = $this->runCommand('php "' . $cli . '"', $input);
 
         $this->assertTrue(Str::contains($output, 'ok'));
     }
 
+    /**
+     * Test option prompt default.
+     *
+     * @return void
+     */
     public function testOptionPromptDefault(): void
     {
         $input  = 'test_2';
-        $cli    = __DIR__ . DIRECTORY_SEPARATOR . 'Assets' . DIRECTORY_SEPARATOR . 'option';
+        $cli    = slash(path: __DIR__ . '/fixtures/option');
         $output = $this->runCommand('php "' . $cli . '"', $input);
 
         $this->assertTrue(Str::contains($output, 'default'));
     }
 
+    /**
+     * Test select prompt.
+     *
+     * @return void
+     */
     public function testSelectPrompt(): void
     {
         $input  = '1';
-        $cli    = __DIR__ . DIRECTORY_SEPARATOR . 'Assets' . DIRECTORY_SEPARATOR . 'select';
+        $cli    = slash(path: __DIR__ . '/fixtures/select');
         $output = $this->runCommand('php "' . $cli . '"', $input);
 
         $this->assertTrue(Str::contains($output, 'ok'));
     }
 
+    /**
+     * Test select prompt default.
+     *
+     * @return void
+     */
     public function testSelectPromptDefault(): void
     {
         $input  = 'rz';
-        $cli    = __DIR__ . DIRECTORY_SEPARATOR . 'Assets' . DIRECTORY_SEPARATOR . 'select';
+        $cli    = slash(path: __DIR__ . '/fixtures/select');
         $output = $this->runCommand('php "' . $cli . '"', $input);
 
         $this->assertTrue(Str::contains($output, 'default'));
     }
 
+    /**
+     * Test text prompt.
+     *
+     * @return void
+     */
     public function testTextPrompt(): void
     {
         $input  = 'text';
-        $cli    = __DIR__ . DIRECTORY_SEPARATOR . 'Assets' . DIRECTORY_SEPARATOR . 'text';
+        $cli    = slash(path: __DIR__ . '/fixtures/text');
         $output = $this->runCommand('php "' . $cli . '"', $input);
 
         $this->assertTrue(Str::contains($output, 'text'));
     }
 
+    /**
+     * Test any key prompt.
+     *
+     * @return void
+     */
     public function testAnyKeyPrompt(): void
     {
         if (!function_exists('readline_callback_handler_install')) {
@@ -92,7 +124,7 @@ final class PromptTest extends TestCase
         }
 
         $input  = 'f';
-        $cli    = __DIR__ . DIRECTORY_SEPARATOR . 'Assets' . DIRECTORY_SEPARATOR . 'any';
+        $cli    = slash(path: __DIR__ . '/fixtures/any');
         $output = $this->runCommand('php "' . $cli . '"', $input);
 
         $this->assertTrue(Str::contains($output, 'you press f'));

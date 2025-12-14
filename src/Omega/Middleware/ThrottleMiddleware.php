@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omega\Middleware;
 
+use Closure;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\RateLimiter\RateLimiterInterface;
@@ -14,7 +15,7 @@ class ThrottleMiddleware
     {
     }
 
-    public function handle(Request $request, \Closure $next): Response
+    public function handle(Request $request, Closure $next): Response
     {
         $key = $this->resolveRequestKey($request);
         if ($this->limiter->isBlocked($key, $maxAttempts = 60, $decayMinutes = 1)) {

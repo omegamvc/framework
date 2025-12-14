@@ -82,6 +82,9 @@ use const STR_PAD_RIGHT;
  * @method self bgLightMagenta()
  * @method self bgLightCyan()
  * @method self bgWhite()
+ * @method text_red_500()
+ * @method bg_blue_500()
+ * @method text_red_10()
  */
 class Style
 {
@@ -115,10 +118,10 @@ class Style
     private ?OutputStreamInterface $outputStream = null;
 
     /** @var bool|mixed  */
-    private bool $colorize = true;
+    private bool $colorize;
 
     /** @var bool Indicate decorate is allowed. */
-    private bool $decorate = true;
+    private bool $decorate;
 
     /**
      * @param string|int $text Text to decorate

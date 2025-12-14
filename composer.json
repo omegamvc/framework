@@ -24,10 +24,10 @@
         "ext-readline": "*",
         "ext-simplexml": "*",
         "omegamvc/serializable-closure":  "^2.0.0",
-        "omegamvc/validator": "^2.0.0"
+        "omegamvc/validator": "^2.0.0",
+        "psr/container": "^2.0"
     },
     "require-dev": {
-        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.4",
         "squizlabs/php_codesniffer": "^4.0"
     },

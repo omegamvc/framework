@@ -79,8 +79,8 @@ readonly class RateLimiter implements RateLimiterInterface
     /**
      * {@inheritdoc}
      *
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function getRetryAfter(string $key): int
     {

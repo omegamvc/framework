@@ -6,7 +6,6 @@ namespace Omega\Support;
 
 use Omega\Environment\Dotenv\Dotenv;
 
-use function array_key_exists;
 use function is_numeric;
 use function strtolower;
 
@@ -19,36 +18,6 @@ class Env
         $dotenv = Dotenv::createImmutable($path, $file);
         self::$values = $dotenv->load();
     }
-
-/**    public static function get(string $key, mixed $default = null): mixed
-    {
-        if (!array_key_exists($key, self::$values)) {
-            return $default;
-        }
-
-        $value = self::$values[$key];
-
-        return match (strtolower($value)) {
-            'true', '(true)'   => true,
-            'false', '(false)' => false,
-            'empty', '(empty)' => '',
-            'null', '(null)'   => null,
-            default            => is_numeric($value) ? $value + 0 : $value,
-        };
-    }*/
-
-    /**public static function get(string $key, mixed $default = null): mixed
-    {
-        $value = self::$values[$key] ?? getenv($key) ?? $default;
-
-        return match (strtolower((string) $value)) {
-            'true', '(true)'   => true,
-            'false', '(false)' => false,
-            'empty', '(empty)' => '',
-            'null', '(null)'   => null,
-            default            => is_numeric($value) ? $value + 0 : $value,
-        };
-    }*/
 
     public static function get(string $key, mixed $default = null): mixed
     {

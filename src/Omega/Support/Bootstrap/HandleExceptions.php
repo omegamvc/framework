@@ -16,10 +16,11 @@ namespace Omega\Support\Bootstrap;
 
 use ErrorException;
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Exceptions\ExceptionHandler;
+use ReflectionException;
 use Throwable;
 
 use function error_get_last;
@@ -75,9 +76,10 @@ class HandleExceptions
      *
      * @param Application $app The application instance
      * @return void
-     * @throws InvalidDefinitionException When container definitions are invalid
-     * @throws DependencyException When a dependency cannot be resolved
-     * @throws NotFoundException When a service is not found in the container
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function bootstrap(Application $app): void
     {
@@ -108,7 +110,8 @@ class HandleExceptions
      * @param string $file The file in which the error occurred
      * @param int|null $line The line number of the error
      * @return void
-     * @throws ErrorException When a non-deprecated error occurs
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ErrorException if a non-deprecated error occurs.
      */
     public function handleError(int $level, string $message, string $file = '', ?int $line = 0): void
     {
@@ -129,6 +132,7 @@ class HandleExceptions
      * @param int $line The line number of the deprecation
      * @param int $level The error level
      * @return void
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
      */
     private function handleDeprecationError(string $message, string $file, int $line, int $level): void
     {
@@ -178,6 +182,7 @@ class HandleExceptions
      * @param int $level The error or deprecation level
      * @param string $message The message to log
      * @return bool True if logged, false otherwise
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
      */
     private function log(int $level, string $message): bool
     {

@@ -476,7 +476,7 @@ class BasicRouteTest extends TestCase
      * Test it can generate basic route using attribute.
      *
      * @return void
-     * @throws ReflectionException
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function testItCanGenerateBasicRouteUsingAttribute(): void
     {
@@ -556,7 +556,7 @@ class BasicRouteTest extends TestCase
      * Test it can generate route using attribute,
      *
      * @return void
-     * @throws ReflectionException
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function testItCanGenerateRouteUsingAttribute(): void
     {

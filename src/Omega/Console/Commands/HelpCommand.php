@@ -10,10 +10,10 @@ use Omega\Console\CommandMap;
 use Omega\Console\Style\Style;
 use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Console\Util;
-use Omega\Container\Invoker\Exception\InvocationException;
-use Omega\Container\Invoker\Exception\NotCallableException;
-use Omega\Container\Invoker\Exception\NotEnoughParametersException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Text\Str;
+use ReflectionException;
 
 use function array_merge;
 use function class_exists;
@@ -77,12 +77,11 @@ class HelpCommand extends AbstractCommand
 
     /**
      * Use for print --help.
-     */
-    /**
+     *
      * @return int
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function main(): int
     {
@@ -208,9 +207,9 @@ class HelpCommand extends AbstractCommand
 
     /**
      * @return int
-     * @throws InvocationException
-     * @throws NotCallableException
-     * @throws NotEnoughParametersException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function commandHelp(): int
     {

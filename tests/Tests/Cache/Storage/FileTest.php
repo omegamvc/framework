@@ -47,7 +47,7 @@ class FileTest extends TestCase
      * dependencies, and preparing any state required by the test.
      *
      * @return void
-     * @throws CachePathException if the path is not valid for the cache.
+     * @throws CachePathException if the cache directory cannot be created or is not writable.
      */
     protected function setUp(): void
     {

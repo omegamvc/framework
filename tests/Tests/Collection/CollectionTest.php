@@ -268,7 +268,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test it can get json.
+     * Test it can get JSON.
      *
      * @return void
      */
@@ -421,7 +421,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanAddCollectionFromCollection()
+    public function testItCanAddCollectionFromCollection(): void
     {
         $arr_1 = ['a' => 'b'];
         $arr_2 = ['c' => 'd'];
@@ -440,7 +440,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanActingLikeArray()
+    public function testItCanActingLikeArray(): void
     {
         $coll = new Collection(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -454,7 +454,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanDoLikeArray()
+    public function testItCanDoLikeArray(): void
     {
         $arr  = ['one' => 1, 'two' => 2, 'three' => 3];
         $coll = new Collection($arr);
@@ -477,11 +477,11 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test it can by iterator.
+     * Test it can be iterator.
      *
      * @return void
      */
-    public function testItCanByIterator()
+    public function testItCanBeIterator(): void
     {
         $coll = new Collection(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -491,11 +491,11 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test it can by shuffle.
+     * Test it can be shuffled.
      *
      * @return void
      */
-    public function testItCanByShuffle()
+    public function testItCanBeShuffled(): void
     {
         $arr  = ['one' => 1, 'two' => 2, 'three' => 3];
         $coll = new Collection($arr);
@@ -512,7 +512,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanMapWithKeys()
+    public function testItCanMapWithKeys(): void
     {
         $arr = new Collection([
             [
@@ -562,7 +562,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetSumUsingReduce()
+    public function testItCanGetSumUsingReduce(): void
     {
         $collection = new Collection([1, 2, 3, 4]);
 
@@ -576,7 +576,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetTakeFirst()
+    public function testItCanGetTakeFirst(): void
     {
         $coll = new Collection([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
@@ -588,7 +588,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetTakeLast()
+    public function testItCanGetTakeLast(): void
     {
         $coll = new Collection([10, 20, 30, 40, 50, 60, 70, 80, 90]);
 
@@ -600,7 +600,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanPushNewItem()
+    public function testItCanPushNewItem(): void
     {
         $coll = new Collection([10, 20, 30, 40, 50, 60, 70, 80, 90]);
         $coll->push(100);
@@ -613,7 +613,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetDiff()
+    public function testItCanGetDiff(): void
     {
         $coll = new Collection([1, 2, 3, 4, 5]);
         $coll->diff([2, 4, 6, 8]);
@@ -626,7 +626,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetDiffUsingKey()
+    public function testItCanGetDiffUsingKey(): void
     {
         $coll = new Collection([
             'buah_1' => 'mangga',
@@ -654,7 +654,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetDiffUsingAssoc()
+    public function testItCanGetDiffUsingAssoc(): void
     {
         $coll = new Collection([
             'color'   => 'green',
@@ -720,7 +720,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetComplementUsingAssoc()
+    public function testItCanGetComplementUsingAssoc(): void
     {
         $coll = new Collection([
             'color'   => 'green',
@@ -747,7 +747,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanGetFilteredUsingWhere()
+    public function testItCanGetFilteredUsingWhere(): void
     {
         $data = [
             ['user' => 'user1', 'age' => 10],
@@ -814,7 +814,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanFilterDataUsingWhereIn()
+    public function testItCanFilterDataUsingWhereIn(): void
     {
         $data = [
             ['user' => 'user1', 'age' => 10],
@@ -837,7 +837,7 @@ class CollectionTest extends TestCase
      *
      * @return void
      */
-    public function testItCanFilterDataUsingWhereNotIn()
+    public function testItCanFilterDataUsingWhereNotIn(): void
     {
         $data = [
             ['user' => 'user1', 'age' => 10],
@@ -895,7 +895,11 @@ class CollectionTest extends TestCase
         $this->assertNull($coll->get(null));
     }
 
-    /** @return void */
+    /**
+     * Test it can dump wthout error.
+     *
+     * @return void
+     */
     public function testItCanDumpWithoutError(): void
     {
         $coll = new Collection(['a' => 1]);

@@ -6,12 +6,13 @@ namespace Omega\Console\Commands;
 
 use Omega\Console\AbstractCommand;
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Router\Router;
 use Omega\SerializableClosure\UnsignedSerializableClosure;
 
+use ReflectionException;
 use function Omega\Console\error;
 use function Omega\Console\success;
 use function Omega\Console\warn;
@@ -53,9 +54,13 @@ class RouteCacheCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     * @throws DependencyException
+     * @param Application $app
+     * @param Router $router
+     * @return int
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function cache(Application $app, Router $router): int
     {
@@ -101,9 +106,12 @@ class RouteCacheCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @param Application $app
+     * @return int
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function clear(Application $app): int
     {

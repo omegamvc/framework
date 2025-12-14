@@ -16,10 +16,11 @@ namespace Omega\Cache;
 
 use Omega\Cache\Storage\File;
 use Omega\Cache\Storage\Memory;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Container\Provider\AbstractServiceProvider;
+use ReflectionException;
 
 /**
  * Bootstraps the cache system and registers available cache drivers.
@@ -53,11 +54,10 @@ class CacheServiceProvider extends AbstractServiceProvider
     /**
      * {@inheritdoc}
      *
-     * Register the Cache engine.
-     *
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function boot(): void
     {
@@ -80,14 +80,12 @@ class CacheServiceProvider extends AbstractServiceProvider
         );
 
         $this->app->set(
-            'cache.array',
+            'cache.memory',
             fn(): Memory => new Memory($this->app->get('cache.options'))
         );
 
         $this->app->set('cache', function () use ($cache, $default): CacheFactory {
-            $factory = new CacheFactory();
-            $factory->setDriver($default, $this->app[$cache]);
-            return $factory;
+            return new CacheFactory($default, $this->app[$cache]);
         });
     }
 }

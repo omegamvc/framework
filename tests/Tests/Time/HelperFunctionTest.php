@@ -47,8 +47,8 @@ final class HelperFunctionTest extends TestCase
      * whose timestamp corresponds to the current system time.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItCanUseFunctionHelper(): void
     {

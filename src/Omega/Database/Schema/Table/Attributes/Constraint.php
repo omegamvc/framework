@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Omega\Database\Schema\Table\Attributes;
 
+use Exception;
+
 class Constraint
 {
     /** @var string */
@@ -39,7 +41,7 @@ class Constraint
 
     private function query(): string
     {
-        $collumn = [
+        $column = [
             $this->data_type,
             $this->unsigned,
             $this->null_able,
@@ -49,7 +51,7 @@ class Constraint
             $this->order,
         ];
 
-        return implode(' ', array_filter($collumn, fn ($item) => $item !== ''));
+        return implode(' ', array_filter($column, fn ($item) => $item !== ''));
     }
 
     public function notNull(bool $notNull = true): self
@@ -70,7 +72,7 @@ class Constraint
      * @param string|int $default Default set value
      * @param bool       $wrap    Wrap default value with "'"
      */
-    public function default($default, bool $wrap = true): self
+    public function default(string|int $default, bool $wrap = true): self
     {
         $wrap          = is_int($default) ? false : $wrap;
         $this->default = $wrap ? "DEFAULT '{$default}'" : "DEFAULT {$default}";
@@ -83,25 +85,28 @@ class Constraint
         return $this->default('NULL', false);
     }
 
-    public function autoIncrement(bool $incremnet = true): self
+    public function autoIncrement(bool $increment = true): self
     {
-        $this->auto_increment = $incremnet ? 'AUTO_INCREMENT' : '';
+        $this->auto_increment = $increment ? 'AUTO_INCREMENT' : '';
 
         return $this;
     }
 
-    public function increment(bool $incremnet): self
+    public function increment(bool $increment): self
     {
-        return $this->autoIncrement($incremnet);
+        return $this->autoIncrement($increment);
     }
 
     /**
      * Make datatype tobe unsigned (int, tinyint, bigint, smallint).
+     *
+     * @return $this
+     * @throws Exception
      */
     public function unsigned(): self
     {
         if (false === preg_match('/^(int|tinyint|bigint|smallint)(\(\d+\))?$/', $this->data_type)) {
-            throw new \Exception('Cant use UNSIGNED not integer datatype.');
+            throw new Exception('Cant use UNSIGNED not integer datatype.');
         }
         $this->unsigned = 'UNSIGNED';
 

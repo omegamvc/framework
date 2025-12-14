@@ -125,8 +125,8 @@ class RateLimiterTest extends TestCase
      * Test get retry after.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function getRetryAfter(): void
     {

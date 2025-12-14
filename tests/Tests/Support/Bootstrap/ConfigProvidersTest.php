@@ -16,12 +16,13 @@ namespace Tests\Support\Bootstrap;
 
 use Exception;
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Bootstrap\ConfigProviders;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 
 /**
  * Class ConfigProvidersTest
@@ -46,17 +47,21 @@ use PHPUnit\Framework\TestCase;
  * @version    2.0.0
  */
 #[CoversClass(Application::class)]
+#[CoversClass(BindingResolutionException::class)]
+#[CoversClass(CircularAliasException::class)]
 #[CoversClass(ConfigProviders::class)]
+#[CoversClass(EntryNotFoundException::class)]
 class ConfigProvidersTest extends TestCase
 {
     /**
      * Test it can load config from file.
      *
      * @return void
-     * @throws NotFoundException If a dependency required by the Application cannot be found
-     * @throws DependencyException If the Application cannot resolve a required dependency
-     * @throws InvalidDefinitionException If a definition registered in the container is invalid
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception if a generic error occurred
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function testItCanLoadConfigFromFile(): void
     {
@@ -77,10 +82,11 @@ class ConfigProvidersTest extends TestCase
      * Assume this test is boostrap application.
      *
      * @return void
-     * @throws NotFoundException If a dependency required by the Application cannot be found
-     * @throws DependencyException If the Application cannot resolve a required dependency
-     * @throws InvalidDefinitionException If a definition registered in the container is invalid
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception if a generic error occurred
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function testItCanLoadConfigFromCache(): void
     {

@@ -231,7 +231,7 @@ final class TimeTravelTest extends TestCase
      * Test it handles leap year birthday correctly.
      *
      * @return void
-     * @throws DateMalformedStringException
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItHandlesLeapYearBirthdayCorrectly(): void
     {
@@ -279,8 +279,8 @@ final class TimeTravelTest extends TestCase
      * Test it handles edge cases around birthday correctly.
      *
      * @return void
-     * @throws DateMalformedStringException
-     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
      */
     public function testItHandlesEdgeCasesAroundBirthdayCorrectly(): void
     {

@@ -15,8 +15,9 @@ declare(strict_types=1);
 namespace Omega\Testing;
 
 use Exception;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Application\Application;
@@ -24,6 +25,7 @@ use Omega\Http\Http;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Support\Facades\AbstractFacade;
 use PHPUnit\Framework\TestCase as PhpUnitTestCase;
+use ReflectionException;
 use Throwable;
 
 use function array_key_exists;
@@ -111,9 +113,11 @@ class TestCase extends PhpUnitTestCase
      * @param string $remoteAddress Remote IP address for the request.
      * @param string|null $rawBody Raw request body content.
      * @return TestResponse The response wrapped in a TestResponse instance.
-     * @throws DependencyException If a dependency cannot be resolved.
-     * @throws NotFoundException If a service or route cannot be found.
-     * @throws Throwable For other runtime exceptions during request handling.
+     * @throws Throwable
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function call(
         string $url,
@@ -154,8 +158,10 @@ class TestCase extends PhpUnitTestCase
      * @param string $url The URL to request.
      * @param array<string, string> $parameter Optional query parameters.
      * @return TestResponse The response wrapped in a TestResponse instance.
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws Throwable
      */
     protected function get(string $url, array $parameter = []): TestResponse
@@ -170,8 +176,10 @@ class TestCase extends PhpUnitTestCase
      * @param array<string, string> $post POST data.
      * @param array<string, string> $files Optional files to upload.
      * @return TestResponse The response wrapped in a TestResponse instance.
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws Throwable
      */
     protected function post(string $url, array $post, array $files = []): TestResponse
@@ -186,8 +194,10 @@ class TestCase extends PhpUnitTestCase
      * @param array<string, string> $put PUT data (sent as attributes).
      * @param array<string, string> $files Optional files to upload.
      * @return TestResponse The response wrapped in a TestResponse instance.
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws Throwable
      */
     protected function put(string $url, array $put, array $files = []): TestResponse
@@ -201,8 +211,10 @@ class TestCase extends PhpUnitTestCase
      * @param string $url The URL to request.
      * @param array<string, string> $delete DELETE data.
      * @return TestResponse The response wrapped in a TestResponse instance.
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws Throwable
      */
     protected function delete(string $url, array $delete): TestResponse

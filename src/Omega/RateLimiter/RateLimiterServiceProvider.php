@@ -15,11 +15,12 @@ declare(strict_types=1);
 namespace Omega\RateLimiter;
 
 use Omega\Cache\CacheFactory;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Container\Provider\AbstractServiceProvider;
 use Omega\Middleware\ThrottleMiddleware;
+use ReflectionException;
 
 /**
  * Service provider responsible for registering the RateLimiter and ThrottleMiddleware
@@ -43,9 +44,10 @@ class RateLimiterServiceProvider extends AbstractServiceProvider
      *
      * Registers the rate limiter resolver and the throttle middleware.
      *
-     * @throws InvalidDefinitionException If the service definition is invalid.
-     * @throws DependencyException If a dependency cannot be resolved.
-     * @throws NotFoundException If the cache service is not found.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function boot(): void
     {
@@ -60,15 +62,16 @@ class RateLimiterServiceProvider extends AbstractServiceProvider
      * using it, and binds the factory instance for later use.
      *
      * @return void
-     * @throws InvalidDefinitionException If the service definition is invalid.
-     * @throws DependencyException If a dependency cannot be resolved.
-     * @throws NotFoundException If the cache service is not found.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected function registerRateLimiterResolver(): void
     {
         /** @var CacheFactory $cache */
-        $cache   = $this->app->get('cache');
-        $rate    = new RateLimiterFactory($cache);
+        $cache = $this->app->get('cache');
+        $rate  = new RateLimiterFactory($cache);
 
         $this->app->set(RateLimiterFactory::class, fn () => $rate);
     }
@@ -81,6 +84,7 @@ class RateLimiterServiceProvider extends AbstractServiceProvider
      * a limit of 60 requests per 60 seconds.
      *
      * @return void
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
      */
     protected function registerThrottleMiddleware(): void
     {

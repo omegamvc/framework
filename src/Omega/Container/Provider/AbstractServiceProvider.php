@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Container Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Container\Provider;
@@ -17,59 +27,70 @@ use function opendir;
 use function pathinfo;
 use function readdir;
 
+use const PATHINFO_DIRNAME;
+
+/**
+ * Abstract base class for service providers.
+ *
+ * Service providers are responsible for registering services and booting logic
+ * into the application container.
+ *
+ * @category   Omega
+ * @package    Container
+ * @subpackage Provider
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 abstract class AbstractServiceProvider
 {
-    /** @var Application */
-    protected Application $app;
+    /** @var array<int|string, class-string> Classes to register in the container */
+    protected array $register = [];
 
-    /** @var array<int|string, class-string> Class register */
-    protected array $register = [
-        // register
-    ];
-
-    /**
-     * Shared modules to import from vendor package.
-     *
-     * @var array<string, array<string, string>>
-     */
+    /** @var array<string, array<string, string>> Shared modules available for import from vendor packages */
     protected static array $modules = [];
 
     /**
      * Create a new service provider instance.
      *
-     * @return void
+     * @param Application $app The application instance
      */
-    public function __construct(Application $app)
+    public function __construct(protected Application $app)
     {
-        $this->app = $app;
     }
 
     /**
-     * Boot provider.
+     * Boot the service provider.
      *
-     * @return void
+     * This method is called after all providers are registered.
      */
     public function boot(): void
     {
-        // boot
     }
 
     /**
-     * Register to application container before booted.
+     * Register services into the application container.
      *
-     * @return void
+     * This method should be called before boot.
      */
     public function register(): void
     {
-        // register application container
     }
 
     /**
-     * Import a specific file to the application.
+     * Import a specific file into the application.
+     *
+     * @param string $from      Source file path
+     * @param string $to        Destination file path
+     * @param bool   $overwrite Whether to overwrite the destination if it exists
+     * @return bool Returns true if the file was successfully imported, false otherwise
      */
     public static function importFile(string $from, string $to, bool $overwrite = false): bool
     {
         $exists = file_exists($to);
+
         if (($exists && $overwrite) || false === $exists) {
             $path = pathinfo($to, PATHINFO_DIRNAME);
             if (false === file_exists($path)) {
@@ -83,11 +104,17 @@ abstract class AbstractServiceProvider
     }
 
     /**
-     * Import a directory to the application.
+     * Import a directory and its contents into the application.
+     *
+     * @param string $from      Source directory path
+     * @param string $to        Destination directory path
+     * @param bool   $overwrite Whether to overwrite existing files
+     * @return bool Returns true if all files and directories were successfully imported
      */
     public static function importDir(string $from, string $to, bool $overwrite = false): bool
     {
         $dir = opendir($from);
+
         if (false === $dir) {
             return false;
         }
@@ -107,27 +134,25 @@ abstract class AbstractServiceProvider
             if (is_dir($src)) {
                 if (false === static::importDir($src, $dst, $overwrite)) {
                     closedir($dir);
-
                     return false;
                 }
             } else {
                 if (false === static::importFile($src, $dst, $overwrite)) {
                     closedir($dir);
-
                     return false;
                 }
             }
         }
 
         closedir($dir);
-
         return true;
     }
 
     /**
-     * Register a package to the module.
+     * Register a package path to the module registry.
      *
-     * @param array<string, string> $path
+     * @param array<string, string> $path Mapping of source to destination paths
+     * @param string                $tag  Optional tag to group modules
      */
     public static function export(array $path, string $tag = ''): void
     {
@@ -139,9 +164,9 @@ abstract class AbstractServiceProvider
     }
 
     /**
-     * Get registers modules.
+     * Get all registered shared modules.
      *
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, string>> All modules grouped by tag
      */
     public static function getModules(): array
     {
@@ -149,7 +174,7 @@ abstract class AbstractServiceProvider
     }
 
     /**
-     * Flush shared modules.
+     * Flush all registered shared modules.
      */
     public static function flushModule(): void
     {

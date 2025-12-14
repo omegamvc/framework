@@ -9,14 +9,15 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Decorate;
 use Omega\Console\Style\ProgressBar;
 use Omega\Console\Traits\PrintHelpTrait;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Text\Str;
 use Omega\View\Templator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
+use ReflectionException;
 use function array_key_exists;
 use function arsort;
 use function count;
@@ -121,9 +122,6 @@ class ViewCommand extends AbstractCommand
     /**
      * @param Templator $templator
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
      * @throws Exception
      */
     public function cache(Templator $templator): int
@@ -161,9 +159,10 @@ class ViewCommand extends AbstractCommand
 
     /**
      * @return int
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     * @throws DependencyException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function clear(): int
     {
@@ -201,9 +200,6 @@ class ViewCommand extends AbstractCommand
     /**
      * @param Templator $templator
      * @return int
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
      * @throws Exception
      */
     public function watch(Templator $templator): int
@@ -275,9 +271,10 @@ class ViewCommand extends AbstractCommand
 
     /**
      * @return array<string, int>
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function getIndexFiles(): array
     {
@@ -307,18 +304,15 @@ class ViewCommand extends AbstractCommand
 
     /**
      * @param Templator $templator
-     * @param string $file_path
+     * @param string $filePath
      * @param int $width
      * @return array<string, int>
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
      * @throws Exception
      */
-    private function compile(Templator $templator, string $file_path, int $width): array
+    private function compile(Templator $templator, string $filePath, int $width): array
     {
         $watchStart        = microtime(true);
-        $filename          = Str::replace($file_path, get_path('path.view'), '');
+        $filename          = Str::replace($filePath, get_path('path.view'), '');
         $templator->compile($filename);
         $length            = strlen($filename);
         $executeTime       = round(microtime(true) - $watchStart, 3) * 1000;
@@ -330,13 +324,13 @@ class ViewCommand extends AbstractCommand
             ->push('ms')->textYellow()
             ->out();
 
-        return $templator->getDependency($file_path);
+        return $templator->getDependency($filePath);
     }
 
     /**
+     * @param Templator          $templator
      * @param array<string, int> $getIndexes
-     * @param int $width Console acceptable width
-     *
+     * @param int                $width Console acceptable width
      * @return array<string, array<string, int>>
      * @throws Exception
      */

@@ -50,8 +50,8 @@ if (!function_exists('now')) {
      * @param string      $date_format The date string to initialize the object (default 'now').
      * @param string|null $time_zone   Optional timezone identifier (e.g., 'UTC', 'Europe/Rome').
      * @return Now An instance of the `Now` class representing the specified date and timezone.
-     * @throws DateInvalidTimeZoneException If the provided timezone is invalid.
-     * @throws DateMalformedStringException If the date string cannot be parsed.
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     function now(string $date_format = 'now', ?string $time_zone = null): Now
     {

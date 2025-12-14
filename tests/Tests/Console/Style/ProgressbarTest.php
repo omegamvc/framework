@@ -1,20 +1,30 @@
-<?php
+<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
-use PHPUnit\Framework\TestCase;
-use System\Console\Style\ProgressBar;
-use System\Text\Str;
+namespace Tests\Console\Style;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+use Omega\Console\Style\ProgressBar;
+use Omega\Text\Str;
+use function ob_get_clean;
+use function ob_start;
+use function range;
+
+#[CoversClass(ProgressBar::class)]
+#[CoversClass(Str::class)]
 final class ProgressbarTest extends TestCase
 {
     /**
-     * @test
+     * Test it can render progress bar.
+     *
+     * @return void
      */
-    public function canRenderProgressbar()
+    public function testItCanRenderProgressbar(): void
     {
         $progressbar       = new ProgressBar(':progress');
-        $progressbar->maks = 10;
+        $progressbar->mask = 10;
         ob_start();
         foreach (range(1, 10) as $tick) {
             $progressbar->current++;
@@ -28,17 +38,19 @@ final class ProgressbarTest extends TestCase
     }
 
     /**
-     * @test
+     * Test it can render progress bar using custom tick.
+     *
+     * @return void
      */
-    public function canRenderProgressbarUsingCostumeTick()
+    public function testItCanRenderProgressbarUsingCustomTick(): void
     {
         $progressbar       = new ProgressBar(':progress');
-        $progressbar->maks = 10;
+        $progressbar->mask = 10;
         ob_start();
         foreach (range(1, 10) as $tick) {
             $progressbar->current++;
-            $progressbar->tickWith(':progress :costume', [
-                ':costume' => fn (): string => "{$progressbar->current}/{$progressbar->maks}",
+            $progressbar->tickWith(':progress :custom', [
+                ':custom' => fn (): string => "{$progressbar->current}/{$progressbar->mask}",
             ]);
         }
         $out = ob_get_clean();

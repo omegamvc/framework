@@ -1,74 +1,85 @@
 <?php
 
+/**
+ * Part of Omega - Container Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Container\Attribute;
 
 use Attribute;
-use JsonException;
-use Omega\Container\Definition\Exceptions\InvalidAttributeException;
-
-use function is_array;
-use function is_string;
-use function json_encode;
-
-use const JSON_THROW_ON_ERROR;
 
 /**
- * #[Inject] attribute.
+ * Attribute used to indicate that a dependency should be injected into a property, method, or parameter.
  *
- * Marks a property or method as an injection point
+ * This attribute is processed by the container's Injector to automatically resolve and assign
+ * dependencies based on the type-hint or a custom name provided.
+ *
+ * Can be applied to:
+ * - Methods: for setter injection
+ * - Properties: for property injection
+ * - Parameters: for constructor or method parameter injection
+ *
+ * Example usage:
+ *
+ * ```php
+ * class MyService
+ * {
+ *     #[Inject(SomeDependency::class)]
+ *     public SomeDependency $dependency;
+ *
+ *     #[Inject(['logger' => Logger::class])]
+ *     public function setLogger(Logger $logger): void
+ *     {
+ *         $this->logger = $logger;
+ *     }
+ *
+ *     public function __construct(#[Inject(Database::class)] Database $db)
+ *     {
+ *         $this->db = $db;
+ *     }
+ * }
+ * ```
+ *
+ * @category   Omega
+ * @package    Container
+ * @subpackage Attribute
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  */
-#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::TARGET_PARAMETER)]
-class Inject
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER)]
+final readonly class Inject
 {
     /**
-     * Entry name.
-     */
-    public ?string $name = null { // phpcs:ignore
-        get {
-            return $this->name; // phpcs:ignore
-        }
-    }
-
-    /**
-     * Parameters, indexed by the parameter number (index) or name.
+     * Constructor.
      *
-     * Used if the attribute is set on a method
+     * @param string|array<string, string> $name Optional. The name of the dependency to inject, or
+     *                                             an associative array mapping parameter/property names
+     *                                             to dependency class names.
      */
-    private array $parameters = [];
-
-    /**
-     * @throws InvalidAttributeException
-     * @throws JsonException
-     */
-    public function __construct(string|array|null $name = null)
-    {
-        // #[Inject('foo')] or #[Inject(name: 'foo')]
-        if (is_string($name)) {
-            $this->name = $name;
-        }
-
-        // #[Inject([...])] on a method
-        if (is_array($name)) {
-            foreach ($name as $key => $value) {
-                if (!is_string($value)) {
-                    throw new InvalidAttributeException(sprintf(
-                        "#[Inject(['param' => 'value'])] expects \"value\" to be a string, %s given.",
-                        json_encode($value, JSON_THROW_ON_ERROR)
-                    ));
-                }
-
-                $this->parameters[$key] = $value;
-            }
-        }
+    public function __construct(
+        private string|array $name = [],
+    ) {
     }
 
     /**
-     * @return array Parameters, indexed by the parameter number (index) or name
+     * Returns the name of the dependency to inject.
+     *
+     * @return string|array<string, string> The dependency class name, or an associative array
+     *                                      mapping parameter/property names to class names.
      */
-    public function getParameters(): array
+    public function getName(): string|array
     {
-        return $this->parameters;
+        return $this->name;
     }
 }

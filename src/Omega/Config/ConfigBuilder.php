@@ -94,7 +94,7 @@ class ConfigBuilder
         return array_reduce(
             $this->sources,
             $this->createConfiguration($strategy),
-            new Config()
+            new ConfigRepository()
         );
     }
 
@@ -112,7 +112,7 @@ class ConfigBuilder
         return function (ConfigRepositoryInterface $configuration, array $configurationSource) use ($strategy) {
             list($source, $section) = $configurationSource;
 
-            $configuration->merge(new Config($source->fetch()), $section, $strategy);
+            $configuration->merge(new ConfigRepository($source->fetch()), $section, $strategy);
 
             return $configuration;
         };

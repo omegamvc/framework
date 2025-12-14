@@ -2,7 +2,6 @@
 
 /**
  * Part of Omega - Logging Package.
- * php versiom 8.2
  *
  * @link       https://omegamvc.github.io
  * @author     Adriano Giovannini <agisoftt@gmail.com>

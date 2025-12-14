@@ -117,8 +117,8 @@ class Now
      * @param string      $dateFormat The date string or 'now' for current time.
      * @param string|null $timeZone   Optional timezone identifier (e.g., "UTC").
      * @return void
-     * @throws DateInvalidTimeZoneException If the provided timezone is invalid.
-     * @throws DateMalformedStringException If the date string cannot be parsed.
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function __construct(string $dateFormat = 'now', ?string $timeZone = null)
     {

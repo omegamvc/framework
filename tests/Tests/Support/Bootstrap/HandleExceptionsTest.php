@@ -17,14 +17,15 @@ namespace Tests\Support\Bootstrap;
 use ErrorException;
 use Exception;
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Exceptions\ExceptionHandler;
 use Omega\Http\Request;
 use Omega\Support\Bootstrap\HandleExceptions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use Throwable;
 
 /**
@@ -53,6 +54,9 @@ use Throwable;
  * @version    2.0.0
  */
 #[CoversClass(Application::class)]
+#[CoversClass(BindingResolutionException::class)]
+#[CoversClass(CircularAliasException::class)]
+#[CoversClass(EntryNotFoundException::class)]
 #[CoversClass(ExceptionHandler::class)]
 #[CoversClass(Request::class)]
 #[CoversClass(HandleExceptions::class)]
@@ -106,11 +110,11 @@ class HandleExceptionsTest extends TestCase
     /**
      * Test it can handle exception.
      *
-     * @return void
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws Throwable
-     * @throws NotFoundException If a dependency required by the Application cannot be found
-     * @throws DependencyException If the Application cannot resolve a required dependency
-     * @throws InvalidDefinitionException If a definition registered in the container is invalid
      */
     public function testItCanHandleException(): void
     {

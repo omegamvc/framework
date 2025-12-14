@@ -9,7 +9,7 @@ use Omega\Cache\CacheFactory;
 use Omega\Cache\Exceptions\UnknownStorageException;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Traits\CommandTrait;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
+use Omega\Container\Exceptions\CircularAliasException;
 
 use function array_keys;
 use function is_array;
@@ -59,9 +59,8 @@ class ClearCacheCommand extends AbstractCommand
     /**
      * @param Application $app
      * @return int
-     * @throws InvalidDefinitionException
-     * @throws UnknownStorageException
-     * @noinspection PhpIncompatibleReturnTypeInspection
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function clear(Application $app): int
     {

@@ -15,11 +15,12 @@ declare(strict_types=1);
 namespace Omega\Support\Facades;
 
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Facades\Exceptions\FacadeObjectNotSetException;
 
+use ReflectionException;
 use function array_key_exists;
 
 /**
@@ -79,9 +80,10 @@ abstract class AbstractFacade implements FacadeInterface
      * Resolve and retrieve the underlying facade instance.
      *
      * @return mixed The resolved instance
-     * @throws DependencyException If a dependency cannot be resolved
-     * @throws InvalidDefinitionException If the container definition is invalid
-     * @throws NotFoundException If the service cannot be found in the container
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected static function getFacade(): mixed
     {
@@ -93,9 +95,10 @@ abstract class AbstractFacade implements FacadeInterface
      *
      * @param string|class-string $name Entry name or class name to resolve
      * @return mixed The resolved instance
-     * @throws DependencyException If a dependency cannot be resolved
-     * @throws InvalidDefinitionException If the container definition is invalid
-     * @throws NotFoundException If the service cannot be found in the container
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     protected static function getFacadeBase(string $name): mixed
     {
@@ -122,10 +125,11 @@ abstract class AbstractFacade implements FacadeInterface
      * @param string $name The method name being called
      * @param array<int, mixed> $arguments The method arguments
      * @return mixed The method return value
-     * @throws FacadeObjectNotSetException If no underlying instance is available
-     * @throws DependencyException If a dependency cannot be resolved
-     * @throws InvalidDefinitionException If the container definition is invalid
-     * @throws NotFoundException If the service is not found in the container
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws FacadeObjectNotSetException
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public static function __callStatic(string $name, array $arguments): mixed
     {

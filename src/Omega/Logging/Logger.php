@@ -331,6 +331,7 @@ class Logger extends AbstractLogger
      * @param string|Stringable    $message The message to log.
      * @param array<string, mixed> $context The context for the log message.
      * @return string The formatted message.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     protected function formatMessage(string $level, string|Stringable $message, array $context): string
     {
@@ -374,7 +375,7 @@ class Logger extends AbstractLogger
      * to work correctly, so here it is.
      *
      * @return string Return the formatted timestamp.
-     * @throws DateMalformedStringException
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     private function getTimestamp(): string
     {
@@ -439,6 +440,7 @@ class Logger extends AbstractLogger
      * @param string|Stringable    $message The message to log.
      * @param array<string, mixed> $context The context for the log message.
      * @return void
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      * @throws LoggerArgumentException If an invalid log level is provided.
      */
     public function log(mixed $level, string|Stringable $message, array $context = []): void

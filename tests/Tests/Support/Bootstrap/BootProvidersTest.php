@@ -16,12 +16,13 @@ namespace Tests\Support\Bootstrap;
 
 use Exception;
 use Omega\Application\Application;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Bootstrap\BootProviders;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 
 /**
  * Class BootProvidersTest
@@ -45,17 +46,21 @@ use PHPUnit\Framework\TestCase;
  * @version    2.0.0
  */
 #[CoversClass(Application::class)]
+#[CoversClass(BindingResolutionException::class)]
 #[CoversClass(BootProviders::class)]
+#[CoversClass(CircularAliasException::class)]
+#[CoversClass(EntryNotFoundException::class)]
 class BootProvidersTest extends TestCase
 {
     /**
      * Test bootstrap
      *
      * @return void
-     * @throws InvalidDefinitionException If a provider definition is invalid in the container
-     * @throws NotFoundException If a provider or dependency is missing in the container
-     * @throws DependencyException If a dependency cannot be resolved by the container
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception if a generic error occurred
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function testBootstrap(): void
     {

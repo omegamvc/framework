@@ -80,7 +80,7 @@ class File extends AbstractStorage
      * @param array<string, mixed> $options Configuration options for the storage.
      * @return void
      * @throws CacheConfigurationException If the 'path' option is missing.
-     * @throws CachePathException If the specified path does not exist and cannot be created.
+     * @throws CachePathException if the cache directory cannot be created or is not writable.
      */
     public function __construct(array $options)
     {

@@ -679,7 +679,7 @@ class Collection extends AbstractCollectionImmutable
      * @param mixed $value The value to compare against.
      * @return $this
      */
-    public function where(int|string $key, string $operator, $value): self
+    public function where(int|string $key, string $operator, mixed $value): self
     {
         if ('=' === $operator || '==' === $operator) {
             return $this->filter(fn ($TValue) => array_key_exists($key, $TValue) && $TValue[$key] == $value);

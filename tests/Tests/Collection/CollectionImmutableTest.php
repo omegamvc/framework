@@ -170,11 +170,11 @@ class CollectionImmutableTest extends TestCase
     }
 
     /**
-     * Test it can by iterator.
+     * Test it can be iterator.
      *
      * @return void
      */
-    public function testItCanByIterator(): void
+    public function testItCanBeIterator(): void
     {
         $coll = new CollectionImmutable(['one' => 1, 'two' => 2, 'three' => 3]);
 
@@ -263,7 +263,7 @@ class CollectionImmutableTest extends TestCase
         $coll = new CollectionImmutable(['one' => 1, 'two' => '2', 'three' => 3]);
 
         $this->assertTrue(
-            $coll->contain(1, false)
+            $coll->contain(1)
         );
         $this->assertFalse(
             $coll->contain('1', true)

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
 use Omega\Collection\CollectionImmutable;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Router\RouteUrlBuilder;
 use Omega\Support\Env;
 use Omega\Http\RedirectResponse;
@@ -20,9 +20,11 @@ if (!function_exists('app_env')) {
      * Check application environment mode.
      *
      * @return string Application environment mode.
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @return string
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function app_env(): string
     {
@@ -35,9 +37,10 @@ if (!function_exists('is_production')) {
      * Check application production mode.
      *
      * @return bool True if in production mode.
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function is_production(): bool
     {
@@ -50,9 +53,10 @@ if (!function_exists('is_dev')) {
      * Check application development mode.
      *
      * @return bool True if in dev mode.
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function is_dev(): bool
     {
@@ -83,9 +87,10 @@ if (!function_exists('config')) {
      * Get Application Configuration.
      *
      * @return CollectionImmutable<string, mixed>
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function config(): CollectionImmutable
     {
@@ -101,9 +106,10 @@ if (!function_exists('view')) {
      * @param array<string, mixed> $data
      * @param array<string, mixed> $option
      * @return Response
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function view(string $view_path, array $data = [], array $option = []): Response
     {
@@ -123,9 +129,11 @@ if (!function_exists('vite')) {
      *
      * @param string ...$entry_points
      * @return array<string, string>|string
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function vite(string ...$entry_points): array|string
     {
@@ -211,9 +219,10 @@ if (!function_exists('get_path')) {
      * @param string|array $id
      * @param string $suffix_path Add string end of path.
      * @return string|array Config path folder or an array of config path folder.
-     * @throws DependencyException
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function get_path(string|array $id, string $suffix_path = ''): string|array
     {

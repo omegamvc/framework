@@ -37,7 +37,7 @@ class View
         $html = ob_get_clean();
 
         // send render content to client
-        return (new Response())
+        return new Response()
             ->setContent($html)
             ->setResponseCode(Response::HTTP_OK)
             ->removeHeaders([

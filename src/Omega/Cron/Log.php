@@ -55,8 +55,8 @@ class Log implements InterpolateInterface
     /**
      * {@inheritdoc}
      *
-     * @throws DateMalformedStringException
-     * @throws DateInvalidTimeZoneException
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
      */
     public function interpolate(string $message, array $context = []): void
     {

@@ -97,7 +97,7 @@ abstract class AbstractEnum
             );
         }
 
-        return (string)array_flip((new ReflectionClass(static::class))->getConstants())[$value];
+        return (string)array_flip(new ReflectionClass(static::class)->getConstants())[$value];
     }
 
     /**
@@ -107,7 +107,7 @@ abstract class AbstractEnum
      */
     final public static function values(): array
     {
-        return array_values((new ReflectionClass(static::class))->getConstants());
+        return array_values(new ReflectionClass(static::class)->getConstants());
     }
 
     /**
@@ -117,7 +117,7 @@ abstract class AbstractEnum
      */
     final public static function enum(): array
     {
-        return array_keys((new ReflectionClass(static::class))->getConstants());
+        return array_keys(new ReflectionClass(static::class)->getConstants());
     }
 
     /**

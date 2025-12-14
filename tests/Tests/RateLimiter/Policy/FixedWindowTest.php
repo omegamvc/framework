@@ -99,8 +99,8 @@ class FixedWindowTest extends TestCase
      * Test it can consume tokens within the limit.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItCanConsumeTokensWithinTheLimit(): void
     {
@@ -116,8 +116,8 @@ class FixedWindowTest extends TestCase
      * Test it blocks when consuming tokens exceeds the limit.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItBlocksWhenConsumingTokensExceedsTheLimit(): void
     {
@@ -138,8 +138,8 @@ class FixedWindowTest extends TestCase
      * Test it can peek at the rate limit status.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItCanPeekAtTheRateLimitStatus(): void
     {
@@ -158,8 +158,8 @@ class FixedWindowTest extends TestCase
      * Test it can reset the rate limit.
      *
      * @return void
-     * @throws DateInvalidTimeZoneException
-     * @throws DateMalformedStringException
+     * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
+     * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      */
     public function testItCanResetTheRateLimit(): void
     {

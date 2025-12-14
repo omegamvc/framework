@@ -63,10 +63,6 @@ use function var_dump;
  *
  * @template TKey of array-key
  * @template TValue
- * @implements CollectionInterface<TKey, TValue>
- *
- * @template TKey of array-key
- * @template TValue
  *
  * @implements CollectionInterface<TKey, TValue>
  */

@@ -17,13 +17,20 @@ use function ob_start;
 
 #[CoversClass(AbstractCommand::class)]
 #[CoversClass(Style::class)]
-#[CoversClass(ValidateCommandTrait::class)]
 #[CoversClass(Str::class)]
-#[CoversClass(ValidPool::class)]
 final class ValidateTraitTest extends TestCase
 {
     private $command;
 
+    /**
+     * Sets up the environment before each test method.
+     *
+     * This method is called automatically by PHPUnit before each test runs.
+     * It is responsible for initializing the application instance, setting up
+     * dependencies, and preparing any state required by the test.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         $this->command = new class(['php', 'omega', '--test', 'oke']) extends AbstractCommand {

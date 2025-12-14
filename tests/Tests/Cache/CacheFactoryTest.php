@@ -16,6 +16,7 @@ namespace Tests\Cache;
 
 use Omega\Cache\CacheFactory;
 use Omega\Cache\CacheInterface;
+use Omega\Cache\Exceptions\CachePathException;
 use Omega\Cache\Exceptions\UnknownStorageException;
 use Omega\Cache\Storage\File;
 use Omega\Cache\Storage\Memory;
@@ -57,12 +58,12 @@ class CacheFactoryTest extends TestCase
      * Test file factory.
      *
      * @return void
-     * @throws UnknownStorageException
+     * @throws CachePathException if the cache directory cannot be created or is not writable.
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function testFileFactory(): void
     {
-        $cache = new CacheFactory();
-        $cache->setDriver('array1', fn (): CacheInterface => new File(['ttl' => 3600, 'path' => '/cache']));
+        $cache = new CacheFactory('array1', new File(['ttl' => 3_600, 'path' => '/cache']));
         $this->assertInstanceOf(CacheInterface::class, $cache->getDriver('array1'));
 
         $this->assertTrue($cache->getDriver('array1')->set('key1', 'value1'));
@@ -73,12 +74,11 @@ class CacheFactoryTest extends TestCase
      * Test memory factory.
      *
      * @return void
-     * @throws UnknownStorageException
+     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function testMemoryFactory(): void
     {
-        $cache = new CacheFactory();
-        $cache->setDriver('array2', fn (): CacheInterface => new Memory(['ttl' => 3600]));
+        $cache = new CacheFactory('array2', new Memory(['ttl' => 3_600]));
         $this->assertInstanceOf(CacheInterface::class, $cache->getDriver('array2'));
 
         $this->assertTrue($cache->getDriver('array2')->set('key1', 'value1'));

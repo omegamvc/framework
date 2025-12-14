@@ -51,6 +51,7 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
 
     /**
      * {@inheritdoc}
+     *
      * @throws Exception
      */
     public function parse(string $template): string
@@ -105,7 +106,10 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
         return preg_replace_callback(
             /* phpcs:disable Generic.Files.LineLength.TooLong */
             '/{%\s*yield(?:\s*\(\s*[\'"](\w+)[\'"](?:\s*,\s*([\'\"].*?[\'\"]|null))?\s*\))?\s*%}(?:(.*?){%\s*endyield\s*%})?/s',
-            /** @param string[] $matches */
+            /**
+             * @param string[] $matches
+             * @throws Exception
+             */
             function (array $matches) use ($matchesLayout): string {
                 if (isset($matches[2]) && '' != $matches[2] && isset($matches[3])) {
                     throw new Exception('The yield statement cannot have both a default value and content.');

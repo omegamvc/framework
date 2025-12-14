@@ -10,11 +10,12 @@ use Exception;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Prompt;
 use Omega\Console\Traits\PrintHelpTrait;
-use Omega\Container\Definition\Exceptions\InvalidDefinitionException;
-use Omega\Container\Exceptions\DependencyException;
-use Omega\Container\Exceptions\NotFoundException;
+use Omega\Container\Exceptions\BindingResolutionException;
+use Omega\Container\Exceptions\CircularAliasException;
+use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Template\Generate;
 use Omega\Template\Method;
+use ReflectionException;
 use Throwable;
 
 use function class_exists;
@@ -70,10 +71,12 @@ class SeedCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @return bool
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function runInDev(): bool
     {
@@ -94,9 +97,11 @@ class SeedCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @return int
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function main(): int
     {
@@ -146,9 +151,11 @@ class SeedCommand extends AbstractCommand
     }
 
     /**
-     * @throws InvalidDefinitionException
-     * @throws NotFoundException
-     * @throws DependencyException
+     * @return int
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function make(): int
     {
