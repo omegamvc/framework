@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\View\Templator;
@@ -16,44 +26,57 @@ use function implode;
 use function ltrim;
 use function preg_replace_callback;
 
+/**
+ * Handles custom template directives.
+ *
+ * This templator allows registering and invoking user-defined directives inside templates.
+ * Directives are translated into PHP code at parse time, except for those reserved by
+ * the core templators listed in the exclude list.
+ *
+ * @category   Omega
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class DirectiveTemplator extends AbstractTemplatorParse
 {
-    /**
-     * @var array<string, Closure>
-     */
+    /** @var array<string, Closure> Registered custom directives mapped to their handler closures. */
     private static array $directive = [];
 
-    /**
-     * Excludes list of directive already use by Templator.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> List of reserved directive names mapped to their core templator classes. */
     public static array $excludeList = [
-        'break'    => BreakTemplator::class,
+        'break'     => BreakTemplator::class,
         'component' => ComponentTemplator::class,
-        'continue' => ContinueTemplator::class,
-        'else'     => IfTemplator::class,
-        'extend'   => SectionTemplator::class,
-        'foreach'  => EachTemplator::class,
-        'if'       => IfTemplator::class,
-        'include'  => IncludeTemplator::class,
-        'bool'     => BooleanTemplator::class,
-        'json'     => JsonTemplator::class,
-        'php'      => PHPTemplator::class,
-        'raw'      => NameTemplator::class,
-        'section'  => SectionTemplator::class,
-        'set'      => SetTemplator::class,
-        'use'      => UseTemplator::class,
-        'yield'    => SectionTemplator::class,
+        'continue'  => ContinueTemplator::class,
+        'else'      => IfTemplator::class,
+        'extend'    => SectionTemplator::class,
+        'foreach'   => EachTemplator::class,
+        'if'        => IfTemplator::class,
+        'include'   => IncludeTemplator::class,
+        'bool'      => BooleanTemplator::class,
+        'json'      => JsonTemplator::class,
+        'php'       => PHPTemplator::class,
+        'raw'       => NameTemplator::class,
+        'section'   => SectionTemplator::class,
+        'set'       => SetTemplator::class,
+        'use'       => UseTemplator::class,
+        'yield'     => SectionTemplator::class,
     ];
 
     /**
-     * Register.
+     * Registers a new custom directive.
      *
-     * @param string $name
-     * @param Closure $callable
+     * The directive name must not conflict with any reserved directive handled
+     * by the core templators.
+     *
+     * @param string  $name     The directive name.
+     * @param Closure $callable The callback executed when the directive is invoked.
      * @return void
-     * @throws DirectiveCanNotBeRegisterException
+     * @throws DirectiveCanNotBeRegisterException If the directive name is reserved.
      */
     public static function register(string $name, Closure $callable): void
     {
@@ -65,12 +88,15 @@ class DirectiveTemplator extends AbstractTemplatorParse
     }
 
     /**
-     * Call.
+     * Calls a registered directive.
      *
-     * @param string $name
-     * @param mixed ...$parameters
-     * @return string
-     * @throws DirectiveCanNotBeRegisterException
+     * Executes the directive callback with the given parameters and returns
+     * its output as a string.
+     *
+     * @param string $name        The directive name.
+     * @param mixed  ...$parameters Parameters passed to the directive callback.
+     * @return string The rendered directive output.
+     * @throws DirectiveNotRegisterException If the directive is not registered.
      */
     public static function call(string $name, mixed ...$parameters): string
     {
@@ -99,8 +125,7 @@ class DirectiveTemplator extends AbstractTemplatorParse
                     ? $matches[0]
                     : '<?php echo Omega\View\Templator\DirectiveTemplator::call(\''
                     . $name . '\', '
-                    . implode(', ', $params) . '); ?>'
-                ;
+                    . implode(', ', $params) . '); ?>';
             },
             $template
         );

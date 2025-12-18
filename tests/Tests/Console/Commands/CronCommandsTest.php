@@ -64,7 +64,7 @@ final class CronCommandsTest extends AbstractTestCommand
 
     private function maker(string $argv): CronCommand
     {
-        return new class($this->argv('omega cron')) extends CronCommand {
+        return new class ($this->argv('omega cron')) extends CronCommand {
             public function __construct($argv)
             {
                 parent::__construct($argv);

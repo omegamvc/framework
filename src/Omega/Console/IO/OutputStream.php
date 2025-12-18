@@ -46,11 +46,7 @@ use const STDOUT;
  */
 class OutputStream implements OutputStreamInterface
 {
-    /**
-     * The underlying stream resource used for output.
-     *
-     * @var resource The stream must be writable (e.g., STDOUT or a writable file handle)
-     */
+    /** @var resource The stream must be writable (e.g., STDOUT or a writable file handle) */
     private mixed $stream;
 
     /**

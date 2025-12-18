@@ -10,6 +10,8 @@
  * @version   2.0.0
  */
 
+/** @noinspection PhpMissingFieldTypeInspection If pass any type hinting the test return error. */
+
 declare(strict_types=1);
 
 namespace Tests\Container\Fixtures;

@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 use Omega\Console\IO\OutputStream;
 use Omega\Console\Style\Colors;
 use Omega\Console\Style\Style;
-
 use Throwable;
+
 use function chr;
 use function ob_get_clean;
 use function ob_start;
@@ -32,7 +32,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->textBlue();
 
-        $this->assertEquals(sprintf('%s[34;49mtext%s[0m', chr(27), chr(27)), $text, 'text must return blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[34;49mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue text terminal code'
+        );
     }
 
     /**
@@ -45,7 +53,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->bgBlue();
 
-        $this->assertEquals(sprintf('%s[39;44mtext%s[0m', chr(27), chr(27)), $text, 'text must return blue background terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[39;44mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue background terminal code'
+        );
     }
 
     /**
@@ -58,7 +74,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->textRed()->bgBlue();
 
-        $this->assertEquals(sprintf('%s[31;44mtext%s[0m', chr(27), chr(27)), $text, 'text must return red text and blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[31;44mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return red text and blue text terminal code'
+        );
     }
 
     /**
@@ -71,7 +95,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->raw(Colors::hexText('#ffd787'));
 
-        $this->assertEquals(sprintf('%s[38;2;255;215;135;49mtext%s[0m', chr(27), chr(27)), $text, 'text must return raw color terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[38;2;255;215;135;49mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return raw color terminal code'
+        );
 
         $cmd  = new Style('text');
         $text = $cmd->raw(Colors::rgbText(0, 0, 0));
@@ -104,7 +136,14 @@ final class StyleTest extends TestCase
             ->raw('38;2;0;0;0')
             ->raw('48;2;255;255;255');
 
-        $this->assertEquals(sprintf('%s[39;49;38;2;0;0;0;48;2;255;255;255mtext%s[0m', chr(27), chr(27)), $text);
+        $this->assertEquals(
+            sprintf(
+                '%s[39;49;38;2;0;0;0;48;2;255;255;255mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text
+        );
     }
 
     /**
@@ -126,7 +165,19 @@ final class StyleTest extends TestCase
             ->out(false);
         $text = ob_get_clean();
 
-        $this->assertEquals(sprintf('%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m', chr(27), chr(27), chr(27), chr(27), chr(27), chr(27)), $text, 'text must return blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue text terminal code'
+        );
     }
 
     /**
@@ -151,7 +202,15 @@ final class StyleTest extends TestCase
         $out = ob_get_clean();
 
         $this->assertEquals(
-            sprintf('start %s[39;44mi%s[0m%s[39;44m love %s[0m%s[39;44mphp%s[0m end', chr(27), chr(27), chr(27), chr(27), chr(27), chr(27)),
+            sprintf(
+                'start %s[39;44mi%s[0m%s[39;44m love %s[0m%s[39;44mphp%s[0m end',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
             $out
         );
     }
@@ -168,21 +227,51 @@ final class StyleTest extends TestCase
             ->textBlue()
             ->tabs(2)
         ;
-        $this->assertEquals(sprintf('%s[34;49mtext%s[0m%s[39;49m%s%s[0m', chr(27), chr(27), chr(27), "\t\t", chr(27)), $text);
+        $this->assertEquals(
+            sprintf(
+                '%s[34;49mtext%s[0m%s[39;49m%s%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                "\t\t",
+                chr(27)
+            ),
+            $text
+        );
 
         $cmd  = new Style('text');
         $text = $cmd
             ->textBlue()
             ->newLines(2)
         ;
-        $this->assertEquals(sprintf('%s[34;49mtext%s[0m%s[39;49m%s%s[0m', chr(27), chr(27), chr(27), "\n\n", chr(27)), $text);
+        $this->assertEquals(
+            sprintf(
+                '%s[34;49mtext%s[0m%s[39;49m%s%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                "\n\n",
+                chr(27)
+            ),
+            $text
+        );
 
         $cmd  = new Style('text');
         $text = $cmd
             ->textBlue()
             ->repeat('.', 5)
         ;
-        $this->assertEquals(sprintf('%s[34;49mtext%s[0m%s[39;49m%s%s[0m', chr(27), chr(27), chr(27), '.....', chr(27)), $text);
+        $this->assertEquals(
+            sprintf(
+                '%s[34;49mtext%s[0m%s[39;49m%s%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                '.....',
+                chr(27)
+            ),
+            $text
+        );
     }
 
     /**
@@ -195,7 +284,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->textColor(Colors::hexText('#ffd787'));
 
-        $this->assertEquals(sprintf('%s[38;2;255;215;135;49mtext%s[0m', chr(27), chr(27)), $text, 'text must return raw color terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[38;2;255;215;135;49mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return raw color terminal code'
+        );
     }
 
     /**
@@ -208,7 +305,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->textColor('#ffd787');
 
-        $this->assertEquals(sprintf('%s[38;2;255;215;135;49mtext%s[0m', chr(27), chr(27)), $text, 'text must return raw color terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[38;2;255;215;135;49mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return raw color terminal code'
+        );
     }
 
     /**
@@ -221,7 +326,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->bgColor(Colors::hexBg('#ffd787'));
 
-        $this->assertEquals(sprintf('%s[39;48;2;255;215;135mtext%s[0m', chr(27), chr(27)), $text, 'text must return raw color terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[39;48;2;255;215;135mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return raw color terminal code'
+        );
     }
 
     /**
@@ -234,7 +347,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->bgColor('#ffd787');
 
-        $this->assertEquals(sprintf('%s[39;48;2;255;215;135mtext%s[0m', chr(27), chr(27)), $text, 'text must return raw color terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[39;48;2;255;215;135mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return raw color terminal code'
+        );
     }
 
     /**
@@ -246,11 +367,27 @@ final class StyleTest extends TestCase
     {
         $text = new Style('text')->text_red_500();
 
-        $this->assertEquals(sprintf('%s[38;2;239;68;68;49mtext%s[0m', chr(27), chr(27)), $text, 'text must return raw color terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[38;2;239;68;68;49mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return raw color terminal code'
+        );
 
         $text = new Style('text')->bg_blue_500();
 
-        $this->assertEquals(sprintf('%s[39;48;2;59;130;246mtext%s[0m', chr(27), chr(27)), $text, 'text must return raw color terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[39;48;2;59;130;246mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return raw color terminal code'
+        );
     }
 
     /**
@@ -294,6 +431,7 @@ final class StyleTest extends TestCase
 
         // add using invoke
         $text(123)->bgBlue()->textWhite()->underline();
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
         $this->assertEquals(3, $text->length());
 
         // add using push
@@ -335,7 +473,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->textBlue()->resetDecorate();
 
-        $this->assertEquals(sprintf('%s[34;49mtext%s[0m', chr(27), chr(27)), $text, 'text must return blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[34;49mtext%s[0m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue text terminal code'
+        );
     }
 
     /**
@@ -348,7 +494,15 @@ final class StyleTest extends TestCase
         $cmd  = new Style('text');
         $text = $cmd->textBlue()->rawReset([0, 22]);
 
-        $this->assertEquals(sprintf('%s[34;49mtext%s[0;22m', chr(27), chr(27)), $text, 'text must return blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[34;49mtext%s[0;22m',
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue text terminal code'
+        );
     }
 
     /**
@@ -370,7 +524,19 @@ final class StyleTest extends TestCase
             ->yield();
         $text = ob_get_clean();
 
-        $this->assertEquals(sprintf('%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m', chr(27), chr(27), chr(27), chr(27), chr(27), chr(27)), $text, 'text must return blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue text terminal code'
+        );
     }
 
     /**
@@ -393,7 +559,17 @@ final class StyleTest extends TestCase
         ;
         $text = ob_get_clean();
 
-        $this->assertEquals(sprintf('%s[2;49mi%s[0m%s[31;49mlove%s[0m', chr(27), chr(27), chr(27), chr(27)), $text, 'text must return blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[2;49mi%s[0m%s[31;49mlove%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue text terminal code'
+        );
     }
 
     /**
@@ -417,7 +593,19 @@ final class StyleTest extends TestCase
         ;
         $text = ob_get_clean();
 
-        $this->assertEquals(sprintf('%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m', chr(27), chr(27), chr(27), chr(27), chr(27), chr(27)), $text, 'text must return blue text terminal code');
+        $this->assertEquals(
+            sprintf(
+                '%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
+            $text,
+            'text must return blue text terminal code'
+        );
     }
 
     /**
@@ -438,7 +626,18 @@ final class StyleTest extends TestCase
             ->outIf(true, false);
         $text = ob_get_clean();
 
-        $this->assertEquals(sprintf('%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m', chr(27), chr(27), chr(27), chr(27), chr(27), chr(27)), $text);
+        $this->assertEquals(
+            sprintf(
+                '%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
+            $text
+        );
 
         // using callback
         ob_start();
@@ -451,7 +650,18 @@ final class StyleTest extends TestCase
             ->outIf(true, false);
         $text = ob_get_clean();
 
-        $this->assertEquals(sprintf('%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m', chr(27), chr(27), chr(27), chr(27), chr(27), chr(27)), $text);
+        $this->assertEquals(
+            sprintf(
+                '%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0m',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
+            $text
+        );
 
         // if false
         ob_start();
@@ -544,7 +754,15 @@ final class StyleTest extends TestCase
         $text = ob_get_clean();
 
         $this->assertEquals(
-            sprintf('%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0;24m', chr(27), chr(27), chr(27), chr(27), chr(27), chr(27)),
+            sprintf(
+                '%s[2;49mi%s[0m%s[31;49mlove%s[0m%s[34;49mphp%s[0;24m',
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27),
+                chr(27)
+            ),
             $text,
             'render without decorate rule'
         );

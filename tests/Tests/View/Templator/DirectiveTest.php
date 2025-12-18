@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\View\Templator;
@@ -13,6 +23,21 @@ use Omega\View\Templator;
 use Omega\View\Templator\DirectiveTemplator;
 use Omega\View\TemplatorFinder;
 
+/**
+ * Test suite for the DirectiveTemplator.
+ *
+ * Ensures that custom directives can be registered, called, and
+ * that exceptions are thrown when directives are missing or not allowed.
+ *
+ * @category   Tests
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 #[CoversClass(DirectiveCanNotBeRegisterException::class)]
 #[CoversClass(DirectiveNotRegisterException::class)]
 #[CoversClass(Templator::class)]
@@ -24,14 +49,19 @@ final class DirectiveTest extends TestCase
      * test it cqn render each break
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If the templator fails to process the template.
      */
     public function testItCanRenderEachBreak(): void
     {
         DirectiveTemplator::register('sum', fn ($a, $b): int => $a + $b);
         $templator = new Templator(new TemplatorFinder([__DIR__], ['']), __DIR__);
         $out       = $templator->templates('<html><head></head><body>{% sum(1, 2) %}</body></html>');
-        $this->assertEquals("<html><head></head><body><?php echo Omega\View\Templator\DirectiveTemplator::call('sum', 1, 2); ?></body></html>", $out); // phpcs:ignore
+        $this->assertEquals(
+            "<html><head></head><body>"
+            . "<?php echo Omega\View\Templator\DirectiveTemplator::call('sum', 1, 2); ?>"
+            . "</body></html>",
+            $out
+        );
     }
 
     /**

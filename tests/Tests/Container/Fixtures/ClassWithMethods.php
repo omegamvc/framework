@@ -55,6 +55,7 @@ class ClassWithMethods
      * Private method used to test reflection of non-public methods.
      *
      * @return void
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function privateMethod(): void
     {

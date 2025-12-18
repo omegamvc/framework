@@ -42,6 +42,7 @@ class StaticSetterClass
      *
      * @param DependencyClass $dependency
      * @return void
+     * @noinspection PhpUnusedParameterInspection
      */
     public static function setStaticDependency(DependencyClass $dependency): void
     {

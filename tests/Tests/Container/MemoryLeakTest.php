@@ -106,6 +106,7 @@ class MemoryLeakTest extends AbstractTestContainer
      * @return void
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
+     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
      */
     public function testLeakInjectOn(): void
     {

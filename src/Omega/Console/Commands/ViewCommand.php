@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
@@ -16,8 +26,8 @@ use Omega\Text\Str;
 use Omega\View\Templator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-
 use ReflectionException;
+
 use function array_key_exists;
 use function arsort;
 use function count;
@@ -40,6 +50,21 @@ use function usleep;
 use const DIRECTORY_SEPARATOR;
 
 /**
+ * Console command for managing view templates.
+ *
+ * Provides utilities to compile, cache, clear, and watch view files.
+ * It supports bulk compilation, cache cleanup, and a watch mode that
+ * automatically recompiles templates when changes are detected.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @property string|null $prefix
  */
 class ViewCommand extends AbstractCommand
@@ -47,7 +72,9 @@ class ViewCommand extends AbstractCommand
     use PrintHelpTrait;
 
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -74,6 +101,10 @@ class ViewCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -96,12 +127,13 @@ class ViewCommand extends AbstractCommand
     }
 
     /**
-     * Find files recursively in a directory using a pattern.
+     * Recursively scans a directory and returns all files matching a given pattern.
      *
-     * @param string $directory
-     * @param string $pattern
-     * @return array<string>
+     * @param string $directory Base directory to search in.
+     * @param string $pattern   Filename pattern (glob-style) used for filtering.
+     * @return array<string>    List of matched file paths.
      */
+
     private function findFiles(string $directory, string $pattern): array
     {
         $files    = [];
@@ -120,9 +152,15 @@ class ViewCommand extends AbstractCommand
     }
 
     /**
-     * @param Templator $templator
-     * @return int
-     * @throws Exception
+     * Compiles all view templates and stores them in the cache.
+     *
+     * @param Templator $templator View templating engine instance.
+     * @return int Returns 0 on success, or 1 if no files are found.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws Exception Thrown when a compilation error occurs.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function cache(Templator $templator): int
     {
@@ -158,7 +196,9 @@ class ViewCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Removes all cached view files.
+     *
+     * @return int Returns 0 when cache is cleared, or 1 if no cached files exist.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -198,9 +238,15 @@ class ViewCommand extends AbstractCommand
     }
 
     /**
-     * @param Templator $templator
-     * @return int
-     * @throws Exception
+     * Watches view files and recompiles them when changes are detected.
+     *
+     * @param Templator $templator View templating engine instance.
+     * @return int Returns 0 when the watch process ends, or 1 on initialization failure.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws Exception Thrown when a compilation or watch error occurs.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function watch(Templator $templator): int
     {
@@ -270,7 +316,9 @@ class ViewCommand extends AbstractCommand
     }
 
     /**
-     * @return array<string, int>
+     * Builds an index of view files with their last modification times.
+     *
+     * @return array<string,int> An associative array of file paths and timestamps.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -303,11 +351,17 @@ class ViewCommand extends AbstractCommand
     }
 
     /**
-     * @param Templator $templator
-     * @param string $filePath
-     * @param int $width
-     * @return array<string, int>
-     * @throws Exception
+     * Compiles a single view file and outputs its execution time.
+     *
+     * @param Templator $templator View templating engine instance.
+     * @param string    $filePath  Absolute path to the view file.
+     * @param int       $width     Output formatting width.
+     * @return array<string,int>   Dependency list with modification times.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws Exception Thrown when compilation fails.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function compile(Templator $templator, string $filePath, int $width): array
     {
@@ -328,11 +382,13 @@ class ViewCommand extends AbstractCommand
     }
 
     /**
-     * @param Templator          $templator
-     * @param array<string, int> $getIndexes
-     * @param int                $width Console acceptable width
-     * @return array<string, array<string, int>>
-     * @throws Exception
+     * Precompiles all indexed view files and resolves their dependencies.
+     *
+     * @param Templator          $templator View templating engine instance.
+     * @param array<string,int>  $getIndexes Indexed view files with timestamps.
+     * @param int                $width Output formatting width.
+     * @return array<string,array<string,int>> Compiled dependency map.
+     * @throws Exception Thrown when precompilation fails.
      */
     private function precompile(Templator $templator, array $getIndexes, int $width): array
     {

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
@@ -25,17 +35,43 @@ use function Omega\Console\style;
 use function Omega\Console\warn;
 use function ucfirst;
 
+/**
+ * Command to display help and command descriptions.
+ *
+ * This command is used to print help information for registered commands,
+ * list available commands, and provide details for specific commands.
+ * It supports the following command patterns:
+ * - `-h, --help`   : Show help information.
+ * - `--list`       : List all registered commands.
+ * - `help`         : Get help for a specific command.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class HelpCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 
     /**
+     * List of namespaces to search for command classes.
+     *
+     * This array stores namespaces where command classes can be found.
+     * It is merged with default namespaces to resolve the correct class names.
+     *
      * @var string[]
      */
     protected array $classNamespace = [];
 
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -53,6 +89,10 @@ class HelpCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -76,9 +116,12 @@ class HelpCommand extends AbstractCommand
 |_|     |_|             ';
 
     /**
-     * Use for print --help.
+     * Main method to display the help banner and available commands.
      *
-     * @return int
+     * This method prints the help banner, explains the usage of the command line,
+     * and lists all available commands and options for the user.
+     *
+     * @return int Exit code: always 0.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -144,7 +187,7 @@ class HelpCommand extends AbstractCommand
             ->newLines(2)
 
             ->push('Options:')->textYellow()
-            ->newLines(1)
+            ->newLines()
             ->repeat(' ', $this->printHelp['margin-left'])
             ->push('-h, --help')->textDim()->textGreen()
             ->tabs(3)
@@ -167,6 +210,14 @@ class HelpCommand extends AbstractCommand
         return 0;
     }
 
+    /**
+     * Lists all registered commands with their corresponding class and method names.
+     *
+     * This method prints a list of all available commands and shows the
+     * class and method that define each command's functionality.
+     *
+     * @return int Exit code: always 0.
+     */
     public function commandList(): int
     {
         style('List of all command registered:')->out();
@@ -206,7 +257,12 @@ class HelpCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Displays detailed help for a specific command.
+     *
+     * This method prints help information for a specific command, including its options
+     * and relations. If the command is not found, an error message is displayed.
+     *
+     * @return int Exit code: 0 if help is found, 1 if not.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -277,9 +333,9 @@ class HelpCommand extends AbstractCommand
     }
 
     /**
-     * Transform commandsMap array to CommandMap.
+     * Converts the commands configuration into an array of CommandMap objects.
      *
-     * @return CommandMap[]
+     * @return CommandMap[] Array of command maps for registered commands.
      */
     private function commandMaps(): array
     {

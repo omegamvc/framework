@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\View\Templator;
@@ -10,6 +20,21 @@ use PHPUnit\Framework\TestCase;
 use Omega\View\Templator;
 use Omega\View\TemplatorFinder;
 
+/**
+ * Test suite for the CommentTemplator.
+ *
+ * Ensures that comment blocks in templates are properly converted
+ * into PHP comments without affecting the rendered output.
+ *
+ * @category   Tests
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 #[CoversClass(Templator::class)]
 #[CoversClass(TemplatorFinder::class)]
 final class CommentTest extends TestCase
@@ -18,7 +43,7 @@ final class CommentTest extends TestCase
      * Test it can render each break.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
      */
     public function testItCanRenderEachBreak(): void
     {

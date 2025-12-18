@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+<?php
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
 
@@ -6,9 +8,11 @@ namespace Tests\Console;
 
 use PHPUnit\Framework\TestCase;
 use Omega\Console\Traits\TerminalTrait;
+
 use function fopen;
 use function getenv;
 use function tmpfile;
+
 use const STDOUT;
 
 class HasColorSupportTest extends TestCase

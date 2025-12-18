@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\View\Templator;
@@ -10,16 +20,30 @@ use PHPUnit\Framework\TestCase;
 use Omega\View\Templator;
 use Omega\View\TemplatorFinder;
 
+/**
+ * Test suite for the SetTemplator.
+ *
+ * Ensures that `{% set %}` directives correctly assign values
+ * to variables inside templates, supporting different data types.
+ *
+ * @category   Tests
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 #[CoversClass(Templator::class)]
 #[CoversClass(TemplatorFinder::class)]
 final class SetTest extends TestCase
 {
-
     /**
      * Test it can render set string.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If the templator fails to process the template.
      */
     public function testItCanRenderSetString(): void
     {
@@ -33,7 +57,7 @@ final class SetTest extends TestCase
      * Test it can render set int.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If the templator fails to process the template.
      */
     public function testItCanRenderSetInt(): void
     {
@@ -46,7 +70,7 @@ final class SetTest extends TestCase
      * Test it can render set array.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If the templator fails to process the template.
      */
     public function testItCanRenderSetArray(): void
     {

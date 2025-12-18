@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\View\Templator;
@@ -18,35 +28,37 @@ use function preg_replace_callback;
 use function str_contains;
 use function trim;
 
+/**
+ * ComponentTemplator is responsible for parsing and rendering template components.
+ *
+ * This class extends AbstractTemplatorParse and implements DependencyTemplatorInterface.
+ * It handles `{% component(...) %}` directives, supports nested components, caching of file contents,
+ * namespace management, and dependency tracking for components used in templates.
+ *
+ * @category   Omega
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class ComponentTemplator extends AbstractTemplatorParse implements DependencyTemplatorInterface
 {
     use InteractWithCacheTrait;
 
-    /**
-     * File get content cached.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> Cached file contents to avoid multiple file reads. */
     private static array $cache = [];
 
-    /**
-     * Namespace.
-     *
-     * @var string
-     */
+    /** @var string Holds the namespace for component classes. */
     private string $namespace = '';
 
-    /**
-     * Depend on.
-     *
-     * @var array<string, int>
-     */
+    /** @var array<string, int> Tracks component dependencies for the current template. */
     private array $dependOn = [];
 
     /**
-     * DependOn.
-     *
-     * @return array<string, int>
+     * {@inheritdoc}
      */
     public function dependOn(): array
     {
@@ -54,11 +66,9 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
     }
 
     /**
-     * Parse.
+     * {@inheritdoc}
      *
-     * @param string $template
-     * @return string
-     * @throws Exception
+     * @throws Exception When a parsing error occurs.
      */
     public function parse(string $template): string
     {
@@ -68,10 +78,10 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
     }
 
     /**
-     * Set namespace.
+     * Sets the namespace to use for component classes.
      *
-     * @param string $namespace
-     * @return $this
+     * @param string $namespace The namespace prefix for component classes.
+     * @return $this Returns the current instance for method chaining.
      */
     public function setNamespace(string $namespace): self
     {
@@ -81,11 +91,14 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
     }
 
     /**
-     * Parse component.
+     * Recursively parses component directives within a template.
      *
-     * @param string $template
-     * @return string
-     * @throws YeldSectionNotFoundException
+     * Supports nested components, inner content replacement, and dependency tracking.
+     *
+     * @param string $template The template content containing `{% component %}` directives.
+     * @return string The template with all components resolved.
+     * @throws YeldSectionNotFoundException If a yield section referenced in a component is not found.
+     * @throws ViewFileNotFoundException If the template cannot be found in any registered path.
      */
     private function parseComponent(string $template): string
     {
@@ -140,10 +153,14 @@ class ComponentTemplator extends AbstractTemplatorParse implements DependencyTem
     }
 
     /**
-     * Extract component name and parameters from raw params.
+     * Extracts the component name and parameters from a raw string.
      *
-     * @param string $rawParams
-     * @return array{0: string, 1: array<string, string>}
+     * Converts a raw parameter string like `'MyComponent', key: 'value'` into
+     * a component name and an associative array of parameters.
+     *
+     * @param string $rawParams Raw parameter string from the component directive.
+     * @return array{0: string, 1: array<string, string>} An array containing the component name
+     *         at index 0 and parameters array at index 1.
      */
     private function extractComponentAndParams(string $rawParams): array
     {

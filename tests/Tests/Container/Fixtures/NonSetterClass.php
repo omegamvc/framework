@@ -41,6 +41,7 @@ class NonSetterClass
      *
      * @param DependencyClass $dependency Resolved dependency.
      * @return void
+     * @noinspection PhpUnusedParameterInspection
      */
     public function doSomething(DependencyClass $dependency): void
     {

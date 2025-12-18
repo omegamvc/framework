@@ -69,7 +69,7 @@ final class TimeTravelTest extends TestCase
      *
      * @return void
      */
-    public function testItSameWithCurrentTime(): void
+    /**public function testItSameWithCurrentTime(): void
     {
         $now = new Now();
 
@@ -132,6 +132,25 @@ final class TimeTravelTest extends TestCase
             $now->monthName,
             'the time must same with this day name'
         );
+    }*/
+    public function testItSameWithCurrentTime(): void
+    {
+        $timestamp = time();
+        $now       = new Now();
+
+        $this->assertSame($timestamp, $now->timestamp);
+
+        $this->assertSame((int) date('Y', $timestamp), $now->year);
+        $this->assertSame((int) date('n', $timestamp), $now->month);
+        $this->assertSame((int) date('d', $timestamp), $now->day);
+
+        $this->assertSame(date('D', $timestamp), $now->shortDay);
+        $this->assertSame((int) date('H', $timestamp), $now->hour);
+        $this->assertSame((int) date('i', $timestamp), $now->minute);
+        $this->assertSame((int) date('s', $timestamp), $now->second);
+
+        $this->assertSame(date('l', $timestamp), $now->dayName);
+        $this->assertSame(date('F', $timestamp), $now->monthName);
     }
 
     /**

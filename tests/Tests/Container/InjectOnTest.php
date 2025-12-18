@@ -171,6 +171,7 @@ class InjectOnTest extends AbstractTestContainer
         $instance = new NestedDependencyClass();
         $this->container->injectOn($instance);
 
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
         $this->assertInstanceOf(NestedDependencyClass::class, $instance);
         $this->assertInstanceOf(Dependant::class, $instance->dependant);
         $this->assertInstanceOf(Dependency::class, $instance->dependant->dep);

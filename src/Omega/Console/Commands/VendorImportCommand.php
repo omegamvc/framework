@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
@@ -14,7 +24,23 @@ use function is_dir;
 use function Omega\Console\success;
 
 /**
- * Command to import files or directories from vendor packages.
+ * ServeCommand
+ *
+ * Provides a development HTTP server for the application using PHP's built-in server.
+ * This command allows running the application locally on a specified port and,
+ * optionally, exposing it to the local network.
+ *
+ * It is intended for development and testing purposes only and should not be
+ * used in production environments.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  *
  * @property bool   $force Whether to force the import, overwriting existing files.
  * @property string $tag   The tag to identify specific commands to run.
@@ -24,12 +50,17 @@ class VendorImportCommand extends AbstractCommand
     use PrintHelpTrait;
 
     /**
-     * Progress bar for tracking import status.
+     * Progress bar instance used to track the progress of vendor imports.
+     *
+     * It reflects the current position, total workload, and visual feedback
+     * during file or directory copy operations.
      */
     private ProgressBar $status;
 
     /**
-     * Command registration details.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -45,7 +76,9 @@ class VendorImportCommand extends AbstractCommand
     ];
 
     /**
-     * Provides help information for the command.
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
      *
      * @return array<string, array<string, string|string[]>>
      */
@@ -65,7 +98,9 @@ class VendorImportCommand extends AbstractCommand
     }
 
     /**
-     * Main method to execute the import command.
+     * {@inheritdoc}
+     *
+     * @return int Exit code: always 0.
      */
     public function main(): int
     {
@@ -76,9 +111,15 @@ class VendorImportCommand extends AbstractCommand
     }
 
     /**
-     * Import specified modules (files or directories).
+     * Import vendor modules defined by service providers.
+     *
+     * Iterates through the given modules, filtering them by tag and importing
+     * files or directories into the target vendor paths while updating
+     * the progress bar accordingly.
      *
      * @param array<string, array<string, string>> $modules
+     *        A map of tags to source/target path pairs to be imported.
+     * @return void
      */
     protected function importItem(array $modules): void
     {
@@ -111,7 +152,17 @@ class VendorImportCommand extends AbstractCommand
     }
 
     /**
-     * Update the console with the progress bar status.
+     * Update the progress bar with the current import status.
+     *
+     * Advances the progress indicator and displays contextual information
+     * about the file or directory being copied, only when the operation
+     * succeeds.
+     *
+     * @param int    $current Current progress position
+     * @param bool   $success Whether the import operation succeeded
+     * @param string $from    Source path of the imported file or directory
+     * @param string $to      Destination path of the imported file or directory
+     * @return void
      */
     protected function status(int $current, bool $success, string $from, string $to): void
     {

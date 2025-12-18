@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
@@ -15,13 +25,33 @@ use function count;
 use function is_array;
 use function Omega\Console\style;
 
+/**
+ * RouteCommand
+ *
+ * Console command that lists all registered application routes.
+ * It formats and displays route information such as HTTP methods,
+ * route names, and URI expressions in a readable, styled output.
+ *
+ * The command is intended for inspection and debugging purposes,
+ * providing a quick overview of the routing configuration.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class RouteCommand extends AbstractCommand
 {
-    // use CommandTrait;
     use PrintHelpTrait;
 
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -33,6 +63,10 @@ class RouteCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -46,6 +80,11 @@ class RouteCommand extends AbstractCommand
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return int Exit code: always 0.
+     */
     public function main(): int
     {
         $print = new Style();
@@ -72,7 +111,13 @@ class RouteCommand extends AbstractCommand
     }
 
     /**
-     * @param string|string[] $methods
+     * Convert one or more HTTP methods into a styled output representation.
+     *
+     * When multiple methods are provided, they are grouped together
+     * and separated by a visual delimiter.
+     *
+     * @param string|string[] $methods One or more HTTP methods to format
+     * @return Style Styled representation of the HTTP method(s)
      */
     private function methodToStyle(array|string $methods): Style
     {
@@ -92,6 +137,15 @@ class RouteCommand extends AbstractCommand
         return $this->coloringMethod($methods);
     }
 
+    /**
+     * Apply color styling to a single HTTP method based on its type.
+     *
+     * Common HTTP verbs are color-coded to improve readability
+     * in console output, while unknown methods use a dim style.
+     *
+     * @param string $method HTTP method name
+     * @return Style Styled HTTP method output
+     */
     private function coloringMethod(string $method): Style
     {
         $method = strtoupper($method);

@@ -33,7 +33,7 @@ final class ValidateTraitTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->command = new class(['php', 'omega', '--test', 'oke']) extends AbstractCommand {
+        $this->command = new class (['php', 'omega', '--test', 'oke']) extends AbstractCommand {
             use ValidateCommandTrait;
 
             public function main(): void

@@ -51,7 +51,7 @@ class RouteClassController
     /**
      * Handle the "create" action.
      *
-     * This method is called when the create route of the resource is accessed.
+     * This method is called when the creation route of the resource is accessed.
      *
      * @return void
      */

@@ -87,7 +87,7 @@ class FileTest extends TestCase
             ->onlyMethods(['calculateExpirationTimestamp'])
             ->getMock();
 
-        $storage->expects($this->any())
+        $storage->expects($this->exactly(2))
             ->method('calculateExpirationTimestamp')
             ->willReturnOnConsecutiveCalls(
                 time() + 3600,

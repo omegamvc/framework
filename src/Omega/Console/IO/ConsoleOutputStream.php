@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\IO;
@@ -15,16 +25,36 @@ use const PHP_OS;
 use const STDERR;
 
 /**
+ * Class ConsoleOutputStream
+ *
+ * A specialized OutputStream that writes to the console error output.
+ * Detects interactive capabilities and adjusts behavior for environments
+ * like IBM iSeries (OS400).
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage IO
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  */
 class ConsoleOutputStream extends OutputStream implements OutputStreamInterface
 {
+    /**
+     * Constructor.
+     *
+     * Opens the appropriate error stream (STDERR if available, otherwise STDOUT)
+     * and initializes the parent OutputStream with it.
+     */
     public function __construct()
     {
         parent::__construct($this->openErrorStream());
     }
 
     /**
-     * Checks whether the stream is interactive (connected to a terminal).
+     * {@inheritdoc}
      */
     public function isInteractive(): bool
     {
@@ -32,7 +62,9 @@ class ConsoleOutputStream extends OutputStream implements OutputStreamInterface
     }
 
     /**
-     * @return resource
+     * Opens the appropriate stream to write error output.
+     *
+     * @return resource The writable stream resource
      */
     private function openErrorStream()
     {
@@ -44,8 +76,10 @@ class ConsoleOutputStream extends OutputStream implements OutputStreamInterface
     }
 
     /**
-     * Checks if current executing environment is IBM iSeries (OS400), which
-     * doesn't properly convert character-encodings between ASCII to EBCDIC.
+     * Determines if the current environment is IBM iSeries (OS400),
+     * which requires special handling due to ASCII/EBCDIC encoding issues.
+     *
+     * @return bool True if running on OS400, false otherwise
      */
     private function isRunningOS400(): bool
     {

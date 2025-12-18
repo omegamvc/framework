@@ -8,6 +8,7 @@ use Omega\Console\Test\TestCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Throwable;
+
 use function explode;
 
 #[CoversClass(TestCommand::class)]

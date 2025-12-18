@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
@@ -18,6 +28,23 @@ use function Omega\Console\info;
 use function Omega\Console\success;
 
 /**
+ * Class ClearCacheCommand
+ *
+ * Command to clear cache for the application. Supports clearing the default
+ * cache driver, all registered drivers, or specific drivers specified by the user.
+ *
+ * This command integrates with the Application's cache system and provides
+ * options for selective cache clearing.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @property bool $update
  * @property bool $force
  */
@@ -26,7 +53,9 @@ class ClearCacheCommand extends AbstractCommand
     use CommandTrait;
 
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -38,6 +67,10 @@ class ClearCacheCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -47,8 +80,8 @@ class ClearCacheCommand extends AbstractCommand
                 'cache:clear' => 'Clear cache (default drive)',
             ],
             'options'   => [
-                '--all'     => 'Clear all registered cache driver.',
-                '--drivers' => 'Clear specific driver name.',
+                '--all'     => 'Clear all registered cache drivers.',
+                '--drivers' => 'Clear specific driver name(s).',
             ],
             'relation'  => [
                 'cache:clear' => ['--all', '--drivers'],
@@ -57,10 +90,18 @@ class ClearCacheCommand extends AbstractCommand
     }
 
     /**
-     * @param Application $app
-     * @return int
-     * @throws CircularAliasException Thrown when alias resolution loops recursively.
-     * @throws UnknownStorageException if a requested cache storage driver is unknown, unregistered, or unsupported.
+     * Executes the cache clearing operation.
+     *
+     * Clears the default cache driver if no options are provided. If the
+     * `--all` option is used, all registered drivers will be cleared. If
+     * the `--drivers` option is provided, only the specified drivers will
+     * be cleared.
+     *
+     * @param Application $app The application instance containing cache services.
+     * @return int Exit code: 0 on success, 1 if cache is not configured.
+     * @throws CircularAliasException Thrown when cache alias resolution loops recursively.
+     * @throws UnknownStorageException If a requested cache storage driver is unknown,
+     *                                 unregistered, or unsupported.
      */
     public function clear(Application $app): int
     {

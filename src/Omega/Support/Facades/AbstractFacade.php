@@ -19,8 +19,8 @@ use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Facades\Exceptions\FacadeObjectNotSetException;
-
 use ReflectionException;
+
 use function array_key_exists;
 
 /**

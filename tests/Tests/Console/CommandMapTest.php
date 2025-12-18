@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\Console;
@@ -9,6 +19,21 @@ use PHPUnit\Framework\TestCase;
 use Omega\Console\CommandMap;
 use Throwable;
 
+/**
+ * Test suite for the CommandMap component.
+ *
+ * Verifies that command mappings correctly resolve commands, modes,
+ * classes, callbacks, matching logic, defaults, and error conditions
+ * used by the console command dispatcher.
+ *
+ * @category  Tests
+ * @package   Console
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(CommandMap::class)]
 class CommandMapTest extends TestCase
 {
@@ -246,7 +271,7 @@ class CommandMapTest extends TestCase
     public function testItCanGetCallUsingClass(): void
     {
         $command = new CommandMap([
-            'class'=> 'someclass',
+            'class' => 'someclass',
             // skip 'fn' because default if 'main'
         ]);
 

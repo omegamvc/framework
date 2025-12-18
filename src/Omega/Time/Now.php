@@ -572,9 +572,9 @@ class Now
     }
 
     /**
-     * Checks if the current year is last year.
+     * Determines whether this instance represents the previous calendar year.
      *
-     * @return bool True if the year is last year, false otherwise.
+     * @return bool True if the year matches the previous calendar year, false otherwise.
      */
     public function isLastYear(): bool
     {
@@ -583,9 +583,9 @@ class Now
     }
 
     /**
-     * Checks if the current month is last month.
+     * Determines whether this instance represents the previous calendar month.
      *
-     * @return bool True if the month is last month, false otherwise.
+     * @return bool True if the month matches the previous calendar month, false otherwise.
      */
     public function isLastMonth(): bool
     {

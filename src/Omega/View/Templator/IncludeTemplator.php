@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\View\Templator;
@@ -12,28 +22,46 @@ use Omega\View\InteractWithCacheTrait;
 use function preg_replace_callback;
 use function trim;
 
+/**
+ * Include templator class.
+ *
+ * Processes `{% include('view') %}` directives within templates.
+ *
+ * This templator resolves and inlines external template files, optionally
+ * parsing nested includes up to a configurable maximum depth. It also tracks
+ * template dependencies for cache invalidation or recompilation purposes.
+ *
+ * @category   Omega
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class IncludeTemplator extends AbstractTemplatorParse implements DependencyTemplatorInterface
 {
     use InteractWithCacheTrait;
 
+    /** @var int Maximum allowed recursive include depth to prevent infinite inclusion loops. */
     private int $makeDept = 5;
 
+    /** @var int Current include depth during recursive parsing. */
     private int $dept = 0;
 
-    /**
-     * Depend on.
-     *
-     * @var array<string, int>
-     */
+    /** @var array<string, int> Tracks included template paths and their inclusion depth. */
     private array $dependOn = [];
 
-    /**
-     * File get content cached.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> Cached contents of already loaded template files. */
     private static array $cache = [];
 
+    /**
+     * Sets the maximum recursion depth for nested include directives.
+     *
+     * @param int $makeDept Maximum include depth.
+     * @return $this Returns the current instance for method chaining.
+     */
     public function maksDept(int $makeDept): self
     {
         $this->makeDept = $makeDept;
@@ -42,7 +70,7 @@ class IncludeTemplator extends AbstractTemplatorParse implements DependencyTempl
     }
 
     /**
-     * @return array<string, int>
+     * {@inheritdoc}
      */
     public function dependOn(): array
     {
@@ -51,7 +79,8 @@ class IncludeTemplator extends AbstractTemplatorParse implements DependencyTempl
 
     /**
      * {@inheritdoc}
-     * @throws Exception
+     *
+     * @throws Exception If an included template file cannot be found.
      */
     public function parse(string $template): string
     {

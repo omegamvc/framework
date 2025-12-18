@@ -8,12 +8,14 @@ use Omega\Console\AbstractCommand;
 use Omega\Console\IO\OutputStream;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+
 use function fclose;
 use function fopen;
 use function putenv;
 use function rewind;
 use function stream_get_contents;
 use function stream_isatty;
+
 use const STDOUT;
 
 #[CoversClass(AbstractCommand::class)]
@@ -48,7 +50,7 @@ class CommandTest extends TestCase
      */
     public function testItCanGetWidth(): void
     {
-        $command = new class([]) extends AbstractCommand {
+        $command = new class ([]) extends AbstractCommand {
             public function width(int $min = 80, int $max = 160): int
             {
                 return $this->getWidth($min, $max);
@@ -69,7 +71,7 @@ class CommandTest extends TestCase
     public function testItCanGetWidthUsingColumn(): void
     {
         $_ENV['COLUMNS'] = '100';
-        $command         = new class([]) extends AbstractCommand {
+        $command         = new class ([]) extends AbstractCommand {
             public function width(int $min = 80, int $max = 160): int
             {
                 return $this->getWidth($min, $max);
@@ -87,7 +89,7 @@ class CommandTest extends TestCase
      */
     public function testItDisablesWhenNoColor(): void
     {
-        $cmd = new class([]) extends AbstractCommand {
+        $cmd = new class ([]) extends AbstractCommand {
             public function color($stream = STDOUT): bool
             {
                 return $this->hasColorSupport($stream);
@@ -109,7 +111,7 @@ class CommandTest extends TestCase
             $this->markTestSkipped('Not a TTY, TERM match pattern test skipped');
         }
 
-        $cmd = new class([]) extends AbstractCommand {
+        $cmd = new class ([]) extends AbstractCommand {
             public function color($stream = STDOUT): bool
             {
                 return $this->hasColorSupport($stream);
@@ -127,7 +129,7 @@ class CommandTest extends TestCase
      */
     public function testItDisablesWhenTermDumb(): void
     {
-        $cmd = new class([]) extends AbstractCommand {
+        $cmd = new class ([]) extends AbstractCommand {
             public function color($stream = STDOUT): bool
             {
                 return $this->hasColorSupport($stream);
@@ -149,7 +151,7 @@ class CommandTest extends TestCase
         $stream       = fopen('php://memory', 'w+');
         $outputStream = new OutputStream($stream);
 
-        $command = new class($outputStream) extends AbstractCommand {
+        $command = new class ($outputStream) extends AbstractCommand {
             public function __construct(OutputStream $output)
             {
                 parent::__construct([]);

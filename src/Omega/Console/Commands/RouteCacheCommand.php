@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Console\Commands;
@@ -11,16 +21,37 @@ use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Router\Router;
 use Omega\SerializableClosure\UnsignedSerializableClosure;
-
 use ReflectionException;
+
 use function Omega\Console\error;
 use function Omega\Console\success;
 use function Omega\Console\warn;
 
+/**
+ * RouteCacheCommand
+ *
+ * This command manages the caching of application routes.
+ * It provides two main operations:
+ * 1. cache - Builds and stores a route cache file, optionally for specific router files.
+ * 2. clear - Removes the existing route cache file.
+ *
+ * The class outputs status messages indicating success or failure of operations.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class RouteCacheCommand extends AbstractCommand
 {
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -35,6 +66,10 @@ class RouteCacheCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -54,9 +89,15 @@ class RouteCacheCommand extends AbstractCommand
     }
 
     /**
-     * @param Application $app
-     * @param Router $router
-     * @return int
+     * Build and store the route cache.
+     *
+     * This method retrieves routes from the Router instance, optionally loads
+     * specific route files, serializes closures when needed, and saves the
+     * resulting route array into a cache file for faster route resolution.
+     *
+     * @param Application $app    The application instance providing paths and services
+     * @param Router      $router The router instance containing registered routes
+     * @return int Returns 0 on successful cache creation, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -106,8 +147,13 @@ class RouteCacheCommand extends AbstractCommand
     }
 
     /**
-     * @param Application $app
-     * @return int
+     * Remove the route cache file.
+     *
+     * This method deletes the cached route file from the application cache directory.
+     * It prints a success message if the file existed and was removed, otherwise returns 1.
+     *
+     * @param Application $app The application instance providing paths and services
+     * @return int Returns 0 if the cache file was successfully removed, 1 if the file does not exist
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.

@@ -109,7 +109,7 @@ final class ReflectionCacheTest extends TestCase
     }
 
     /**
-     * Test it gets and caches constructor arameters.
+     * Test it gets and caches constructor parameters.
      *
      * @return void
      */

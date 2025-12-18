@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\View;
@@ -34,26 +44,48 @@ use function ob_get_clean;
 use function ob_get_level;
 use function ob_start;
 
+/**
+ * Class Templator
+ *
+ * Main template engine class responsible for parsing, compiling, caching, and rendering templates.
+ *
+ * It supports dependencies, component namespaces, caching, and a suite of templator classes for parsing
+ * directives, sections, includes, and other template features.
+ *
+ * @category  Omega
+ * @package   View
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class Templator
 {
+    /** @var TemplatorFinder Template finder instance for locating template files. */
     protected TemplatorFinder $finder;
+
+    /** @var string Directory path for cached compiled templates. */
     private string $cacheDir;
 
+    /** @var string Suffix appended to template names when rendering or compiling. */
     public string $suffix = '';
 
+    /** @var int Maximum recursion depth for template inclusion and components. */
     public int $maxDepth = 5;
 
+    /** @var string Namespace for component classes. */
     private string $componentNamespace = '';
 
-    /** @var array<string, array<string, int>> */
+    /** @var array<string, array<string, int>> Stores template dependencies by parent and child templates. */
     private array $dependency = [];
 
+
     /**
-     * Create new instance.
+     * Templator constructor.
      *
-     * @param string|TemplatorFinder $finder   If String will generate TemplatorFinder with default extension.
-     * @param string                 $cacheDir
-     * @return void
+     * @param string|TemplatorFinder $finder  Template directory or a TemplatorFinder instance.
+     * @param string                 $cacheDir Directory for cached compiled templates.
      */
     public function __construct(TemplatorFinder|string $finder, string $cacheDir)
     {
@@ -63,9 +95,9 @@ class Templator
     }
 
     /**
-     * Set Finder.
+     * Set a new TemplatorFinder instance.
      *
-     * @param TemplatorFinder $finder
+     * @param TemplatorFinder $finder Template finder instance.
      * @return self
      */
     public function setFinder(TemplatorFinder $finder): self
@@ -76,9 +108,9 @@ class Templator
     }
 
     /**
-     * Set Component Namespace.
+     * Set the namespace used for component classes.
      *
-     * @param string $namespace
+     * @param string $namespace Component namespace.
      * @return self
      */
     public function setComponentNamespace(string $namespace): self
@@ -89,11 +121,11 @@ class Templator
     }
 
     /**
-     * Add dependency.
+     * Add a dependency between a parent and a child template.
      *
-     * @param string $parent
-     * @param string $child
-     * @param int    $dependDeep
+     * @param string $parent      Parent template file path.
+     * @param string $child       Child template file path.
+     * @param int    $dependDeep  Dependency depth (default 1).
      * @return self
      */
     public function addDependency(string $parent, string $child, int $dependDeep = 1): self
@@ -104,10 +136,10 @@ class Templator
     }
 
     /**
-     * Prepend Dependency.
+     * Prepend multiple dependencies for a parent template.
      *
-     * @param string             $parent
-     * @param array<string, int> $children
+     * @param string             $parent   Parent template file path.
+     * @param array<string, int> $children Array of child template paths with depth values.
      * @return self
      */
     public function prependDependency(string $parent, array $children): self
@@ -126,10 +158,10 @@ class Templator
     }
 
     /**
-     * Get dependency.
+     * Get the dependencies of a parent template.
      *
-     * @param string $parent
-     * @return array<string, int>
+     * @param string $parent Parent template file path.
+     * @return array<string, int> Array of child template paths with their depth.
      */
     public function getDependency(string $parent): array
     {
@@ -137,13 +169,13 @@ class Templator
     }
 
     /**
-     * Render
+     * Render a template with provided data, optionally using cached compiled templates.
      *
-     * @param string $templateName
-     * @param array<string, mixed> $data
-     * @param bool $cache
-     * @return string
-     * @throws Throwable
+     * @param string               $templateName Template file name without suffix.
+     * @param array<string, mixed> $data         Associative array of template variables.
+     * @param bool                 $cache        Whether to use cached compiled template if available.
+     * @return string Rendered template output.
+     * @throws Throwable If an error occurs during template execution.
      */
     public function render(string $templateName, array $data, bool $cache = true): string
     {
@@ -164,11 +196,11 @@ class Templator
     }
 
     /**
-     * Compile templator file to php file.
+     * Compile a template file to a PHP file without rendering.
      *
-     * @param string $templateName
-     * @return string
-     * @throws Exception
+     * @param string $templateName Template file name without suffix.
+     * @return string Compiled PHP template content.
+     * @throws Exception If the template file cannot be read or processed.
      */
     public function compile(string $templateName): string
     {
@@ -186,10 +218,10 @@ class Templator
     }
 
     /**
-     * Check view file exist.
+     * Check whether a template file exists.
      *
-     * @param string $templateName
-     * @return bool
+     * @param string $templateName Template file name without suffix.
+     * @return bool True if template exists, false otherwise.
      */
     public function viewExist(string $templateName): bool
     {
@@ -199,11 +231,12 @@ class Templator
     }
 
     /**
-     * Get view.
+     * Get the rendered view from a compiled PHP template file.
      *
-     * @param string               $templatePath
-     * @param array<string, mixed> $data
-     * @return string
+     * @param string               $templatePath Path to compiled PHP template file.
+     * @param array<string, mixed> $data         Associative array of variables to extract.
+     * @return string Rendered template output.
+     * @throws Throwable If an error occurs during execution of the template.
      */
     private function getView(string $templatePath, array $data): string
     {
@@ -230,12 +263,14 @@ class Templator
     }
 
     /**
-     * Transform templator to php template.
+     * Parse a template using all available templators.
      *
-     * @param string $template
-     * @param string $viewLocation
-     * @return string
-     * @throws Exception
+     * Applies transformations from each templator class in sequence and records dependencies.
+     *
+     * @param string $template     Template content to parse.
+     * @param string $viewLocation Original template file path for dependency tracking.
+     * @return string Parsed template content.
+     * @throws Exception If a templator fails to process the template.
      */
     public function templates(string $template, string $viewLocation = ''): string
     {

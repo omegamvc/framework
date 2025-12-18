@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -21,6 +31,8 @@ use Omega\Database\Schema\Table\Create;
 use Omega\Support\Facades\DB;
 use Omega\Support\Facades\PDO;
 use Omega\Support\Facades\Schema;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 use Throwable;
 
@@ -33,6 +45,21 @@ use function Omega\Console\warn;
 use const PATHINFO_FILENAME;
 
 /**
+ * Handles all database migration commands for the application.
+ *
+ * This class provides functionality to run, rollback, refresh, and manage
+ * migrations, as well as to create, drop, and inspect databases. It also
+ * integrates seeding and allows adding custom vendor migration paths.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @property ?int        $take
  * @property ?int        $batch
  * @property bool        $force
@@ -42,17 +69,20 @@ class MigrationCommand extends AbstractCommand
 {
     use PrintHelpTrait;
 
-    /** @todo: Ho aggiunto uno spazio prima dei DONE. Controllare se possono essere formattati in alto modo */
-
     /**
-     * Register vendor migration path.
+     * List of registered vendor migration paths.
+     *
+     * These paths will be scanned in addition to the default migration
+     * directory when running migration commands.
      *
      * @var string[]
      */
     public static array $vendorPaths = [];
 
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -91,6 +121,10 @@ class MigrationCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -132,10 +166,19 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @return string
+     * Retrieve the target database name for migration operations.
+     *
+     * This method returns the database name specified via the command-line option
+     * `--database`. If no option is provided, it retrieves the default database
+     * name from the application's schema connection.
+     *
+     * @return string The name of the database to be used for migration commands.
+     *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws NotFoundExceptionInterface Thrown if the requested schema connection service is not in the container.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function DbName(): string
@@ -144,7 +187,20 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @throws Exception
+     * Determine whether migration commands are running in a development environment.
+     *
+     * This method checks if the application is in development mode (`app()->isDev()`)
+     * or if the `--force` option is provided. If not, it prompts the user to confirm
+     * running migrations in production.
+     *
+     * @return bool Returns `true` if running in a development environment or if the user
+     *              confirms running in production; otherwise, `false`.
+     *
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws Exception Thrown if reading input from STDIN fails during the prompt.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function runInDev(): bool
     {
@@ -165,9 +221,15 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @param string|Style $message
-     * @return bool
-     * @throws Exception
+     * Prompt the user for confirmation with a yes/no question.
+     *
+     * This method displays a prompt message to the user and waits for a response.
+     * If the `--yes` option is provided, the method automatically returns `true`
+     * without asking.
+     *
+     * @param Style|string $message The message to display in the prompt. Can be a string or a styled message.
+     * @return bool Returns `true` if the user confirms, otherwise `false`.
+     * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      */
     private function confirmation(Style|string $message): bool
     {
@@ -188,10 +250,16 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Get migration list.
+     * Retrieve the list of migrations to be executed.
      *
-     * @param false|int $batch
-     * @return Collection<string, array<string, string>>
+     * This method collects migration files from the default migration path and any
+     * registered vendor paths, compares them with the migration table, and determines
+     * which migrations need to be run for the given batch.
+     *
+     * @param false|int $batch Optional batch number to limit the migrations. If `false`,
+     *                         the next batch number will be used automatically.
+     * @return Collection<string, array<string, string>> Returns a collection mapping
+     *         migration names to arrays containing `file_name` and `batch`.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -251,8 +319,12 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @return int
-     * @throws Exception
+     * {@inheritdoc}
+     *
+     * @return int Exit code indicating the result of running migrations:
+     *             0 on success, 2 if aborted due to environment or user confirmation failure,
+     *             1 on general failure.
+     * @throws Exception Thrown if an unexpected error occurs during migration execution.
      */
     public function main(): int
     {
@@ -260,9 +332,18 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @param bool $silent
-     * @return int
-     * @throws Exception
+     * Execute all pending migrations for the current batch.
+     *
+     * This method retrieves migration files, compares them with the migration table,
+     * and runs their `up` scripts. If the `--dry-run` option is provided, the SQL
+     * queries will only be displayed without executing them. Execution can be
+     * suppressed using the `$silent` flag.
+     *
+     * @param bool $silent If `true`, suppresses prompts and outputs; otherwise prompts may be shown.
+     * @return int Exit code indicating the result of running migrations:
+     *             0 on success, 2 if aborted due to environment or user confirmation failure,
+     *             1 on general failure.
+     * @throws Exception Thrown if an unexpected error occurs during migration execution.
      */
     public function migration(bool $silent = false): int
     {
@@ -278,6 +359,7 @@ class MigrationCommand extends AbstractCommand
             ->filter(static fn ($value): bool => $value['batch'] == $batch)
             ->sort();
 
+        /** @noinspection DuplicatedCode */
         $print->tap(info('Running migration'));
 
         foreach ($migrate as $key => $val) {
@@ -317,9 +399,23 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @param bool $silent
-     * @return int
-     * @throws Exception
+     * Drops and recreates the database, then runs all migrations from scratch.
+     *
+     * This method is typically used to reset the database to a clean state
+     * and apply all migrations in order. It respects the `$silent` flag
+     * to suppress prompts and output, and the `--dry-run` option to
+     * preview SQL queries without executing them.
+     *
+     * @param bool $silent If `true`, suppresses prompts and outputs; otherwise prompts may be shown.
+     * @return int Exit code indicating the result of running migrations:
+     *             0 on success, 2 if aborted due to environment or user confirmation failure,
+     *             1 on general failure.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws NotFoundExceptionInterface Thrown if the requested schema connection service is not in the container.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function fresh(bool $silent = false): int
     {
@@ -337,6 +433,7 @@ class MigrationCommand extends AbstractCommand
         $migrate = $this->baseMigrate()->sort();
         $width   = $this->getWidth(40, 60);
 
+        /** @noinspection DuplicatedCode */
         $print->tap(info('Running migration'));
 
         foreach ($migrate as $key => $val) {
@@ -376,9 +473,13 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @param bool $silent
-     * @return int
-     * @throws Exception
+     * Roll back all executed migrations.
+     *
+     * @param bool $silent If `true`, suppresses environment checks and user prompts.
+     * @return int Exit code indicating the result of the rollback operation:
+     *             0 on success, 2 if aborted due to environment restrictions or confirmation failure.
+     *
+     * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      */
     public function reset(bool $silent = false): int
     {
@@ -392,8 +493,13 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
+     * Reset all migrations and immediately re-run them.
+     *
+     * @return int Exit code indicating the result of the refresh operation:
+     *             0 on success, 2 if aborted due to environment restrictions,
+     *             or a propagated non-zero code from reset or migration.
      * @return int
-     * @throws Exception
+     * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      */
     public function refresh(): int
     {
@@ -412,7 +518,14 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Roll back one or more batches of migrations.
+     *
+     * @return int Exit code indicating the result of the rollback operation:
+     *             0 on success, 1 if required options are missing or invalid.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function rollback(): int
     {
@@ -433,11 +546,12 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Rolling backs migration.
+     * Roll back executed migrations based on batch number and limit.
      *
-     * @param false|int $batch
-     * @param int $take
-     * @return int
+     * @param false|int $batch The batch number to roll back, or `false` to determine it automatically.
+     * @param int $take The number of batches to roll back starting from the given batch.
+     * @return int Exit code indicating the result of the rollback process:
+     *             always returns 0 after processing the selected migrations.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -493,9 +607,18 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @param bool $silent
-     * @return int
-     * @throws Exception
+     * Create the target database and initialize the migration table if needed.
+     *
+     * @param bool $silent If `true`, suppresses confirmation prompts and environment checks.
+     * @return int Exit code indicating the result of the operation:
+     *             0 on success, 1 on failure, 2 if aborted due to environment or user confirmation.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws Exception Thrown if reading input from STDIN fails during confirmation prompts.
+     * @throws NotFoundExceptionInterface Thrown if the requested schema connection service is not in the container.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function databaseCreate(bool $silent = false): int
     {
@@ -524,9 +647,18 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @param bool $silent
-     * @return int
-     * @throws Exception
+     * Drop the target database after confirmation and environment validation.
+     *
+     * @param bool $silent If `true`, suppresses confirmation prompts and environment checks.
+     * @return int Exit code indicating the result of the operation:
+     *             0 on success, 1 on failure, 2 if aborted due to environment or user confirmation.
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws Exception Thrown if reading input from STDIN fails during confirmation prompts.
+     * @throws NotFoundExceptionInterface Thrown if the requested schema connection service is not in the container.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function databaseDrop(bool $silent = false): int
     {
@@ -539,7 +671,7 @@ class MigrationCommand extends AbstractCommand
 
         info("try to drop database `{$dbName}`")->out(false);
 
-        $success = Schema::drop()->database($dbName)->ifExists(true)->execute();
+        $success = Schema::drop()->database($dbName)->ifExists()->execute();
 
         if ($success) {
             success("success drop database `{$dbName}`")->out(false);
@@ -553,16 +685,21 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Display information about the current database or a specific table.
+     *
+     * @return int Exit code indicating the result:
+     *             0 on success, 2 if no tables are found or the database is empty.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws NotFoundExceptionInterface Thrown if the requested schema connection service is not in the container.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function databaseShow(): int
     {
         if ($this->option('table-name')) {
-            return $this->tableShow($this->option('table-name', null));
+            return $this->tableShow($this->option('table-name'));
         }
 
         $dbName = $this->DbName();
@@ -601,8 +738,11 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @param string $table
-     * @return int
+     * Display detailed column information for a specific database table.
+     *
+     * @param string $table The name of the table to inspect.
+     * @return int Exit code indicating the result:
+     *             always returns 0 after printing the table structure.
      */
     public function tableShow(string $table): int
     {
@@ -637,7 +777,10 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Display the current migration status and batch numbers.
+     *
+     * @return int Exit code indicating the result:
+     *             always returns 0 after printing migration statuses.
      */
     public function status(): int
     {
@@ -661,9 +804,11 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Integrate seeder during run migration.
+     * Execute seeders after migrations based on the provided options.
      *
-     * @return int
+     * @return int Exit code indicating the result:
+     *             0 if no seeding is performed or on success,
+     *             otherwise the exit code returned by the seeder command.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -691,9 +836,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Check for migration table exist or not in this current database.
+     * Determine whether the migration table exists in the current database.
      *
-     * @return bool
+     * @return bool Returns true if the migration table exists, false otherwise.
      */
     private function hasMigrationTable(): bool
     {
@@ -712,9 +857,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Create migration table schema.
+     * Create the migration table schema in the current database.
      *
-     * @return bool
+     * @return bool Returns true on successful creation, false on failure.
      */
     private function createMigrationTable(): bool
     {
@@ -727,9 +872,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Get migration batch file in migration table.
+     * Retrieve the list of executed migrations and their batch numbers.
      *
-     * @return Collection<string, int>
+     * @return Collection<string, int> A collection mapping migration names to their batch numbers.
      */
     private function getMigrationTable(): Collection
     {
@@ -743,10 +888,10 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Save insert migration file with batch to migration table.
+     * Insert a migration record into the migration table.
      *
-     * @param array<string, string|int> $migration
-     * @return bool
+     * @param array<string, string|int> $migration The migration name and its associated batch number.
+     * @return bool Returns true on successful insertion, false otherwise.
      */
     private function insertMigrationTable(array $migration): bool
     {
@@ -758,10 +903,10 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Save insert migration file with batch to migration table.
+     * Delete migration records for the specified batch number.
      *
-     * @param int $batchNumber
-     * @return bool
+     * @param int $batchNumber The batch number whose migrations should be removed.
+     * @return bool Returns true on successful deletion, false otherwise.
      */
     private function deleteMigrationTable(int $batchNumber): bool
     {
@@ -773,7 +918,11 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Initialize the migration system by creating the migration table if it does not exist.
+     *
+     * @return int Exit code indicating the result:
+     *             0 if the migration table already exists or is successfully created,
+     *             1 if the migration table creation fails.
      */
     public function initializeMigration(): int
     {
@@ -795,9 +944,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Add migration from vendor path.
+     * Register an additional vendor directory to be scanned for migration files.
      *
-     * @param string $path
+     * @param string $path Absolute or relative path to the vendor migration directory.
      * @return void
      */
     public static function addVendorMigrationPath(string $path): void
@@ -806,9 +955,9 @@ class MigrationCommand extends AbstractCommand
     }
 
     /**
-     * Flush migration vendor paths.
+     * Remove all previously registered vendor migration paths.
      *
-     * @return void
+     * @reurn void
      */
     public static function flushVendorMigrationPaths(): void
     {

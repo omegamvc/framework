@@ -66,6 +66,7 @@ final class TestJsonResponseTest extends TestCase
         $response['test'] = 'test';
 
         $this->assertEquals('ok', $response['status']);
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
         $this->assertEquals('test', $response['test']);
     }
 

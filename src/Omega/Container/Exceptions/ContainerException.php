@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Omega\Container\Exceptions;
 
 use Exception;
+use Psr\Container\ContainerExceptionInterface;
 
 /**
  * Generic exception thrown by the container for errors not covered by more specific exceptions.
@@ -28,6 +29,6 @@ use Exception;
  * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
  * @version    2.0.0
  */
-class ContainerException extends Exception // implements ContainerExceptionInterface
+class ContainerException extends Exception implements ContainerExceptionInterface
 {
 }

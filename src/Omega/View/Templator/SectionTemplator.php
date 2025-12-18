@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\View\Templator;
@@ -15,34 +25,44 @@ use function explode;
 use function htmlspecialchars;
 use function preg_match;
 use function preg_replace_callback;
+use function sprintf;
 use function str_replace;
 use function trim;
 
 use const PHP_EOL;
 
+/**
+ * Handles template inheritance through sections and layout extension.
+ *
+ * This templator processes layout extension directives, collects defined sections,
+ * and injects them into the parent layout using yield placeholders. It supports
+ * inline sections, block sections, grouped section definitions, default values,
+ * and content fallbacks, while tracking template dependencies.
+ *
+ * @category   Omega
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class SectionTemplator extends AbstractTemplatorParse implements DependencyTemplatorInterface
 {
     use InteractWithCacheTrait;
 
-    /** @var array<string, mixed> */
-    private $section     = [];
+    /** @var array<string, mixed> Stores resolved section contents indexed by section name. */
+    private array $section = [];
 
-    /**
-     * File get content cached.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> Cached contents of resolved template files. */
     private static array $cache = [];
 
-    /**
-     * Depend on.
-     *
-     * @var array<string, int>
-     */
+    /** @var array<string, int> Tracks template dependencies and their nesting depth. */
     private array $dependOn = [];
 
     /**
-     * @return array<string, int>
+     * {@inheritdoc}
      */
     public function dependOn(): array
     {
@@ -52,7 +72,7 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
     /**
      * {@inheritdoc}
      *
-     * @throws Exception
+     * @throws Exception If the layout template is missing, invalid, or if yield rules are violated.
      */
     public function parse(string $template): string
     {
@@ -131,7 +151,13 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
                 }
 
                 if (isset($matches[1])) {
-                    throw new Exception("Slot with extends '{$matchesLayout[1]}' required '{$matches[1]}'");
+                    throw new Exception(
+                        sprintf(
+                            "Slot with extends '%s' required '%s'",
+                            $matchesLayout[1],
+                            $matches[1]
+                        )
+                    );
                 }
 
                 return '';

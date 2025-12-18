@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\View;
@@ -21,6 +31,24 @@ use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 
+/**
+ * Test suite for the Templator rendering engine.
+ *
+ * This class verifies the full template lifecycle, including compilation,
+ * caching, rendering, inclusion, control structures, variables, sections,
+ * slots, comments, raw blocks, and error handling.
+ *
+ * It also ensures that templates behave consistently with and without cache,
+ * and that the Templator integrates correctly with the TemplatorFinder.
+ *
+ * @category  Tests
+ * @package   View
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(Str::class)]
 #[CoversClass(Templator::class)]
 #[CoversClass(TemplatorFinder::class)]
@@ -46,12 +74,33 @@ class TemplatorTest extends TestCase
         }
     }
 
+    /**
+     * Assert that the given text contains the expected substring.
+     *
+     * This helper method is used to improve test readability when checking
+     * that a rendered template includes specific output fragments.
+     *
+     * @param string $text The rendered output to inspect.
+     * @param string $find The substring expected to be present.
+     *
+     * @return void
+     */
     private function assertSee(string $text, string $find): void
     {
         $this->assertTrue(Str::contains($text, $find));
     }
 
-    /** @noinspection PhpSameParameterValueInspection */
+    /**
+     * Assert that the given text does NOT contain the specified substring.
+     *
+     * This helper method is mainly used to verify that certain template elements
+     * (such as comments or skipped blocks) are not rendered in the final output.
+     *
+     * @param string $text The rendered output to inspect.
+     * @param string $find The substring that must not be present.
+     * @return void
+     * @noinspection PhpSameParameterValueInspection
+     */
     private function assertBlind(string $text, string $find): void
     {
         $this->assertTrue(!Str::contains($text, $find));
@@ -61,7 +110,7 @@ class TemplatorTest extends TestCase
      * Test it can render php templare.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderPhpTemplate(): void
     {
@@ -82,7 +131,7 @@ class TemplatorTest extends TestCase
      * est it can render include template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderIncludeTemplate(): void
     {
@@ -103,7 +152,7 @@ class TemplatorTest extends TestCase
      * Test it can render include nesting template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderIncludeNestingTemplate(): void
     {
@@ -124,7 +173,7 @@ class TemplatorTest extends TestCase
      * Test it can render name template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderNameTemplate(): void
     {
@@ -145,7 +194,7 @@ class TemplatorTest extends TestCase
      * Test it can render name template with ternary.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderNameTemplateWithTernary(): void
     {
@@ -166,7 +215,7 @@ class TemplatorTest extends TestCase
      * Test it can render name template in sub folder.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderNameTemplateInSubFolder(): void
     {
@@ -183,7 +232,7 @@ class TemplatorTest extends TestCase
      * Test it can render if template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderIfTemplate(): void
     {
@@ -204,7 +253,7 @@ class TemplatorTest extends TestCase
      * Test it can render else if template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderElseIfTemplate(): void
     {
@@ -225,7 +274,7 @@ class TemplatorTest extends TestCase
      * Test it can render each template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderEachTemplate(): void
     {
@@ -246,7 +295,7 @@ class TemplatorTest extends TestCase
      * Test it can render section template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderSectionTemplate(): void
     {
@@ -292,7 +341,7 @@ class TemplatorTest extends TestCase
      * Test it can render template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderTemplate(): void
     {
@@ -316,7 +365,7 @@ class TemplatorTest extends TestCase
      * Test it can render comment template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderCommentTemplate(): void
     {
@@ -337,7 +386,7 @@ class TemplatorTest extends TestCase
      * Test it can render repeat template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderRepeatTemplate(): void
     {
@@ -358,7 +407,7 @@ class TemplatorTest extends TestCase
      * Test it can compile template file.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If the templator fails to process the template.
      */
     public function testItCanCompileTemplateFile(): void
     {
@@ -376,7 +425,7 @@ class TemplatorTest extends TestCase
      * Test it can compile set template.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If the templator fails to process the template.
      */
     public function testItCanCompileSetTemplate(): void
     {
@@ -398,7 +447,7 @@ class TemplatorTest extends TestCase
      * Test it can render name template with raw.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderNameTemplateWithRaw(): void
     {
@@ -408,14 +457,17 @@ class TemplatorTest extends TestCase
         $view = new Templator(new TemplatorFinder([$loader], ['']), $cache);
         $out  = $view->render('namingskip.php', ['render' => 'oke']);
 
-        $this->assertEquals('<html><head></head><body><h1>oke, your {{ name }}, ages {{ age }}</h1></body></html>', trim($out));
+        $this->assertEquals(
+            '<html><head></head><body><h1>oke, your {{ name }}, ages {{ age }}</h1></body></html>',
+            trim($out)
+        );
     }
 
     /**
      * Test it can render each break template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderEachBreakTemplate(): void
     {
@@ -432,7 +484,7 @@ class TemplatorTest extends TestCase
      * Test it can render each continue template.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanRenderEachContinueTemplate(): void
     {
@@ -449,7 +501,7 @@ class TemplatorTest extends TestCase
      * Test it can get raw parameter data.
      *
      * @return void
-     * @throws Throwable
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItCanGetRawParameterData(): void
     {
@@ -459,7 +511,10 @@ class TemplatorTest extends TestCase
         $view = new Templator(new TemplatorFinder([$loader], ['']), $cache);
         $out  = $view->render('parent-data.php', ['full.name' => 'taylor otwell']);
 
-        $this->assertEquals('<html><head></head><body><h1>my name is taylor otwell </h1></body></html>', trim($out));
+        $this->assertEquals(
+            '<html><head></head><body><h1>my name is taylor otwell </h1></body></html>',
+            trim($out)
+        );
     }
 
     /**

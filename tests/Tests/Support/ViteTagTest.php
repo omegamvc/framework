@@ -42,7 +42,7 @@ final class ViteTagTest extends TestCase
     }
 
     /**
-     * Test is css file.
+     * Test is CSS file.
      *
      * @return void
      */
@@ -73,7 +73,11 @@ final class ViteTagTest extends TestCase
             'false-should-be-ignored' => false,
             'null-should-be-ignored'  => null,
         ]);
-        $this->assertEquals('data-foo="123" async="true" defer', $buildAttributeString, 'should build attribute string from array');
+        $this->assertEquals(
+            'data-foo="123" async="true" defer',
+            $buildAttributeString,
+            'should build attribute string from array'
+        );
     }
 
     /**
@@ -103,7 +107,7 @@ final class ViteTagTest extends TestCase
     }
 
     /**
-     * Test create tag with attributes..
+     * Test create tag with attributes.
      *
      * @return void
      */
@@ -112,7 +116,11 @@ final class ViteTagTest extends TestCase
         $vite   = new Vite(__DIR__, '');
 
         $createTagWithAttributes = (
-            fn (string $url, string $entrypoint, array $attributes) => $this->{'createTag'}($url, $entrypoint, $attributes)
+            fn (
+                string $url,
+                string $entrypoint,
+                array $attributes
+            ) => $this->{'createTag'}($url, $entrypoint, $attributes)
         )->call(
             $vite,
             'foo.js',
@@ -123,7 +131,10 @@ final class ViteTagTest extends TestCase
             ],
         );
 
-        $this->assertEquals('<script type="module" data-foo="bar" async="true" src="foo.js"></script>', $createTagWithAttributes);
+        $this->assertEquals(
+            '<script type="module" data-foo="bar" async="true" src="foo.js"></script>',
+            $createTagWithAttributes
+        );
     }
 
     /**
@@ -185,7 +196,7 @@ final class ViteTagTest extends TestCase
     }
 
     /**
-     * Test get tags attributes with excption.
+     * Test get tags attributes with exception.
      *
      * @return void
      * @throws Exception

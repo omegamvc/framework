@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\View\Templator;
@@ -10,6 +20,21 @@ use PHPUnit\Framework\TestCase;
 use Omega\View\Templator;
 use Omega\View\TemplatorFinder;
 
+/**
+ * Test suite for the BreakTemplator within foreach loops.
+ *
+ * Validates that the `{% break %}` directive is correctly rendered
+ * into PHP code in various contexts.
+ *
+ * @category   Tests
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 #[CoversClass(Templator::class)]
 #[CoversClass(TemplatorFinder::class)]
 final class EachBreakTest extends TestCase
@@ -18,7 +43,7 @@ final class EachBreakTest extends TestCase
      * Test it can render each break.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If the templator fails to process the template.
      */
     public function testItCanRenderEachBreak(): void
     {
@@ -26,6 +51,13 @@ final class EachBreakTest extends TestCase
         $out       = $templator->templates(
             '<html><head></head><body>{% foreach ($numbers as $number) %}{% break %}{% endforeach %}</body></html>'
         );
-        $this->assertEquals('<html><head></head><body><?php foreach ($numbers as $number): ?><?php break ; ?><?php endforeach; ?></body></html>', $out);
+        $this->assertEquals(
+            '<html><head></head><body>'
+            . '<?php foreach ($numbers as $number): ?>'
+            . '<?php break ; ?>'
+            . '<?php endforeach; ?>'
+            . '</body></html>',
+            $out
+        );
     }
 }

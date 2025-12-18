@@ -481,7 +481,7 @@ class Router
      *
      * @param class-string|class-string[] $className  A class name or an array of class names to scan.
      * @return void
-     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.  If the class cannot be reflected.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public static function register(string|array $className): void
     {

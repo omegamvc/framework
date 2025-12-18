@@ -114,7 +114,7 @@ class ClearCacheCommandTest extends TestCase
 
         ob_start();
         $code = $command->clear($this->app);
-        $out  =ob_get_clean();
+        $out  = ob_get_clean();
 
         $this->assertEquals(0, $code);
         $this->assertStringContainsString("Clear 'memory' driver.", $out);

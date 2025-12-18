@@ -87,22 +87,31 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
 {
     use TerminalTrait;
 
+    /** @var int Status code representing a successful command execution. */
     public const int SUCCESS = 0;
 
+    /** @var int Status code representing a failed command execution. */
     public const int FAILURE = 1;
 
+    /** @var int Status code representing an invalid command or input. */
     public const int INVALID = 2;
 
+    /** @var int Silent verbosity level, no output will be shown. */
     public const int VERBOSITY_SILENT = 0;
 
+    /** @var int Quiet verbosity level, minimal output displayed. */
     public const int VERBOSITY_QUIET = 1;
 
+    /** @var int Normal verbosity level, default for regular output. */
     public const int VERBOSITY_NORMAL = 2;
 
+    /** @var int Verbose verbosity level, more detailed output. */
     public const int VERBOSITY_VERBOSE = 3;
 
+    /** @var int Very verbose verbosity level, extensive output shown. */
     public const int VERBOSITY_VERY_VERBOSE = 4;
 
+    /** @var int Debug verbosity level, maximum detail including debug info. */
     public const int VERBOSITY_DEBUG = 5;
 
     /** @var int Default verbosity level. */

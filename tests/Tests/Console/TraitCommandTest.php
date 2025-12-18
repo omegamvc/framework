@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Omega\Console\AbstractCommand;
 use Omega\Console\Style\Color\ForegroundColor;
 use Omega\Console\Traits\CommandTrait;
+
 use function chr;
 use function ob_get_clean;
 use function ob_start;
@@ -31,7 +32,7 @@ final class TraitCommandTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->command = new class(['cli', '--test']) extends AbstractCommand {
+        $this->command = new class (['cli', '--test']) extends AbstractCommand {
             use CommandTrait;
 
             public function __call($name, $arguments)

@@ -120,7 +120,7 @@ class ConsoleParseTest extends TestCase
      */
     public function testItCanRunMainMethod(): void
     {
-        $console = new class(['test', '--test', 'Oke']) extends TestCommand {
+        $console = new class (['test', '--test', 'Oke']) extends TestCommand {
             use CommandTrait;
 
             public function main()
@@ -211,7 +211,7 @@ class ConsoleParseTest extends TestCase
     {
         $command = 'php cp /path/to/inputfile /path/to/outputfile';
         $argv    = explode(' ', $command);
-        $cli     = new class($argv) extends TestCommand {
+        $cli     = new class ($argv) extends TestCommand {
             /**
              * @return string[]
              */

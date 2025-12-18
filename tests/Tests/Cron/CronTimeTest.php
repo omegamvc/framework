@@ -122,7 +122,7 @@ final class CronTimeTest extends TestCase
     }
 
     /**
-     * Test i t run only every ten minute.
+     * Test it run only every ten minute.
      *
      * @return void
      */

@@ -896,7 +896,7 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * Test it can dump wthout error.
+     * Test it can dump without error.
      *
      * @return void
      */

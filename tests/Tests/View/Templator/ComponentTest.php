@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\View\Templator;
@@ -13,6 +23,22 @@ use Throwable;
 
 use function trim;
 
+/**
+ * Test suite for the ComponentTemplator.
+ *
+ * Verifies that components are correctly parsed, rendered, and that
+ * dependencies and nested components behave as expected. Also tests
+ * error handling when templates or yield sections are missing.
+ *
+ * @category   Tests
+ * @package    View
+ * @subpackage Templator
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 #[CoversClass(Templator::class)]
 #[CoversClass(TemplatorFinder::class)]
 final class ComponentTest extends TestCase
@@ -21,7 +47,7 @@ final class ComponentTest extends TestCase
      * Test it can render component scope.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
      */
     public function testItCanRenderComponentScope(): void
     {
@@ -36,7 +62,7 @@ final class ComponentTest extends TestCase
      * Test it can render nested component scope.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
      */
     public function testItCanRenderNestedComponentScope(): void
     {
@@ -56,16 +82,20 @@ final class ComponentTest extends TestCase
      * Test it can render component scope multiple.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
      */
     public function testItCanRenderComponentScopeMultiple(): void
     {
         $templator = new Templator(new TemplatorFinder([__DIR__ . '/view/'], ['']), __DIR__);
-        $out       = $templator->templates('{% component(\'componentcard.template\') %}oke{% endcomponent %} {% component(\'componentcard.template\') %}oke 2 {% endcomponent %}'); // phpcs:ignore
+        $out = $templator->templates(
+            '{% component(\'componentcard.template\') %}oke{% endcomponent %} '
+            . '{% component(\'componentcard.template\') %}oke 2 {% endcomponent %}'
+        );
         $this->assertEquals(
             '<div class="card">oke</div>'
             . PHP_EOL
-            . ' <div class="card">oke 2 </div>', trim($out)
+            . ' <div class="card">oke 2 </div>',
+            trim($out)
         );
     }
 
@@ -73,7 +103,8 @@ final class ComponentTest extends TestCase
      * Test it throw when extend not found.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItThrowWhenExtendNotFound(): void
     {
@@ -84,7 +115,8 @@ final class ComponentTest extends TestCase
             );
         } catch (Throwable $th) {
             $this->assertEquals(
-                'View file not found: `notexits.template`', $th->getMessage()
+                'View file not found: `notexits.template`',
+                $th->getMessage()
             );
         }
     }
@@ -93,7 +125,8 @@ final class ComponentTest extends TestCase
      * Test it throw when extend not found yield.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
+     * @throws Throwable If the templator fails to process the template.
      */
     public function testItThrowWhenExtendNotFoundYield(): void
     {
@@ -111,7 +144,7 @@ final class ComponentTest extends TestCase
      * Test it can render component using named parameter.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
      */
     public function testItCanRenderComponentUsingNamedParameter(): void
     {
@@ -126,7 +159,7 @@ final class ComponentTest extends TestCase
      * Test it can render component opp a process.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
      */
     public function testItCanRenderComponentOppAProcess(): void
     {
@@ -142,35 +175,18 @@ final class ComponentTest extends TestCase
      * Test it can get dependency view.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception If a templator fails to process the template.
      */
     public function testItCanGetDependencyView(): void
     {
         $finder    = new TemplatorFinder([__DIR__ . '/view/'], ['']);
         $templator = new Templator($finder, __DIR__);
         $templator->templates(
-            '{% component(\'component.template\') %}<main>core component</main>{% endcomponent %}', 'test'
+            '{% component(\'component.template\') %}<main>core component</main>{% endcomponent %}',
+            'test'
         );
         $this->assertEquals([
             $finder->find('component.template') => 1,
         ], $templator->getDependency('test'));
-    }
-}
-
-class TestClassComponent
-{
-    private string $bg;
-    private string $size;
-
-    public function __construct(string $bg, string $size)
-    {
-        $this->bg   = $bg;
-        $this->size = $size;
-    }
-
-    public function render(string $inner): string
-    {
-        /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
-        return "<p class=\"{$this->bg} {$this->size}\">{$inner}</p>";
     }
 }

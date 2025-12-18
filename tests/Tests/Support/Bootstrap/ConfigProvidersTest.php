@@ -22,6 +22,7 @@ use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Bootstrap\ConfigProviders;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 
 /**
@@ -59,6 +60,7 @@ class ConfigProvidersTest extends TestCase
      * @return void
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception if a generic error occurred
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -84,6 +86,7 @@ class ConfigProvidersTest extends TestCase
      * @return void
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception if a generic error occurred
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.

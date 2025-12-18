@@ -170,7 +170,7 @@ final class ViteTest extends TestCase
     }
 
     /**
-     * Test it can render head html tag.
+     * Test it can render head HTML tag.
      *
      * @return void
      * @throws Exception
@@ -192,7 +192,7 @@ final class ViteTest extends TestCase
     }
 
     /**
-     * Test it can render head html tag with preload.
+     * Test it can render head HTML tag with preload.
      *
      * @return void
      * @throws Exception
@@ -214,7 +214,7 @@ final class ViteTest extends TestCase
     }
 
     /**
-     * Test it can render head html tag in hrm mode.
+     * Test it can render head HTML tag in hrm mode.
      *
      * @return void
      * @throws Exception

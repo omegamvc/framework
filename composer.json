@@ -70,6 +70,6 @@
     "suggest": {
 		"ext-apache": "If you wanto to use apache extension"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }

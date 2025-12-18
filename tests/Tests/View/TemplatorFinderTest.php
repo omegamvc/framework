@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Tests\View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Tests\View;
@@ -11,6 +21,21 @@ use Omega\View\TemplatorFinder;
 
 use const DIRECTORY_SEPARATOR;
 
+/**
+ * Test suite for the TemplatorFinder component.
+ *
+ * Ensures that template files can be located correctly across registered paths
+ * and extensions, validates path and extension management, cache behavior,
+ * and proper exception handling when templates cannot be found.
+ *
+ * @category  Tests
+ * @package   View
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 #[CoversClass(ViewFileNotFoundException::class)]
 #[CoversClass(TemplatorFinder::class)]
 class TemplatorFinderTest extends TestCase
@@ -33,7 +58,7 @@ class TemplatorFinderTest extends TestCase
      * Test it can find templator file location will throw.
      *
      * @return void
-     * @throws ViewFileNotFoundexception
+     * @throws ViewFileNotFoundException If the template cannot be found in any registered path.
      */
     public function testItCanFindTemplatorFileLocationWillThrow(): void
     {
@@ -72,14 +97,19 @@ class TemplatorFinderTest extends TestCase
 
         $view = new TemplatorFinder([$loader], ['.php']);
 
-        $this->assertEquals($loader . DIRECTORY_SEPARATOR . 'php.php', (fn () => $this->{'findInPath'}('php', [$loader]))->call($view));
+        $this->assertEquals(
+            $loader
+            . DIRECTORY_SEPARATOR
+            . 'php.php',
+            (fn () => $this->{'findInPath'}('php', [$loader]))->call($view)
+        );
     }
 
     /**
      * Test it can fnd in path will throw exception
      *
      * @return void
-     * @throws ViewFileNotFoundException
+     * @throws ViewFileNotFoundException If the template cannot be found in any registered path.
      */
     public function testItCanFindInPathWillThrowException(): void
     {

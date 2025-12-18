@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\View;
@@ -11,15 +21,33 @@ use function file_exists;
 use function ob_get_clean;
 use function ob_start;
 
+/**
+ * Class View
+ *
+ * Responsible for rendering view templates with provided data.
+ * Supports injecting structured data via the Portal objects and returns a Response instance.
+ *
+ * @category  Omega
+ * @package   View
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class View
 {
     /**
-     * Render view template with data.
+     * Render a view template and return a Response object.
      *
-     * @param string               $viewPath View path location
-     * @param array<string, mixed> $portal   Data to push
-     * @return Response
-     * @throws ViewFileNotFoundException
+     * Extracts data from the provided portal array and makes it accessible inside the view.
+     * Throws an exception if the view file cannot be found.
+     *
+     * @param string               $viewPath Full path to the view template file.
+     * @param array<string, mixed> $portal   Associative array of data to inject into the view.
+     *                                      Common keys: 'auth', 'meta', 'contents'.
+     * @return Response The Response object containing the rendered HTML content.
+     * @throws ViewFileNotFoundException If the template cannot be found in any registered path.
      */
     public static function render(string $viewPath, array $portal = []): Response
     {
@@ -27,16 +55,16 @@ class View
             throw new ViewFileNotFoundException($viewPath);
         }
 
-        $auth         = new Portal($portal['auth'] ?? []);
-        $meta         = new Portal($portal['meta'] ?? []);
-        $content      = new Portal($portal['contents'] ?? []);
+        $auth    = new Portal($portal['auth'] ?? []);
+        $meta    = new Portal($portal['meta'] ?? []);
+        $content = new Portal($portal['contents'] ?? []);
 
-        // get render content
+        // Capture the rendered template content
         ob_start();
         require_once $viewPath;
         $html = ob_get_clean();
 
-        // send render content to client
+        // Return as HTTP response
         return new Response()
             ->setContent($html)
             ->setResponseCode(Response::HTTP_OK)

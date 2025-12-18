@@ -69,7 +69,7 @@ class Crypt
      * @param string $passPhrase  The pass phrase used to generate the encryption key.
      * @param string $cipherAlgo  The cipher algorithm definition (e.g., "AES-256-CBC;16").
      * @throws RandomException If initialization vector generation fails.
-     * @throws InvalidCipherDefinitionException If the cipher definition is malformed.
+     * @throws InvalidCipherDefinitionException If the cipher definition is invalid or malformed.
      */
     public function __construct(string $passPhrase, string $cipherAlgo)
     {
@@ -86,7 +86,7 @@ class Crypt
      *
      * @param string $cipherAlgo  The cipher definition string.
      * @return array{string,int}  An array containing the algorithm name and IV length.
-     * @throws InvalidCipherDefinitionException If the input string does not contain the required components.
+     * @throws InvalidCipherDefinitionException If the cipher definition is invalid or malformed.
      */
     private function algoParse(string $cipherAlgo): array
     {

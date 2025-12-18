@@ -5,13 +5,34 @@ declare(strict_types=1);
 namespace Omega\Console\IO;
 
 /**
+ * Class BufferedOutputStream
+ *
+ * An output stream that accumulates written data in memory.
+ * Data can be retrieved and cleared with fetch().
+ * Typically used for testing or capturing output without writing to a real stream.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage IO
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  */
 class BufferedOutputStream implements OutputStreamInterface
 {
+    /**
+     * Constructor.
+     *
+     * Initializes an empty buffer.
+     */
     private string $buffer = '';
 
     /**
-     * Empties buffer and returns its content.
+     * Empties the buffer and returns its contents.
+     *
+     * @return string The buffered output
      */
     public function fetch(): string
     {
@@ -22,7 +43,7 @@ class BufferedOutputStream implements OutputStreamInterface
     }
 
     /**
-     * Writes the buffer to the stream.
+     * {@inheritdoc}
      */
     public function write(string $buffer): void
     {
@@ -30,7 +51,7 @@ class BufferedOutputStream implements OutputStreamInterface
     }
 
     /**
-     * Checks whether the stream is interactive (connected to a terminal).
+     * {@inheritdoc}
      */
     public function isInteractive(): bool
     {

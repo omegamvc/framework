@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -38,6 +48,22 @@ use function strtolower;
 use function ucfirst;
 
 /**
+ * Command class to generate application resources and scaffolding.
+ *
+ * Provides commands to create new controllers, models, exceptions,
+ * middleware, migrations, providers, views, and commands themselves.
+ * Each generator uses predefined stubs/templates and saves files
+ * in the corresponding application paths.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @property bool $update
  * @property bool $force
  */
@@ -46,7 +72,9 @@ class MakeCommand extends AbstractCommand
     use CommandTrait;
 
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -79,6 +107,10 @@ class MakeCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -95,9 +127,9 @@ class MakeCommand extends AbstractCommand
                 'make:view'       => 'Generate new view template',
             ],
             'options'   => [
-                '--table-name' => 'Set table column when creating model.',
-                '--update'     => 'Generate migration file with alter (update).',
-                '--force'      => 'Force to creating template.',
+                '--table-name'    => 'Set table column when creating model.',
+                '--update'        => 'Generate migration file with alter (update).',
+                '--force'         => 'Force to creating template.',
             ],
             'relation'  => [
                 'make:command'    => ['[command_name]'],
@@ -113,7 +145,9 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new controller class.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -126,7 +160,7 @@ class MakeCommand extends AbstractCommand
         $this->isPath('path.controller');
 
         $success = $this->makeTemplate($this->option[0], [
-            'template_location' => __DIR__ . '/stubs/controller',
+            'template_location' => slash(path: __DIR__ . '/stubs/controller'),
             'save_location'     => get_path('path.controller'),
             'pattern'           => '__controller__',
             'suffix'            => 'Controller.php',
@@ -146,7 +180,9 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new middleware class.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -159,7 +195,7 @@ class MakeCommand extends AbstractCommand
         $this->isPath('path.middleware');
 
         $success = $this->makeTemplate($this->option[0], [
-            'template_location' => __DIR__ . '/stubs/middleware',
+            'template_location' => slash(path: __DIR__ . '/stubs/middleware'),
             'save_location'     => get_path('path.middleware'),
             'pattern'           => '__middleware__',
             'suffix'            => 'Middleware.php',
@@ -179,7 +215,9 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new exception class.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -192,7 +230,7 @@ class MakeCommand extends AbstractCommand
         $this->isPath('path.exception');
 
         $success = $this->makeTemplate($this->option[0], [
-            'template_location' => __DIR__ . '/stubs/exception',
+            'template_location' => slash(path: __DIR__ . '/stubs/exception'),
             'save_location'     => get_path('path.exception'),
             'pattern'           => '__exception__',
             'suffix'            => 'Exception.php',
@@ -212,7 +250,9 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new view template.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -223,7 +263,7 @@ class MakeCommand extends AbstractCommand
         info('Making view file...')->out(false);
 
         $success = $this->makeTemplate($this->option[0], [
-            'template_location' => __DIR__ . '/stubs/view',
+            'template_location' => slash(path: __DIR__ . '/stubs/view'),
             'save_location'     => get_path('path.view'),
             'pattern'           => '__view__',
             'suffix'            => '.template.php',
@@ -241,7 +281,9 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new service provider class.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -254,7 +296,7 @@ class MakeCommand extends AbstractCommand
         $this->isPath('path.provider');
 
         $success = $this->makeTemplate($this->option[0], [
-            'template_location' => __DIR__ . '/stubs/provider',
+            'template_location' => slash(path: __DIR__ . '/stubs/provider'),
             'save_location'     => get_path('path.provider'),
             'pattern'           => '__provider__',
             'suffix'            => 'ServiceProvider.php',
@@ -274,11 +316,16 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new model class.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
+     * @throws Throwable Thrown when an unexpected error occurs while retrieving table information
+     *                   or generating the model class. This includes any exception thrown
+     *                   by database operations or file system access.
      */
     public function make_model(): int
     {
@@ -349,13 +396,11 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * Replace template to new class/resource.
      *
-     * @param string                $argument   Name of Class/file
-     * @param array<string, string> $makeOption Configuration to replace template
-     * @param string                $folder     Create folder for save location
-     *
-     * @return bool True if template success copied
+     * @param string $argument Name of the class/file to generate
+     * @param array<string, string> $makeOption Configuration for template replacement
+     * @param string $folder Optional folder to create/save the file
+     * @return bool True if the template was successfully copied, false otherwise
      */
     private function makeTemplate(string $argument, array $makeOption, string $folder = ''): bool
     {
@@ -379,7 +424,9 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new command class.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -393,7 +440,7 @@ class MakeCommand extends AbstractCommand
 
         $name    = $this->option[0];
         $success = $this->makeTemplate($name, [
-            'template_location' => __DIR__ . '/stubs/command',
+            'template_location' => slash(path: __DIR__ . '/stubs/command'),
             'save_location'     => get_path('path.command'),
             'pattern'           => '__command__',
             'suffix'            => 'Command.php',
@@ -422,7 +469,9 @@ class MakeCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new migration file.
+     *
+     * @return int Exit code: 0 on success, 1 on failure
      * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
      * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
      * @throws Exception
@@ -445,7 +494,7 @@ class MakeCommand extends AbstractCommand
         $fileName   = "{$pathToFile}{$bath}_{$name}.php";
 
         $use      = $this->update ? 'migration_update' : 'migration';
-        $template = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . $use);
+        $template = file_get_contents(slash(path: __DIR__ . '/stubs/') . $use);
         $template = str_replace('__table__', $name, $template);
 
         if (false === file_exists($pathToFile) || false === file_put_contents($fileName, $template)) {

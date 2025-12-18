@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Console Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -28,6 +38,24 @@ use function Omega\Console\success;
 use function Omega\Console\warn;
 
 /**
+ * SeedCommand
+ *
+ * Handles database seeding operations from the console.
+ * This command allows executing existing seeders to populate the database
+ * and generating new seeder classes following the application's conventions.
+ *
+ * It provides safety checks to prevent accidental execution in production
+ * environments, unless explicitly confirmed or forced.
+ *
+ * @category   Omega
+ * @package    Console
+ * @subpackage Commands
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @property string|null $class
  * @property bool|null   $force
  */
@@ -36,7 +64,9 @@ class SeedCommand extends AbstractCommand
     use PrintHelpTrait;
 
     /**
-     * Register command.
+     * Command registration configuration.
+     *
+     * Defines the pattern used to invoke the command and the method to execute.
      *
      * @var array<int, array<string, mixed>>
      */
@@ -51,6 +81,10 @@ class SeedCommand extends AbstractCommand
     ];
 
     /**
+     * Returns a description of the command, its options, and their relations.
+     *
+     * This is used to generate help output for users.
+     *
      * @return array<string, array<string, string|string[]>>
      */
     public function printHelp(): array
@@ -71,11 +105,18 @@ class SeedCommand extends AbstractCommand
     }
 
     /**
-     * @return bool
+     * Determines whether the seeder is allowed to run in the current environment.
+     *
+     * In development mode the seeder is executed immediately.
+     * In production mode, execution requires explicit user confirmation
+     * unless the force option is enabled.
+     *
+     * @return bool Returns true if the seeder execution is allowed in the current environment,
+     *              or false if execution is denied by the user.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
-     * @throws Exception
+     * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     private function runInDev(): bool
@@ -97,7 +138,10 @@ class SeedCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
+     *
+     * @return int Exit code: always 0.
+     *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -151,7 +195,13 @@ class SeedCommand extends AbstractCommand
     }
 
     /**
-     * @return int
+     * Generates a new database seeder class file.
+     *
+     * The seeder is created using the default application namespace and
+     * boilerplate structure, unless the target file already exists and
+     * execution is not forced.
+     *
+     * @return int Returns 0 on successful seeder creation, or 1 if the operation fails.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.

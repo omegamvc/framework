@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - View Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\View;
@@ -11,34 +21,36 @@ use function file_exists;
 use function in_array;
 use function realpath;
 
+/**
+ * Class TemplatorFinder
+ *
+ * Responsible for locating template files based on registered paths and file extensions.
+ * Caches resolved file paths for faster subsequent lookups.
+ *
+ * @category  Omega
+ * @package   View
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class TemplatorFinder
 {
-    /**
-     * View file location has register.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> Cached mapping of view names to resolved file paths. */
     protected array $views = [];
 
-    /**
-     * Paths.
-     *
-     * @var string[]
-     */
+    /** @var string[] Registered paths to search for template files. */
     protected array $paths = [];
 
-    /**
-     * Extensions.
-     *
-     * @var string[]
-     */
+    /** @var string[] Registered file extensions for templates. */
     protected array $extensions;
 
     /**
-     * Create new View Finder instance.
+     * TemplatorFinder constructor.
      *
-     * @param string[] $paths
-     * @param string[] $extensions
+     * @param string[]   $paths      Initial paths to search for templates.
+     * @param string[]|null $extensions Optional list of file extensions. Defaults to ['.template.php', '.php'].
      */
     public function __construct(array $paths, ?array $extensions = null)
     {
@@ -47,11 +59,11 @@ class TemplatorFinder
     }
 
     /**
-     * Find file location by view_name given.
+     * Find the full file path of a template by its view name.
      *
-     * @param string $viewName
-     * @return string
-     * @throws ViewFileNotFoundException
+     * @param string $viewName Name of the view/template.
+     * @return string Full file path to the template.
+     * @throws ViewFileNotFoundException If the template cannot be found in any registered path.
      */
     public function find(string $viewName): string
     {
@@ -63,10 +75,10 @@ class TemplatorFinder
     }
 
     /**
-     * Check view name exist.
+     * Check if a view exists in any registered path.
      *
-     * @param string $viewName
-     * @return bool
+     * @param string $viewName Name of the view/template.
+     * @return bool True if the template exists, false otherwise.
      */
     public function exists(string $viewName): bool
     {
@@ -78,7 +90,6 @@ class TemplatorFinder
             foreach ($this->extensions as $extension) {
                 if (file_exists($file = $path . DIRECTORY_SEPARATOR . $viewName . $extension)) {
                     $this->views[$viewName] = $file;
-
                     return true;
                 }
             }
@@ -88,16 +99,17 @@ class TemplatorFinder
     }
 
     /**
-     * Find view name possible paths given.
+     * Search for a view in a given set of paths.
      *
-     * @param string   $viewName
-     * @param string[] $paths
-     * @return string
-     * @throws ViewFileNotFoundException
+     * @param string   $viewName Name of the view/template.
+     * @param string[] $paths    Array of paths to search.
+     * @return string Full file path to the template.
+     * @throws ViewFileNotFoundException If the template cannot be found in any registered path.
      */
     protected function findInPath(string $viewName, array $paths): string
     {
         foreach ($paths as $path) {
+            /** @noinspection PhpLoopCanBeConvertedToArrayAnyInspection */
             foreach ($this->extensions as $extension) {
                 if (file_exists($find = $path . DIRECTORY_SEPARATOR . $viewName . $extension)) {
                     return $find;
@@ -109,9 +121,9 @@ class TemplatorFinder
     }
 
     /**
-     * Add path to possible path location.
+     * Add a new path to search for templates.
      *
-     * @param string $path
+     * @param string $path Path to add.
      * @return self
      */
     public function addPath(string $path): self
@@ -124,20 +136,19 @@ class TemplatorFinder
     }
 
     /**
-     * Add extension in first array.
+     * Add a new file extension at the beginning of the extension list.
      *
-     * @param string $extension
+     * @param string $extension File extension (e.g., '.php').
      * @return self
      */
     public function addExtension(string $extension): self
     {
         array_unshift($this->extensions, $extension);
-
         return $this;
     }
 
     /**
-     * Flush view register file location.
+     * Clear all cached view paths.
      *
      * @return void
      */
@@ -147,9 +158,9 @@ class TemplatorFinder
     }
 
     /**
-     * Set paths registered.
+     * Set the paths for the template finder.
      *
-     * @param string[] $paths
+     * @param string[] $paths Array of paths to register.
      * @return self
      */
     public function setPaths(array $paths): self
@@ -163,9 +174,9 @@ class TemplatorFinder
     }
 
     /**
-     * Get paths registered.
+     * Get all registered paths.
      *
-     * @return string[]
+     * @return string[] Array of registered paths.
      */
     public function getPaths(): array
     {
@@ -173,9 +184,9 @@ class TemplatorFinder
     }
 
     /**
-     * Get Extension registered.
+     * Get all registered file extensions.
      *
-     * @return string[]
+     * @return string[] Array of file extensions.
      */
     public function getExtensions(): array
     {
@@ -183,10 +194,10 @@ class TemplatorFinder
     }
 
     /**
-     * Resolve the path.
+     * Resolve a path to its real path, if possible.
      *
-     * @param string $path
-     * @return string
+     * @param string $path Path to resolve.
+     * @return string Resolved path or original if realpath fails.
      */
     protected function resolvePath(string $path): string
     {
