@@ -17,6 +17,7 @@ namespace Omega\Container;
 use Omega\Container\Attribute\Inject;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\EntryNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -65,6 +66,7 @@ final class Injector
      *
      * @param object $instance The object instance to perform injection upon
      * @return object The same instance with injected dependencies
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required dependency cannot be found
      * @throws ReflectionException If reflection fails on the object
      */
@@ -84,6 +86,7 @@ final class Injector
      * @param object $instance The object instance to inject
      * @param ReflectionClass<object> $reflector Reflection class of the object
      * @return void
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a dependency cannot be resolved
      * @throws ReflectionException If method reflection fails
      */
@@ -168,6 +171,7 @@ final class Injector
      * @param object $instance The object instance to inject
      * @param ReflectionClass<object> $reflector Reflection class of the object
      * @return void
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a dependency cannot be resolved
      * @throws ReflectionException If property reflection fails
      */

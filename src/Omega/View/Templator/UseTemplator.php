@@ -46,6 +46,7 @@ class UseTemplator extends AbstractTemplatorParse
      */
     public function parse(string $template): string
     {
+        /** @noinspection PhpUnusedLocalVariableInspection */
         preg_match('/{%\s*use\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*%}/', $template, $matches);
 
         $result = preg_replace_callback(

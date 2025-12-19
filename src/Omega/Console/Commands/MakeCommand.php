@@ -28,6 +28,7 @@ use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Support\Facades\DB;
 use Omega\Template\Generate;
 use Omega\Template\Property;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 use Throwable;
 
@@ -150,6 +151,7 @@ class MakeCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -185,6 +187,7 @@ class MakeCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -220,6 +223,7 @@ class MakeCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -255,6 +259,7 @@ class MakeCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -286,6 +291,7 @@ class MakeCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -429,6 +435,7 @@ class MakeCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -474,6 +481,7 @@ class MakeCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 on failure
      * @throws DateInvalidTimeZoneException Thrown when a provided timezone is invalid.
      * @throws DateMalformedStringException Thrown when a date string cannot be parsed correctly.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws Exception
      */
     public function make_migration(): int

@@ -163,6 +163,7 @@ class TestCase extends PhpUnitTestCase
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws Throwable
+     * @noinspection PhpRedundantOptionalArgumentInspection
      */
     protected function get(string $url, array $parameter = []): TestResponse
     {
@@ -216,6 +217,7 @@ class TestCase extends PhpUnitTestCase
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      * @throws Throwable
+     * @noinspection PhpUnusedParameterInspection
      */
     protected function delete(string $url, array $delete): TestResponse
     {

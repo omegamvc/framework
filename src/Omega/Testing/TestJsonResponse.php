@@ -214,6 +214,7 @@ class TestJsonResponse extends TestResponse implements ArrayAccess
      */
     public function assertEmpty(string $dataKey): void
     {
+        /** @noinspection PhpUnusedLocalVariableInspection */
         $dataGet = data_get($this->responseData, $dataKey);
         Assert::assertEmpty($this->getData());
     }
@@ -226,6 +227,7 @@ class TestJsonResponse extends TestResponse implements ArrayAccess
      */
     public function assertNotEmpty(string $dataKey): void
     {
+        /** @noinspection PhpUnusedLocalVariableInspection */
         $dataGet = data_get($this->responseData, $dataKey);
         Assert::assertNotEmpty($this->getData());
     }

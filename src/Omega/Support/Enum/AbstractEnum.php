@@ -127,7 +127,7 @@ abstract class AbstractEnum
      */
     final public function value(): mixed
     {
-        return constant("static::{$this->value}");
+        return constant("static::" . $this->value);
     }
 
     /**

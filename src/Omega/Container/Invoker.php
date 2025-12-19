@@ -17,6 +17,7 @@ namespace Omega\Container;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
@@ -74,6 +75,7 @@ final readonly class Invoker
      * @return mixed The result of the callable execution
      * @throws BindingResolutionException If a dependency cannot be resolved
      * @throws CircularAliasException If a circular alias is detected during resolution
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required entry is missing from the container
      * @throws ReflectionException If reflection fails on the callable
      */
@@ -133,6 +135,7 @@ final readonly class Invoker
      * @return mixed The result of the method invocation
      * @throws BindingResolutionException If a dependency cannot be resolved
      * @throws CircularAliasException If a circular alias is detected
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required entry is missing from the container
      * @throws ReflectionException If method reflection fails
      */
@@ -157,6 +160,7 @@ final readonly class Invoker
      * @return array The resolved dependencies in order
      * @throws BindingResolutionException If a dependency cannot be resolved
      * @throws CircularAliasException If a circular alias is detected
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required entry is missing from the container
      * @throws ReflectionException If parameter reflection fails
      */
@@ -218,11 +222,15 @@ final readonly class Invoker
      * @return array The resolved dependencies in order
      * @throws BindingResolutionException If a dependency cannot be resolved
      * @throws CircularAliasException If a circular alias is detected
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required entry is missing from the container
      * @throws ReflectionException If parameter reflection fails
      */
-    private function resolveMethodDependencies(ReflectionMethod $method, object $instance, array $parameters = []): array
-    {
+    private function resolveMethodDependencies(
+        ReflectionMethod $method,
+        object $instance,
+        array $parameters = []
+    ): array {
         $dependencies = [];
 
         foreach ($method->getParameters() as $parameter) {

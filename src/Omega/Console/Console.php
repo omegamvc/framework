@@ -134,6 +134,7 @@ class Console
         $count   = 0;
         $similar =  new Style();
         $similar->tap(error(sprintf('Command "%s" is ambiguous. Did you mean one of these?', $baseArgs)));
+        /** @noinspection PhpRedundantOptionalArgumentInspection */
         foreach ($this->getSimilarity($baseArgs, $commands, 0.8) as $term => $score) {
             $similar->push('    > ')->push($term)->textDim()->newLines();
             $count++;
@@ -217,6 +218,7 @@ class Console
      * @param string[] $commands The list of registered command names
      * @param float $threshold Minimum similarity required (default 0.8)
      * @return array<string, float> Commands sorted by similarity
+     * @noinspection PhpSameParameterValueInspection
      */
     private function getSimilarity(string $find, array $commands, float $threshold = 0.8): array
     {

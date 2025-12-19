@@ -25,6 +25,7 @@ use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Template\Generate;
 use Omega\Template\Method;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 use Throwable;
 
@@ -115,6 +116,7 @@ class SeedCommand extends AbstractCommand
      *              or false if execution is denied by the user.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -144,6 +146,7 @@ class SeedCommand extends AbstractCommand
      *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

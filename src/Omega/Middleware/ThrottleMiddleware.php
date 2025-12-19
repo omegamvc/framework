@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUnusedParameterInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Middleware;
@@ -19,10 +21,10 @@ class ThrottleMiddleware
     {
         $key = $this->resolveRequestKey($request);
         if ($this->limiter->isBlocked($key, $maxAttempts = 60, $decayMinutes = 1)) {
-            return $this->rateLimitedRespose(
+            return $this->rateLimitedResponse(
                 key: $key,
                 maxAttempts: $maxAttempts,
-                remaingAfter: $this->calculateRemainingAttempts(
+                remainingAfter: $this->calculateRemainingAttempts(
                     key: $key,
                     maxAttempts: $maxAttempts,
                     retryAfter: $this->limiter->getRetryAfter($key)
@@ -33,12 +35,12 @@ class ThrottleMiddleware
         $this->limiter->consume($key, $decayMinutes);
 
         /** @var Response $response */
-        $respone = $next($request);
+        $response = $next($request);
 
-        $respone->headers->add(
+        $response->headers->add(
             $this->rateLimitedHeader(
                 maxAttempts: $maxAttempts,
-                remaingAfter: $this->calculateRemainingAttempts(
+                remainingAfter: $this->calculateRemainingAttempts(
                     key: $key,
                     maxAttempts: $maxAttempts,
                     retryAfter: null
@@ -46,7 +48,7 @@ class ThrottleMiddleware
             )
         );
 
-        return $respone;
+        return $response;
     }
 
     protected function resolveRequestKey(Request $request): string
@@ -56,10 +58,10 @@ class ThrottleMiddleware
         return sha1($key);
     }
 
-    protected function rateLimitedRespose(
+    protected function rateLimitedResponse(
         string $key,
         int $maxAttempts,
-        int $remaingAfter,
+        int $remainingAfter,
         ?int $retryAfter = null
     ): Response {
         return new Response(
@@ -67,8 +69,8 @@ class ThrottleMiddleware
             429,
             $this->rateLimitedHeader(
                 $maxAttempts,
-                $remaingAfter,
-                $remaingAfter
+                $remainingAfter,
+                $remainingAfter
             )
         );
     }
@@ -76,11 +78,11 @@ class ThrottleMiddleware
     /**
      * @return array<string, string>
      */
-    protected function rateLimitedHeader(int $maxAttempts, int $remaingAfter, ?int $retryAfter = null): array
+    protected function rateLimitedHeader(int $maxAttempts, int $remainingAfter, ?int $retryAfter = null): array
     {
         $header = [
             'X-RateLimit-Limit'     => (string) $maxAttempts,
-            'X-RateLimit-Remaining' => (string) $remaingAfter,
+            'X-RateLimit-Remaining' => (string) $remainingAfter,
         ];
 
         if ($retryAfter !== null) {

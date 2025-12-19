@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Application Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Application;
@@ -17,6 +27,7 @@ use Omega\Support\AddonServiceProvider;
 use Omega\Support\PackageManifest;
 use Omega\Support\Vite;
 use Omega\View\Templator;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 
 use function array_map;
@@ -27,6 +38,19 @@ use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
 
+/**
+ * Core application container.
+ *
+ * Manages configuration, service providers, bootstrapping,
+ *
+ * @category  Omega
+ * @package   Application
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 final class Application extends Container
 {
     /** @var Application|null Application instance. */
@@ -55,8 +79,8 @@ final class Application extends Container
     private bool $isBootstrapped = false;
 
     /** Indicates whether the application has completed its bootstrap phase. */
-    public bool $bootstrapped {
-        get => $this->isBootstrapped;
+    public bool $bootstrapped { // phpcs:ignore
+        get => $this->isBootstrapped; // phpcs:ignore
     }
 
     /** @var callable[] Terminate callback register. */
@@ -94,6 +118,11 @@ final class Application extends Container
         }
     }
 
+    /**
+     * Get the default application bindings and path definitions.
+     *
+     * @return array<string, mixed> Key-value pairs defining paths, environment, and core settings.
+     */
     protected function definitions(): array
     {
         return [
@@ -126,7 +155,7 @@ final class Application extends Container
     /**
      * Get instance Application container.
      *
-     * @return Application|null
+     * @return Application|null Return instance Application container.
      */
     public static function getInstance(): ?Application
     {
@@ -175,9 +204,10 @@ final class Application extends Container
      * Get application (bootstrapper) cache path.
      * default './boostrap/cache/'.
      *
-     * @return string
+     * @return string Absolute path to the application bootstrap cache directory.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -191,12 +221,10 @@ final class Application extends Container
     /**
      * Detect application environment.
      *
-     * @return string
-     */
-    /**
-     * @return string
+     * @return string Current application environment (e.g. "dev", "prod").
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -208,9 +236,10 @@ final class Application extends Container
     /**
      * Detect application debug enable.
      *
-     * @return bool
+     * @return bool True when application debug mode is enabled.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -222,9 +251,10 @@ final class Application extends Container
     /**
      * Detect application production mode.
      *
-     * @return bool
+     * @return bool True when the application is running in production environment.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -236,9 +266,10 @@ final class Application extends Container
     /**
      * Detect application development mode.
      *
-     * @return bool
+     * @return bool True when the application is running in development environment.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -250,9 +281,9 @@ final class Application extends Container
     // core region
 
     /**
-     * Bootstrapper.
+     * Bootstrap the application using the given bootstrapper classes.
      *
-     * @param array<int, class-string> $bootstrappers
+     * @param array<int, class-string> $bootstrappers List of bootstrapper class names.
      * @return void
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
@@ -322,7 +353,7 @@ final class Application extends Container
     /**
      * Call the registered booting callbacks.
      *
-     * @param callable[] $bootCallBacks
+     * @param callable[] $bootCallBacks Callbacks executed during the booting phase.
      * @return void
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -342,7 +373,7 @@ final class Application extends Container
     /**
      * Add booted call back, call after boot is called.
      *
-     * @param callable $callback
+     * @param callable $callback Callback executed after the application has booted.
      * @return void
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -359,6 +390,8 @@ final class Application extends Container
 
     /**
      * Flush or reset application (static).
+     *
+     * @return void
      */
     public function flush(): void
     {
@@ -378,7 +411,7 @@ final class Application extends Container
      * Register service provider.
      *
      * @param string $provider Class-name service provider
-     * @return AbstractServiceProvider
+     * @return AbstractServiceProvider The instantiated and registered service provider.
      */
     public function register(string $provider): AbstractServiceProvider
     {
@@ -421,9 +454,10 @@ final class Application extends Container
     /**
      * Determinate application maintenance mode.
      *
-     * @return bool
+     * @return bool True if the application is currently in maintenance mode.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -440,9 +474,10 @@ final class Application extends Container
     /**
      * Get down maintenance file config.
      *
-     * @return array<string, string|int|null>
+     * @return array<string, string|int|null> Maintenance mode configuration data.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -472,9 +507,10 @@ final class Application extends Container
     /**
      * Abort application to http exception.
      *
-     * @param int $code
-     * @param string $message
-     * @param array<string, string> $headers
+    /**
+     * @param int $code HTTP status code.
+     * @param string $message Exception message.
+     * @param array<string, string> $headers HTTP response headers.
      * @return void
      */
     public function abort(int $code, string $message = '', array $headers = []): void
@@ -486,7 +522,7 @@ final class Application extends Container
      * Register aliases to container.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception Thrown when alias registration fails.
      */
     protected function registerAlias(): void
     {
@@ -507,7 +543,7 @@ final class Application extends Container
     /**
      * Merge application provider and vendor package provider.
      *
-     * @return AbstractServiceProvider[]
+     * @return AbstractServiceProvider[] Merged list of application and package service providers.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.

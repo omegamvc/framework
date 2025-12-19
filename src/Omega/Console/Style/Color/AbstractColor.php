@@ -32,7 +32,9 @@ abstract class AbstractColor implements RuleInterface
     /** @var array<int, int> Current set of rules for this color */
     private array $rules = [];
 
-    /** @var array<int, int> Current set of rules for this color */
+    /** @var array<int, int> Current set of rules for this color
+     * @noinspection PhpUnusedParameterInspection
+     */
     public array $rule { // phpcs:ignore
         get {
             return $this->rules; // phpcs:ignore

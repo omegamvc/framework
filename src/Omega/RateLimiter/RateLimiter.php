@@ -65,7 +65,7 @@ readonly class RateLimiter implements RateLimiterInterface
      */
     public function consume(string $key, int $decayMinutes = 1): int
     {
-        return $this->Limiter->consume($key, 1)->getConsumed();
+        return $this->Limiter->consume($key)->getConsumed();
     }
 
     /**

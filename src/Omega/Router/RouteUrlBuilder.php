@@ -50,6 +50,7 @@ class RouteUrlBuilder
      *
      * @param array<string, string> $patterns Optional custom patterns for placeholders.
      * @return void
+     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
      */
     public function __construct(private array $patterns = [])
     {

@@ -49,7 +49,7 @@ class XmlConfig extends AbstractFile
         try {
             $xml = simplexml_load_string($this->fetchContent());
             return json_decode(json_encode($xml), true) ?? [];
-        } catch (Exception $_) {
+        } catch (Exception) {
             throw new MalformedXmlException('Invalid XML format in configuration file.');
         }
     }

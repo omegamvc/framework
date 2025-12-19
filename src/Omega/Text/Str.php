@@ -496,6 +496,7 @@ final class Str
      */
     public static function isString(string $text): bool
     {
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
         return is_string($text);
     }
 

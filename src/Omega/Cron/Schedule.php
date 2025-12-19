@@ -35,7 +35,9 @@ use Closure;
  */
 class Schedule
 {
-    /** @var ScheduleTime[] The collection of scheduled tasks (`ScheduleTime` instances) in this schedule. */
+    /** @var ScheduleTime[] The collection of scheduled tasks (`ScheduleTime` instances) in this schedule.
+     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
+     */
     protected array $pools = [];
 
     /**

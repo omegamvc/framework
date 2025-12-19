@@ -126,6 +126,7 @@ class Property
         $tabDept  = fn (int $dept) => str_repeat($this->tabIndent, $dept * $this->tabSize);
 
         $comment = $this->generateComment(1);
+        /** @noinspection DuplicatedCode */
         $comment = count($this->comments) > 0
         ? $comment . "\n" . $tabDept(1)
         : $comment;

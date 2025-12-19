@@ -10,6 +10,9 @@
  * @version   2.0.0
  */
 
+/** @noinspection PhpReturnValueOfMethodIsNeverUsedInspection */
+/** @noinspection PhpUnusedParameterInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Support\Bootstrap;
@@ -20,6 +23,7 @@ use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Exceptions\ExceptionHandler;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 use Throwable;
 
@@ -78,6 +82,7 @@ class HandleExceptions
      * @return void
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

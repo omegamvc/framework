@@ -43,7 +43,9 @@ class TemplatorFinder
     /** @var string[] Registered paths to search for template files. */
     protected array $paths = [];
 
-    /** @var string[] Registered file extensions for templates. */
+    /** @var string[] Registered file extensions for templates.
+     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
+     */
     protected array $extensions;
 
     /**

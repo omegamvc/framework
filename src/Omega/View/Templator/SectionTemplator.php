@@ -73,6 +73,7 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
      * {@inheritdoc}
      *
      * @throws Exception If the layout template is missing, invalid, or if yield rules are violated.
+     * @noinspection PhpRegExpRedundantModifierInspection
      */
     public function parse(string $template): string
     {
@@ -106,6 +107,7 @@ class SectionTemplator extends AbstractTemplatorParse implements DependencyTempl
             $template
         );
 
+        /** @noinspection PhpUnusedLocalVariableInspection */
         $template = preg_replace_callback(
             '/{%\s*sections\s*\\s*%}(.*?){%\s*endsections\s*%}/s',
             function ($matches) {

@@ -198,6 +198,7 @@ class MigrationCommand extends AbstractCommand
      *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -324,6 +325,7 @@ class MigrationCommand extends AbstractCommand
      * @return int Exit code indicating the result of running migrations:
      *             0 on success, 2 if aborted due to environment or user confirmation failure,
      *             1 on general failure.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws Exception Thrown if an unexpected error occurs during migration execution.
      */
     public function main(): int
@@ -343,6 +345,7 @@ class MigrationCommand extends AbstractCommand
      * @return int Exit code indicating the result of running migrations:
      *             0 on success, 2 if aborted due to environment or user confirmation failure,
      *             1 on general failure.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws Exception Thrown if an unexpected error occurs during migration execution.
      */
     public function migration(bool $silent = false): int
@@ -478,7 +481,7 @@ class MigrationCommand extends AbstractCommand
      * @param bool $silent If `true`, suppresses environment checks and user prompts.
      * @return int Exit code indicating the result of the rollback operation:
      *             0 on success, 2 if aborted due to environment restrictions or confirmation failure.
-     *
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      */
     public function reset(bool $silent = false): int
@@ -499,6 +502,7 @@ class MigrationCommand extends AbstractCommand
      *             0 on success, 2 if aborted due to environment restrictions,
      *             or a propagated non-zero code from reset or migration.
      * @return int
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws Exception Thrown if reading input from STDIN fails during the prompt.
      */
     public function refresh(): int

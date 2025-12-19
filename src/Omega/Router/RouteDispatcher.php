@@ -313,6 +313,7 @@ final class RouteDispatcher
     {
         $parsedPath = $parsedUrl['path'] ?? null;
 
+        /** @noinspection PhpDuplicateMatchArmBodyInspection */
         return match (true) {
             null === $parsedPath           => '/',
             $trailingSlashMatters          => $parsedPath,

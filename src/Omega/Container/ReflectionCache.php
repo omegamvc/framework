@@ -84,7 +84,8 @@ final class ReflectionCache
      * Retrieve cached constructor parameters or create and cache them.
      *
      * @param string $class The class name to inspect
-     * @param Closure():(?array<ReflectionParameter>) $creator Closure to create constructor parameters array if not cached
+     * @param Closure():(?array<ReflectionParameter>) $creator Closure to create constructor parameters array
+     *                                                         if not cached
      * @return array<ReflectionParameter>|null The cached or newly created constructor parameters, or null if none
      */
     public function getConstructorParameters(string $class, Closure $creator): ?array

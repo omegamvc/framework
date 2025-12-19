@@ -1,5 +1,10 @@
 <?php
 
+/**
+ *
+ */
+
+/** @noinspection PhpSameParameterValueInspection */
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);

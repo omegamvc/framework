@@ -17,6 +17,7 @@ namespace Omega\Container;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
@@ -68,6 +69,7 @@ final class Resolver
      * @return mixed The instantiated class with resolved dependencies
      * @throws BindingResolutionException If class is not instantiable or a dependency is unresolvable
      * @throws CircularAliasException If a circular dependency is detected
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required container entry is missing
      * @throws ReflectionException If reflection fails
      */
@@ -121,6 +123,7 @@ final class Resolver
      * @return array Resolved dependency instances
      * @throws BindingResolutionException If a dependency is unresolvable
      * @throws CircularAliasException If a circular dependency is detected
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required container entry is missing
      * @throws ReflectionException If reflection fails
      */
@@ -160,6 +163,7 @@ final class Resolver
      * @return mixed The resolved value
      * @throws BindingResolutionException If the parameter cannot be resolved
      * @throws CircularAliasException If a circular dependency is detected
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException If a required container entry is missing
      * @throws ReflectionException If reflection fails
      */
@@ -183,7 +187,10 @@ final class Resolver
 
         $isUnion    = $type instanceof ReflectionUnionType;
         $types      = $isUnion ? $type->getTypes() : [$type];
-        $classTypes = array_filter($types, fn ($t): bool => $t instanceof ReflectionNamedType && false === $t->isBuiltin());
+        $classTypes = array_filter(
+            $types,
+            fn ($t): bool => $t instanceof ReflectionNamedType && false === $t->isBuiltin()
+        );
 
         foreach ($classTypes as $classType) {
             $name = $classType->getName();

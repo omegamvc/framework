@@ -42,6 +42,7 @@ interface CommandInterface
      * This method is invoked when the command is run from the console.
      *
      * @return int Exit code of the command execution (0 for success, non-zero for error).
+     * @noinspection PhpMissingReturnTypeInspection Don't touch this suppression
      */
     public function main();
 }

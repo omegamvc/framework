@@ -50,7 +50,9 @@ use function sprintf;
 class Container implements ArrayAccess, ContainerInterface
 {
     #region Property
-    /** @var array<string, array{concrete: Closure, shared: bool}> Container's bindings for abstract types */
+    /** @var array<string, array{concrete: Closure, shared: bool}> Container's bindings for abstract types
+     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
+     */
     protected array $bindings = [];
 
     /** @var array<string, mixed> Container's shared instances (singleton cache) */

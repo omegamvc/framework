@@ -64,6 +64,7 @@ final class Text
      * @param bool|string|array<int|string, string> $text New incoming text
      * @param string                                $functionName Name of the method calling this execution
      * @return string
+     * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
      */
     private function execute(array|bool|string $text, string $functionName): string
     {

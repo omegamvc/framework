@@ -48,7 +48,7 @@ class JsonConfig extends AbstractFile
     {
         try {
             return (array)json_decode($this->fetchContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $_) {
+        } catch (JsonException) {
             throw new MalformedJsonException('Invalid JSON format in configuration file.');
         }
     }

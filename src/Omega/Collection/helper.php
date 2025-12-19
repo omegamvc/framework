@@ -10,6 +10,8 @@
  * @version   2.0.0
  */
 
+/** @noinspection PhpMissingParamTypeInspection Don't touch this suppression. */
+
 declare(strict_types=1);
 
 namespace Omega\Collection;

@@ -90,7 +90,9 @@ class Style
 {
     use CommandTrait;
 
-    /** @var array<int, int> Array of terminal style rules. */
+    /** @var array<int, int> Array of terminal style rules.
+     * @noinspection PhpPrivateFieldCanBeLocalVariableInspection
+     */
     private array $rules = [];
 
     /** @var array<int, array<int, string|int>> Raw terminal codes. */

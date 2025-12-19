@@ -41,7 +41,7 @@ final class BooleanTemplator extends AbstractTemplatorParse
     {
         return preg_replace_callback(
             '/{%\s*bool\(\s*(.+?)\s*\)\s*%}/',
-            static fn (array $matches): string => "<?= ({$matches[1]}) ? 'true' : 'false' ?>",
+            static fn (array $matches): string => "<?= ($matches[1]) ? 'true' : 'false' ?>",
             $template
         );
     }

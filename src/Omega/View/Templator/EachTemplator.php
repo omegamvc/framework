@@ -10,6 +10,8 @@
  * @version   2.0.0
  */
 
+/** @noinspection PhpRegExpRedundantModifierInspection */
+
 declare(strict_types=1);
 
 namespace Omega\View\Templator;
@@ -51,12 +53,10 @@ class EachTemplator extends AbstractTemplatorParse
             $template
         );
 
-        $template = preg_replace(
+        return preg_replace(
             '/{%\s*endforeach\s*%}/s',
             '<?php endforeach; ?>',
             $template
         );
-
-        return $template;
     }
 }

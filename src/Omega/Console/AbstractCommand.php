@@ -178,6 +178,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
                 $name     = preg_replace('/^(-{1,2})/', '', $keyValue[0]);
 
                 // alias check
+                /** @noinspection PhpUnusedLocalVariableInspection */
                 if (preg_match('/^-(?!-)([a-zA-Z]+)$/', $keyValue[0], $singleDash)) {
                     $alias[$name] = array_key_exists($name, $alias)
                         ? array_merge($alias[$name], str_split($name))

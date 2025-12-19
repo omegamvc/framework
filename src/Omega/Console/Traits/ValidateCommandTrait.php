@@ -35,11 +35,7 @@ use Omega\Validator\Validator;
  */
 trait ValidateCommandTrait
 {
-    /**
-     * Validator instance used to validate input data.
-     *
-     * @var Validator
-     */
+    /** @var Validator Validator instance used to validate data. */
     protected Validator $validate;
 
     /**
@@ -90,6 +86,7 @@ trait ValidateCommandTrait
      */
     protected function getValidateMessage(Style $style): Style
     {
+        /** @noinspection PhpUnusedLocalVariableInspection */
         foreach ($this->validate->getError() as $input => $message) {
             $style->tap(
                 Alert::render()->warn($message)
