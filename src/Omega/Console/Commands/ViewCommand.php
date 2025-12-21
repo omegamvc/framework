@@ -24,6 +24,7 @@ use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Text\Str;
 use Omega\View\Templator;
+use Psr\Container\ContainerExceptionInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
@@ -158,6 +159,7 @@ class ViewCommand extends AbstractCommand
      * @return int Returns 0 on success, or 1 if no files are found.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception Thrown when a compilation error occurs.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -201,6 +203,7 @@ class ViewCommand extends AbstractCommand
      * @return int Returns 0 when cache is cleared, or 1 if no cached files exist.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -244,6 +247,7 @@ class ViewCommand extends AbstractCommand
      * @return int Returns 0 when the watch process ends, or 1 on initialization failure.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception Thrown when a compilation or watch error occurs.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -321,6 +325,7 @@ class ViewCommand extends AbstractCommand
      * @return array<string,int> An associative array of file paths and timestamps.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -359,6 +364,7 @@ class ViewCommand extends AbstractCommand
      * @return array<string,int>   Dependency list with modification times.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws Exception Thrown when compilation fails.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
@@ -388,6 +394,7 @@ class ViewCommand extends AbstractCommand
      * @param array<string,int>  $getIndexes Indexed view files with timestamps.
      * @param int                $width Output formatting width.
      * @return array<string,array<string,int>> Compiled dependency map.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws Exception Thrown when precompilation fails.
      */
     private function precompile(Templator $templator, array $getIndexes, int $width): array

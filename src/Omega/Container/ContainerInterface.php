@@ -105,7 +105,6 @@ interface ContainerInterface extends PSRContainerInterface
      *
      * @param string $abstract The abstract type or identifier to check.
      * @return bool True if the type is bound or aliased, false otherwise.
-     *
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      */
     public function bound(string $abstract): bool;
@@ -116,7 +115,6 @@ interface ContainerInterface extends PSRContainerInterface
      * @param callable|object|array|string $callable The callable to invoke.
      * @param array<int|string, mixed> $parameters Optional parameters to override injection.
      * @return mixed The result returned by the callable.
-     *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
@@ -139,7 +137,6 @@ interface ContainerInterface extends PSRContainerInterface
      *
      * @param string $class Fully-qualified class or interface name.
      * @return ReflectionClass<object> Reflection metadata for the given class.
-     *
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function getReflectionClass(string $class): ReflectionClass;
@@ -150,7 +147,6 @@ interface ContainerInterface extends PSRContainerInterface
      * @param string|object $class Class name or object instance.
      * @param string $method Method name to reflect.
      * @return ReflectionMethod Reflection metadata for the requested method.
-     *
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function getReflectionMethod(string|object $class, string $method): ReflectionMethod;
@@ -161,7 +157,6 @@ interface ContainerInterface extends PSRContainerInterface
      * @param string $class Fully-qualified class name.
      * @return ReflectionParameter[]|null List of constructor parameters,
      *                                   or null if the class has no constructor.
-     *
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function getConstructorParameters(string $class): ?array;
@@ -201,7 +196,6 @@ interface ContainerInterface extends PSRContainerInterface
      *
      * @param object $instance The object on which dependencies should be injected.
      * @return object The same instance, after dependency injection.
-     *
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Omega\Database\Query;
 
-/**
- * @internal
- */
 final class Bind
 {
     /** @var string Bind name (required) */

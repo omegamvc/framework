@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -27,22 +37,44 @@ use function round;
 use function str_contains;
 use function stripos;
 
+/**
+ * PDO-based database connection factory and execution context.
+ *
+ * This class is responsible for:
+ * - Normalizing and validating database configuration
+ * - Building driver-specific DSN strings
+ * - Creating and re-creating PDO connections
+ * - Preparing and executing SQL statements
+ * - Managing transactions
+ * - Collecting query execution logs
+ *
+ * Despite its name, this class acts as a connection factory and
+ * proxy rather than a raw connection object.
+ *
+ * @category  Omega
+ * @package   Database
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class Connection implements ConnectionInterface
 {
-    /** @var PDO  */
+    /** @var PDO Active PDO instance */
     protected PDO $pdo;
 
-    /** @var PDOStatement  */
+    /** @var PDOStatement Prepared PDO statement */
     private PDOStatement $statement;
 
-    /** @var array<int, string|int|bool> */
+    /** @var array<int, string|int|bool> Default PDO options. */
     protected array $option = [
         PDO::ATTR_PERSISTENT => true,
         PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION,
     ];
 
     /**
-     * Connection configuration.
+     * Normalized database connection configuration.
      *
      * @var array{
      *     driver: string,
@@ -54,24 +86,25 @@ class Connection implements ConnectionInterface
      *     password: ?string,
      *     options: array<int, string|int|bool>
      * }
+     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
      */
     protected array $configs;
 
-    /**
-     * Query prepare statement;.
-     */
+    /** @var string Currently prepared SQL query. */
     protected string $query;
 
-    /**
-     * Log query when execute and fetching.
-     * - query.
-     *
-     * @var array<int, array<string, mixed>>
-     */
+    /** @var array<int, array<string, mixed>> Logs of executed queries with query, start, end, and duration. */
     protected array $logs = [];
 
     /**
+     * Create a new database connection instance.
+     *
+     * This constructor normalizes configuration, builds the DSN,
+     * and creates the underlying PDO connection.
+     *
      * @param array<string, string|int|array<int, string|int|bool>|null> $configs
+     *        Raw database configuration values.
+     * @throws PDOException When connection creation fails.
      */
     public function __construct(array $configs)
     {
@@ -81,7 +114,10 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * Singleton pattern implement for Database connation.
+     * Return the current connection instance.
+     *
+     * This method exists for backward compatibility and does not
+     * implement a real singleton pattern.
      *
      * @return self
      */
@@ -91,12 +127,13 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @deprecated use createConnection instead
-     * @param string $dsn
-     * @param string $user
-     * @param string $pass
+     * @deprecated Use createConnection() instead.
+     *
+     * @param string $dsn The data source name.
+     * @param string $user Database username.
+     * @param string $pass Database password.
      * @return self
-     * @throws Exception
+     * @throws Exception When PDO connection fails.
      */
     protected function useDsn(string $dsn, string $user, string $pass): self
     {
@@ -115,11 +152,13 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string                      $dsn
-     * @param array<string, string>       $configs
-     * @param array<int, string|int|bool> $options
-     * @return PDO
-     * @throws PDOException
+     * Create a PDO connection using a DSN string.
+     *
+     * @param string                      $dsn     Data source name.
+     * @param array<string, string>       $configs Normalized configuration values.
+     * @param array<int, string|int|bool> $options PDO options.
+     * @return PDO The PDO connection instance.
+     * @throws PDOException If connection cannot be established.
      */
     protected function createConnection(string $dsn, array $configs, array $options): PDO
     {
@@ -139,8 +178,10 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param Throwable $e
-     * @return bool
+     * Determine whether an exception was caused by a lost database connection.
+     *
+     * @param Throwable $e The exception to check.
+     * @return bool True if the exception indicates a lost connection.
      */
     protected function causedByLostConnection(Throwable $e): bool
     {
@@ -197,18 +238,18 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * Create connection using static.
+     * Create a new Connection instance from configuration.
      *
-     * @param array<string, string> $configs
-     * @return Connection
-     * */
+     * @param array<string, string> $configs Raw database configuration.
+     * @return Connection New connection instance.
+     */
     public static function conn(array $configs): Connection
     {
         return new self($configs);
     }
 
     /**
-     * Get connection configuration.
+     * Retrieve the normalized connection configuration.
      *
      * @return array{
      *     driver: string,
@@ -227,7 +268,9 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param array<string, string|int|array<int, int|bool>|null> $configs
+     * Normalize raw database configuration values.
+     *
+     * @param array<string, string|int|array<int, int|bool>|null> $configs Raw configuration values.
      * @return array{
      *     driver: string,
      *     host: ?string,
@@ -254,14 +297,16 @@ class Connection implements ConnectionInterface
     }
 
     /**
+     * Build a driver-specific DSN string.
+     *
      * @param array{
      *     host: string,
      *     driver: 'mysql'|'mariadb'|'pgsql'|'sqlite',
      *     database: ?string,
      *     port: ?int,
      *     charset: ?string
-     * } $configs
-     * @return string
+     * } $configs Normalized configuration values.
+     * @return string Driver-specific DSN string.
      */
     public function getDsn(array $configs): string
     {
@@ -273,9 +318,11 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param array<string, string|int|array<int, string|bool>> $config
-     * @return string
-     * @throws InvalidConfigurationException
+     * Build a MySQL or MariaDB DSN string.
+     *
+     * @param array<string, string|int|array<int, string|bool>> $config Normalized config values.
+     * @return string DSN string.
+     * @throws InvalidConfigurationException When required values are missing.
      */
     private function makeMysqlDsn(array $config): string
     {
@@ -295,9 +342,11 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param array<string, string|int|array<int, string|bool>> $config
-     * @return string
-     * @throws InvalidConfigurationException
+     * Build a PostgreSQL DSN string.
+     *
+     * @param array<string, string|int|array<int, string|bool>> $config Normalized config values.
+     * @return string DSN string.
+     * @throws InvalidConfigurationException When required values are missing.
      */
     private function makePgsqlDsn(array $config): string
     {
@@ -317,9 +366,11 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param array<string, string|int|array<int, string|bool>> $config
-     * @retrn string
-     * @throws InvalidConfigurationException
+     * Build a SQLite DSN string.
+     *
+     * @param array<string, string|int|array<int, string|bool>> $config Normalized config values.
+     * @return string DSN string.
+     * @throws InvalidConfigurationException When the database path is invalid.
      */
     private function makeSqliteDsn(array $config): string
     {
@@ -341,6 +392,24 @@ class Connection implements ConnectionInterface
         }
 
         return "sqlite:{$path}";
+    }
+
+    /**
+     * Add a query execution log entry.
+     *
+     * @param string $query The executed SQL query.
+     * @param float $startTime Query start timestamp in seconds.
+     * @param float $endTime Query end timestamp in seconds.
+     * @return void
+     */
+    protected function addLog(string $query, float $startTime, float $endTime): void
+    {
+        $this->logs[] = [
+            'query'    => $query,
+            'started'  => $startTime,
+            'ended'    => $endTime,
+            'duration' => null,
+        ];
     }
 
     /**
@@ -438,7 +507,7 @@ class Connection implements ConnectionInterface
             }
 
             return $this->endTransaction();
-        } catch (Throwable $th) {
+        } catch (Throwable) {
             $this->cancelTransaction();
 
             return false;
@@ -467,22 +536,6 @@ class Connection implements ConnectionInterface
     public function cancelTransaction(): bool
     {
         return $this->pdo->rollBack();
-    }
-
-    /**
-     * @param string $query
-     * @param float $startTime
-     * @param float $endTime
-     * @return void
-     */
-    protected function addLog(string $query, float $startTime, float $endTime): void
-    {
-        $this->logs[] = [
-            'query'    => $query,
-            'started'  => $startTime,
-            'ended'    => $endTime,
-            'duration' => null,
-        ];
     }
 
     /**

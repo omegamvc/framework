@@ -1,27 +1,70 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 
 namespace Omega\Database;
 
 use Omega\Database\Exceptions\InvalidConfigurationException;
 
+use function sprintf;
+
+/**
+ * Manages multiple database connections and delegates operations
+ * to the currently active connection.
+ *
+ * The DatabaseManager acts as a proxy between the application and the
+ * concrete database connection implementation. It is responsible for:
+ *
+ * - Resolving connections from configuration
+ * - Caching instantiated connections
+ * - Delegating query, transaction, and logging operations
+ *
+ * This class does not implement database logic itself, but forwards
+ * all calls to the selected ConnectionInterface instance.
+ *
+ * @category  Omega
+ * @package   Database
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class DatabaseManager implements ConnectionInterface
 {
-    /** @var ConnectionInterface  */
+    /** @var ConnectionInterface The currently active default connection */
     private ConnectionInterface $connection;
 
-    /** @var array<string, ConnectionInterface> */
+    /** @var array<string, ConnectionInterface> Cached connection instances */
     private array $connections = [];
 
     /**
+     * Create a new DatabaseManager instance.
+     *
+     * The configuration array contains named connection definitions that
+     * will be used to lazily instantiate Connection instances on demand.
+     *
      * @param array<string, array<string, string|int|array<int, string|int|bool>|null>> $configs
+     *        Database connection configurations indexed by connection name.
      */
     public function __construct(private readonly array $configs)
     {
     }
 
     /**
+     * Clear all cached database connections.
+     *
+     * This forces new connection instances to be created on the next
+     * request for a connection.
+     *
      * @return void
      */
     public function clearConnections(): void
@@ -30,15 +73,25 @@ class DatabaseManager implements ConnectionInterface
     }
 
     /**
-     * @param string $name
-     * @return ConnectionInterface
-     * @throws InvalidConfigurationException
+     * Retrieve a database connection by name.
+     *
+     * If the connection has not been created yet, it will be instantiated
+     * using the corresponding configuration and cached for reuse.
+     *
+     * @param string $name The name of the configured database connection.
+     * @return ConnectionInterface The resolved database connection.
+     * @throws InvalidConfigurationException If the connection is not configured.
      */
     public function connection(string $name): ConnectionInterface
     {
         if (false === isset($this->connections[$name])) {
             if (false === isset($this->configs[$name])) {
-                throw new InvalidConfigurationException("Database connection [{$name}] not configured.");
+                throw new InvalidConfigurationException(
+                    sprintf(
+                        "Database connection [%s] not configured.",
+                        $name
+                    )
+                );
             }
 
             $config = $this->configs[$name];
@@ -50,8 +103,13 @@ class DatabaseManager implements ConnectionInterface
     }
 
     /**
-     * @param ConnectionInterface $connection
-     * @return $this
+     * Set the default database connection.
+     *
+     * All subsequent database operations executed through the
+     * DatabaseManager will be delegated to this connection.
+     *
+     * @param ConnectionInterface $connection The connection to set as default.
+     * @return $this Returns the current DatabaseManager instance.
      */
     public function setDefaultConnection(ConnectionInterface $connection): self
     {

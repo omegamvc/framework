@@ -59,6 +59,7 @@ class Query
     public static function from(string|InnerQuery $tableName, ConnectionInterface $pdo): Table
     {
         $conn = new Query($pdo);
+
         return $conn->table($tableName);
     }
 }

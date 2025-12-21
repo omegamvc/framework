@@ -1,5 +1,11 @@
 <?php
 
+/**
+ *
+ */
+
+/** @noinspection PhpDocSignatureInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Query\Traits;
@@ -43,7 +49,7 @@ trait SubQueryTrait
     }
 
     /**
-     * Added 'where exists' condition (query bulider).
+     * Added 'where exists' condition (query builder).
      *
      * @param Select $select Select class
      * @return self

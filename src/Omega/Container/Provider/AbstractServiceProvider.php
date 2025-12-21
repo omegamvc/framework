@@ -175,6 +175,8 @@ abstract class AbstractServiceProvider
 
     /**
      * Flush all registered shared modules.
+     *
+     * @return void
      */
     public static function flushModule(): void
     {

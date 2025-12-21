@@ -173,7 +173,6 @@ class MigrationCommand extends AbstractCommand
      * name from the application's schema connection.
      *
      * @return string The name of the database to be used for migration commands.
-     *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -195,7 +194,6 @@ class MigrationCommand extends AbstractCommand
      *
      * @return bool Returns `true` if running in a development environment or if the user
      *              confirms running in production; otherwise, `false`.
-     *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -263,6 +261,7 @@ class MigrationCommand extends AbstractCommand
      *         migration names to arrays containing `file_name` and `batch`.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -528,6 +527,7 @@ class MigrationCommand extends AbstractCommand
      *             0 on success, 1 if required options are missing or invalid.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -558,6 +558,7 @@ class MigrationCommand extends AbstractCommand
      *             always returns 0 after processing the selected migrations.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -815,6 +816,7 @@ class MigrationCommand extends AbstractCommand
      *             otherwise the exit code returned by the seeder command.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

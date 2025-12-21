@@ -19,6 +19,7 @@ use Omega\Console\Traits\PrintHelpTrait;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 
 use function file_exists;
@@ -93,6 +94,7 @@ class MaintenanceCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 if already in maintenance mode
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -132,6 +134,7 @@ class MaintenanceCommand extends AbstractCommand
      * @return int Exit code: 0 on success, 1 if not in maintenance mode or removal failed
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

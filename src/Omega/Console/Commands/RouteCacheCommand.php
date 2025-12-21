@@ -21,6 +21,7 @@ use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Router\Router;
 use Omega\SerializableClosure\UnsignedSerializableClosure;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 
 use function Omega\Console\error;
@@ -100,6 +101,7 @@ class RouteCacheCommand extends AbstractCommand
      * @return int Returns 0 on successful cache creation, 1 on failure
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -156,6 +158,7 @@ class RouteCacheCommand extends AbstractCommand
      * @return int Returns 0 if the cache file was successfully removed, 1 if the file does not exist
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

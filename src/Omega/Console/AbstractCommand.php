@@ -23,6 +23,7 @@ use Omega\Console\Traits\TerminalTrait;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 use ReturnTypeWillChange;
 
@@ -304,6 +305,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      * @return string Absolute filesystem path
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -322,6 +324,9 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
 
     /**
      * Get exist option status.
+     *
+     * @param string $name Holds the option name.
+     * @return bool True if option exists, false otherwise
      */
     protected function hasOption(string $name): bool
     {
@@ -329,9 +334,9 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
-     * Get all option array positional.
+     * Returns positional command-line arguments not associated with any option.
      *
-     * @return string[]
+     * @return string[] List of positional arguments.
      */
     protected function optionPosition(): array
     {
@@ -339,18 +344,23 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
     }
 
     /**
+     * Create and configure a Style output helper bound to the given output stream.
+     *
+     * @param OutputStream $outputStream Output stream used to write command output.
      * @param array{
-     *  colorize?: bool,
-     *  decorate?: bool,
-     * } $options
+     *     colorize?: bool,
+     *     decorate?: bool,
+     * } $options Optional output configuration overrides.
+     * @return Style Configured style instance for formatted output.
      */
-    protected function output(OutputStream $output_stream, array $options = []): Style
+    protected function output(OutputStream $outputStream, array $options = []): Style
     {
+        /** @noinspection PhpParamsInspection */
         $output = new Style(options: [
             'colorize' => $options['colorize'] ?? $this->hasColorSupport(),
             'decorate' => $options['decorate'] ?? null,
         ]);
-        $output->setOutputStream($output_stream);
+        $output->setOutputStream($outputStream);
 
         return $output;
     }
@@ -363,6 +373,8 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      * 3. debug with flag --debug
      *
      * if there is no default option set, then set default verbosity to normal.
+     *
+     * @return int One of the VERBOSITY_* constants.
      */
     protected function getDefaultVerbosity(): int
     {
@@ -389,6 +401,13 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
         return self::VERBOSITY_NORMAL;
     }
 
+    /**
+     * Set the current verbosity level.
+     *
+     * @param int $verbosity Verbosity level, must be between VERBOSITY_SILENT and VERBOSITY_DEBUG.
+     * @return void
+     * @throws InvalidArgumentException If the verbosity level is out of range.
+     */
     public function setVerbosity(int $verbosity): void
     {
         if ($verbosity < self::VERBOSITY_SILENT || $verbosity > self::VERBOSITY_DEBUG) {
@@ -400,31 +419,61 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
         $this->verbosity = $verbosity;
     }
 
+    /**
+     * Get the current verbosity level.
+     *
+     * @return int Current verbosity level.
+     */
     public function getVerbosity(): int
     {
         return $this->verbosity;
     }
 
+    /**
+     * Determine whether the command is running in silent mode.
+     *
+     * @return bool True if verbosity is VERBOSITY_SILENT.
+     */
     public function isSilent(): bool
     {
         return $this->verbosity === self::VERBOSITY_SILENT;
     }
 
+    /**
+     * Determine whether the command is running in quiet mode.
+     *
+     * @return bool True if verbosity is VERBOSITY_QUIET.
+     */
     public function isQuiet(): bool
     {
         return $this->verbosity === self::VERBOSITY_QUIET;
     }
 
+    /**
+     * Determine whether the command is running in verbose mode or higher.
+     *
+     * @return bool True if verbosity is VERBOSITY_VERBOSE or above.
+     */
     public function isVerbose(): bool
     {
         return $this->verbosity >= self::VERBOSITY_VERBOSE;
     }
 
+    /**
+     * Determine whether the command is running in very verbose mode or higher.
+     *
+     * @return bool True if verbosity is VERBOSITY_VERY_VERBOSE or above.
+     */
     public function isVeryVerbose(): bool
     {
         return $this->verbosity >= self::VERBOSITY_VERY_VERBOSE;
     }
 
+    /**
+     * Determine whether the command is running in debug mode.
+     *
+     * @return bool True if verbosity is VERBOSITY_DEBUG.
+     */
     public function isDebug(): bool
     {
         return $this->verbosity >= self::VERBOSITY_DEBUG;
@@ -469,6 +518,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      *
      * @param mixed $offset Option name
      * @param mixed $value  Value
+     * @return void
      * @throws ImmutableOptionException Always throws because options cannot be modified
      */
     public function offsetSet(mixed $offset, mixed $value): void
@@ -480,6 +530,7 @@ abstract class AbstractCommand implements ArrayAccess, CommandInterface
      * ArrayAccess: Prevent unsetting of options.
      *
      * @param mixed $offset Option name
+     * @return void
      * @throws ImmutableOptionException Always throws because options cannot be modified
      */
     public function offsetUnset(mixed $offset): void

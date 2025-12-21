@@ -23,6 +23,7 @@ use Omega\Support\Bootstrap\BootProviders;
 use Omega\Support\Bootstrap\ConfigProviders;
 use Omega\Support\Bootstrap\RegisterFacades;
 use Omega\Support\Bootstrap\RegisterProviders;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 
 use function array_fill;
@@ -106,6 +107,7 @@ class Console
      * @return int Exit code
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -166,6 +168,7 @@ class Console
      * @return void
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -186,6 +189,7 @@ class Console
      * @return int Exit code
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

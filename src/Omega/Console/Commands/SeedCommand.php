@@ -143,7 +143,6 @@ class SeedCommand extends AbstractCommand
      * {@inheritdoc}
      *
      * @return int Exit code: always 0.
-     *
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -207,6 +206,7 @@ class SeedCommand extends AbstractCommand
      * @return int Returns 0 on successful seeder creation, or 1 if the operation fails.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

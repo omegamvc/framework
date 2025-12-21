@@ -1,64 +1,94 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 
 namespace Omega\Database;
 
 use PDOException;
 
+/**
+ * Defines the contract for a database connection.
+ *
+ * A Connection implementation is responsible for preparing and executing
+ * SQL statements, binding parameters, fetching results, managing transactions,
+ * and collecting execution logs.
+ *
+ * @category  Omega
+ * @package   Database
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 interface ConnectionInterface extends LoggerInterface, TransactionInterface
 {
     /**
-     * Preparing a statement in the query.
+     * Prepare an SQL statement for execution.
      *
-     * @param string $query
-     * @return self
+     * @param string $query The SQL query string to prepare.
+     * @return self Returns the current connection instance for method chaining.
      */
     public function query(string $query): self;
 
     /**
-     * Replace the user's input parameter with a placeholder.
+     * Bind a value to a parameter in the prepared statement.
      *
-     * @param string|int|bool|null $param
-     * @param mixed                $value
-     * @param string|int|bool|null $type
-     * @return self
+     * The parameter may be a named or positional placeholder. The value is
+     * safely bound to prevent SQL injection.
+     *
+     * @param string|int|bool|null $param The parameter identifier or placeholder.
+     * @param mixed               $value The value to bind to the parameter.
+     * @param string|int|bool|null $type  Optional parameter type or driver hint.
+     * @return self Returns the current connection instance for method chaining.
      */
-    public function bind(string|int|bool|null $param, mixed $value, string|int|bool|null $type = null): self;
+    public function bind(
+        string|int|bool|null $param,
+        mixed $value,
+        string|int|bool|null $type = null
+    ): self;
 
     /**
-     * Executes a prepared statement (query).
+     * Execute the prepared SQL statement.
      *
-     * @return bool
-     * @throws PDOException
+     * @return bool True on successful execution, false otherwise.
+     * @throws PDOException If the execution fails at the driver level.
      */
     public function execute(): bool;
 
     /**
-     * Returns the results of the query executed in the form of an array.
+     * Fetch all rows from the executed statement.
      *
-     * @return array|false
+     * @return array|false An array of result rows, or false if no results are available.
      */
     public function resultset(): array|false;
 
     /**
-     * Returns the results of the query, displaying only one row of data.
+     * Fetch a single row from the executed statement.
      *
-     * @return mixed
+     * @return mixed The fetched row, or null if no result is available.
      */
     public function single(): mixed;
 
     /**
-     * Displays the amount of data that has been successfully saved, changed, or deleted.
+     * Get the number of affected rows from the last executed statement.
      *
-     * @return int
+     * @return int The number of rows inserted, updated, or deleted.
      */
     public function rowCount(): int;
 
     /**
-     * ID from the last saved data.
+     * Retrieve the ID of the last inserted row.
      *
-     * @return string|false
+     * @return string|false The last insert ID, or false if not supported.
      */
     public function lastInsertId(): string|false;
 }

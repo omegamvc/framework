@@ -15,7 +15,7 @@ class Where
     /** @var string Table Name */
     private string $table;
 
-    /** @var InnerQuery|null This property use for helper phpstan (auto skip) */
+    /** @var InnerQuery|null This property use for helper php-stan (auto skip) */
     private ?InnerQuery $subQuery = null;
 
     /**  @var Bind[] Binder for PDO bind */

@@ -85,7 +85,7 @@ class ClearCacheCommandTest extends TestCase
      */
     public function testItCanClearDefaultDriver(): void
     {
-        $this->app ->set('cache', fn () => new CacheFactory('file', new File([
+        $this->app->set('cache', fn () => new CacheFactory('file', new File([
             'ttl'  => 3_600,
             'path' => get_path('path.cache')
         ])));

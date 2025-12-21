@@ -20,6 +20,7 @@ use Omega\Container\Exceptions\AliasException;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\CircularAliasException;
 use Omega\Container\Exceptions\EntryNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -118,6 +119,12 @@ class Container implements ArrayAccess, ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function make(string $name, array $parameters = []): mixed
     {
@@ -179,6 +186,12 @@ class Container implements ArrayAccess, ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function build(string|Closure $concrete, array $parameters = []): mixed
     {
@@ -245,6 +258,12 @@ class Container implements ArrayAccess, ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function call(callable|object|array|string $callable, array $parameters = []): mixed
     {
@@ -253,6 +272,10 @@ class Container implements ArrayAccess, ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
+     * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
+     * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function injectOn(object $instance): object
     {
@@ -322,6 +345,7 @@ class Container implements ArrayAccess, ContainerInterface
      * @return mixed The resolved value.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -404,6 +428,7 @@ class Container implements ArrayAccess, ContainerInterface
      * @return mixed The resolved object or value.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

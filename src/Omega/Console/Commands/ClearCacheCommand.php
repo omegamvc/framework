@@ -100,8 +100,7 @@ class ClearCacheCommand extends AbstractCommand
      * @param Application $app The application instance containing cache services.
      * @return int Exit code: 0 on success, 1 if cache is not configured.
      * @throws CircularAliasException Thrown when cache alias resolution loops recursively.
-     * @throws UnknownStorageException If a requested cache storage driver is unknown,
-     *                                 unregistered, or unsupported.
+     * @throws UnknownStorageException If a requested cache storage driver is unknown, unregistered, or unsupported.
      */
     public function clear(Application $app): int
     {

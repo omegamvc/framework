@@ -17,6 +17,7 @@ namespace Omega\Console;
 use Omega\Application\Application;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\EntryNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Run;
@@ -37,6 +38,7 @@ class ConsoleError extends Console
     /**
      * @param Application $app
      * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

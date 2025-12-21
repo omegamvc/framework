@@ -51,15 +51,15 @@ final class ViewTest extends TestCase
 
         $app->set(
             'view.response',
-            fn () => fn (string $view_path, array $portal = []): Response => new Response(
-                $app->make(Templator::class)->render($view_path, $portal)
+            fn () => fn (string $viewPath, array $portal = []): Response => new Response(
+                $app->make(Templator::class)->render($viewPath, $portal)
             )
         );
 
         $view = view('test', [], ['status' => 500]);
         $this->assertEquals(500, $view->getStatusCode());
         $this->assertTrue(
-            Str::contains($view->getContent(), 'savanna')
+            Str::contains($view->getContent(), 'omega')
         );
 
         $app->flush();

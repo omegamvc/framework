@@ -1,5 +1,10 @@
 <?php
 
+/**
+ *
+ */
+
+/** @noinspection PhpDocSignatureInspection */
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);

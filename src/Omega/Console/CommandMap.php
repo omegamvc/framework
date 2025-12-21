@@ -129,7 +129,6 @@ readonly class CommandMap implements ArrayAccess
      *  - The "class" key in the definition.
      *
      * @return string
-     *
      * @throws InvalidArgumentException If no class can be resolved.
      */
     public function class(): string

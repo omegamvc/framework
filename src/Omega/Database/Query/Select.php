@@ -45,7 +45,7 @@ final class Select extends AbstractFetch
         }
 
         $column       = implode(', ', $columnsName);
-        $this->query = $options['query'] ?? "SELECT {$column} FROM { $this->subQuery}";
+        $this->query  = $options['query'] ?? "SELECT {$column} FROM { $this->subQuery}";
     }
 
     /**

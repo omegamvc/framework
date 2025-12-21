@@ -1,22 +1,47 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 
 namespace Omega\Database;
 
+/**
+ * Defines the contract for query execution logging.
+ *
+ * Implementations are responsible for collecting and exposing
+ * execution timing and diagnostic information for database queries.
+ *
+ * @category  Omega
+ * @package   Database
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 interface LoggerInterface
 {
     /**
-     * Flush logs query.
+     * Clear all stored query execution logs.
      *
      * @return void
      */
     public function flushLogs(): void;
 
     /**
-     * Get logs query.
+     * Retrieve the collected query execution logs.
      *
-     * @return array<int, array<string, float|string|null>> The return of started, ended and duration in milisocond
+     * Each log entry contains start time, end time, and execution duration
+     * expressed in milliseconds.
+     *
+     * @return array<int, array<string, float|string|null>> Collected query logs.
      */
     public function getLogs(): array;
 }

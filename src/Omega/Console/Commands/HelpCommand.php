@@ -23,6 +23,7 @@ use Omega\Console\Util;
 use Omega\Container\Exceptions\BindingResolutionException;
 use Omega\Container\Exceptions\EntryNotFoundException;
 use Omega\Text\Str;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 
 use function array_merge;
@@ -123,6 +124,7 @@ class HelpCommand extends AbstractCommand
      *
      * @return int Exit code: always 0.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
@@ -264,6 +266,7 @@ class HelpCommand extends AbstractCommand
      *
      * @return int Exit code: 0 if help is found, 1 if not.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */

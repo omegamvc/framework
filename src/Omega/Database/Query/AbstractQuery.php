@@ -37,6 +37,7 @@ abstract class AbstractQuery
      * Binder array(['key', 'val']).
      *
      * @var Bind[] Binder for PDO bind
+     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
      */
     protected array $binds = [];
 
