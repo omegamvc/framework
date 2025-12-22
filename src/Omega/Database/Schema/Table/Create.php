@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Schema\Table;
@@ -13,56 +23,58 @@ use function array_merge;
 use function count;
 use function implode;
 
+/**
+ * Class Create
+ *
+ * Handles creation of database tables with columns, primary keys, unique constraints,
+ * storage engines, and character sets. Extends the Query class to build executable SQL.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Schema\Table
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class Create extends Query
 {
-    /** @var string  */
+    /** @var string Storage engine constants. */
     public const string INNODB    = 'INNODB';
-
-    /** @var string  */
     public const string MYISAM    = 'MYISAM';
-
-    /** @var string  */
     public const string MEMORY    = 'MEMORY';
-
-    /** @var string  */
     public const string MERGE     = 'MERGE';
-
-    /** @var string  */
     public const string EXAMPLE   = 'EXAMPLE';
-
-    /** @var string  */
     public const string ARCHIVE   = 'ARCHIVE';
-
-    /** @var string  */
     public const string CSV       = 'CSV';
-
-    /** @var string  */
     public const string BLACKHOLE = 'BLACKHOLE';
-
-    /** @var string  */
     public const string FEDERATED = 'FEDERATED';
 
-    /** @var Column[]|DataType[] */
+    /** @var Column[]|DataType[] List of table columns */
     private array $columns;
 
-    /** @var string[] */
+    /** @var string[] List of primary key columns */
     private array $primaryKeys;
 
-    /** @var string[] */
+    /** @var string[] List of unique columns */
     private array $uniques;
 
-    /** @var string */
+    /** @var string Storage engine for the table */
     private string $storeEngine;
 
+    /** @var string Character set for the table */
     private string $characterSet;
 
-    /** @var string */
+    /** @var string Fully qualified table name (database.table) */
     private string $tableName;
 
     /**
-     * @param string                    $databaseName
-     * @param string                    $tableName
-     * @param SchemaConnectionInterface $pdo
+     * Create constructor.
+     *
+     * @param string $databaseName Database name
+     * @param string $tableName    Table name
+     * @param SchemaConnectionInterface $pdo Database connection interface
      */
     public function __construct(string $databaseName, string $tableName, SchemaConnectionInterface $pdo)
     {
@@ -76,8 +88,10 @@ class Create extends Query
     }
 
     /**
-     * @param string $columnName
-     * @return DataType
+     * Add a new column by name using fluent interface.
+     *
+     * @param string $columnName Name of the column
+     * @return DataType Returns a DataType instance to define column constraints
      */
     public function __invoke(string $columnName): DataType
     {
@@ -85,7 +99,9 @@ class Create extends Query
     }
 
     /**
-     * @return Column
+     * Add an empty column instance.
+     *
+     * @return Column Column instance
      */
     public function addColumn(): Column
     {
@@ -93,8 +109,10 @@ class Create extends Query
     }
 
     /**
-     * @param Column[] $columns
-     * @return $this
+     * Set multiple columns at once.
+     *
+     * @param Column[] $columns Array of Column instances
+     * @return $this Fluent interface
      */
     public function columns(array $columns): self
     {
@@ -107,8 +125,10 @@ class Create extends Query
     }
 
     /**
-     * @param string $columnName
-     * @return $this
+     * Define a primary key column.
+     *
+     * @param string $columnName Column name
+     * @return $this Fluent interface
      */
     public function primaryKey(string $columnName): self
     {
@@ -118,8 +138,10 @@ class Create extends Query
     }
 
     /**
-     * @param string $unique
-     * @return $this
+     * Define a unique constraint column.
+     *
+     * @param string $unique Column name
+     * @return $this Fluent interface
      */
     public function unique(string $unique): self
     {
@@ -129,8 +151,10 @@ class Create extends Query
     }
 
     /**
-     * @param string $engine
-     * @return $this
+     * Set the storage engine for the table.
+     *
+     * @param string $engine Storage engine (use constants)
+     * @return $this Fluent interface
      */
     public function engine(string $engine): self
     {
@@ -140,8 +164,10 @@ class Create extends Query
     }
 
     /**
-     * @param string $characterSet
-     * @return $this
+     * Set the character set for the table.
+     *
+     * @param string $characterSet Character set name
+     * @return $this Fluent interface
      */
     public function character(string $characterSet): self
     {
@@ -151,7 +177,9 @@ class Create extends Query
     }
 
     /**
-     * @return string
+     * Build the CREATE TABLE SQL statement.
+     *
+     * @return string SQL query string
      */
     protected function builder(): string
     {
@@ -165,7 +193,9 @@ class Create extends Query
     }
 
     /**
-     * @return string[]
+     * Get SQL string for all columns.
+     *
+     * @return string[] Array of column SQL strings
      */
     private function getColumns(): array
     {
@@ -179,7 +209,9 @@ class Create extends Query
     }
 
     /**
-     * @return string[]
+     * Get SQL string for primary key constraint.
+     *
+     * @return string[] Array with PRIMARY KEY SQL
      */
     private function getPrimaryKey(): array
     {
@@ -187,14 +219,15 @@ class Create extends Query
             return [''];
         }
 
-        $primaryKeys = array_map(fn ($primaryKey) => $primaryKey, $this->primaryKeys);
-        $primaryKeys = implode(', ', $primaryKeys);
+        $primaryKeys = implode(', ', $this->primaryKeys);
 
         return ["PRIMARY KEY ($primaryKeys)"];
     }
 
     /**
-     * @return string[]
+     * Get SQL string for unique constraints.
+     *
+     * @return string[] Array with UNIQUE SQL
      */
     private function getUnique(): array
     {
@@ -208,7 +241,9 @@ class Create extends Query
     }
 
     /**
-     * @return string
+     * Get SQL string for storage engine.
+     *
+     * @return string Storage engine SQL
      */
     private function getStoreEngine(): string
     {
@@ -216,7 +251,9 @@ class Create extends Query
     }
 
     /**
-     * @return string
+     * Get SQL string for character set.
+     *
+     * @return string Character set SQL
      */
     private function getCharacterSet(): string
     {

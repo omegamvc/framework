@@ -1,7 +1,13 @@
 <?php
 
 /**
+ * Part of Omega - Database Package.
  *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 
 /** @noinspection PhpFullyQualifiedNameUsageInspection */
@@ -12,18 +18,43 @@ namespace Omega\Database\Query;
 
 use function trim;
 
+/**
+ * Represents a table reference or a subquery used inside SQL statements.
+ *
+ * An InnerQuery can wrap a Select query to be used as a subquery with an alias,
+ * or simply represent a plain table name. It is commonly used in JOIN clauses
+ * and other contexts where a table or subquery is required.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Query
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 final readonly class InnerQuery implements \Stringable
 {
     /**
-     * @param Select|null $select
-     * @param string      $table
+     * Create a new InnerQuery instance.
+     *
+     * If a Select instance is provided, the InnerQuery represents a subquery.
+     * Otherwise, it represents a plain table reference.
+     *
+     * @param Select|null $select Select query used as subquery.
+     * @param string      $table  Table name or alias.
      */
-    public function __construct(private ?Select $select = null, private string $table = '')
-    {
+    public function __construct(
+        private ?Select $select = null,
+        private string $table = ''
+    ) {
     }
 
     /**
-     * @return bool
+     * Determine whether this instance represents a subquery.
+     *
+     * @return bool True if a Select instance is defined.
      */
     public function isSubQuery(): bool
     {
@@ -31,6 +62,8 @@ final readonly class InnerQuery implements \Stringable
     }
 
     /**
+     * Get the table alias or table name.
+     *
      * @return string
      */
     public function getAlias(): string
@@ -39,7 +72,9 @@ final readonly class InnerQuery implements \Stringable
     }
 
     /**
-     * @return Bind[]
+     * Get bind parameters from the inner Select query.
+     *
+     * @return Bind[] List of bind objects used by the subquery.
      */
     public function getBind(): array
     {
@@ -47,6 +82,11 @@ final readonly class InnerQuery implements \Stringable
     }
 
     /**
+     * Convert the inner query to its SQL representation.
+     *
+     * If this instance wraps a subquery, it will be rendered as
+     * "(SELECT ...) AS alias". Otherwise, only the table name is returned.
+     *
      * @return string
      */
     public function __toString(): string

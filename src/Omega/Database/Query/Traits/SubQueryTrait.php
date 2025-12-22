@@ -1,7 +1,13 @@
 <?php
 
 /**
+ * Part of Omega - Database Package.
  *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 
 /** @noinspection PhpDocSignatureInspection */
@@ -15,15 +21,28 @@ use Omega\Database\Query\Select;
 use function implode;
 
 /**
- * Sub where query trait.
+ * Provides methods for handling subqueries in SQL query builders.
+ *
+ * This trait allows adding subquery conditions to WHERE clauses, supporting
+ * common SQL subquery operators such as EXISTS, NOT EXISTS, IN, =, and LIKE.
+ * It automatically merges the binds from the subquery into the main query.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Query\Traits
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  */
 trait SubQueryTrait
 {
     /**
-     * Add sub query to where statement.
+     * Add a raw subquery to the WHERE statement.
      *
-     * @param string $clause
-     * @param Select $select
+     * @param string $clause Raw SQL clause or operator (e.g., "EXISTS", "column =")
+     * @param Select $select The Select instance representing the subquery
      * @return self
      */
     public function whereClause(string $clause, Select $select): self
@@ -38,9 +57,13 @@ trait SubQueryTrait
     }
 
     /**
-     * @param string $columnName
-     * @param string $operator
-     * @param Select $select
+     * Add a comparison condition with a subquery.
+     *
+     * Example: columnName operator (subquery)
+     *
+     * @param string $columnName Column name
+     * @param string $operator   Comparison operator (e.g., '=', '>', '<')
+     * @param Select $select     Subquery instance
      * @return self
      */
     public function whereCompare(string $columnName, string $operator, Select $select): self
@@ -49,9 +72,9 @@ trait SubQueryTrait
     }
 
     /**
-     * Added 'where exists' condition (query builder).
+     * Add a WHERE EXISTS condition with a subquery.
      *
-     * @param Select $select Select class
+     * @param Select $select Subquery instance
      * @return self
      */
     public function whereExist(Select $select): self
@@ -60,9 +83,9 @@ trait SubQueryTrait
     }
 
     /**
-     * Added 'where not exists' condition (query builder).
+     * Add a WHERE NOT EXISTS condition with a subquery.
      *
-     * @param Select $select Select class
+     * @param Select $select Subquery instance
      * @return self
      */
     public function whereNotExist(Select $select): self
@@ -71,10 +94,12 @@ trait SubQueryTrait
     }
 
     /**
-     * Added 'where equal' condition (query builder).
+     * Add a WHERE equal condition using a subquery.
      *
-     * @param string $columnName
-     * @param Select $select
+     * Example: columnName = (subquery)
+     *
+     * @param string $columnName Column name
+     * @param Select $select     Subquery instance
      * @return self
      */
     public function whereEqual(string $columnName, Select $select): self
@@ -83,10 +108,12 @@ trait SubQueryTrait
     }
 
     /**
-     * Added 'where like' condition (query builder).
+     * Add a WHERE LIKE condition using a subquery.
      *
-     * @param string $columnName
-     * @param Select $select
+     * Example: columnName LIKE (subquery)
+     *
+     * @param string $columnName Column name
+     * @param Select $select     Subquery instance
      * @return self
      */
     public function whereLike(string $columnName, Select $select): self
@@ -95,10 +122,12 @@ trait SubQueryTrait
     }
 
     /**
-     * Added 'where in' condition (query builder).
+     * Add a WHERE IN condition using a subquery.
      *
-     * @param string $columnName
-     * @param Select $select
+     * Example: columnName IN (subquery)
+     *
+     * @param string $columnName Column name
+     * @param Select $select     Subquery instance
      * @return self
      */
     public function whereIn(string $columnName, Select $select): self

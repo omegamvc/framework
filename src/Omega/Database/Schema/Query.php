@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Schema;
@@ -7,13 +17,31 @@ namespace Omega\Database\Schema;
 use function array_filter;
 use function implode;
 
+/**
+ * Class Query
+ *
+ * Abstract base class for schema queries.
+ * Provides core functionality for building and executing SQL statements
+ * using a SchemaConnectionInterface instance.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Schema
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 abstract class Query
 {
-    /** @var SchemaConnectionInterface PDO property */
+    /** @var SchemaConnectionInterface PDO connection for executing queries */
     protected SchemaConnectionInterface $pdo;
 
     /**
-     * @return string
+     * Convert the query to string.
+     *
+     * @return string SQL statement
      */
     public function __toString(): string
     {
@@ -21,7 +49,11 @@ abstract class Query
     }
 
     /**
-     * @return string
+     * Build the SQL query.
+     *
+     * To be overridden in child classes.
+     *
+     * @return string SQL query string
      */
     protected function builder(): string
     {
@@ -29,7 +61,9 @@ abstract class Query
     }
 
     /**
-     * @return bool
+     * Execute the built query.
+     *
+     * @return bool True if query executed successfully
      */
     public function execute(): bool
     {
@@ -37,11 +71,11 @@ abstract class Query
     }
 
     /**
-     * Helper: join condition into string.
+     * Helper: join non-empty strings with a separator.
      *
-     * @param string[] $array
-     * @param string   $separator
-     * @return string
+     * @param string[] $array     Array of strings to join
+     * @param string   $separator Separator between elements, defaults to space
+     * @return string Joined string
      */
     protected function join(array $array, string $separator = ' '): string
     {

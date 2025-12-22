@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Model;
@@ -12,29 +22,44 @@ use Omega\Database\Query\Update;
 use function array_merge;
 
 /**
+ * ModelCollection class.
+ *
+ * A collection of Model instances with helper methods to
+ * perform operations on multiple models at once.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Model
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ *
  * @extends Collection<array-key, Model>
  */
 class ModelCollection extends Collection
 {
-    /** @var Model */
+    /** @var Model Reference model used to infer table and primary key. */
     private Model $model;
 
     /**
-     * @param iterable<array-key, Model> $models
-     * @param Model $of
+     * Construct a ModelCollection.
+     *
+     * @param iterable<array-key, Model> $models Models to initialize the collection with.
+     * @param Model $of Reference model to infer table and primary key.
      */
     public function __construct(iterable $models, Model $of)
     {
         parent::__construct($models);
-
         $this->model = $of;
     }
 
     /**
-     * Get value of primary key from first column/record.
+     * Get primary keys of all models in the collection.
      *
-     * @return array
-     * @throws Exception No records found
+     * @return array<int|string> Array of primary key values.
+     * @throws Exception If any model has no records loaded.
      */
     public function getPrimaryKey(): array
     {
@@ -47,10 +72,10 @@ class ModelCollection extends Collection
     }
 
     /**
-     *  Check every Model has clean column.
+     * Check if every model in the collection has clean columns.
      *
-     * @param string|null $column
-     * @return bool
+     * @param string|null $column Optional column name to check.
+     * @return bool True if all models are clean.
      */
     public function isClean(?string $column = null): bool
     {
@@ -58,10 +83,10 @@ class ModelCollection extends Collection
     }
 
     /**
-     * Check every Model has dirty column.
+     * Check if any model in the collection has dirty columns.
      *
-     * @param string|null $column
-     * @return bool
+     * @param string|null $column Optional column name to check.
+     * @return bool True if at least one model is dirty.
      */
     public function isDirty(?string $column = null): bool
     {
@@ -69,11 +94,11 @@ class ModelCollection extends Collection
     }
 
     /**
-     * Update using query using model primary key.
+     * Update all models in the collection with the given values using their primary keys.
      *
-     * @param array<array-key, mixed> $values
-     * @return bool
-     * @throws Exception
+     * @param array<array-key, mixed> $values Column values to update.
+     * @return bool True if the update succeeded.
+     * @throws Exception On execution failure.
      */
     public function update(array $values): bool
     {
@@ -88,10 +113,10 @@ class ModelCollection extends Collection
     }
 
     /**
-     * Delete using query using model primary key.
+     * Delete all models in the collection using their primary keys.
      *
-     * @return bool
-     * @throws Exception
+     * @return bool True if the deletion succeeded.
+     * @throws Exception On execution failure.
      */
     public function delete(): bool
     {
@@ -106,13 +131,12 @@ class ModelCollection extends Collection
     }
 
     /**
-     * Convert array of model to pure array;.
+     * Convert the collection to a plain array of all model columns.
      *
-     * @return array<array-key, mixed>
+     * @return array<array-key, mixed> Merged array of all models' columns.
      */
     public function toArrayArray(): array
     {
-        /** @var array<array-key, mixed> $arr */
         $arr = [];
         foreach ($this->collection as $model) {
             $arr = array_merge($arr, $model->toArray());

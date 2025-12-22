@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Schema\Table;
@@ -8,26 +18,45 @@ use Omega\Database\Schema\Query;
 use Omega\Database\Schema\Traits\ConditionTrait;
 use Omega\Database\Schema\SchemaConnectionInterface;
 
+/**
+ * Class Drop
+ *
+ * Handles the generation of a DROP TABLE SQL statement.
+ * Uses ConditionTrait for optional conditions (e.g., IF EXISTS).
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Schema\Table
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class Drop extends Query
 {
     use ConditionTrait;
 
-    /** @var string */
+    /** @var string Fully qualified table name (database.table) */
     private string $tableName;
 
     /**
-     * @param string                    $databaseName
-     * @param string                    $tableName
-     * @param SchemaConnectionInterface $pdo
+     * Drop constructor.
+     *
+     * @param string                    $databaseName Name of the database
+     * @param string                    $tableName    Name of the table
+     * @param SchemaConnectionInterface $pdo          Database connection interface
      */
     public function __construct(string $databaseName, string $tableName, SchemaConnectionInterface $pdo)
     {
-        $this->tableName    = $databaseName . '.' . $tableName;
-        $this->pdo           = $pdo;
+        $this->tableName = $databaseName . '.' . $tableName;
+        $this->pdo       = $pdo;
     }
 
     /**
-     * @return string
+     * Build the DROP TABLE SQL statement.
+     *
+     * @return string SQL query string
      */
     protected function builder(): string
     {

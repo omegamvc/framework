@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -13,13 +23,40 @@ use function array_filter;
 use function count;
 use function implode;
 
+/**
+ * Builds and executes an INSERT SQL query.
+ *
+ * This class supports single-row and multi-row inserts, value binding,
+ * and optional ON DUPLICATE KEY UPDATE clauses. Query execution is handled
+ * by AbstractExecute.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Query
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class Insert extends AbstractExecute
 {
     /**
-     * @var array<string, string>
+     * Columns and values used for ON DUPLICATE KEY UPDATE.
+     *
+     * The array key represents the column name, while the value represents
+     * the SQL expression assigned to that column.
+     *
+     * @var array<string, string>|null
      */
     private ?array $duplicateKey = null;
 
+    /**
+     * Create a new INSERT query builder.
+     *
+     * @param string              $tableName Table name.
+     * @param ConnectionInterface $pdo       Database connection instance.
+     */
     public function __construct(string $tableName, ConnectionInterface $pdo)
     {
         $this->table = $tableName;
@@ -27,7 +64,9 @@ class Insert extends AbstractExecute
     }
 
     /**
-     * @return string
+     * Cast the builder to its SQL representation.
+     *
+     * @return string The compiled INSERT SQL query.
      */
     public function __toString(): string
     {
@@ -35,10 +74,10 @@ class Insert extends AbstractExecute
     }
 
     /**
-     *  Value query builder (key => value).
+     * Add multiple column-value pairs for insertion.
      *
-     * @param array<string, string|int|bool|null> $values Insert values
-     * @return self
+     * @param array<string, string|int|bool|null> $values Column-value map.
+     * @return $this
      */
     public function values(array $values): self
     {
@@ -50,28 +89,36 @@ class Insert extends AbstractExecute
     }
 
     /**
-     * @param string               $bind
-     * @param string|int|bool|null $value
-     * @return self
+     * Add a single column-value pair for insertion.
+     *
+     * The value is automatically bound using a prefixed placeholder.
+     *
+     * @param string               $bind  Column name.
+     * @param string|int|bool|null $value Column value.
+     * @return $this
      */
     public function value(string $bind, string|int|bool|null $value): self
     {
-        $this->binds[] = Bind::set($bind, $value, $bind)->prefixBind(':bind_');
+        $this->binds[] = Bind::set($bind, $value, $bind)
+            ->prefixBind(':bind_');
 
         return $this;
     }
 
     /**
-     * Added multi rows (values).
+     * Add multiple rows for a multi-row INSERT statement.
      *
-     * @param array<int, array<string, string|int|bool|null>> $rows
-     * @return self
+     * Each row is indexed to ensure unique bind placeholders.
+     *
+     * @param array<int, array<string, string|int|bool|null>> $rows Rows to insert.
+     * @return $this
      */
     public function rows(array $rows): self
     {
         foreach ($rows as $index => $values) {
             foreach ($values as $bind => $value) {
-                $this->binds[] = Bind::set($bind, $value, $bind)->prefixBind(':bind_' . $index . '_');
+                $this->binds[] = Bind::set($bind, $value, $bind)
+                    ->prefixBind(':bind_' . $index . '_');
             }
         }
 
@@ -79,11 +126,14 @@ class Insert extends AbstractExecute
     }
 
     /**
-     * On duplicate key update.
+     * Define a column update for the ON DUPLICATE KEY UPDATE clause.
      *
-     * @param string      $column
-     * @param string|null $value
-     * @return self
+     * If no value is provided, the column will be updated using
+     * VALUES(column).
+     *
+     * @param string      $column Column name.
+     * @param string|null $value  SQL expression or null for default behavior.
+     * @return $this
      */
     public function on(string $column, ?string $value = null): self
     {
@@ -93,25 +143,32 @@ class Insert extends AbstractExecute
     }
 
     /**
-     * @return string
+     * Compile the INSERT SQL query.
+     *
+     * @return string The generated SQL statement.
      */
     protected function builder(): string
     {
-        [$binds, ,$columns] = $this->bindsDestructor();
+        [$binds, , $columns] = $this->bindsDestructor();
 
         $stringsBinds = [];
         /** @var array<int, array<int, string>> $chunk */
         $chunk = array_chunk($binds, count($columns), true);
+
         foreach ($chunk as $group) {
             $stringsBinds[] = '(' . implode(', ', $group) . ')';
         }
 
-        $builds              = [];
+        $builds = [];
         $builds['column']    = '(' . implode(', ', $columns) . ')';
         $builds['values']    = 'VALUES';
         $builds['binds']     = implode(', ', $stringsBinds);
         $builds['keyUpdate'] = $this->getDuplicateKeyUpdate();
-        $stringBuild         = implode(' ', array_filter($builds, fn ($item) => $item !== ''));
+
+        $stringBuild = implode(
+            ' ',
+            array_filter($builds, fn ($item) => $item !== '')
+        );
 
         $this->query = "INSERT INTO {$this->table} {$stringBuild}";
 
@@ -119,7 +176,9 @@ class Insert extends AbstractExecute
     }
 
     /**
-     * @return string
+     * Build the ON DUPLICATE KEY UPDATE clause.
+     *
+     * @return string The compiled clause or an empty string if not defined.
      */
     private function getDuplicateKeyUpdate(): string
     {

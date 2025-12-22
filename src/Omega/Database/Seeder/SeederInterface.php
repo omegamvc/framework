@@ -1,31 +1,62 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Seeder;
 
 use Omega\Database\Query\Insert;
 
+/**
+ * Interface SeederInterface
+ *
+ * Defines the contract for database seeders.
+ * Seeders are responsible for populating tables with initial or test data.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Seeder
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 interface SeederInterface
 {
     /**
-     * Call the migration class.
+     * Call another seeder or migration class.
      *
-     * @param class-string $className Holds the class name to call.
+     * This allows chaining or reusing seeders by calling their class directly.
+     *
+     * @param class-string $className Fully qualified class name of the seeder or migration.
      * @return void
      */
     public function call(string $className): void;
 
     /**
-     * Create database seeder.
+     * Create a new database insert operation.
      *
-     * @param string $tableName Holds the name of the table to insert.
-     * @return Insert Return an object of Insert.
+     * Provides an `Insert` object to define data for a specific table.
+     *
+     * @param string $tableName Name of the table to insert data into.
+     * @return Insert Insert object ready for adding values and executing the insert.
      */
     public function create(string $tableName): Insert;
 
     /**
-     * Run seeder.
+     * Run the seeder.
+     *
+     * This method contains the logic to populate tables with data.
      *
      * @return void
      */

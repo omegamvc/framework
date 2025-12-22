@@ -1,12 +1,39 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Schema;
 
-/** Proxy for create database and table */
+/**
+ * Class Create
+ *
+ * Provides methods to create databases and tables.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Schema
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 readonly class Create
 {
+    /**
+     * @param SchemaConnectionInterface $pdo          Database connection
+     * @param string|null               $databaseName Optional database name
+     */
     public function __construct(
         private SchemaConnectionInterface $pdo,
         private ?string $databaseName = null,
@@ -14,7 +41,10 @@ readonly class Create
     }
 
     /**
-     * Create database.
+     * Create a new database.
+     *
+     * @param string $databaseName Name of the database to create
+     * @return DB\Create Instance of DB\Create to execute database creation
      */
     public function database(string $databaseName): DB\Create
     {
@@ -22,7 +52,10 @@ readonly class Create
     }
 
     /**
-     * Create table.
+     * Create a new table.
+     *
+     * @param string $tableName Name of the table to create
+     * @return Table\Create Instance of Table\Create to define table structure
      */
     public function table(string $tableName): Table\Create
     {

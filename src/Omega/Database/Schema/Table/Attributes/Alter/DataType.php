@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -9,16 +19,34 @@ namespace Omega\Database\Schema\Table\Attributes\Alter;
 use function array_map;
 use function implode;
 
+/**
+ * Class DataType
+ *
+ * Represents a column's data type for table creation or modification.
+ * Provides methods to define numeric, date/time, and text types.
+ * Each method returns a Constraint instance, except for positional modifiers like AFTER/FIRST.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Schema\Table\Attributes\Alter
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class DataType
 {
-    /** @var string */
+    /** @var string Column name */
     private string $name;
 
-    /** @var string|Constraint */
+    /** @var string|Constraint Column data type or Constraint instance */
     private string|Constraint $datatype;
 
     /**
-     * @param string $columnName
+     * Constructor.
+     *
+     * @param string $columnName Name of the column
      */
     public function __construct(string $columnName)
     {
@@ -27,6 +55,8 @@ class DataType
     }
 
     /**
+     * Convert datatype and constraint to SQL string.
+     *
      * @return string
      */
     public function __toString(): string
@@ -35,6 +65,8 @@ class DataType
     }
 
     /**
+     * Build SQL string for column definition.
+     *
      * @return string
      */
     private function query(): string
@@ -42,152 +74,81 @@ class DataType
         return $this->name . ' ' . $this->datatype;
     }
 
-    // number
-
     /**
-     * @param int $length
+     * Define INT type.
+     *
+     * @param int $length Optional length
      * @return Constraint
      */
     public function int(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('int');
-        }
-
-        return $this->datatype = new Constraint("int($length)");
+        $type = $length === 0 ? 'int' : "int($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function tinyint(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('tinyint');
-        }
-
-        return $this->datatype = new Constraint("tinyint($length)");
+        $type = $length === 0 ? 'tinyint' : "tinyint($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function smallint(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('smallint');
-        }
-
-        return $this->datatype = new Constraint("smallint($length)");
+        $type = $length === 0 ? 'smallint' : "smallint($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function bigint(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('bigint');
-        }
-
-        return $this->datatype = new Constraint("bigint($length)");
+        $type = $length === 0 ? 'bigint' : "bigint($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function float(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('float');
-        }
-
-        return $this->datatype = new Constraint("float($length)");
+        $type = $length === 0 ? 'float' : "float($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    // date
-
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function time(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('time');
-        }
-
-        return $this->datatype = new Constraint("time($length)");
+        $type = $length === 0 ? 'time' : "time($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function timestamp(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('timestamp');
-        }
-
-        return $this->datatype = new Constraint("timestamp($length)");
+        $type = $length === 0 ? 'timestamp' : "timestamp($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @return Constraint
-     */
     public function date(): Constraint
     {
         return $this->datatype = new Constraint('date');
     }
 
-    // text
-
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function varchar(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('varchar');
-        }
-
-        return $this->datatype = new Constraint("varchar($length)");
+        $type = $length === 0 ? 'varchar' : "varchar($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function text(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('text');
-        }
-
-        return $this->datatype = new Constraint("text($length)");
+        $type = $length === 0 ? 'text' : "text($length)";
+        return $this->datatype = new Constraint($type);
     }
 
-    /**
-     * @param int $length
-     * @return Constraint
-     */
     public function blob(int $length = 0): Constraint
     {
-        if ($length === 0) {
-            return $this->datatype = new Constraint('blob');
-        }
-
-        return $this->datatype = new Constraint("blob($length)");
+        $type = $length === 0 ? 'blob' : "blob($length)";
+        return $this->datatype = new Constraint($type);
     }
 
     /**
-     * @param string[] $enums
+     * Define ENUM type.
+     *
+     * @param string[] $enums List of possible enum values
      * @return Constraint
      */
     public function enum(array $enums): Constraint
@@ -199,7 +160,9 @@ class DataType
     }
 
     /**
-     * @param string $column
+     * Set column position after another column.
+     *
+     * @param string $column Column name to position after
      * @return void
      */
     public function after(string $column): void
@@ -208,6 +171,8 @@ class DataType
     }
 
     /**
+     * Set column as first in table.
+     *
      * @return void
      */
     public function first(): void

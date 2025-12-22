@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -13,27 +23,55 @@ use Omega\Database\Schema\SchemaConnectionInterface;
 use function array_merge;
 use function implode;
 
+/**
+ * Class Alter
+ *
+ * Provides methods to modify an existing table structure in the database.
+ * Supports adding, altering, dropping, and renaming columns.
+ * Builds a complete ALTER TABLE SQL statement when executed.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Schema\Table
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class Alter extends Query
 {
-    /** @var Column[]|DataType[] */
+    /**
+     * @var Column[]|DataType[] Columns to be modified
+     */
     private array $alterColumns = [];
 
-    /** @var Column[]|DataType[] */
+    /**
+     * @var Column[]|DataType[] Columns to be added
+     */
     private array $addColumns = [];
 
-    /** @var string[] */
+    /**
+     * @var string[] Columns to be dropped
+     */
     private array $dropColumns = [];
 
-    /** @var array<string, string> */
+    /**
+     * @var array<string, string> Columns to be renamed [oldName => newName]
+     */
     private array $renameColumns = [];
 
-    /** @var string */
+    /**
+     * @var string Fully qualified table name (database.table)
+     */
     private string $tableName;
 
     /**
-     * @param string                    $databaseName
-     * @param string                    $tableName
-     * @param SchemaConnectionInterface $pdo
+     * Constructor.
+     *
+     * @param string $databaseName Name of the database
+     * @param string $tableName Name of the table to alter
+     * @param SchemaConnectionInterface $pdo PDO connection instance
      */
     public function __construct(string $databaseName, string $tableName, SchemaConnectionInterface $pdo)
     {
@@ -42,9 +80,9 @@ class Alter extends Query
     }
 
     /**
-     * Add new column to the exist table.
+     * Shortcut to create a new column definition.
      *
-     * @param string $columnName
+     * @param string $columnName Column name
      * @return DataType
      */
     public function __invoke(string $columnName): DataType
@@ -53,7 +91,9 @@ class Alter extends Query
     }
 
     /**
-     * @param string $columnName
+     * Add a new column to the table.
+     *
+     * @param string $columnName Column name
      * @return DataType
      */
     public function add(string $columnName): DataType
@@ -62,7 +102,9 @@ class Alter extends Query
     }
 
     /**
-     * @param string $columnName
+     * Drop a column from the table.
+     *
+     * @param string $columnName Column name to drop
      * @return string
      */
     public function drop(string $columnName): string
@@ -71,7 +113,9 @@ class Alter extends Query
     }
 
     /**
-     * @param string $columnName
+     * Alter an existing column in the table.
+     *
+     * @param string $columnName Column name to modify
      * @return DataType
      */
     public function column(string $columnName): DataType
@@ -80,8 +124,10 @@ class Alter extends Query
     }
 
     /**
-     * @param string $from
-     * @param string $to
+     * Rename a column.
+     *
+     * @param string $from Old column name
+     * @param string $to New column name
      * @return string
      */
     public function rename(string $from, string $to): string
@@ -90,13 +136,15 @@ class Alter extends Query
     }
 
     /**
+     * Build the complete ALTER TABLE SQL query.
+     *
      * @return string
      */
     protected function builder(): string
     {
         $query = [];
 
-        // merge alter, add, drop, rename
+        // Merge alter, add, drop, and rename statements
         $query = array_merge($query, $this->getModify(), $this->getColumns(), $this->getDrops(), $this->getRename());
         $query = implode(', ', $query);
 
@@ -104,6 +152,8 @@ class Alter extends Query
     }
 
     /**
+     * Build MODIFY COLUMN statements.
+     *
      * @return string[]
      */
     private function getModify(): array
@@ -118,6 +168,8 @@ class Alter extends Query
     }
 
     /**
+     * Build RENAME COLUMN statements.
+     *
      * @return string[]
      */
     private function getRename(): array
@@ -132,6 +184,8 @@ class Alter extends Query
     }
 
     /**
+     * Build ADD COLUMN statements.
+     *
      * @return string[]
      */
     private function getColumns(): array
@@ -146,6 +200,8 @@ class Alter extends Query
     }
 
     /**
+     * Build DROP COLUMN statements.
+     *
      * @return string[]
      */
     private function getDrops(): array

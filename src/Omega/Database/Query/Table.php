@@ -1,22 +1,47 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Database\Query;
 
 use Omega\Database\ConnectionInterface;
 
+/**
+ * Represents a database table and provides a fluent interface
+ * to perform queries such as SELECT, INSERT, UPDATE, DELETE, and REPLACE.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Query
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 class Table
 {
-    /** @var ConnectionInterface Connection instance. */
+    /** @var ConnectionInterface Connection instance used to execute queries. */
     protected ConnectionInterface $pdo;
 
-    /** @var string|InnerQuery Table name. */
+    /** @var string|InnerQuery Name of the table or a subquery instance. */
     protected string|InnerQuery $tableName;
 
     /**
-     * @param string|InnerQuery   $tableName Table name
-     * @param ConnectionInterface $pdo        ConnectionInstance
+     * Initialize a Table instance.
+     *
+     * @param string|InnerQuery   $tableName Name of the table or subquery.
+     * @param ConnectionInterface $pdo       Connection instance for query execution.
      */
     public function __construct(string|InnerQuery $tableName, ConnectionInterface $pdo)
     {
@@ -25,9 +50,9 @@ class Table
     }
 
     /**
-     * Perform insert query.
+     * Create an Insert query builder for this table.
      *
-     * @return Insert
+     * @return Insert Returns an Insert query builder instance.
      */
     public function insert(): Insert
     {
@@ -35,9 +60,9 @@ class Table
     }
 
     /**
-     * Perform replace query.
+     * Create a Replace query builder for this table.
      *
-     * @return Replace
+     * @return Replace Returns a Replace query builder instance.
      */
     public function replace(): Replace
     {
@@ -45,10 +70,10 @@ class Table
     }
 
     /**
-     * Perform select query.
+     * Create a Select query builder for this table.
      *
-     * @param string[] $selectColumns Selected column (raw)
-     * @return Select
+     * @param string[] $selectColumns Optional array of column names to select. Defaults to ['*'].
+     * @return Select Returns a Select query builder instance.
      */
     public function select(array $selectColumns = ['*']): Select
     {
@@ -56,9 +81,9 @@ class Table
     }
 
     /**
-     * Perform update query.
+     * Create an Update query builder for this table.
      *
-     * @return Update
+     * @return Update Returns an Update query builder instance.
      */
     public function update(): Update
     {
@@ -66,9 +91,9 @@ class Table
     }
 
     /**
-     * Perform delete query.
+     * Create a Delete query builder for this table.
      *
-     * @return Delete
+     * @return Delete Returns a Delete query builder instance.
      */
     public function delete(): Delete
     {
@@ -76,9 +101,13 @@ class Table
     }
 
     /**
-     * Get table information.
+     * Retrieve metadata information about the table columns.
+     *
+     * Queries INFORMATION_SCHEMA to return column details such as name,
+     * type, charset, collation, nullability, ordinal position, and key type.
      *
      * @return array<string, mixed>
+     *         Returns an array of column metadata. Returns an empty array if the table has no columns.
      */
     public function info(): array
     {

@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Part of Omega - Database Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+/** @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection */
 /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
 
 declare(strict_types=1);
@@ -17,89 +28,82 @@ use function is_string;
 use function str_contains;
 use function str_replace;
 
+/**
+ * Abstract base class for query builders.
+ *
+ * Provides common functionality for constructing SQL queries,
+ * managing table names, columns, bindings, filters, joins,
+ * grouping, and sort orders.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Query
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
+ */
 abstract class AbstractQuery
 {
-    /** @var ConnectionInterface PDO property */
-    protected ConnectionInterface $pdo;
-
-    /** @var string Main query */
-    protected string $query;
-
-    /** @var string Table Name */
-    protected string $table = '';
-
-    protected ?InnerQuery $subQuery = null;
-
-    /** @var string[] Columns name */
-    protected array $column = ['*'];
-
-    /**
-     * Binder array(['key', 'val']).
-     *
-     * @var Bind[] Binder for PDO bind
-     * @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection
-     */
-    protected array $binds = [];
-
-    /** @var int Limit start from */
-    protected int $limitStart = 0;
-
-    /** @var int Limit end to */
-    protected int $limitEnd = 0;
-
-    /** @var int offest */
-    protected int $offset = 0;
-
-    /** @var array<string, string> Sort result ASC|DESC */
-    protected array $sortOrder  = [];
-
+    /** @var int Ascending order flag */
     public const int ORDER_ASC  = 0;
+
+    /** @var int Descending order flag */
     public const int ORDER_DESC = 1;
 
-    /**
-     * Final where statement.
-     *
-     * @var string[]
-     */
+    /** @var ConnectionInterface PDO connection instance */
+    protected ConnectionInterface $pdo;
+
+    /** @var string Main SQL query */
+    protected string $query;
+
+    /** @var string Table name used in the query */
+    protected string $table = '';
+
+    /** @var InnerQuery|null Optional subquery for nested queries */
+    protected ?InnerQuery $subQuery = null;
+
+    /** @var string[] Columns to select */
+    protected array $column = ['*'];
+
+    /** @var Bind[] Binder array for PDO prepared statements. */
+    protected array $binds = [];
+
+    /** @var int LIMIT start value */
+    protected int $limitStart = 0;
+
+    /** @var int LIMIT end value */
+    protected int $limitEnd = 0;
+
+    /** @var int OFFSET value */
+    protected int $offset = 0;
+
+    /** @var array<string, string> Column sorting order ASC|DESC */
+    protected array $sortOrder = [];
+
+    /** @var string[] WHERE clause statements */
     protected array $where = [];
 
-    /**
-     * Grouping.
-     *
-     * @var string[]
-     */
+    /** @var string[] GROUP BY columns */
     protected array $groupBy = [];
 
-    /**
-     * Multi filter with strict mode.
-     *
-     * @var array<int, array<string, array<string, array<string, string>>>>
-     */
+    /** @var array<int, array<string, array<string, array<string, string>>>> Multi-filter groups with strict mode. */
     protected array $groupFilters = [];
 
-    /**
-     * Single filter and single strict mode.
-     *
-     * @var array<string, string>
-     */
+    /** Single filters with key => value pairs */
     protected array $filters = [];
 
-    /**
-     * Strict mode.
-     *
-     * @var bool True if you use AND instance of OR
-     */
+    /** @var bool Whether filters are combined with AND (true) or OR (false) */
     protected bool $strictMode = true;
 
-    /**
-     * @var string[]
-     */
+    /** @var string[] JOIN clauses */
     protected array $join = [];
 
     /**
-     * reset all property.
+     * Reset all query builder properties to default values.
      *
-     * @return self
+     * @return self Returns the current instance for chaining.
      */
     public function reset(): self
     {
@@ -117,12 +121,11 @@ abstract class AbstractQuery
         return $this;
     }
 
-    // Query builder
-
     /**
-     * Get where statement base binding set before.
+    /**
+     * Build WHERE clause based on current filters and bindings.
      *
-     * @return string Where statement from binder
+     * @return string Returns the generated WHERE SQL string.
      */
     protected function getWhere(): string
     {
@@ -148,7 +151,9 @@ abstract class AbstractQuery
     }
 
     /**
-     * @return array<int, array<string, array<string, array<string, string>>>>
+     * Merge main filters and group filters into a single array.
+     *
+     * @return array<int, array<string, array<string, array<string, string>>>> Returns merged filters.
      */
     protected function mergeFilters(): array
     {
@@ -165,8 +170,10 @@ abstract class AbstractQuery
     }
 
     /**
-     * @param array<int, array<string, array<string, array<string, string>>>> $groupFilters Groups of filters
-     * @return string
+     * Split group filters into a SQL string.
+     *
+     * @param array<int, array<string, array<string, array<string, string>>>> $groupFilters Filter groups.
+     * @return string Returns the SQL string for the groups.
      */
     protected function splitGroupsFilters(array $groupFilters): string
     {
@@ -180,8 +187,10 @@ abstract class AbstractQuery
     }
 
     /**
-     * @param array<string, array<string, array<string, string>>> $filters Filters
-     * @return string
+     * Split individual filters into SQL conditions.
+     *
+     * @param array<string, array<string, array<string, string>>> $filters Single filter group.
+     * @return string Returns the SQL condition string.
      */
     protected function splitFilters(array $filters): string
     {
@@ -206,9 +215,9 @@ abstract class AbstractQuery
     }
 
     /**
-     * Bind query with binding.
+     * Bind values into query placeholders and return a full SQL string.
      *
-     * @return string
+     * @return string Returns the final SQL query with bound values.
      */
     public function queryBind(): string
     {
@@ -235,7 +244,9 @@ abstract class AbstractQuery
     }
 
     /**
-     * @return string
+     * Build the SQL query.
+     *
+     * @return string Returns the SQL query string (empty by default in abstract class).
      */
     protected function builder(): string
     {
@@ -243,7 +254,10 @@ abstract class AbstractQuery
     }
 
     /**
-     * @return array<int, string[]|bool[]>>
+     * Extract bind names, values, and columns from the bind array.
+     *
+     * @return array{0: array<int, string>, 1: array<int, mixed>, 2: array<int, string>}
+     *         Returns [bind names, values, columns].
      */
     public function bindsDestructor(): array
     {
@@ -263,7 +277,9 @@ abstract class AbstractQuery
     }
 
     /**
-     * @return Bind[]
+     * Retrieve the current array of Bind objects.
+     *
+     * @return Bind[] Returns all bind objects used in the query.
      */
     public function getBinds(): array
     {
@@ -271,10 +287,10 @@ abstract class AbstractQuery
     }
 
     /**
-     * Add where condition from where ref.
+     * Apply a Where reference object to this query.
      *
-     * @param Where|null $ref
-     * @return static
+     * @param Where|null $ref Reference object containing conditions and binds.
+     * @return static Returns the current instance for chaining.
      */
     public function whereRef(?Where $ref): static
     {

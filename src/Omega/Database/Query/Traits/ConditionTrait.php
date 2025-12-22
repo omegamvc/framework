@@ -1,7 +1,13 @@
 <?php
 
 /**
+ * Part of Omega - Database Package.
  *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 
 /** @noinspection PhpDocSignatureInspection */
@@ -17,15 +23,28 @@ use function implode;
 use function str_replace;
 
 /**
- * Trait to provide condition under class extend with Query::class.
+ * Provides common SQL condition methods for query building.
+ *
+ * This trait is designed to be used in query builder classes (e.g., Select, Update, Delete).
+ * It handles common SQL conditions such as equal, like, between, in, and generic comparisons,
+ * while managing PDO bind parameters automatically.
+ *
+ * @category   Omega
+ * @package    Database
+ * @subpackage Query\Traits
+ * @link       https://omegamvc.github.io
+ * @author     Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version    2.0.0
  */
 trait ConditionTrait
 {
     /**
-     * Insert 'equal' condition in (query builder).
+     * Add an 'equal' condition to the query.
      *
-     * @param string               $bind  Bind
-     * @param bool|int|string|null $value Value of bind
+     * @param string               $bind  Column or bind name
+     * @param bool|int|string|null $value Value to compare
      * @return self
      */
     public function equal(string $bind, bool|int|string|null $value): self
@@ -36,10 +55,10 @@ trait ConditionTrait
     }
 
     /**
-     * Insert 'like' condition in (query builder).
+     * Add a 'LIKE' condition to the query.
      *
-     * @param string               $bind  Bind
-     * @param bool|int|string|null $value Value of bind
+     * @param string               $bind  Column or bind name
+     * @param bool|int|string|null $value Value to compare
      * @return self
      */
     public function like(string $bind, bool|int|string|null $value): self
@@ -50,11 +69,11 @@ trait ConditionTrait
     }
 
     /**
-     * Insert 'where' condition in (query builder).
+     * Add a raw WHERE condition to the query.
      *
-     * @param string                 $whereCondition Specific column name
-     * @param array<int, array|Bind> $binder         Bind and value (use for 'in')
-     * @return $this
+     * @param string                 $whereCondition Raw WHERE condition (e.g., "column = :bind")
+     * @param array<int, array|Bind> $binder         List of binds or Bind objects
+     * @return self
      */
     public function where(string $whereCondition, array $binder = []): self
     {
@@ -72,20 +91,18 @@ trait ConditionTrait
     }
 
     /**
-     * Insert 'between' condition in (query builder).
+     * Add a 'BETWEEN' condition to the query.
      *
-     * @param string $columnName Specific column name
-     * @param int    $value_1     Between start
-     * @param int    $value_2     Between end
+     * @param string $columnName Column name
+     * @param int    $value_1    Start value
+     * @param int    $value_2    End value
      * @return self
      */
     public function between(string $columnName, int $value_1, int $value_2): self
     {
         $tableName = null === $this->subQuery ? $this->table : $this->subQuery->getAlias();
 
-        $this->where(
-            "({$tableName}.{$columnName} BETWEEN :b_start AND :b_end)"
-        );
+        $this->where("({$tableName}.{$columnName} BETWEEN :b_start AND :b_end)");
 
         $this->binds[] = Bind::set('b_start', $value_1);
         $this->binds[] = Bind::set('b_end', $value_2);
@@ -94,10 +111,10 @@ trait ConditionTrait
     }
 
     /**
-     * Insert 'in' condition (query builder).
+     * Add an 'IN' condition to the query.
      *
-     * @param string                                  $columnName Specific column name
-     * @param array<int|string, string|int|bool|null> $value      Bind and value (use for 'in')
+     * @param string                                  $columnName Column name
+     * @param array<int|string, string|int|bool|null> $value      Values for the IN condition
      * @return self
      */
     public function in(string $columnName, array $value): self
@@ -109,23 +126,20 @@ trait ConditionTrait
             $binder[] = [":in_$key", $bind];
         }
         $bindString = implode(', ', $binds);
-        $tableName = null === $this->subQuery ? "{$this->table}" : $this->subQuery->getAlias();
+        $tableName  = null === $this->subQuery ? $this->table : $this->subQuery->getAlias();
 
-        $this->where(
-            "({$tableName}.{$columnName} IN ({$bindString}))",
-            $binder
-        );
+        $this->where("({$tableName}.{$columnName} IN ({$bindString}))", $binder);
 
         return $this;
     }
 
     /**
-     * Where statement setter,
+     * Add a generic comparison condition to the query.
      *
-     * @param string               $bind
-     * @param string               $comparison
-     * @param bool|int|string|null $value
-     * @param bool                 $bindValue
+     * @param string               $bind       Column or bind name
+     * @param string               $comparison SQL comparison operator (e.g., '=', '>', '<')
+     * @param bool|int|string|null $value      Value to compare
+     * @param bool                 $bindValue Optional, whether to bind the value directly
      * @return self
      */
     public function compare(
@@ -147,10 +161,9 @@ trait ConditionTrait
     }
 
     /**
-     * Setter strict mode.
+     * Set the strict mode for the query.
      *
-     * True = operator using AND,
-     * False = operator using OR
+     * True means combining conditions with AND, false means OR.
      *
      * @param bool $strict
      * @return self
