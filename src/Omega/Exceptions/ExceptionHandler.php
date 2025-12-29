@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Exceptions Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Exceptions;
@@ -21,39 +31,48 @@ use Throwable;
 use function array_map;
 use function array_merge;
 
+/**
+ * Handles exceptions for the application, including rendering, reporting, and HTTP responses.
+ *
+ * @category  Omega
+ * @package   Exceptions
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class ExceptionHandler
 {
+    /** @var Container The main application container. */
     protected Container $app;
 
-    /**
-     * Do not report exception list.
-     *
-     * @var array<int, class-string<Throwable>>
-     */
+    /** @var array<int, class-string<Throwable>> List of exceptions not to report. */
     protected array $dontReport = [];
 
-    /**
-     * Do not report exception list internal (framework).
-     *
-     * @var array<int, class-string<Throwable>>
-     */
+    /** @var array<int, class-string<Throwable>> Internal exceptions not to report (framework). */
     protected array $dontReportInternal = [
         HttpResponseException::class,
         HttpException::class,
     ];
 
+    /**
+     * Initialize the exception handler with the application container.
+     *
+     * @param Container $application The main application container.
+     */
     public function __construct(Container $application)
     {
         $this->app = $application;
     }
 
     /**
-     * Render exception.
+     * Render an exception to an HTTP response.
      *
-     * @param Request   $request
-     * @param Throwable $th
-     * @return Response
-     * @throws Throwable
+     * @param Request   $request The current HTTP request.
+     * @param Throwable $th      The exception to render.
+     * @return Response The HTTP response generated from the exception.
+     * @throws Throwable If the exception should bubble up in debug mode.
      */
     public function render(Request $request, Throwable $th): Response
     {
@@ -77,9 +96,9 @@ class ExceptionHandler
     }
 
     /**
-     * Report exception (usefully for logging).
+     * Report an exception (useful for logging).
      *
-     * @param Throwable $th
+     * @param Throwable $th The exception to report.
      * @return void
      */
     public function report(Throwable $th): void
@@ -91,10 +110,10 @@ class ExceptionHandler
     }
 
     /**
-     * Determinate if exception in list of do not report.
+     * Determine if an exception should not be reported.
      *
-     * @param Throwable $th
-     * @return bool
+     * @param Throwable $th The exception to check.
+     * @return bool True if the exception should not be reported, false otherwise.
      */
     protected function dontReport(Throwable $th): bool
     {
@@ -108,8 +127,10 @@ class ExceptionHandler
     }
 
     /**
-     * @param Throwable $th
-     * @return Response
+     * Handle exception for JSON response.
+     *
+     * @param Throwable $th The exception to render as JSON.
+     * @return Response The JSON HTTP response.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -145,8 +166,10 @@ class ExceptionHandler
     }
 
     /**
-     * @param Throwable $th
-     * @return Response
+     * Handle exception for standard response (HTML or generic).
+     *
+     * @param Throwable $th The exception to handle.
+     * @return Response The generated HTTP response.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -161,8 +184,10 @@ class ExceptionHandler
     }
 
     /**
-     * @param HttpException $e
-     * @return Response
+     * Handle HttpException specifically.
+     *
+     * @param HttpException $e The HTTP exception.
+     * @return Response The HTTP response for the exception.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -186,9 +211,9 @@ class ExceptionHandler
     }
 
     /**
-     * Register error view path.
+     * Register view paths for rendering exception templates.
      *
-     * @return Templator
+     * @return Templator Configured templator instance.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -211,7 +236,9 @@ class ExceptionHandler
     }
 
     /**
-     * @return bool
+     * Check if the application is in debug mode.
+     *
+     * @return bool True if debug mode is enabled.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -224,7 +251,9 @@ class ExceptionHandler
     }
 
     /**
-     * @return bool
+     * Check if the application environment is production.
+     *
+     * @return bool True if the environment is 'prod'.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.

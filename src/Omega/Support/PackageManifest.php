@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Facades Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Support;
@@ -14,27 +24,47 @@ use function var_export;
 
 use const PHP_EOL;
 
+/**
+ * PackageManifest handles caching and retrieval of package information.
+ *
+ * This class reads installed Composer packages, extracts relevant configuration
+ * data, and caches it to a PHP file for faster access. It provides methods to
+ * retrieve service providers and other package-related metadata.
+ *
+ * @category  Omega
+ * @package   Support
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 final class PackageManifest
 {
     /**
-     * Cached package manifest.
-     *
-     * @var array<string, array<string, array<int, string>>>|null
+     * @var array<string, array<string, array<int, string>>>|null Cached package manifest.
      */
     public ?array $packageManifest = null;
 
+    /**
+     * Constructor for PackageManifest.
+     *
+     * @param string $basePath The base path of the application.
+     * @param string $applicationCachePath Path where cached package manifest is stored.
+     * @param string|null $vendorPath Optional vendor path; defaults to '/vendor/composer/'.
+     */
     public function __construct(
         private readonly string $basePath,
         private readonly string $applicationCachePath,
         private ?string $vendorPath = null,
     ) {
-        $this->vendorPath ??= DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'composer' . DIRECTORY_SEPARATOR;
+        $this->vendorPath ??= slash(path: '/vendor/composer/');
     }
 
     /**
-     * Get provider in cache package manifest.
+     * Get all registered providers from the cached package manifest.
      *
-     * @return string[]
+     * @return string[] List of provider class names.
      */
     public function providers(): array
     {
@@ -42,9 +72,10 @@ final class PackageManifest
     }
 
     /**
-     * Get array of provider.
+     * Retrieve an array of values for a given key from the package manifest.
      *
-     * @return string[]
+     * @param string $key The key to retrieve from each package configuration.
+     * @return string[] Array of non-empty values for the given key.
      */
     protected function config(string $key): array
     {
@@ -66,9 +97,9 @@ final class PackageManifest
     }
 
     /**
-     * Get cached package manifest has been build.
+     * Get the cached package manifest, building it if it does not exist.
      *
-     * @return array<string, array<string, array<int, string>>>
+     * @return array<string, array<string, array<int, string>>> Cached package manifest.
      */
     protected function getPackageManifest(): array
     {
@@ -84,7 +115,12 @@ final class PackageManifest
     }
 
     /**
-     * Build cache package manifest from composer installed package.
+     * Build the package manifest cache from installed Composer packages.
+     *
+     * Scans the composer installed.json file, extracts 'omegamvc' extra data,
+     * and writes a cached PHP file for future access.
+     *
+     * @return void
      */
     public function build(): void
     {

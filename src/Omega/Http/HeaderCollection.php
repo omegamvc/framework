@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * Part of Omega - Http Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+/** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Http;
@@ -22,20 +34,48 @@ use function substr;
 use function trim;
 
 /**
+ * Collection specialized for managing HTTP headers.
+ *
+ * This class extends the base {@see Collection} to provide
+ * helpers for working with HTTP header fields and directives.
+ * It supports parsing, modifying, encoding, and rendering
+ * header values that contain multiple directives (e.g.
+ * Cache-Control, Content-Disposition).
+ *
+ * Headers are internally stored as key-value pairs and can
+ * be converted to a valid raw HTTP header string.
+ *
+ * @category  Omega
+ * @package   Http
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ *
  * @extends Collection<string, string>
  */
 class HeaderCollection extends Collection
 {
     /**
-     * Header collection.
+     * Create a new header collection.
      *
-     * @param array<string, string> $headers
+     * @param array<string, string> $headers Associative array of header
+     *                                       names and their values.
      */
     public function __construct(array $headers)
     {
         parent::__construct($headers);
     }
 
+    /**
+     * Convert the header collection to a raw HTTP header string.
+     *
+     * Each header is formatted as "Header-Name: value" and
+     * separated by CRLF characters.
+     *
+     * @return string Raw HTTP header representation.
+     */
     public function __toString(): string
     {
         $headers = $this->clone()->map(fn (string $value, string $key = ''): string => "{$key}: {$value}")->toArray();
@@ -44,11 +84,13 @@ class HeaderCollection extends Collection
     }
 
     /**
-     * Set raw header.
+     * Set a raw HTTP header line.
      *
-     * @param string $header
+     * The header string must follow the "Header-Name: value" format.
+     *
+     * @param string $header Raw header string.
      * @return $this
-     * @throws Exception
+     * @throws Exception If the header structure is invalid.
      */
     public function setRaw(string $header): self
     {
@@ -62,10 +104,14 @@ class HeaderCollection extends Collection
     }
 
     /**
-     * Get header directly.
+     * Get the parsed directives of a header.
      *
-     * @param string $header
-     * @return array<string|int, string|string[]>
+     * This method parses a header value into an array of
+     * directives, handling both key-value pairs and
+     * standalone values.
+     *
+     * @param string $header Header name.
+     * @return array<string|int, string|string[]> Parsed header directives.
      */
     public function getDirective(string $header): array
     {
@@ -73,11 +119,15 @@ class HeaderCollection extends Collection
     }
 
     /**
-     * Add new heder value directly to exist header.
+     * Add one or more directives to an existing header.
      *
-     * @param string $header
-     * @param array<int|string, string|string[]> $value
-     * @return HeaderCollection
+     * If the header already exists, the new directives are merged
+     * with the current ones. Numeric keys are appended, while
+     * string keys overwrite existing values.
+     *
+     * @param string $header Header name.
+     * @param array<int|string, string|string[]> $value Directives to add.
+     * @return $this
      */
     public function addDirective(string $header, array $value): self
     {
@@ -94,10 +144,13 @@ class HeaderCollection extends Collection
     }
 
     /**
-     * Remove exits header directly.
+     * Remove a directive or directive value from a header.
      *
-     * @param string $header
-     * @param string $item
+     * Both directive keys and values are checked and removed
+     * when matched.
+     *
+     * @param string $header Header name.
+     * @param string $item   Directive key or value to remove.
      * @return $this
      */
     public function removeDirective(string $header, string $item): self
@@ -118,10 +171,14 @@ class HeaderCollection extends Collection
     }
 
     /**
-     * Check header directive has item/key.
-     * @param string $header
-     * @param string $item
-     * @return bool
+     * Determine if a header contains a specific directive.
+     *
+     * The check is performed against both directive keys
+     * and directive values.
+     *
+     * @param string $header Header name.
+     * @param string $item   Directive key or value to check.
+     * @return bool True if the directive exists, false otherwise.
      */
     public function hasDirective(string $header, string $item): bool
     {
@@ -139,10 +196,13 @@ class HeaderCollection extends Collection
     }
 
     /**
-     * Parse header item to array.
+     * Parse a header value into an array of directives.
      *
-     * @param string $key
-     * @return array<string|int, string|string[]>
+     * Supports key-value directives as well as standalone
+     * values and quoted multi-value directives.
+     *
+     * @param string $key Header name.
+     * @return array<string|int, string|string[]> Parsed directives.
      */
     private function parseDirective(string $key): array
     {
@@ -174,10 +234,13 @@ class HeaderCollection extends Collection
     }
 
     /**
-     * Encode array data to header string.
+     * Encode an array of directives into a header string.
      *
-     * @param array<string|int, string|string[]> $data
-     * @return string
+     * Array values are automatically quoted and joined
+     * according to HTTP header formatting rules.
+     *
+     * @param array<string|int, string|string[]> $data Parsed directives.
+     * @return string Encoded header value.
      */
     private function encodeToString(array $data): string
     {

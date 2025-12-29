@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Http Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Http;
@@ -15,16 +25,40 @@ use function strtr;
 use function substr;
 use function trim;
 
+/**
+ * Class RequestFactory
+ *
+ * Factory class for creating Request instances.
+ * Provides helper methods to capture the current HTTP request from PHP globals
+ * and populate a Request object with query parameters, post data, headers,
+ * cookies, files, HTTP method, client IP, and raw request body.
+ *
+ * @category  Omega
+ * @package   Http
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class RequestFactory
 {
     /**
-     * Helper to create request from global.
+     * Capture the current HTTP request and return a Request instance.
+     *
+     * @return Request Returns a Request object populated from global PHP variables.
      */
     public static function capture(): Request
     {
         return new self()->getFromGlobal();
     }
 
+    /**
+     * Create a Request object from PHP global variables.
+     *
+     * @return Request Returns a Request object initialized with query, post, cookies, files, headers,
+     *         method, client IP, and raw body.
+     */
     public function getFromGlobal(): Request
     {
         return new Request(
@@ -42,7 +76,9 @@ class RequestFactory
     }
 
     /**
-     * @return array<string, string>
+     * Retrieve all HTTP headers from the current request.
+     *
+     * @return array<string, string> Returns an associative array of headers with lowercase keys.
      */
     private function getHeaders(): array
     {
@@ -78,6 +114,13 @@ class RequestFactory
         return array_change_key_case($headers);
     }
 
+    /**
+     * Get the HTTP request method.
+     *
+     * This method also supports method overriding using the "X-HTTP-Method-Override" header.
+     *
+     * @return string|null Returns the HTTP method (e.g., GET, POST) or null if not available.
+     */
     private function getMethod(): ?string
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? null;
@@ -98,6 +141,11 @@ class RequestFactory
             : null;
     }
 
+    /**
+     * Get the client IP address from the request.
+     *
+     * @return string|null Returns the client IP address or null if not available.
+     */
     private function getRawBody(): ?string
     {
         return file_get_contents('php://input') ?: null;

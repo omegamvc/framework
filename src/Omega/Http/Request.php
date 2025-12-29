@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * Part of Omega - Http Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
+/** @noinspection PhpGetterAndSetterCanBeReplacedWithPropertyHooksInspection */
+
 declare(strict_types=1);
 
 namespace Omega\Http;
@@ -33,6 +45,28 @@ use const JSON_BIGINT_AS_STRING;
 use const JSON_THROW_ON_ERROR;
 
 /**
+ * Represents an HTTP request.
+ *
+ * This class encapsulates all aspects of a client request, including:
+ * - Request method (GET, POST, etc.)
+ * - URL and query parameters
+ * - POST data
+ * - Uploaded files
+ * - Cookies and headers
+ * - Raw body and JSON content
+ * - Custom attributes
+ *
+ * Implements ArrayAccess and IteratorAggregate to allow easy access to
+ * input data and iteration over request parameters.
+ *
+ * @category  Omega
+ * @package   Http
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ *
  * @method Validator    validate(?Closure $rule = null, ?Closure $filter = null)
  * @method UploadFile upload(array $fileName)
  *
@@ -43,82 +77,40 @@ class Request implements ArrayAccess, IteratorAggregate
 {
     use MacroableTrait;
 
-    /**
-     * Request method.
-     */
+    /** @var string The HTTP request method (GET, POST, etc.). */
     private string $method;
 
-    /**
-     * Request url.
-     */
+    /** @var string The requested URL. */
     private string $url;
 
-    /**
-     * Request query ($_GET).
-     *
-     * @var Collection<string, string>
-     */
+    /** @var Collection<string, string> Query parameters ($_GET). */
     private Collection $query;
 
-    /**
-     * Custom request information.
-     *
-     * @var array<string, string|int|bool>
-     */
+    /** @var array<string, string|int|bool> Custom attributes associated with the request. */
     private array $attributes;
 
-    /**
-     * Request post ($_POST).
-     *
-     * @var Collection<string, string>
-     */
+    /** @var Collection<string, string> POST parameters ($_POST). */
     private Collection $post;
 
-    /**
-     * Request file ($_FILE).
-     *
-     * @var array<string, array<int, string>|string>
-     */
+    /** @var array<string, array<int, string>|string> Uploaded files ($_FILES). */
     private array $files;
 
-    /**
-     * Request cookies ($_COOKIES).
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> Cookies ($_COOKIE). */
     private array $cookies;
 
-    /**
-     * Request header.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> HTTP headers associated with the request. */
     private array $headers;
 
-    /**
-     * Request remote address (IP).
-     */
+    /** @var string Remote IP address of the client making the request. */
     private string $remoteAddress;
 
-    /**
-     * Request Body content.
-     *
-     * @var string|null
-     */
+    /** @var string|null Raw body content of the request. */
     private ?string $rawBody;
 
-    /**
-     * Json body rendered.
-     *
-     * @var Collection<string, string>
-     */
+    /** @var Collection<string, string> Parsed JSON content from the request body. */
     private Collection $json;
 
-    /**
-     * Initialize mime format.
-     *
-     * @var array<string, string[]>
-     */
+    /** @var array<string, string[]> MIME types associated with known formats. */
     protected array $formats = [
         'html'   => ['text/html', 'application/xhtml+xml'],
         'txt'    => ['text/plain'],
@@ -134,12 +126,19 @@ class Request implements ArrayAccess, IteratorAggregate
     ];
 
     /**
-     * @param array<string, string> $query
-     * @param array<string, string> $post
-     * @param array<string, string> $attributes
-     * @param array<string, string> $cookies
-     * @param array<string, string> $files
-     * @param array<string, string> $headers
+     * Initialize a new HTTP request.
+     *
+     * @param string                $url           The requested URL.
+     * @param array<string, string> $query         Query parameters ($_GET).
+     * @param array<string, string> $post          POST parameters ($_POST).
+     * @param array<string, string> $attributes    Custom attributes.
+     * @param array<string, string> $cookies       Cookies ($_COOKIE).
+     * @param array<string, string> $files         Uploaded files ($_FILES).
+     * @param array<string, string> $headers       HTTP headers.
+     * @param string                $method        HTTP method, default 'GET'.
+     * @param string                $remoteAddress Client IP address, default '::1'.
+     * @param string|null           $rawBody       Raw request body.
+     * @return void
      */
     public function __construct(
         string $url,
@@ -168,19 +167,21 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Initial request.
+     * Initialize request data explicitly.
      *
-     * @param string                $url
-     * @param array<string, string> $query
-     * @param array<string, string> $post
-     * @param array<string, string> $attributes
-     * @param array<string, string> $cookies
-     * @param array<string, string> $files
-     * @param array<string, string> $headers
-     * @param string                $method
-     * @param string                $remoteAddress
-     * @param string|null           $rawBody
-     * @return self
+     * This method allows re-initializing all request data after construction.
+     *
+     * @param string                $url           The requested URL.
+     * @param array<string, string> $query         Query parameters ($_GET).
+     * @param array<string, string> $post          POST parameters ($_POST).
+     * @param array<string, string> $attributes    Custom attributes.
+     * @param array<string, string> $cookies       Cookies ($_COOKIE).
+     * @param array<string, string> $files         Uploaded files ($_FILES).
+     * @param array<string, string> $headers       HTTP headers.
+     * @param string                $method        HTTP method.
+     * @param string                $remoteAddress Client IP address.
+     * @param string|null           $rawBody       Raw request body.
+     * @return self Returns the request instance.
      */
     public function initialize(
         string $url,
@@ -209,15 +210,16 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Initial request.
+     * Create a duplicate of the current request, optionally overriding
+     * query, post, attributes, cookies, files, or headers.
      *
-     * @param array<string, string>|null $query
-     * @param array<string, string>|null $post
-     * @param array<string, string>|null $attributes
-     * @param array<string, string>|null $cookies
-     * @param array<string, string>|null $files
-     * @param array<string, string>|null $headers
-     * @return self
+     * @param array<string, string>|null $query Optional query parameters to override.
+     * @param array<string, string>|null $post Optional POST parameters to override.
+     * @param array<string, string>|null $attributes Optional custom attributes to override.
+     * @param array<string, string>|null $cookies Optional cookies to override.
+     * @param array<string, string>|null $files Optional uploaded files to override.
+     * @param array<string, string>|null $headers Optional headers to override.
+     * @return self Returns a cloned request instance with optional overrides.
      */
     public function duplicate(
         ?array $query = null,
@@ -251,6 +253,14 @@ class Request implements ArrayAccess, IteratorAggregate
         return $duplicate;
     }
 
+    /**
+     * Clone the current request instance.
+     *
+     * This method ensures that all internal collections and arrays are deeply cloned
+     * so that changes to the cloned instance do not affect the original.
+     *
+     * @return void
+     */
     public function __clone(): void
     {
         $this->query      = clone $this->query;
@@ -263,7 +273,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * @return string
+     * Get the requested URL.
+     *
+     * @return string Returns the full request URL.
      */
     public function getUrl(): string
     {
@@ -271,9 +283,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get query ($_GET).
+     * Get the query parameters ($_GET) as an immutable collection.
      *
-     * @return CollectionImmutable<string, string>
+     * @return CollectionImmutable<string, string> Immutable collection of query parameters.
      */
     public function query(): CollectionImmutable
     {
@@ -281,10 +293,13 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get Post/s ($_GET).
+     * Get query parameters ($_GET).
      *
-     * @param string|null $key
-     * @return array<string, string>|string
+     * If a key is provided, returns the value of that parameter.
+     * If no key is provided, returns all query parameters as an array.
+     *
+     * @param string|null $key Optional parameter key to retrieve.
+     * @return array<string, string>|string Returns the value of a query parameter or all query parameters as an array.
      */
     public function getQuery(?string $key = null): array|string
     {
@@ -296,9 +311,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get post ($_POST).
+     * Get POST parameters ($_POST) as an immutable collection.
      *
-     * @return CollectionImmutable<string, string>
+     * @return CollectionImmutable<string, string> Immutable collection of POST parameters.
      */
     public function post(): CollectionImmutable
     {
@@ -306,10 +321,13 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get Post/s ($_POST).
+     * Get POST parameters ($_POST).
      *
-     * @param string|null $key
-     * @return array<string, string>|string
+     * If a key is provided, returns the value of that POST parameter.
+     * If no key is provided, returns all POST parameters as an array.
+     *
+     * @param string|null $key Optional parameter key to retrieve.
+     * @return array<string, string>|string Returns the value of a POST parameter or all POST parameters as an array.
      */
     public function getPost(?string $key = null): array|string
     {
@@ -321,10 +339,14 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get file/s ($_FILE).
+     * Get uploaded files ($_FILES).
      *
-     * @param string|null $key
+     * If a key is provided, returns the file(s) associated with that key.
+     * If no key is provided, returns all uploaded files as an array.
+     *
+     * @param string|null $key Optional key of the file input to retrieve.
      * @return array<string, array<int, string>|string>|array<int, string>|string
+     *         Returns the requested file, an array of files, or all files.
      */
     public function getFile(?string $key = null): array|string
     {
@@ -335,36 +357,56 @@ class Request implements ArrayAccess, IteratorAggregate
         return $this->files[$key];
     }
 
+    /**
+     * Get a specific cookie by its key.
+     *
+     * @param string $key The name of the cookie to retrieve.
+     *
+     * @return string|null Returns the cookie value if it exists, otherwise null.
+     */
     public function getCookie(string $key): ?string
     {
         return $this->cookies[$key] ?? null;
     }
 
     /**
-     * Get cookies.
+     * Get all cookies.
      *
-     * @return array<string, string>|null
+     * @return array<string, string>|null Returns an associative array of all cookies, or null if no cookies are set.
      */
     public function getCookies(): ?array
     {
         return $this->cookies;
     }
 
+    /**
+     * Get the HTTP method of the request.
+     *
+     * @return string Returns the request method in uppercase (e.g., GET, POST, PUT, DELETE).
+     */
     public function getMethod(): string
     {
         return strtoupper($this->method);
     }
 
+    /**
+     * Check if the request method matches the given method.
+     *
+     * @param string $method The HTTP method to compare against.
+     * @return bool Returns true if the request method matches the given method (case-insensitive), false otherwise.
+     */
     public function isMethod(string $method): bool
     {
         return strcasecmp($this->method, $method) === 0;
     }
 
     /**
-     * Get header/s.
+     * Get one or all request headers.
      *
-     * @param string|null $header
-     * @return array<string, string>|string|null get header/s
+     * @param string|null $header Optional header key to retrieve. If null, returns all headers.
+     * @return array<string, string>|string|null Returns the value of a single header if key is provided,
+     *                                           an associative array of all headers if no key is provided,
+     *                                           or null if the requested header does not exist.
      */
     public function getHeaders(?string $header = null): array|string|null
     {
@@ -376,10 +418,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Gets the mime types associated with the format.
+     * Get the MIME types associated with a given format.
      *
-     * @param string $format
-     * @return string[]
+     * @param string $format The format name (e.g., "json", "html", "xml").
+     * @return string[] Returns an array of MIME types associated with the format.
      */
     public function getMimeTypes(string $format): array
     {
@@ -387,13 +429,14 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Gets format using mimetype.
+     * Get the format associated with a given MIME type.
      *
-     * @param string|null $mimeType
-     * @return string|null
+     * @param string|null $mimeType The MIME type to check (e.g., "application/json").
+     * @return string|null Returns the format name if a matching MIME type is found, otherwise null.
      */
     public function getFormat(?string $mimeType): ?string
     {
+        /** @noinspection PhpLoopCanBeConvertedToArrayFindKeyInspection */
         foreach ($this->formats as $format => $mimeTypes) {
             if (in_array($mimeType, $mimeTypes)) {
                 return $format;
@@ -404,9 +447,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Gets format type from request header.
+     * Get the request format based on the "Content-Type" header.
      *
-     * @return string|null
+     * @return string|null Returns the format name (e.g., "json", "html") if detected, otherwise null.
      */
     public function getRequestFormat(): ?string
     {
@@ -416,9 +459,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * @param string $headerKey
-     * @param string $headerVal
-     * @return bool
+     * Check if a specific header matches the given value.
+     *
+     * @param string $headerKey The header name to check.
+     * @param string $headerVal The expected header value.
+     * @return bool Returns true if the header exists and its value matches the given value, false otherwise.
      */
     public function isHeader(string $headerKey, string $headerVal): bool
     {
@@ -430,8 +475,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * @param string $header_key
-     * @return bool
+     * Check if a specific header exists.
+     *
+     * @param string $header_key The header name to check.
+     * @return bool Returns true if the header exists in the request, false otherwise.
      */
     public function hasHeader(string $header_key): bool
     {
@@ -439,7 +486,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * @return bool
+     * Determine if the request is made over HTTPS.
+     *
+     * @return bool Returns true if the request is secured with HTTPS, false otherwise.
      */
     public function isSecured(): bool
     {
@@ -447,7 +496,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * @return string
+     * Get the remote IP address of the client making the request.
+     *
+     * @return string Returns the remote IP address.
      */
     public function getRemoteAddress(): string
     {
@@ -455,7 +506,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * @return string|null
+     * Get the raw body content of the request.
+     *
+     * @return string|null Returns the raw request body, or null if the body is empty.
      */
     public function getRawBody(): ?string
     {
@@ -463,10 +516,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get Json array.
+     * Get the JSON body of the request decoded as an array.
      *
-     * @return array
-     * @throws Exception
+     * @return array Returns the request body as an associative array.
+     * @throws Exception Throws if the body is empty, cannot be decoded, or does not decode to an array.
      */
     public function getJsonBody(): array
     {
@@ -477,7 +530,12 @@ class Request implements ArrayAccess, IteratorAggregate
         }
 
         try {
-            $content = json_decode($content, true, 512, JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR);
+            $content = json_decode(
+                $content,
+                true,
+                512,
+                JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR
+            );
         } catch (Exception $e) {
             throw new Exception(
                 'Could not decode request body.',
@@ -499,11 +557,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get attribute.
+     * Get a custom attribute from the request.
      *
-     * @param string          $key
-     * @param string|int|bool $default
-     * @return string|int|bool
+     * @param string $key The attribute name.
+     * @param string|int|bool $default Default value to return if the attribute does not exist.
+     * @return string|int|bool Returns the attribute value if it exists, otherwise returns the default value.
      */
     public function getAttribute(string $key, string|int|bool $default): string|int|bool
     {
@@ -511,11 +569,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Push custom attributes to the request,
-     * uses for custom request to server.
+     * Push custom attributes into the request.
      *
-     * @param array<string, string|int|bool> $pushAttributes Push an attributes as array
-     * @return self
+     * @param array<string, string|int|bool> $pushAttributes Associative array of attributes to add to the request.
+     * @return self Returns the current request instance with the added attributes.
      */
     public function with(array $pushAttributes): self
     {
@@ -525,10 +582,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get all request as array.
+     * Get all request data as an associative array.
      *
-     * @return array<string, mixed> All request
-     * @throws Exception
+     * @return array<string, mixed> Returns all request data including headers, query, post,
+     *         attributes, cookies, files, raw body, and method.
+     * @throws Exception Throws if an error occurs while retrieving input data.
      */
     public function all(): array
     {
@@ -549,10 +607,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get all request and wrap it.
+     * Get all request data wrapped in a single-element array.
      *
-     * @return array<int, array<string, mixed>> Insert all request array in single array
-     * @throws Exception
+     * @return array<int, array<string, mixed>> Returns a single-element array containing all request data.
+     * @throws Exception Throws if an error occurs while retrieving input data.
      */
     public function wrap(): array
     {
@@ -560,9 +618,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Determinate request is ajax.
+     * Determine if the request is an AJAX request.
      *
-     * @return bool
+     * @return bool Returns true if the "X-Requested-With" header is "XMLHttpRequest", false otherwise.
      */
     public function isAjax(): bool
     {
@@ -570,7 +628,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Determinate request is json request.
+     * Determine if the request content type is JSON.
+     *
+     * @return bool Returns true if the "Content-Type" header contains "/json" or "+json", false otherwise.
      */
     public function isJson(): bool
     {
@@ -581,8 +641,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * @return Collection<string, string>
-     * @throws Exception
+     * Get the request JSON body as a Collection.
+     *
+     * @return Collection<string, string> Returns the JSON body wrapped in a Collection.
+     * @throws Exception Throws if the request body is empty or cannot be parsed as JSON.
      */
     public function json(): Collection
     {
@@ -598,9 +660,9 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get Authorization header.
+     * Get the Authorization header value.
      *
-     * @returm ?string
+     * @return string|null Returns the value of the "Authorization" header or null if not present.
      */
     public function getAuthorization(): ?string
     {
@@ -608,9 +670,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get Bearer token from Authorization header.
+     * Get the Bearer token from the Authorization header.
      *
-     * @return ?string
+     * @return string|null Returns the Bearer token string or null if the header
+     *         is missing or does not contain a Bearer token.
      */
     public function getBearerToken(): ?string
     {
@@ -627,12 +690,15 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Compine all request input.
+     * Get request input, optionally by key.
      *
      * @template TGetDefault
-     * @param TGetDefault $default
-     * @return Collection<string, string>|string|TGetDefault
-     * @throws Exception
+     * @param string|null $key The input key to retrieve. If null, returns all input.
+     * @param TGetDefault $default Default value to return if the input key is not found.
+     * @return Collection<string, string>|string|TGetDefault Returns the input as a Collection, a single string value,
+     *         or the default value.
+     * @throws Exception Throws if an error occurs while retrieving input.
+     * @noinspection PhpMissingParamTypeInspection
      */
     public function input(?string $key = null, $default = null): Collection|string
     {
@@ -645,10 +711,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get input resource base on method type.
+     * Get the input source based on request method type.
      *
-     * @return Collection<string, string>
-     * @throws Exception
+     * @return Collection<string, string> Returns a Collection of the request input depending
+     *         on method (query, post, or JSON body).
+     * @throws Exception Throws if an error occurs while retrieving input data.
      */
     private function source(): Collection
     {
@@ -660,10 +727,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Determine if the given offset exists.
+     * Determine if the given offset exists in the input source.
      *
-     * @param string $offset
-     * @throws Exception
+     * @param string $offset The input key to check.
+     * @return bool Returns true if the key exists, false otherwise.
+     * @throws Exception Throws if an error occurs while retrieving input.
      */
     public function offsetExists($offset): bool
     {
@@ -671,11 +739,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get the value at the given offset.
+     * Get the value at the given offset from the input source.
      *
-     * @param string $offset
-     * @return string|null
-     * @throws Exception
+     * @param string $offset The input key to retrieve.
+     * @return string|null Returns the value associated with the key, or null if not found.
+     * @throws Exception Throws if an error occurs while retrieving input.
      */
     #[ReturnTypeWillChange]
     public function offsetGet(mixed $offset): ?string
@@ -684,12 +752,12 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Set the value at the given offset.
+     * Set a value at the given offset in the input source.
      *
-     * @param string $offset
-     * @param string $value
+     * @param string $offset The input key to set.
+     * @param string $value The value to assign.
      * @return void
-     * @throws Exception
+     * @throws Exception Throws if an error occurs while setting input.
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -697,11 +765,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Remove the value at the given offset.
+     * Remove a value at the given offset from the input source.
      *
-     * @param string $offset
+     * @param string $offset The input key to remove.
      * @return void
-     * @throws Exception
+     * @throws Exception Throws if an error occurs while removing input.
      */
     public function offsetUnset(mixed $offset): void
     {
@@ -709,11 +777,11 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Get an input element from the request.
+     * Magic method to get an input element by key.
      *
-     * @param string $key
-     * @return string|null
-     * @throws Exception
+     * @param string $key The input key to retrieve.
+     * @return string|null Returns the value of the key or null if it does not exist.
+     * @throws Exception Throws if an error occurs while retrieving input.
      */
     public function __get(string $key): ?string
     {
@@ -721,10 +789,10 @@ class Request implements ArrayAccess, IteratorAggregate
     }
 
     /**
-     * Iterator.
+     * Get an iterator for the input source.
      *
-     * @return Traversable
-     * @throws Exception
+     * @return Traversable Returns an iterator for all input data.
+     * @throws Exception Throws if an error occurs while retrieving input.
      */
     public function getIterator(): Traversable
     {

@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Part of Omega - Logging Package.
+ * Part of Omega - Logger Package.
  *
- * @link       https://omegamvc.github.io
- * @author     Adriano Giovannini <agisoftt@gmail.com>
- * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
- * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version    2.0.0
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 
 declare(strict_types=1);
@@ -33,13 +33,13 @@ namespace Omega\Logging;
  * This class allows the consistent use of these predefined log levels across the application, making it easier to
  * manage and filter logs.
  *
- * @category   Omega
- * @package    Logging
- * @link       https://omegamvc.github.io
- * @author     Adriano Giovannini <agisoftt@gmail.com>
- * @copyright  Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
- * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version    2.0.0
+ * @category  Omega
+ * @package   Logging
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 final class LogLevel
 {

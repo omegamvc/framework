@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Part of Omega - Logging Package.
+ * Part of Omega - Logger Package.
  *
- * @link       https://omegamvc.github.io
- * @author     Adriano Giovannini <agisoftt@gmail.com>
- * @copyright  Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
- * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version    1.0.0
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 
 declare(strict_types=1);
@@ -30,13 +30,13 @@ namespace Omega\Logging;
  * This trait is typically used in combination with the LoggerAwareInterface to ensure objects can accept and manage
  * logger instances, promoting consistency in logging across different parts of the application.
  *
- * @category   Omega
- * @package    Logging
- * @link       https://omegamvc.github.io
- * @author     Adriano Giovannini <agisoftt@gmail.com>
- * @copyright  Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
- * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version    1.0.0
+ * @category  Omega
+ * @package   Logging
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 trait LoggerAwareTrait
 {

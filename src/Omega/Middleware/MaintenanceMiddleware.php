@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Middleware Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 namespace Omega\Middleware;
@@ -13,25 +23,53 @@ use Omega\Http\Request;
 use Omega\Http\Response;
 use Omega\Application\Application;
 use Omega\Http\Exceptions\HttpException;
+use Psr\Container\ContainerExceptionInterface;
 use ReflectionException;
 
+/**
+ * Middleware to handle application maintenance mode.
+ *
+ * This middleware intercepts incoming HTTP requests and checks if the
+ * application is in maintenance mode. If so, it either redirects the
+ * request, returns a maintenance template response, or throws an HTTP
+ * exception. If maintenance mode is not active, the request is passed
+ * to the next middleware/controller.
+ *
+ * @category  Omega
+ * @package   Middleware
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class MaintenanceMiddleware
 {
-    protected Application $app;
-
-    public function __construct(Application $app)
+    /**
+     * Create a new MaintenanceMiddleware instance.
+     *
+     * @param Application $app The application instance used to check maintenance status and retrieve data.
+     */
+    public function __construct(protected Application $app)
     {
-        $this->app = $app;
     }
 
     /**
-     * @param Request $request
-     * @param Closure $next
-     * @return Response
+     * Handle an incoming request.
+     *
+     * Checks if the application is in maintenance mode and responds accordingly:
+     * - Redirects if a redirect URL is specified.
+     * - Returns a maintenance template with optional headers.
+     * - Throws HttpException if no redirect or template is defined.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or request handler.
+     * @return Response The HTTP response for the request.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
+     * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
-     * @throws Exception
+     * @throws Exception Thrown for general unexpected errors during request handling.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     public function handle(Request $request, Closure $next): Response

@@ -1,7 +1,13 @@
 <?php
 
 /**
+ * Part of Omega - Facades Package.
  *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 
 /** @noinspection PhpSameParameterValueInspection */
@@ -43,17 +49,40 @@ use const ARRAY_FILTER_USE_BOTH;
 use const ENT_QUOTES;
 use const JSON_ERROR_NONE;
 
+/**
+ * Vite class handles asset management and HMR (Hot Module Replacement) integration.
+ *
+ * This class reads Vite manifest files, generates HTML tags for JS/CSS assets,
+ * supports hot module replacement, and caches asset information for performance.
+ *
+ * @category  Omega
+ * @package   Support
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
 class Vite
 {
+    /** @var string Name of the manifest file. */
     private string $manifestName;
 
+    /** @var int Timestamp of the cached manifest file. */
     private int $cacheTime = 0;
 
-    /** @var array<string, array<string, array<string, string>>> */
+    /** @var array<string, array<string, array<string, string>>> Cached manifest data. */
     public static array $cache = [];
 
+    /** @var string|null HMR (Hot Module Replacement) URL if running HMR server. */
     public static ?string $hot = null;
 
+    /**
+     * Constructor.
+     *
+     * @param string $publicPath Public path of the application.
+     * @param string $buildPath Path where Vite build assets are stored.
+     */
     public function __construct(
         private readonly string $publicPath,
         private readonly string $buildPath,
@@ -62,11 +91,14 @@ class Vite
     }
 
     /**
-     * Get/render resource using entri point(s).
+     * Render HTML tags for the given Vite entry point(s).
      *
-     * @param string ...$entryPoints
-     * @return string
-     * @throws Exception
+     * This method returns the appropriate `<script>` and `<link>` tags for JS and CSS assets.
+     * If HMR (Hot Module Replacement) is active, it includes the HMR client script and uses HMR URLs.
+     *
+     * @param string ...$entryPoints Entry point filenames defined in Vite manifest.
+     * @return string HTML tags for JS/CSS assets.
+     * @throws Exception If a manifest file cannot be read or a resource is missing.
      */
     public function __invoke(string ...$entryPoints): string
     {
@@ -116,8 +148,10 @@ class Vite
     }
 
     /**
-     * @param string $manifestName
-     * @return $this
+     * Set a custom manifest filename.
+     *
+     * @param string $manifestName The manifest file name to use instead of the default.
+     * @return $this Fluent interface, returns the current instance.
      */
     public function manifestName(string $manifestName): self
     {
@@ -127,7 +161,9 @@ class Vite
     }
 
     /**
-     * Flush the cache.
+     * Flush cached manifest data and HMR URL.
+     *
+     * This clears the internal cache and resets the HMR URL, forcing reloading of manifest on next access.
      *
      * @return void
      */
@@ -138,10 +174,10 @@ class Vite
     }
 
     /**
-     * Get manifest filename.
+     * Get the full path to the Vite manifest file.
      *
-     * @return string
-     * @throws Exception if manifest file is not found.
+     * @return string Full path to the manifest file.
+     * @throws Exception If the manifest file does not exist.
      */
     public function manifest(): string
     {
@@ -153,8 +189,12 @@ class Vite
     }
 
     /**
-     * @return array<string, array<string, string|string[]>>
-     * @throws Exception
+     * Load and decode the Vite manifest JSON file.
+     *
+     * Caches the decoded manifest and reuses it if the manifest file has not changed since last load.
+     *
+     * @return array<string, array<string, string|string[]>> Decoded manifest data.
+     * @throws Exception If the manifest file cannot be read or JSON decoding fails.
      */
     public function loader(): array
     {
@@ -185,9 +225,11 @@ class Vite
     }
 
     /**
-     * @param string $resourceName
-     * @return string
-     * @throws Exception
+     * Get the built path for a single resource from the Vite manifest.
+     *
+     * @param string $resourceName The resource name as defined in the manifest.
+     * @return string Full URL/path to the resource file.
+     * @throws Exception If the resource is not found in the manifest.
      */
     public function getManifest(string $resourceName): string
     {
@@ -201,11 +243,12 @@ class Vite
     }
 
     /**
-     * @param string[] $resourceNames
-     * @return array<string, string>
-     * @throws Exception
+     * Get the built paths for multiple resources from the Vite manifest.
      *
-     * @deprecated Since v0.40
+     * @param string[] $resourceNames List of resource names defined in the manifest.
+     * @return array<string, string> Array of resource name => path mappings.
+     * @throws Exception If the manifest cannot be loaded.
+     * @deprecated Since v0.40. Use `gets()` instead.
      */
     public function getsManifest(array $resourceNames): array
     {
@@ -222,9 +265,14 @@ class Vite
     }
 
     /**
-     * @param string[] $resources
-     * @return array{imports: string[], css: string[]}
-     * @throws Exception
+     * Collect imports and CSS files for the given resources.
+     *
+     * This builds an array with 'imports' and 'css' for the requested resources,
+     * resolving nested imports recursively.
+     *
+     * @param string[] $resources List of resource names.
+     * @return array{imports: string[], css: string[]} Arrays of import and CSS file paths.
+     * @throws Exception If the manifest cannot be loaded.
      */
     public function getManifestImports(array $resources): array
     {
@@ -246,9 +294,12 @@ class Vite
     }
 
     /**
-     * @param array<string, array<string, string|string[]>> $assets
-     * @param array<string, string|string[]>                $asset
-     * @param array{imports: string[], css: string[]}       $preload
+     * Recursively collect CSS and JS import dependencies for a single asset.
+     *
+     * @param array<string, array<string, string|string[]>> $assets Full manifest assets array.
+     * @param array<string, string|string[]> $asset Asset entry to collect dependencies from.
+     * @param array{imports: string[], css: string[]} $preload Reference to the preload array to populate.
+     * @return void
      */
     private function collectImports(array $assets, array $asset, array &$preload): void
     {
@@ -268,16 +319,11 @@ class Vite
     }
 
     /**
-     * Get hot url (if hot not found will return with manifest).
+     * Get the URL for a single resource, using HMR if running.
      *
-     * @param string $resourceName
-     * @return string
-     * @throws Exception
-     */
-    /**
-     * @param string $resourceName
-     * @return string
-     * @throws Exception
+     * @param string $resourceName Resource name to retrieve.
+     * @return string URL to the resource file.
+     * @throws Exception If manifest or hot file cannot be loaded.
      */
     public function get(string $resourceName): string
     {
@@ -291,11 +337,11 @@ class Vite
     }
 
     /**
-     * Get hot url (if hot not found will return with manifest).
+     * Get the URLs for multiple resources, using HMR if running.
      *
-     * @param string[] $resourceNames
-     * @return array<string, string>
-     * @throws Exception
+     * @param string[] $resourceNames List of resource names.
+     * @return array<string, string> Mapping of resource name => URL.
+     * @throws Exception If manifest or hot file cannot be loaded.
      */
     public function gets(array $resourceNames): array
     {
@@ -321,9 +367,9 @@ class Vite
     }
 
     /**
-     * Determine if the HMR server is running.
+     * Determine if the HMR (Hot Module Replacement) server is currently running.
      *
-     * @return bool
+     * @return bool True if HMR is running, false otherwise.
      */
     public function isRunningHRM(): bool
     {
@@ -331,10 +377,10 @@ class Vite
     }
 
     /**
-     * Get hot url.
+     * Get the base URL of the HMR server.
      *
-     * @return string
-     * @throws Exception
+     * @return string HMR server URL with trailing slash.
+     * @throws Exception If the hot file cannot be read.
      */
     public function getHmrUrl(): string
     {
@@ -356,8 +402,10 @@ class Vite
     }
 
     /**
-     * @return string
-     * @throws Exception
+     * Get the HMR client script tag.
+     *
+     * @return string Script tag for HMR client.
+     * @throws Exception If HMR URL cannot be determined.
      */
     public function getHmrScript(): string
     {
@@ -365,7 +413,9 @@ class Vite
     }
 
     /**
-     * @return int
+     * Get the last cached manifest timestamp.
+     *
+     * @return int Timestamp of the last loaded manifest.
      */
     public function cacheTime(): int
     {
@@ -373,8 +423,10 @@ class Vite
     }
 
     /**
-     * @return int
-     * @throws Exception
+     * Get the last modification time of the manifest file.
+     *
+     * @return int Timestamp of the manifest file.
+     * @throws Exception If the manifest file cannot be found.
      */
     public function manifestTime(): int
     {
@@ -382,9 +434,11 @@ class Vite
     }
 
     /**
-     * @param string[] $entryPoints
-     * @return string
-     * @throws Exception
+     * Generate preload link tags for given entry points.
+     *
+     * @param string[] $entryPoints List of entry point resource names.
+     * @return string HTML string containing preload tags.
+     * @throws Exception If manifest files cannot be read.
      */
     public function getPreloadTags(array $entryPoints): string
     {
@@ -408,10 +462,12 @@ class Vite
     }
 
     /**
-     * @param string[]                                $entryPoints
-     * @param array<string|int, string|bool|int|null> $attributes
-     * @return string
-     * @throws Exception
+     * Generate script and style tags for the given entry points with optional attributes.
+     *
+     * @param string[] $entryPoints List of entry point resource names.
+     * @param array<string|int, string|bool|int|null>|null $attributes Optional HTML attributes.
+     * @return string HTML string containing script and style tags.
+     * @throws Exception If manifest files cannot be read.
      */
     public function getTags(array $entryPoints, ?array $attributes = null): string
     {
@@ -421,10 +477,13 @@ class Vite
     }
 
     /**
-     * @param array<string, array<string|int, string|bool|int|null>> $entryPoints
-     * @param array<string|int, string|bool|int|null>                $defaultAttributes
-     * @return string
-     * @throws Exception
+     * Generate custom script and style tags for multiple entry points with per-entry attributes.
+     *
+     * @param array<string, array<string|int, string|bool|int|null>> $entryPoints Entry points and attributes.
+     * @param array<string|int, string|bool|int|null> $defaultAttributes Default attributes applied if not
+     *                      provided per entry.
+     * @return string HTML string containing custom tags.
+     * @throws Exception If manifest files cannot be read.
      */
     public function getCustomTags(array $entryPoints, array $defaultAttributes = []): string
     {
@@ -459,10 +518,12 @@ class Vite
     }
 
     /**
-     * @param string                                       $url
-     * @param string                                       $entryPoint
-     * @param array<string|int, string|bool|int|null>|null $attributes
-     * @return string
+     * Create a single tag for a resource, choosing script or style based on file type.
+     *
+     * @param string $url Resource URL.
+     * @param string $entryPoint Resource entry name.
+     * @param array<string|int, string|bool|int|null>|null $attributes Optional HTML attributes.
+     * @return string HTML tag string.
      */
     private function createTag(string $url, string $entryPoint, ?array $attributes = null): string
     {
@@ -474,9 +535,11 @@ class Vite
     }
 
     /**
-     * @param string                                       $url
-     * @param array<string|int, string|bool|int|null>|null $attributes
-     * @return string
+     * Create a script tag with optional attributes.
+     *
+     * @param string $url Script URL.
+     * @param array<string|int, string|bool|int|null>|null $attributes Optional HTML attributes.
+     * @return string HTML script tag.
      */
     private function createScriptTag(string $url, ?array $attributes = null): string
     {
@@ -493,9 +556,11 @@ class Vite
     }
 
     /**
-     * @param string                                       $url
-     * @param array<string|int, string|bool|int|null>|null $attributes
-     * @return string
+     * Create a style (link) tag with optional attributes.
+     *
+     * @param string $url CSS file URL.
+     * @param array<string|int, string|bool|int|null>|null $attributes Optional HTML attributes.
+     * @return string HTML link tag.
      */
     private function createStyleTag(string $url, ?array $attributes = null): string
     {
@@ -512,8 +577,10 @@ class Vite
     }
 
     /**
-     * @param string $url
-     * @return string
+     * Create a preload link tag for a given resource URL.
+     *
+     * @param string $url Resource URL to preload.
+     * @return string HTML preload link tag.
      */
     private function createPreloadTag(string $url): string
     {
@@ -528,8 +595,10 @@ class Vite
     // helper functions
 
     /**
-     * @param string $filename
-     * @return bool
+     * Determine if a filename is a CSS-related file.
+     *
+     * @param string $filename File name to check.
+     * @return bool True if CSS or preprocessor file, false otherwise.
      */
     private function isCssFile(string $filename): bool
     {
@@ -537,8 +606,10 @@ class Vite
     }
 
     /**
-     * @param string $url
-     * @return string
+     * Escape a URL for safe inclusion in HTML attributes.
+     *
+     * @param string $url URL to escape.
+     * @return string Escaped URL.
      */
     private function escapeUrl(string $url): string
     {
@@ -546,10 +617,10 @@ class Vite
     }
 
     /**
-     * Build attribute string from array.
+     * Build an HTML attribute string from an associative array.
      *
-     * @param array<string|int, string|bool|int|null> $attributes
-     * @return string
+     * @param array<string|int, string|bool|int|null> $attributes Attributes to convert.
+     * @return string HTML-ready attribute string.
      */
     private function buildAttributeString(array $attributes): string
     {

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Part of Omega - Facades Package.
+ *
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 declare(strict_types=1);
 
 use Omega\Collection\CollectionImmutable;
@@ -16,12 +26,27 @@ use Omega\Support\Vite;
 use Omega\Router\Router;
 use Psr\Container\ContainerExceptionInterface;
 
+/**
+ * Omega Helper Functions.
+ *
+ * This file contains global helper functions for accessing
+ * core services of the Omega application, such as configuration,
+ * environment settings, and utilities to simplify common tasks.
+ *
+ * @category  Omega
+ * @package   Support
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
+ */
+
 if (!function_exists('app_env')) {
     /**
      * Check application environment mode.
      *
-     * @return string Application environment mode.
-     * @return string
+     * @return string Returns the current environment mode of the application, such as 'dev', 'prod', or 'testing'.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -90,7 +115,8 @@ if (!function_exists('config')) {
     /**
      * Get Application Configuration.
      *
-     * @return CollectionImmutable<string, mixed>
+     * @return CollectionImmutable<string, mixed> Returns an immutable collection
+     *  containing all application configuration values, indexed by string keys.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -107,10 +133,12 @@ if (!function_exists('view')) {
     /**
      * Render with custom template engine, wrap in `Route\Controller`.
      *
-     * @param string               $view_path
-     * @param array<string, mixed> $data
-     * @param array<string, mixed> $option
-     * @return Response
+     * @param string               $view_path Path to the template file to render.
+     * @param array<string, mixed> $data      Associative array of data to pass to the template.
+     * @param array<string, mixed> $option    Optional settings such as 'status' (HTTP status code) and 'header'
+     *           (HTTP headers).
+     * @return Response Returns a Response object containing the rendered template along with the specified
+     *           status and headers.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
@@ -131,15 +159,17 @@ if (!function_exists('view')) {
 
 if (!function_exists('vite')) {
     /**
-     * Get resource using entry point(s).
+     * Get resource using entry point(s) from the Vite build system.
      *
-     * @param string ...$entry_points
-     * @return array<string, string>|string
+     * @param string ...$entry_points One or more entry point names to retrieve resources for.
+     * @return array<string, string>|string Returns an associative array of entry point names to resource URLs if
+     *                                      multiple are given, or a single resource URL string if only one entry point
+     *                                      is provided.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
      * @throws CircularAliasException Thrown when alias resolution loops recursively.
      * @throws ContainerExceptionInterface Thrown on general container errors, e.g., service not retrievable.
      * @throws EntryNotFoundException Thrown when no entry exists for the identifier.
-     * @throws Exception
+     * @throws Exception Thrown when resource cannot be retrieved.
      * @throws ReflectionException Thrown when the requested class or interface cannot be reflected.
      */
     function vite(string ...$entry_points): array|string
@@ -156,12 +186,13 @@ if (!function_exists('vite')) {
 
 if (!function_exists('redirect_route')) {
     /**
-     * Redirect to another route.
+     * Redirect to another route using the route's name and optional parameters.
      *
-     * @param string   $route_name The name of the route.
-     * @param array<string|int, string|int|bool> $parameter Dynamic parameter to fill with url expression
-     * @return RedirectResponse
-     * @throws Exception
+     * @param string $route_name The name of the route to redirect to.
+     * @param array<string|int, string|int|bool> $parameter Optional dynamic parameters to populate the
+     *                                                      route's URL pattern.
+     * @return RedirectResponse Returns a RedirectResponse object representing the redirection.
+     * @throws Exception Thrown if the route cannot be resolved or URL cannot be built.
      */
     function redirect_route(string $route_name, array $parameter = []): RedirectResponse
     {
@@ -174,11 +205,11 @@ if (!function_exists('redirect_route')) {
 
 if (!function_exists('redirect')) {
     /**
-     * Redirect to Url.
+     * Redirect to a specific URL.
      *
-     * @param string $url
-     * @return RedirectResponse
-     * @throws Exception
+     * @param string $url The destination URL for the redirection.
+     * @return RedirectResponse Returns a RedirectResponse object representing the redirection.
+     * @throws Exception Thrown if the redirection cannot be created.
      */
     function redirect(string $url): RedirectResponse
     {
@@ -188,11 +219,11 @@ if (!function_exists('redirect')) {
 
 if (!function_exists('abort')) {
     /**
-     * Abort application to http exception.
+     * Abort application to an HTTP exception.
      *
-     * @param int                   $code
-     * @param string                $message
-     * @param array<string, string> $headers
+     * @param int $code The HTTP status code for the abort.
+     * @param string $message Optional message describing the reason for the abort.
+     * @param array<string, string> $headers Optional HTTP headers to send with the response.
      * @return void
      */
     function abort(int $code, string $message = '', array $headers = []): void
@@ -209,6 +240,16 @@ if (!function_exists('env')) {
 }
 
 if (!function_exists('set_path')) {
+    /**
+     * Convert a dot-notated path key into a directory path.
+     *
+     * This function replaces dots in the given key with the system's directory separator
+     * and ensures the path starts and ends with a directory separator.
+     *
+     * @param string $key The dot-notated path key (e.g., "app.config").
+     * @return string The resulting directory path with separators.
+     * @throws InvalidArgumentException Thrown when the provided path key is an empty string.
+     */
     function set_path(string $key): string
     {
         if ($key === '') {
@@ -223,7 +264,7 @@ if (!function_exists('get_path')) {
     /**
      * Get application config path, base on config file.
      *
-     * @param string|array $id
+     * @param string|array $id The configuration key(s) used to retrieve the path(s) from the application container.
      * @param string $suffix_path Add string end of path.
      * @return string|array Config path folder or an array of config path folder.
      * @throws BindingResolutionException Thrown when resolving a binding fails.
@@ -245,15 +286,24 @@ if (!function_exists('get_path')) {
 }
 
 if (!function_exists('path')) {
+    /**
+     * Convert a dot-notated binding into a relative directory path.
+     *
+     * This function replaces dots in the given binding with the system's directory separator
+     * and ensures the path ends with a directory separator.
+     *
+     * @param string $binding The dot-notated binding (e.g., "app.config").
+     * @return string The resulting relative directory path with trailing separator.
+     */
     function path(string $binding): string
     {
-        $relativePath = str_replace('.', DIRECTORY_SEPARATOR, $binding);
+        $relative_path = str_replace('.', DIRECTORY_SEPARATOR, $binding);
 
-        if (!str_ends_with($relativePath, DIRECTORY_SEPARATOR)) {
-            $relativePath .= DIRECTORY_SEPARATOR;
+        if (!str_ends_with($relative_path, DIRECTORY_SEPARATOR)) {
+            $relative_path .= DIRECTORY_SEPARATOR;
         }
 
-        return $relativePath;
+        return $relative_path;
     }
 }
 

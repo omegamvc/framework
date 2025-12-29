@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Part of Omega - Logging Package.
+ * Part of Omega - Logger Package.
  *
- * @link       https://omegamvc.github.io
- * @author     Adriano Giovannini <agisoftt@gmail.com>
- * @copyright  Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
- * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version    1.0.0
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 
 declare(strict_types=1);
@@ -41,13 +41,13 @@ use Omega\Logging\Exceptions\LoggerArgumentException;
  * This interface ensures that any logger class implementing it will conform to a common structure, allowing consistent
  * logging behavior across the application.
  *
- * @category   Omega
- * @package    Logging
- * @link       https://omegamvc.github.io
- * @author     Adriano Giovannini <agisoftt@gmail.com>
- * @copyright  Copyright (c) 2024 - 2025 Adriano Giovannini (https://omegamvc.github.io)
- * @license    https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
- * @version    1.0.0
+ * @category  Omega
+ * @package   Logging
+ * @link      https://omegamvc.github.io
+ * @author    Adriano Giovannini <agisoftt@gmail.com>
+ * @copyright Copyright (c) 2025 Adriano Giovannini (https://omegamvc.github.io)
+ * @license   https://www.gnu.org/licenses/gpl-3.0-standalone.html     GPL V3.0+
+ * @version   2.0.0
  */
 interface LoggerInterface
 {
